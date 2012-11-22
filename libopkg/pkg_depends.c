@@ -464,7 +464,8 @@ int version_constraints_satisfied(depend_t * depends, pkg_t * pkg)
     else if((depends->constraint == LATER) &&
 	    (comparison > 0))
 	return 1;
-    else if(comparison == 0)
+    else if((depends->constraint == EQUAL) &&
+	    (comparison == 0))
 	return 1;
     else if((depends->constraint == LATER_EQUAL) &&
 	    (comparison >= 0))
