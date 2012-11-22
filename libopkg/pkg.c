@@ -731,7 +731,8 @@ pkg_formatted_field(FILE *fp, pkg_t *pkg, const char *field)
 	  } else if (strcasecmp(field, "Priority") == 0) {
                fprintf(fp, "Priority: %s\n", pkg->priority);
 	  } else if (strcasecmp(field, "Provides") == 0) {
-	       if (pkg->provides_count) {
+	       /* Don't print provides if this package provides only itself */
+	       if (pkg->provides_count > 1) {
                   fprintf(fp, "Provides:");
 		  for(i = 1; i < pkg->provides_count; i++) {
                       fprintf(fp, "%s %s", i == 1 ? "" : ",",
