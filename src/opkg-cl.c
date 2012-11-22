@@ -42,6 +42,7 @@ enum {
 	ARGS_OPT_FORCE_SPACE,
 	ARGS_OPT_FORCE_POSTINSTALL,
 	ARGS_OPT_FORCE_REMOVE,
+	ARGS_OPT_PREFER_ARCH_TO_VERSION,
 	ARGS_OPT_ADD_ARCH,
 	ARGS_OPT_ADD_DEST,
 	ARGS_OPT_NOACTION,
@@ -83,6 +84,8 @@ static struct option long_options[] = {
 	{"force_postinstall", 0, 0, ARGS_OPT_FORCE_POSTINSTALL},
 	{"force-remove", 0, 0, ARGS_OPT_FORCE_REMOVE},
 	{"force_remove", 0, 0, ARGS_OPT_FORCE_REMOVE},
+	{"prefer-arch-to-version", 0, 0, ARGS_OPT_PREFER_ARCH_TO_VERSION},
+	{"prefer-arch-to-version", 0, 0, ARGS_OPT_PREFER_ARCH_TO_VERSION},
 	{"noaction", 0, 0, ARGS_OPT_NOACTION},
 	{"download-only", 0, 0, ARGS_OPT_DOWNLOAD_ONLY},
 	{"nodeps", 0, 0, ARGS_OPT_NODEPS},
@@ -172,6 +175,9 @@ args_parse(int argc, char *argv[])
 			break;
 		case ARGS_OPT_FORCE_REMOVE:
 			conf->force_remove = 1;
+			break;
+		case ARGS_OPT_PREFER_ARCH_TO_VERSION:
+			conf->prefer_arch_to_version = 1;
 			break;
 		case ARGS_OPT_NODEPS:
 			conf->nodeps = 1;
@@ -271,6 +277,9 @@ usage()
 	printf("\t--offline-root <dir>	offline installation of packages.\n");
 	printf("\t--add-arch <arch>:<prio>	Register architecture with given priority\n");
 	printf("\t--add-dest <name>:<path>	Register destination with given path\n");
+	printf("\t--prefer-arch-to-version\t 	Use the architecture priority package rather\n");
+	printf("\t				than the higher version one if more\n");
+	printf("\t				than one candidate is found.\n");
 
 	printf("\nForce Options:\n");
 	printf("\t--force-depends		Install/remove despite failed dependencies\n");
