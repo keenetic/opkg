@@ -7,7 +7,7 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_MACRO_DIR([shave])
 
 AM_INIT_AUTOMAKE
-AC_CONFIG_HEADERS(libopkg/config.h)
+AC_CONFIG_HEADERS(config.h)
 
 AC_CANONICAL_HOST
 AC_GNU_SOURCE 
@@ -66,7 +66,7 @@ fi
 # check for sha256
 AC_ARG_ENABLE(sha256,
               AC_HELP_STRING([--enable-sha256], [Enable sha256sum check
-      (sha256.{c,h} are GPLv3 licensed) [[default=no]] ]),
+      [[default=no]] ]),
     [want_sha256="$enableval"], [want_sha256="no"])
 
 if test "x$want_sha256" = "xyes"; then
