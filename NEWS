@@ -1,0 +1,29 @@
+opkg-0.2.0-rc1
+==============
+
+- Added basic regression test suite
+
+- Added man pages for opkg-cl and opkg-key
+
+- Added the `overlay_root` config option
+
+- Added the `--prefer-arch-to-version` option
+
+- Added the `--force-postinstall` option
+
+- Added the `list-changed-conffiles` command
+ 
+- Added the `opkg_compare_versions` function to libopkg
+
+- Allow external gunzip binary to be used to perform decompression if the
+  OPKG_USE_VFORK environment variable is set
+
+- Do not read /etc/opkg/*.conf if -f option is specified
+
+- Detect and handle circular dependencies
+
+- Replaced GPLv3+ licensed sha256 implementation with GPLv2+ implementation
+
+- Use `ln -snf` rather than `ln -sf` in update-alternatives
+
+- Many other bugfixes, improvements and cleanups...
