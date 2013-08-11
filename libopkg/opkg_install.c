@@ -85,7 +85,7 @@ satisfy_dependencies_for(pkg_t *pkg)
 	          dep earlier in this loop may have depended on it and pulled
 	          it in, so check first. */
                if (is_pkg_in_pkg_vec(dep->wanted_by, pkg)) {
-		    opkg_msg(NOTICE,"Breaking cicular dependency on %s for %s.\n", pkg->name, dep->name);
+		    opkg_msg(NOTICE,"Breaking circular dependency on %s for %s.\n", pkg->name, dep->name);
 	            continue;
                }
 	       if ((dep->state_status != SS_INSTALLED) && (dep->state_status != SS_UNPACKED)) {
