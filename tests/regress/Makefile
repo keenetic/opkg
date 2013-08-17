@@ -13,4 +13,4 @@ run-%.py: %.py
 	@$(PYTHON) $^
 
 clean:
-	rm -f *.pyc
+	rm -rf __pycache__ *.pyc
