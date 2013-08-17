@@ -14,3 +14,5 @@ run-%.py: %.py
 
 clean:
 	rm -rf __pycache__ *.pyc
+
+.PHONY: regress clean
