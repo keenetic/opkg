@@ -1,5 +1,7 @@
-import tarfile, os
+import tarfile, os, sys
 import cfg
+
+__appname = sys.argv[0]
 
 class Opk:
 	valid_control_fields = ["Package", "Version", "Depends", "Provides",\
@@ -88,6 +90,9 @@ class OpkGroup:
 			f.write("\n")
 		f.close()
 
+def fail(msg):
+	print("%s: Test failed: %s" % (__appname, msg))
+	exit(-1)
 
 def regress_init():
 	"""
@@ -95,9 +100,8 @@ def regress_init():
 	"""
 
 	if not os.access(cfg.opkgcl, os.X_OK):
-		print("Cannot exec {}".format(cfg.opkgcl))
-		exit(False)
-
+		fail("Cannot exec {}".format(cfg.opkgcl))
+		
 	os.chdir(cfg.opkdir)
 
 	os.system("rm -fr {}".format(cfg.offline_root))

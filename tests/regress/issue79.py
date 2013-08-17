@@ -29,5 +29,4 @@ opkgcl.update()
 opkgcl.upgrade("--autoremove")
 
 if not opkgcl.is_installed("b", "1.0"):
-	print("b has been removed even though a still depends on it")
-	exit(False)
+	opk.fail("b has been removed even though a still depends on it")

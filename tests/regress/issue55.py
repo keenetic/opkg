@@ -14,12 +14,10 @@ os.unlink("linky")
 opkgcl.install("a_1.0_all.opk")
 
 if not opkgcl.is_installed("a"):
-	print(__file__, ": Package 'a' not installed.")
-	exit(False)
+	opk.fail("Package 'a' not installed.")
 
 if not os.path.lexists("{}/linky".format(cfg.offline_root)):
-	print(__file__, ": symlink to file with a name longer than 100 "
+	opk.fail("symlink to file with a name longer than 100 "
 					"characters not created.")
-	exit(False)
 
 opkgcl.remove("a")

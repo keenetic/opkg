@@ -19,13 +19,9 @@ opkgcl.install("c")
 
 opkgcl.remove("a", "--autoremove")
 if not opkgcl.is_installed("b"):
-	print(__file__, ": Pacakge 'b' orphaned despite remaining "
+	opk.fail("Pacakge 'b' orphaned despite remaining "
 			"recommending package 'c'.")
-	exit(False)
 
 opkgcl.remove("c", "--autoremove")
 if opkgcl.is_installed("b"):
-	print(__file__, ": Recommended package 'b' not autoremoved.")
-	exit(False)
-
-
+	opk.fail("Recommended package 'b' not autoremoved.")

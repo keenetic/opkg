@@ -14,22 +14,18 @@ os.unlink("asdf")
 opkgcl.install("a_1.0_all.opk")
 
 if not opkgcl.is_installed("a"):
-	print(__file__, ": Package 'a' not installed.")
-	exit(False)
+	opk.fail("Package 'a' not installed.")
 
 if not os.path.exists("{}/asdf".format(cfg.offline_root)):
-	print(__file__, ": asdf not created.")
-	exit(False)
+	opk.fail("asdf not created.")
 
 opkgcl.install("b_1.0_all.opk", "--force-overwrite")
 
 if "{}/asdf".format(cfg.offline_root) not in opkgcl.files("b"):
-	print(__file__, ": asdf not claimed by ``b''.")
-	exit(False)
+	opk.fail("asdf not claimed by ``b''.")
 
 if "{}/asdf".format(cfg.offline_root) in opkgcl.files("a"):
-	print(__file__, ": asdf is still claimed by ``a''.")
-	exit(False)
+	opk.fail("asdf is still claimed by ``a''.")
 
 opkgcl.remove("b")
 opkgcl.remove("a")

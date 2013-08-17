@@ -32,20 +32,17 @@ foo_fullpath = "{}/foo".format(cfg.offline_root)
 bar_fullpath = "{}/bar".format(cfg.offline_root)
 
 if not os.path.exists(foo_fullpath) or not os.path.exists(bar_fullpath):
-	print(__file__, ": Files foo and/or bar are missing.")
-	exit(False)
+	opk.fail("Files foo and/or bar are missing.")
 
 a_files = opkgcl.files("a")
 if not foo_fullpath in a_files or not bar_fullpath in a_files:
-	print(__file__, ": Package 'a' does not own foo and/or bar.")
-	exit(False)
+	opk.fail("Package 'a' does not own foo and/or bar.")
 
 opkgcl.remove("a")
 
 if os.path.exists(foo_fullpath) or os.path.exists(bar_fullpath):
-	print(__file__, ": Files foo and/or bar still exist "
+	opk.fail("Files foo and/or bar still exist "
 				"after removal of package 'a'.")
-	exit(False)
 
 # ----
 o = opk.OpkGroup()
@@ -60,11 +57,9 @@ opkgcl.update()
 opkgcl.install("a", "--force-reinstall")
 
 if os.path.exists(foo_fullpath):
-	print(__file__, ": File 'foo' not orphaned as it should be.")
-	exit(False)
+	opk.fail("File 'foo' not orphaned as it should be.")
 
 if foo_fullpath in opkgcl.files("a"):
-	print(__file__, ": Package 'a' incorrectly owns file 'foo'.")
-	exit(False)
+	opk.fail("Package 'a' incorrectly owns file 'foo'.")
 
 opkgcl.remove("a")

@@ -24,16 +24,14 @@ opkgcl.update()
 
 opkgcl.install("a")
 if opkgcl.is_installed("b"):
-	print(__file__, ": Package 'b' installed despite "
+	opk.fail("Package 'b' installed despite "
 					"deinstall/hold status.")
-	exit(False)
 
 opkgcl.remove("a")
 opkgcl.install("a")
 if opkgcl.is_installed("b"):
-	print(__file__, ": Package 'b' installed - deinstall/hold status "
+	opk.fail("Package 'b' installed - deinstall/hold status "
 					"not retained.")
-	exit(False)
 
 opkgcl.remove("a")
 open(status_filename, "w").close()

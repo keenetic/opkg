@@ -26,18 +26,15 @@ opkgcl.update()
 opkgcl.upgrade()
 
 if not opkgcl.is_installed("a", "2.0"):
-	print(__file__, ": Package 'a_2.0' not installed.")
-	exit(False)
+	opk.fail("Package 'a_2.0' not installed.")
 
 foo_fullpath = "{}/foo".format(cfg.offline_root)
 
 if not os.path.exists(foo_fullpath):
-	print(__file__, ": File 'foo' incorrectly orphaned.")
-	exit(False)
+	opk.fail("File 'foo' incorrectly orphaned.")
 
 if not foo_fullpath in opkgcl.files("b"):
-	print(__file__, ": Package 'b' does not own file 'foo'.")
-	exit(False)
+	opk.fail("Package 'b' does not own file 'foo'.")
 
 opkgcl.remove("a")
 opkgcl.remove("b")

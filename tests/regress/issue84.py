@@ -26,20 +26,17 @@ opkgcl.update()
 # install ``a1`` directly
 opkgcl.install("a1_1.0_all.opk")
 if not opkgcl.is_installed("a1"):
-	print(__file__, ": package ``a1'' not installed.")
 	cleanup()
-	exit(False)
+	opk.fail("package ``a1'' not installed.")
 
 # install ``c'' from repository
 opkgcl.install("c")
 if not opkgcl.is_installed("c"):
-	print(__file__, ": package ``c'' not installed.")
 	cleanup()
-	exit(False)
+	opk.fail("package ``c'' not installed.")
 
 if opkgcl.is_installed("b1"):
-	print(__file__, ": package ``b1'' is installed, but should not be.")
 	cleanup()
-	exit(False)
+	opk.fail("package ``b1'' is installed, but should not be.")
 
 cleanup()

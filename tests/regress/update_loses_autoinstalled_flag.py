@@ -22,8 +22,7 @@ opkgcl.update()
 opkgcl.install("a")
 
 if not opkgcl.is_autoinstalled("b"):
-	print("b is not autoinstalled")
-	exit(False)
+	opk.fail("b is not autoinstalled")
 
 if (bug):
 	a = opk.Opk(Package="a", Version="2.0", Depends="b")
@@ -40,8 +39,7 @@ if (bug):
 	opkgcl.upgrade();
 
 	if not opkgcl.is_autoinstalled("b"):
-		print("b is not autoinstalled anymore")
-		exit(False)
+		opk.fail("b is not autoinstalled anymore")
 
 a = opk.Opk(Package="a", Version="3.0")
 a.write(data_files=["asdf"])
@@ -55,9 +53,7 @@ opkgcl.update()
 opkgcl.upgrade();
 
 if opkgcl.is_installed("b", "2.0"):
-	print("b is still installed")
-	exit(False)
+	opk.fail("b is still installed")
 
 if not opkgcl.is_installed("a", "3.0"):
-	print("a is not installed")
-	exit(False)
+	opk.fail("a is not installed")

@@ -18,16 +18,13 @@ ln_a = output.find("Configuring a")
 ln_b = output.find("Configuring b")
 
 if ln_a == -1:
-	print(__file__, ": Didn't see package 'a' get configured.")
-	exit(False)
+	opk.fail("Didn't see package 'a' get configured.")
 
 if ln_b == -1:
-	print(__file__, ": Didn't see package 'b' get configured.")
-	exit(False)
+	opk.fail("Didn't see package 'b' get configured.")
 
 if ln_a < ln_b:
-	print(__file__, ": Packages 'a' and 'b' configured in wrong order.")
-	exit(False)
+	opk.fail("Packages 'a' and 'b' configured in wrong order.")
 
 opkgcl.remove("a")
 opkgcl.remove("b")

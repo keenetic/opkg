@@ -15,11 +15,9 @@ opkgcl.update()
 
 opkgcl.install("a")
 if opkgcl.is_installed("a"):
-	print(__file__, ": Package 'a' installed, despite dependency "
+	opk.fail("Package 'a' installed, despite dependency "
 			"upon a package with an unresolved dependency.")
-	exit(False)
 
 if opkgcl.is_installed("b"):
-	print(__file__, ": Package 'b' installed, "
+	opk.fail("Package 'b' installed, "
 			"despite unresolved dependency.")
-	exit(False)

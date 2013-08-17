@@ -22,8 +22,7 @@ opkgcl.update()
 # install ``c'' from repository
 opkgcl.install("c")
 if not opkgcl.is_installed("c"):
-	print(__file__, ": package ``c'' not installed.")
 	cleanup()
-	exit(False)
+	opk.fail("package ``c'' not installed.")
 
 cleanup()
