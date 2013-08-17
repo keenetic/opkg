@@ -20,4 +20,7 @@ libopkg_test_LDADD = $(top_builddir)/libopkg/libopkg.la
 libopkg_test_SOURCE = libopkg_test.c
 libopkg_test_LDFLAGS = -static
 
+check-regress:
+	$(MAKE) -C regress
 
+check: check-regress
