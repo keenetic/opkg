@@ -1,4 +1,20 @@
 #!/usr/bin/python3
+#
+# Reporter: Graham Gower
+#
+# If a tarball contains a long symlink (over 100 chars) in a longpath (over 100
+# chars) then the resulting link or path can be truncated to 100 chars.
+#
+# This is due to a bug where if both 'L' and 'K' entries are found in the
+# tarball, only the first one takes affect due to get_header_tar recursively
+# calling itself. To fix this, process longname and linkname at the end of the
+# function rather than the start after any subcalls have taken place.
+#
+#
+# Status
+# ======
+#
+# Fixed in r594.
 
 import os
 import opk, cfg, opkgcl

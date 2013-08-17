@@ -1,4 +1,49 @@
 #!/usr/bin/python3
+#
+# Reporter: Graham Gower
+#
+# What steps will reproduce the problem?
+# ======================================
+# 
+# Create two packages, with differing versions. Provide the newer package in an
+# accessible repository. For this test I manually created an older
+# abiword_1.6.8-r0.3 package (identical contents except the control file).
+#
+# $ ./opkg-cl -o ~/opkg install abiword
+# Installing abiword (2.6.8-r0.3) to root...
+# Downloading http://10.0.0.13/ipk/mipsel/abiword_2.6.8-r0.3_mipsel.ipk
+# Configuring abiword
+# sh: rm: command not found
+#
+# $ ./opkg-cl -o ~/opkg -force-downgrade install ~/opkg/abiword_1.6.8-r0.3_mipsel.ipk 
+# Downgrading abiword on root from 2.6.8-r0.3 to 1.6.8-r0.3...
+# Configuring abiword
+# sh: rm: command not found
+#
+# $ ./opkg-cl -o ~/opkg -force-downgrade install ~/opkg/abiword_1.6.8-r0.3_mipsel.ipk 
+# Installing abiword (2.6.8-r0.3) to root...
+# Downloading http://10.0.0.13/ipk/mipsel/abiword_2.6.8-r0.3_mipsel.ipk
+# Configuring abiword
+# sh: rm: command not found
+#
+# Note that it is now impossible to install the older version with opkg-cl. To
+# recover from this situation, the package information must be deleted from
+# /usr/lib/opkg/status manually.
+#
+#
+# What is the expected output? What do you see instead?
+# =====================================================
+# 
+# I expect the installation of the specified package to fail if it is already
+# installed.
+#
+#
+# Status
+# ======
+#
+# Graham Gower:
+# > I can no longer reproduce this. I suspect it has been fixed as a side effect
+# > of r465.
 
 import os
 import opk, cfg, opkgcl

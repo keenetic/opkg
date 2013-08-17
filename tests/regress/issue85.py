@@ -1,4 +1,15 @@
 #!/usr/bin/python3
+#
+# Reporter: Graham Gower
+#
+# Opkg should try subsequent satisfying dependencies in the event of failing to
+# install the first one (e.g. due to missing dependency or conflict).
+#
+#
+# Status
+# ======
+#
+# Open
 
 import opk, cfg, opkgcl
 

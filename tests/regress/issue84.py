@@ -1,4 +1,16 @@
 #!/usr/bin/python3
+#
+# Reporter: Graham Gower
+#
+# As ``a1'' is already installed, it is expected that opkg should choose to
+# install ``a'' as satisfying the virtual dependency for ``v''. This is not the
+# case.
+#
+#
+# Status
+# ======
+#
+# Open.
 
 import opk, cfg, opkgcl
 

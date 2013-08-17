@@ -1,4 +1,17 @@
 #!/usr/bin/python3
+#
+# Reporter: Graham Gower
+#
+# Denys Dmytriyenko has experienced problems using BAD_RECOMMENDATAIONS with OE.
+# See post here:
+# http://lists.linuxtogo.org/pipermail/openembedded-devel/2010-February/017648.html
+#
+#
+# Status
+# ======
+#
+# Graham Gower:
+# > Should be fixed with r553.
 
 import os
 import opk, cfg, opkgcl

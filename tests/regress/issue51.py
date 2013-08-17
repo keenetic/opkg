@@ -1,4 +1,44 @@
 #!/usr/bin/python3
+#
+# Reporter: Graham Gower
+#
+# What steps will reproduce the problem?
+# ======================================
+# 
+# 1. Create a package containing file /foo
+# 2. Create an identically named/versioned package containing file /foo and /bar
+# 3. Install the first package.
+# 4. Force reinstall the second package from a repository (passing the package
+#	on the command line will not show the bug).
+#
+#
+# What is the expected output? What do you see instead?
+# =====================================================
+# 
+# The package should show that it owns both /foo and /bar. It only shows
+# ownership of the file(s) that were installed initially.
+#
+# $ ./opkg-cl -o /tmp/opkg files a
+# Package a (1) is installed on root and has the following files:
+# /tmp/opkg/foo
+#
+# If the package is now removed, /bar will be left on the system.
+#
+#
+# Additional
+# ==========
+#
+# Also a problem, is when the --force-reinstall'd package contains fewer files.
+# These files are not properly orphaned/deleted.
+#
+# Perhaps --force-reinstall should do a --force-depends remove, then install? 
+#
+#
+# Status
+# ======
+#
+# Graham Gower:
+# > Fixed with r538.
 
 import os
 import opk, cfg, opkgcl

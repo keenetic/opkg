@@ -1,4 +1,26 @@
 #!/usr/bin/python3
+#
+# Reporter: pixdamix
+#
+# What steps will reproduce the problem?
+# ======================================
+# 
+# 1. Extract two package package-a, package-b (wich depends on package-a)
+# 2. Under some condition when package are flagged as extracted
+#    opkg-cl configure will configure package-b before package-a 
+#
+#
+# What is the expected output? What do you see instead?
+# =====================================================
+# 
+# opkg should configure package-a before package-b
+#
+#
+# Status
+# ======
+#
+# pixdamix:
+# > Resolved in r521
 
 import os
 import opk, cfg, opkgcl

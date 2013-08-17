@@ -1,4 +1,32 @@
 #!/usr/bin/python3
+#
+# Reporter: Graham Gower
+#
+# What steps will reproduce the problem?
+# ======================================
+# 
+# 1. Create package a version 1, containing file /foo.
+# 2. Create package a version 2, without file /foo, depending on package b.
+# 3. Create package b version 1, containing file /foo.
+# 4. Create package repository containing a_2 and b_1.
+# 5. Install a_1 manually.
+# 6. opkg update; opkg upgrade
+#
+#
+# What is the expected output? What do you see instead?
+# =====================================================
+# 
+# File /foo is expected to exist and be provided by package b_1. This is not the
+# case, file /foo has disappeared.
+#
+# opkg_remove.c: remove_data_files_and_list() should double check that the file
+# belongs to the package before removing it.
+#
+#
+# Status
+# ======
+#
+# Fixed by r531-r534,r536
 
 import os
 import opk, cfg, opkgcl
