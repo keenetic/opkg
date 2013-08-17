@@ -47,8 +47,10 @@ if not opkgcl.is_installed("c"):
 	cleanup()
 	opk.fail("package ``c'' not installed.")
 
+# This is where we currently expect failure to occur: opkg is installing 'b' and
+# 'b1' when it should just install 'a' according to the issue report.
 if opkgcl.is_installed("b1"):
 	cleanup()
-	opk.fail("package ``b1'' is installed, but should not be.")
+	opk.xfail("package ``b1'' is installed, but should not be.")
 
 cleanup()

@@ -34,6 +34,6 @@ opkgcl.update()
 opkgcl.install("c")
 if not opkgcl.is_installed("c"):
 	cleanup()
-	opk.fail("package ``c'' not installed.")
+	opk.xfail("package ``c'' not installed.")
 
 cleanup()

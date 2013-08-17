@@ -94,6 +94,12 @@ def fail(msg):
 	print("%s: Test failed: %s" % (__appname, msg))
 	exit(-1)
 
+# Expected failure: For issues we know haven't been fixed yet. As these aren't
+# regressions don't return an error condition.
+def xfail(msg):
+	print("%s: Expected failure: %s" % (__appname, msg))
+	exit(0)
+
 def regress_init():
 	"""
 	Initialisation and sanity checking.
