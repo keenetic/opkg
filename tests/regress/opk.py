@@ -107,7 +107,8 @@ def regress_init():
 
 	if not os.access(cfg.opkgcl, os.X_OK):
 		fail("Cannot exec {}".format(cfg.opkgcl))
-		
+
+	os.makedirs(cfg.opkdir, exist_ok=True)
 	os.chdir(cfg.opkdir)
 
 	os.system("rm -fr {}".format(cfg.offline_root))
