@@ -401,7 +401,7 @@ pkg_vec_t * pkg_hash_fetch_conflicts(pkg_t * pkg)
 
 
     /* foreach conflict */
-    for(i = 0; i < pkg->conflicts_count; i++){
+    for(i = 0; i < count; i++){
 
 	possible_satisfiers = conflicts->possibilities;
 
