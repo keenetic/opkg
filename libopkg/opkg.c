@@ -30,6 +30,8 @@
 #include "opkg_remove.h"
 #include "opkg_upgrade.h"
 
+#include "pkg_parse.h"
+
 #include "sprintf_alloc.h"
 #include "file_util.h"
 
