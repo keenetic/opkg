@@ -358,9 +358,9 @@ is_pkg_a_replaces(pkg_t *pkg_scout,pkg_t *pkg)
     replaces = pkg->replaces;
 
     for (i = 0; i < replaces_count; i++) {
-        if (strcmp(pkg_scout->name,pkg->replaces[i]->name)==0) {      // Found
+        if (strcmp(pkg_scout->name,replaces[i]->name)==0) {      // Found
             opkg_msg(DEBUG2, "Seems I've found a replace %s %s\n",
-			pkg_scout->name, pkg->replaces[i]->name);
+			pkg_scout->name, replaces[i]->name);
             return 1;
         }
     }
