@@ -250,7 +250,7 @@ opkg_install_package(const char *package_name,
 	opkg_progress_data_t pdata;
 	pkg_t *old, *new;
 	pkg_vec_t *deps, *all;
-	int i, ndepends;
+	int i;
 	char **unresolved = NULL;
 
 	opkg_assert(package_name != NULL);
@@ -283,8 +283,7 @@ opkg_install_package(const char *package_name,
 	/* find dependancies and download them */
 	deps = pkg_vec_alloc();
 	/* this function does not return the original package, so we insert it later */
-	ndepends = pkg_hash_fetch_unsatisfied_dependencies(new, deps,
-			&unresolved);
+	pkg_hash_fetch_unsatisfied_dependencies(new, deps, &unresolved);
 	if (unresolved) {
 		char **tmp = unresolved;
 		opkg_msg(ERROR, "Couldn't satisfy the following dependencies"
