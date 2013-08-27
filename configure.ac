@@ -168,11 +168,20 @@ if test "x$want_gpgme" = "xyes"; then
   else
     AC_MSG_ERROR(GPGME $min_gpgme_version or later needed)
   fi
+
+  AC_PATH_PROG(GPGERR_CONFIG, gpg-error-config, "failed")
+  if test $GPGERR_CONFIG != "failed" ; then
+    GPGERR_CFLAGS=`$GPGERR_CONFIG --cflags`
+    GPGERR_LIBS=`$GPGERR_CONFIG --libs`
+  else
+    AC_MSG_ERROR(GPGERR is required to build gpgme support)
+  fi
 fi
 
 AC_SUBST(GPGME_CFLAGS)
 AC_SUBST(GPGME_LIBS)
-
+AC_SUBST(GPGERR_CFLAGS)
+AC_SUBST(GPGERR_LIBS)
 
 # Checks for header files
 AC_HEADER_DIRENT
