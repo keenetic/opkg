@@ -26,7 +26,7 @@
 #include "hash_table.h"
 #include "libbb/libbb.h"
 
-static int parseDepends(compound_depend_t *compound_depend, char * depend_str);
+static int parseDepends(compound_depend_t *compound_depend, const char * depend_str);
 static depend_t * depend_init(void);
 static char ** add_unresolved_dep(pkg_t * pkg, char ** the_lost, int ref_ndx);
 static char ** merge_unresolved(char ** oldstuff, char ** newstuff);
@@ -797,7 +797,7 @@ constraint_to_str(enum version_constraint c)
 }
 
 enum version_constraint
-str_to_constraint(char **str)
+str_to_constraint(const char ** str)
 {
 	if(!strncmp(*str, "<<", 2)){
 		*str += 2;
@@ -945,12 +945,13 @@ static depend_t * depend_init(void)
 }
 
 static int parseDepends(compound_depend_t *compound_depend,
-			char * depend_str)
+			const char * depend_str)
 {
      char * pkg_name, buffer[2048];
      unsigned int num_of_ors = 0;
      int i;
-     char * src, * dest;
+     const char * src;
+     char * dest;
      depend_t ** possibilities;
 
      /* first count the number of ored possibilities for satisfying dependency */

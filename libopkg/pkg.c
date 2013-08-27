@@ -969,8 +969,7 @@ pkg_version_satisfied(pkg_t *it, pkg_t *ref, const char *op)
      int r;
 
      r = pkg_compare_versions(it, ref);
-     char *op2 = op;
-     enum version_constraint constraint = str_to_constraint(&op2);
+     enum version_constraint constraint = str_to_constraint(&op);
 
      switch (constraint)
      {
