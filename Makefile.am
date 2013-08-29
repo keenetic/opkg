@@ -24,14 +24,5 @@ install-data-hook:
 
 EXTRA_DIST = $(intercept_DATA) tests/regress CONTRIBUTORS ChangeLog.ipkg
 
-MAINTAINERCLEANFILES= \
-	configure \
-	Makefile.in \
-	config.guess \
-	config.sub \
-	ltmain.sh \
-	.Makefile.am.swp \
-	aclocal.m4
-
 package: all-recursive
 	STRIPPROG=$(STRIP) INSTALL=$$PWD/install-sh  binary-arch
