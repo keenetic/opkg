@@ -27,6 +27,9 @@ def files(pkg_name):
 	output = opkgcl("files {}".format(pkg_name))[1]
 	return output.split("\n")[1:]
 
+def flag_hold(pkg_name):
+	out = opkgcl("flag hold {}".format(pkg_name))
+	return out == "Setting hold flag on package {}.".format(pkg_name)
 
 def flag_unpacked(pkg_name):
 	out = opkgcl("flag unpacked {}".format(pkg_name))
