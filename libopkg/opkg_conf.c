@@ -129,6 +129,39 @@ resolve_pkg_dest_list(void)
 }
 
 int
+opkg_conf_get_option(char *name, void *value)
+{
+	int i;
+
+	*(char**)value = NULL;
+
+	for (i=0; options[i].name; i++) {
+		if (strcmp(options[i].name, name) == 0)
+			break;
+	}
+
+	if (options[i].name == NULL)
+		/* Not found. */
+		return -1;
+
+	switch (options[i].type) {
+	case OPKG_OPT_TYPE_BOOL:
+		*(int *)value = *(int *)options[i].value;
+		break;
+
+	case OPKG_OPT_TYPE_INT:
+		*(int *)value = *(int *)options[i].value;
+		break;
+
+	case OPKG_OPT_TYPE_STRING:
+		*(char **)value = xstrdup(*(char **)options[i].value);
+		break;
+	}
+
+	return 0;
+}
+
+int
 opkg_conf_set_option(const char *name, const char *value, int overwrite)
 {
      int i = 0;
