@@ -171,76 +171,20 @@ opkg_re_read_config_files(void)
 int
 opkg_get_option(char *option, void *value)
 {
-	int i;
-	extern opkg_option_t options[];
-
 	opkg_assert(option != NULL);
 	opkg_assert(value != NULL);
 
-	*(char**)value = NULL;
-
-	for (i=0; options[i].name; i++) {
-		if (strcmp(options[i].name, option) == 0)
-			break;
-	}
-
-	if (options[i].name == NULL)
-		/* Not found. */
-		return -1;
-
-	switch (options[i].type) {
-	case OPKG_OPT_TYPE_BOOL:
-		*(int *)value = *(int *)options[i].value;
-		break;
-
-	case OPKG_OPT_TYPE_INT:
-		*(int *)value = *(int *)options[i].value;
-		break;
-
-	case OPKG_OPT_TYPE_STRING:
-		*(char **)value = xstrdup(*(char **)options[i].value);
-		break;
-	}
-
-	return 0;
+	return opkg_conf_get_option(option, value);
 }
 
 void
 opkg_set_option(char *option, void *value)
 {
-	int i;
-	extern opkg_option_t options[];
-
 	opkg_assert(option != NULL);
 	opkg_assert(value != NULL);
 
-	for (i=0; options[i].name; i++) {
-		if (strcmp(options[i].name, option) == 0)
-			break;
-	}
-
-	if (options[i].name == NULL) {
-		opkg_msg(ERROR, "Invalid option: %s\n", option);
-		return;
-	}
-
-	switch (options[i].type) {
-	case OPKG_OPT_TYPE_BOOL:
-		if ((long)value == 0)
-			*((int *) options[i].value) = 0;
-		else
-			*((int *) options[i].value) = 1;
-		break;
-
-	case OPKG_OPT_TYPE_INT:
-		*((int *) options[i].value) = (long)value;
-		break;
-
-	case OPKG_OPT_TYPE_STRING:
-		*((char **) options[i].value) = xstrdup((char *)value);
-		break;
-	}
-
+	/* Set option, overwriting any previously set value. */
+	opkg_conf_set_option(option, value, 1);
 }
 
 /**
