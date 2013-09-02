@@ -40,7 +40,7 @@ pkg_hash_init(void)
 static void
 free_pkgs(const char *key, void *entry, void *data)
 {
-	int i;
+	unsigned int i;
 	abstract_pkg_t *ab_pkg;
 
 	/* Each entry in the hash table is an abstract package, which contains
@@ -179,7 +179,7 @@ pkg_hash_load_feeds(void)
 		sprintf_alloc(&list_file, "%s/%s", lists_dir, src->name);
 
 		if (file_exists(list_file)) {
-			int i;
+			unsigned int i;
 			release_t *release = release_new();
 			if(release_init_from_file(release, list_file)) {
 				free(list_file);
@@ -260,9 +260,9 @@ pkg_hash_fetch_best_installation_candidate(abstract_pkg_t *apkg,
 		int (*constraint_fcn)(pkg_t *pkg, void *cdata),
 		void *cdata, int quiet)
 {
-     int i, j;
-     int nprovides = 0;
-     int nmatching = 0;
+     unsigned int i, j;
+     unsigned int nprovides = 0;
+     unsigned int nmatching = 0;
      int wrong_arch_found = 0;
      pkg_vec_t *matching_pkgs;
      abstract_pkg_vec_t *matching_apkgs;
@@ -525,7 +525,7 @@ pkg_t *
 pkg_hash_fetch_by_name_version(const char *pkg_name, const char * version)
 {
 	pkg_vec_t * vec;
-	int i;
+	unsigned int i;
 	char *version_str = NULL;
 
 	if(!(vec = pkg_vec_fetch_by_name(pkg_name)))
@@ -550,7 +550,7 @@ pkg_t *
 pkg_hash_fetch_installed_by_name_dest(const char *pkg_name, pkg_dest_t *dest)
 {
 	pkg_vec_t * vec;
-	int i;
+	unsigned int i;
 
 	if (!(vec = pkg_vec_fetch_by_name(pkg_name))) {
 		return NULL;
@@ -570,7 +570,7 @@ pkg_t *
 pkg_hash_fetch_installed_by_name(const char *pkg_name)
 {
 	pkg_vec_t * vec;
-	int i;
+	unsigned int i;
 
 	if (!(vec = pkg_vec_fetch_by_name(pkg_name))) {
 		return NULL;
@@ -590,7 +590,7 @@ pkg_hash_fetch_installed_by_name(const char *pkg_name)
 static void
 pkg_hash_fetch_available_helper(const char *pkg_name, void *entry, void *data)
 {
-	int j;
+	unsigned int j;
 	abstract_pkg_t *ab_pkg = (abstract_pkg_t *)entry;
 	pkg_vec_t *all = (pkg_vec_t *)data;
 	pkg_vec_t *pkg_vec = ab_pkg->pkgs;
@@ -617,7 +617,7 @@ pkg_hash_fetch_all_installed_helper(const char *pkg_name, void *entry, void *dat
 	abstract_pkg_t *ab_pkg = (abstract_pkg_t *)entry;
 	pkg_vec_t *all = (pkg_vec_t *)data;
 	pkg_vec_t *pkg_vec = ab_pkg->pkgs;
-	int j;
+	unsigned int j;
 
 	if (!pkg_vec)
 		return;

@@ -156,7 +156,7 @@ compound_depend_deinit(compound_depend_t *depends)
 void
 pkg_deinit(pkg_t *pkg)
 {
-	int i;
+	unsigned int i;
 
 	if (pkg->name)
 		free(pkg->name);
@@ -203,10 +203,10 @@ pkg_deinit(pkg_t *pkg)
 	pkg->replaces = NULL;
 
 	if (pkg->depends) {
-		int count = pkg->pre_depends_count
-				+ pkg->depends_count
-				+ pkg->recommends_count
-				+ pkg->suggests_count;
+		unsigned int count = pkg->pre_depends_count
+			+ pkg->depends_count
+			+ pkg->recommends_count
+			+ pkg->suggests_count;
 
 		for (i=0; i<count; i++)
 			compound_depend_deinit (&pkg->depends[i]);
@@ -482,7 +482,7 @@ set_flags_from_control(pkg_t *pkg){
 static const char *
 pkg_state_want_to_str(pkg_state_want_t sw)
 {
-     int i;
+     unsigned int i;
 
      for (i=0; i < ARRAY_SIZE(pkg_state_want_map); i++) {
 	  if (pkg_state_want_map[i].value == sw) {
@@ -497,7 +497,7 @@ pkg_state_want_to_str(pkg_state_want_t sw)
 pkg_state_want_t
 pkg_state_want_from_str(char *str)
 {
-     int i;
+     unsigned int i;
 
      for (i=0; i < ARRAY_SIZE(pkg_state_want_map); i++) {
 	  if (strcmp(str, pkg_state_want_map[i].str) == 0) {
@@ -512,7 +512,7 @@ pkg_state_want_from_str(char *str)
 static char *
 pkg_state_flag_to_str(pkg_state_flag_t sf)
 {
-	int i;
+	unsigned int i;
 	unsigned int len;
 	char *str;
 
@@ -547,7 +547,7 @@ pkg_state_flag_to_str(pkg_state_flag_t sf)
 pkg_state_flag_t
 pkg_state_flag_from_str(const char *str)
 {
-     int i;
+     unsigned int i;
      int sf = SF_OK;
      const char *sfname;
      unsigned int sfname_len;
@@ -575,7 +575,7 @@ pkg_state_flag_from_str(const char *str)
 static const char *
 pkg_state_status_to_str(pkg_state_status_t ss)
 {
-     int i;
+     unsigned int i;
 
      for (i=0; i < ARRAY_SIZE(pkg_state_status_map); i++) {
 	  if (pkg_state_status_map[i].value == ss) {
@@ -590,7 +590,7 @@ pkg_state_status_to_str(pkg_state_status_t ss)
 pkg_state_status_t
 pkg_state_status_from_str(const char *str)
 {
-     int i;
+     unsigned int i;
 
      for (i=0; i < ARRAY_SIZE(pkg_state_status_map); i++) {
 	  if (strcmp(str, pkg_state_status_map[i].str) == 0) {
@@ -605,12 +605,12 @@ pkg_state_status_from_str(const char *str)
 void
 pkg_formatted_field(FILE *fp, pkg_t *pkg, const char *field)
 {
-     int i, j;
+     unsigned int i, j;
      char *str;
-     int depends_count = pkg->pre_depends_count +
-			 pkg->depends_count +
-			 pkg->recommends_count +
-			 pkg->suggests_count;
+     unsigned int depends_count = pkg->pre_depends_count +
+	     pkg->depends_count +
+	     pkg->recommends_count +
+	     pkg->suggests_count;
 
      if (strlen(field) < PKG_MINIMUM_FIELD_NAME_LEN) {
 	  goto UNKNOWN_FMT_FIELD;
@@ -1335,7 +1335,7 @@ pkg_arch_supported(pkg_t *pkg)
 void
 pkg_info_preinstall_check(void)
 {
-     int i;
+     unsigned int i;
      pkg_vec_t *installed_pkgs = pkg_vec_alloc();
 
      /* update the file owner data structure */
@@ -1410,7 +1410,8 @@ int
 pkg_write_changed_filelists(void)
 {
 	pkg_vec_t *installed_pkgs = pkg_vec_alloc();
-	int i, err, ret = 0;
+	unsigned int i;
+	int err, ret = 0;
 
 	if (opkg_config->noaction)
 		return 0;

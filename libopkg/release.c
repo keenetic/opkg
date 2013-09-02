@@ -55,7 +55,7 @@ release_new(void)
 void
 release_deinit(release_t *release)
 {
-    int i;
+    unsigned int i;
 
     free(release->name);
     free(release->datestring);
@@ -103,7 +103,7 @@ release_init_from_file(release_t *release, const char *filename)
 const char *
 item_in_list(const char *comp, char **complist, unsigned int count)
 {
-     int i;
+     unsigned int i;
 
      if (!complist)
 	  return comp;
@@ -137,7 +137,7 @@ int
 release_comps_supported(release_t *release, const char *complist)
 {
      int ret = 1;
-     int i;
+     unsigned int i;
 
      if (complist) {
 	  release->complist = parse_list(complist, &release->complist_count, ' ', 1);
@@ -175,7 +175,7 @@ release_download(release_t *release, pkg_src_t *dist, char *lists_dir, char *tmp
      unsigned int ncomp;
      const char **comps = release_comps(release, &ncomp);
      nv_pair_list_elt_t *l;
-     int i;
+     unsigned int i;
 
      for(i = 0; i < ncomp; i++){
 	  int err = 0;

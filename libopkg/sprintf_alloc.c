@@ -39,7 +39,7 @@ sprintf_alloc(char **str, const char *fmt, ...)
 			exit(EXIT_FAILURE);
 		}
 
-		if (n < size)
+		if ((unsigned int)n < size)
 			break;
 
 		/* Truncated, try again with more space. */

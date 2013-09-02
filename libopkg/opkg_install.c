@@ -45,7 +45,8 @@
 static int
 satisfy_dependencies_for(pkg_t *pkg)
 {
-     int i, err;
+     unsigned int i;
+     int err;
      pkg_vec_t *depends = pkg_vec_alloc();
      pkg_t *dep;
      char **tmp, **unresolved = NULL;
@@ -145,7 +146,7 @@ satisfy_dependencies_for(pkg_t *pkg)
 static int
 check_conflicts_for(pkg_t *pkg)
 {
-     int i;
+     unsigned int i;
      pkg_vec_t *conflicts = NULL;
      message_level_t level;
 
@@ -427,7 +428,8 @@ pkg_get_installed_replacees(pkg_t *pkg, pkg_vec_t *installed_replacees)
 {
      abstract_pkg_t **replaces = pkg->replaces;
      int replaces_count = pkg->replaces_count;
-     int i, j;
+     int i;
+     unsigned int j;
      for (i = 0; i < replaces_count; i++) {
 	  abstract_pkg_t *ab_pkg = replaces[i];
 	  pkg_vec_t *pkg_vec = ab_pkg->pkgs;

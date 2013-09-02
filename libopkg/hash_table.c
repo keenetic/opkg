@@ -79,7 +79,7 @@ hash_print_stats(hash_table_t *hash)
 
 void hash_table_deinit(hash_table_t *hash)
 {
-    int i;
+    unsigned int i;
     if (!hash)
         return;
 
@@ -125,7 +125,7 @@ void *hash_table_get(hash_table_t *hash, const char *key)
 
 int hash_table_insert(hash_table_t *hash, const char *key, void *value)
 {
-     int bucket_len = 0;
+     unsigned int bucket_len = 0;
      int ndx= hash_index(hash, key);
      hash_entry_t *hash_entry = hash->entries + ndx;
      if (hash_entry->key) {
@@ -199,7 +199,7 @@ int hash_table_remove(hash_table_t *hash, const char *key)
 
 void hash_table_foreach(hash_table_t *hash, void (*f)(const char *key, void *entry, void *data), void *data)
 {
-    int i;
+    unsigned int i;
     if (!hash || !f)
 	return;
 

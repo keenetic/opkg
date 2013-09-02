@@ -328,7 +328,8 @@ static int
 opkg_recurse_pkgs_in_order(pkg_t *pkg, pkg_vec_t *all,
                                pkg_vec_t *visited, pkg_vec_t *ordered)
 {
-    int j,k,l,m;
+    int j,k;
+    unsigned int i,l,m;
     int count;
     pkg_t *dep;
     compound_depend_t * compound_depend;
@@ -347,8 +348,8 @@ opkg_recurse_pkgs_in_order(pkg_t *pkg, pkg_vec_t *all,
         return 0;
 
     /* If the  package has already been visited (by this function), skip it */
-    for(j = 0; j < visited->len; j++)
-        if ( ! strcmp(visited->pkgs[j]->name, pkg->name)) {
+    for(i = 0; i < visited->len; i++)
+        if ( ! strcmp(visited->pkgs[i]->name, pkg->name)) {
             opkg_msg(DEBUG, "pkg %s already visited, skipping.\n", pkg->name);
             return 0;
         }
@@ -408,7 +409,7 @@ static int
 opkg_configure_packages(char *pkg_name)
 {
      pkg_vec_t *all, *ordered, *visited;
-     int i;
+     unsigned int i;
      pkg_t *pkg;
      opkg_intercept_t ic;
      int r, err = 0;
@@ -523,6 +524,7 @@ static int
 opkg_upgrade_cmd(int argc, char **argv)
 {
      int i;
+     unsigned int j;
      pkg_t *pkg;
      int err = 0;
 
@@ -564,8 +566,8 @@ opkg_upgrade_cmd(int argc, char **argv)
 	  pkg_info_preinstall_check();
 
 	  pkg_hash_fetch_all_installed(installed);
-	  for (i = 0; i < installed->len; i++) {
-	       pkg = installed->pkgs[i];
+	  for (j = 0; j < installed->len; j++) {
+	       pkg = installed->pkgs[j];
 	       if (opkg_upgrade_pkg(pkg))
 		       err = -1;
 	  }
@@ -615,7 +617,7 @@ opkg_download_cmd(int argc, char **argv)
 static int
 opkg_list_cmd(int argc, char **argv)
 {
-     int i;
+     unsigned int i;
      pkg_vec_t *available;
      pkg_t *pkg;
      char *pkg_name = NULL;
@@ -642,7 +644,7 @@ opkg_list_cmd(int argc, char **argv)
 static int
 opkg_list_installed_cmd(int argc, char **argv)
 {
-     int i ;
+     unsigned int i;
      pkg_vec_t *available;
      pkg_t *pkg;
      char *pkg_name = NULL;
@@ -669,7 +671,7 @@ opkg_list_installed_cmd(int argc, char **argv)
 static int
 opkg_list_changed_conffiles_cmd(int argc, char **argv)
 {
-     int i ;
+     unsigned int i;
      pkg_vec_t *available;
      pkg_t *pkg;
      char *pkg_name = NULL;
@@ -724,7 +726,7 @@ opkg_list_upgradable_cmd(int argc, char **argv)
 static int
 opkg_info_status_cmd(int argc, char **argv, int installed_only)
 {
-     int i;
+     unsigned int i;
      pkg_vec_t *available;
      pkg_t *pkg;
      char *pkg_name = NULL;
@@ -794,7 +796,8 @@ opkg_configure_cmd(int argc, char **argv)
 static int
 opkg_remove_cmd(int argc, char **argv)
 {
-     int i, a, done, err = 0;
+     int i, done, err = 0;
+     unsigned int a;
      pkg_t *pkg;
      pkg_t *pkg_to_remove;
      pkg_vec_t *available;
@@ -926,7 +929,8 @@ opkg_files_cmd(int argc, char **argv)
 static int
 opkg_depends_cmd(int argc, char **argv)
 {
-	int i, j, k;
+	int i, k;
+	unsigned int j;
 	int depends_count;
 	pkg_vec_t *available_pkgs;
 	compound_depend_t *cdep;
@@ -1002,7 +1006,8 @@ opkg_what_depends_conflicts_cmd(enum depend_type what_field_type, int recursive,
 	compound_depend_t *cdep;
 	pkg_vec_t *available_pkgs;
 	pkg_t *pkg;
-	int i, j, k, l;
+	int i, k, l;
+	unsigned int j;
 	int changed, count;
 	const char *rel_str = NULL;
 	char *ver;
@@ -1028,8 +1033,8 @@ opkg_what_depends_conflicts_cmd(enum depend_type what_field_type, int recursive,
 	for (i = 0; i < argc; i++)
 	       pkg_vec_mark_if_matches(available_pkgs, argv[i]);
 
-	for (i = 0; i < available_pkgs->len; i++) {
-	       pkg = available_pkgs->pkgs[i];
+	for (j = 0; j < available_pkgs->len; j++) {
+	       pkg = available_pkgs->pkgs[j];
 	       if (pkg->state_flag & SF_MARKED) {
 		    /* mark the parent (abstract) package */
 		    pkg_mark_provides(pkg);
@@ -1153,7 +1158,7 @@ opkg_what_provides_replaces_cmd(enum what_field_type what_field_type, int argc, 
 	       pkg_hash_fetch_all_installed(available_pkgs);
 	  for (i = 0; i < argc; i++) {
 	       const char *target = argv[i];
-	       int j;
+	       unsigned int j;
 
 	       opkg_msg(NOTICE, "What %s %s\n",
 			    rel_str, target);
@@ -1196,7 +1201,7 @@ opkg_whatreplaces_cmd(int argc, char **argv)
 static int
 opkg_search_cmd(int argc, char **argv)
 {
-     int i;
+     unsigned int i;
 
      pkg_vec_t *installed;
      pkg_t *pkg;

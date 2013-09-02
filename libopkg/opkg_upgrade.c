@@ -85,7 +85,7 @@ pkg_hash_check_installed_pkg_helper(const char *pkg_name, void *entry,
 	struct active_list *head = (struct active_list *) data;
 	abstract_pkg_t *ab_pkg = (abstract_pkg_t *)entry;
 	pkg_vec_t *pkg_vec = ab_pkg->pkgs;
-	int j;
+	unsigned int j;
 
 	if (!pkg_vec)
 		return;

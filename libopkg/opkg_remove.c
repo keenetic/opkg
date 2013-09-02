@@ -424,7 +424,8 @@ remove_data_files_and_list(pkg_t *pkg)
 void
 remove_maintainer_scripts(pkg_t *pkg)
 {
-	int i, err;
+	unsigned int i;
+	int err;
 	char *globpattern;
 	glob_t globbuf;
 

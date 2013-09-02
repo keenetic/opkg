@@ -416,7 +416,8 @@ opkg_conf_write_status_files(void)
      pkg_dest_t *dest;
      pkg_vec_t *all;
      pkg_t *pkg;
-     int i, ret = 0;
+     unsigned int i;
+     int ret = 0;
 
      if (opkg_config->noaction)
 	  return 0;
@@ -503,7 +504,8 @@ opkg_conf_init(void)
 int
 opkg_conf_load(void)
 {
-	int i, glob_ret;
+	unsigned int i;
+	int glob_ret;
 	char *tmp, *tmp_dir_base, **tmp_val;
 	glob_t globbuf;
 	char *etc_opkg_conf_pattern;

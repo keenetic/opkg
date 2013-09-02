@@ -78,7 +78,7 @@ opkg_message (message_level_t level, const char *fmt, ...)
 {
 	va_list ap;
 
-	if (opkg_config->verbosity < level)
+	if (opkg_config->verbosity < (int)level)
 		return;
 
 	if (opkg_config->opkg_vmessage) {

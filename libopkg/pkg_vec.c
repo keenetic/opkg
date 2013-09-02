@@ -50,7 +50,7 @@ void pkg_vec_free(pkg_vec_t *vec)
  */
 void pkg_vec_insert_merge(pkg_vec_t *vec, pkg_t *pkg, int set_status)
 {
-     int i;
+     unsigned int i;
      int found = 0;
 
      /* look for a duplicate pkg by name, version, and architecture */
@@ -105,7 +105,7 @@ void pkg_vec_insert(pkg_vec_t *vec, const pkg_t *pkg)
 
 int pkg_vec_contains(pkg_vec_t *vec, pkg_t *apkg)
 {
-     int i;
+     unsigned int i;
      for (i = 0; i < vec->len; i++)
 	  if (vec->pkgs[i] == apkg)
 	       return 1;
@@ -175,7 +175,7 @@ void abstract_pkg_vec_insert(abstract_pkg_vec_t *vec, abstract_pkg_t *pkg)
 
 abstract_pkg_t * abstract_pkg_vec_get(abstract_pkg_vec_t *vec, int i)
 {
-    if (vec->len > i)
+    if ((i >= 0) && ((unsigned int)i < vec->len))
 	return vec->pkgs[i];
     else
 	return NULL;
@@ -183,7 +183,7 @@ abstract_pkg_t * abstract_pkg_vec_get(abstract_pkg_vec_t *vec, int i)
 
 int abstract_pkg_vec_contains(abstract_pkg_vec_t *vec, abstract_pkg_t *apkg)
 {
-     int i;
+     unsigned int i;
      for (i = 0; i < vec->len; i++)
 	  if (vec->pkgs[i] == apkg)
 	       return 1;

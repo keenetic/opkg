@@ -57,7 +57,7 @@ static int
 opkg_configure_packages(char *pkg_name)
 {
 	pkg_vec_t *all;
-	int i;
+	unsigned int i;
 	pkg_t *pkg;
 	int r, err = 0;
 
@@ -202,7 +202,7 @@ opkg_install_package(const char *package_name,
 	opkg_progress_data_t pdata;
 	pkg_t *old, *new;
 	pkg_vec_t *deps, *all;
-	int i;
+	unsigned int i;
 	char **unresolved = NULL;
 
 	opkg_assert(package_name != NULL);
@@ -438,7 +438,7 @@ opkg_upgrade_all(opkg_progress_callback_t progress_callback, void *user_data)
 {
 	pkg_vec_t *installed;
 	int err = 0;
-	int i;
+	unsigned int i;
 	pkg_t *pkg;
 	opkg_progress_data_t pdata;
 
@@ -669,7 +669,7 @@ int
 opkg_list_packages(opkg_package_callback_t callback, void *user_data)
 {
 	pkg_vec_t *all;
-	int i;
+	unsigned int i;
 
 	opkg_assert(callback);
 
@@ -722,7 +722,7 @@ opkg_find_package(const char *name, const char *ver, const char *arch,
 {
 	pkg_t *pkg = NULL;
 	pkg_vec_t *all;
-	int i;
+	unsigned int i;
 
 	/* We expect to be given a name to search for, all other arguments are
 	 * optional.
