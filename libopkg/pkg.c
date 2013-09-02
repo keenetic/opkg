@@ -902,12 +902,20 @@ pkg_print_status(pkg_t * pkg, FILE * file)
  * Copyright (C) 1995 Ian Jackson <iwj10@cus.cam.ac.uk>
  */
 
-/* assume ascii; warning: evaluates x multiple times! */
-#define order(x) ((x) == '~' ? -1 \
-		: isdigit((x)) ? 0 \
-		: !(x) ? 0 \
-		: isalpha((x)) ? (x) \
-		: (x) + 256)
+/* assume ascii */
+static int order(char x)
+{
+	if (x == '~')
+		return -1;
+	if (isdigit(x))
+		return 0;
+	if (!x)
+		return 0;
+	if (isalpha(x))
+		return x;
+	
+	return 256 + (int)x;
+}
 
 static int
 verrevcmp(const char *val, const char *ref) {
