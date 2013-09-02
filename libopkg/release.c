@@ -101,7 +101,7 @@ release_init_from_file(release_t *release, const char *filename)
 }
 
 const char *
-item_in_list(const char *comp, char **complist, const unsigned int count)
+item_in_list(const char *comp, char **complist, unsigned int count)
 {
      int i;
 
