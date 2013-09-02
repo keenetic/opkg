@@ -65,7 +65,7 @@ satisfy_dependencies_for(pkg_t *pkg)
 	  }
 	  free(tmp);
 	  opkg_message(ERROR, "\n");
-	  if (! conf->force_depends) {
+	  if (! opkg_config->force_depends) {
 	       opkg_msg(INFO,
 			    "This could mean that your package list is out of date or that the packages\n"
 			    "mentioned above do not yet exist (try 'opkg update'). To proceed in spite\n"
@@ -149,13 +149,13 @@ check_conflicts_for(pkg_t *pkg)
      pkg_vec_t *conflicts = NULL;
      message_level_t level;
 
-     if (conf->force_depends) {
+     if (opkg_config->force_depends) {
 	  level = NOTICE;
      } else {
 	  level = ERROR;
      }
 
-     if (!conf->force_depends)
+     if (!opkg_config->force_depends)
 	  conflicts = pkg_hash_fetch_conflicts(pkg);
 
      if (conflicts) {
@@ -186,7 +186,7 @@ update_file_ownership(pkg_t *new_pkg, pkg_t *old_pkg)
              iter = niter, niter = str_list_next(new_list, niter)) {
 	  char *new_file = (char *)iter->data;
 	  pkg_t *owner = file_hash_get_file_owner(new_file);
-	  pkg_t *obs = hash_table_get(&conf->obs_file_hash, new_file);
+	  pkg_t *obs = hash_table_get(&opkg_config->obs_file_hash, new_file);
 
 	  opkg_msg(DEBUG2, "%s: new_pkg=%s wants file %s, from owner=%s\n",
 		__func__, new_pkg->name, new_file, owner?owner->name:"<NULL>");
@@ -209,7 +209,7 @@ update_file_ownership(pkg_t *new_pkg, pkg_t *old_pkg)
 	       pkg_t *owner = file_hash_get_file_owner(old_file);
 	       if (!owner || (owner == old_pkg)) {
 		    /* obsolete */
-		    hash_table_insert(&conf->obs_file_hash, old_file, old_pkg);
+		    hash_table_insert(&opkg_config->obs_file_hash, old_file, old_pkg);
 	       }
 	  }
           pkg_free_installed_files(old_pkg);
@@ -225,20 +225,20 @@ verify_pkg_installable(pkg_t *pkg)
 	char *root_dir = NULL;
 	struct stat s;
 
-	if (conf->force_space || pkg->installed_size == 0)
+	if (opkg_config->force_space || pkg->installed_size == 0)
 		return 0;
 
 	if (pkg->dest)
 	{
-		if (!strcmp(pkg->dest->name, "root") && conf->overlay_root
-		    && !stat(conf->overlay_root, &s) && (s.st_mode & S_IFDIR))
-			root_dir = conf->overlay_root;
+		if (!strcmp(pkg->dest->name, "root") && opkg_config->overlay_root
+		    && !stat(opkg_config->overlay_root, &s) && (s.st_mode & S_IFDIR))
+			root_dir = opkg_config->overlay_root;
 		else
 			root_dir = pkg->dest->root_dir;
 	}
 
 	if (!root_dir)
-		root_dir = conf->default_dest->root_dir;
+		root_dir = opkg_config->default_dest->root_dir;
 
 	kbs_available = get_available_kbytes(root_dir);
 
@@ -262,7 +262,7 @@ unpack_pkg_control_files(pkg_t *pkg)
      char *root_dir;
      FILE *conffiles_file;
 
-     sprintf_alloc(&pkg->tmp_unpack_dir, "%s/%s-XXXXXX", conf->tmp_dir, pkg->name);
+     sprintf_alloc(&pkg->tmp_unpack_dir, "%s/%s-XXXXXX", opkg_config->tmp_dir, pkg->name);
 
      pkg->tmp_unpack_dir = mkdtemp(pkg->tmp_unpack_dir);
      if (pkg->tmp_unpack_dir == NULL) {
@@ -315,9 +315,9 @@ unpack_pkg_control_files(pkg_t *pkg)
 	  /* Prepend dest->root_dir to conffile name.
 	     Take pains to avoid multiple slashes. */
 	  root_dir = pkg->dest->root_dir;
-	  if (conf->offline_root)
+	  if (opkg_config->offline_root)
 	       /* skip the offline_root prefix */
-	       root_dir = pkg->dest->root_dir + strlen(conf->offline_root);
+	       root_dir = pkg->dest->root_dir + strlen(opkg_config->offline_root);
 	  sprintf_alloc(&cf_name_in_dest, "%s%s", root_dir,
 			cf_name[0] == '/' ? (cf_name + 1) : cf_name);
 
@@ -492,26 +492,26 @@ opkg_install_check_downgrade(pkg_t *pkg, pkg_t *old_pkg, int message)
 
           memset(message_out,'\x0',15);
           strncpy (message_out,"Upgrading ",strlen("Upgrading "));
-          if ( (conf->force_downgrade==1) && (cmp > 0) ){     /* We've been asked to allow downgrade  and version is precedent */
+          if ( (opkg_config->force_downgrade==1) && (cmp > 0) ){     /* We've been asked to allow downgrade  and version is precedent */
              cmp = -1 ;                                       /* then we force opkg to downgrade */
              strncpy (message_out,"Downgrading ",strlen("Downgrading "));         /* We need to use a value < 0 because in the 0 case we are asking to */
                                                               /* reinstall, and some check could fail asking the "force-reinstall" option */
           }
 
 	  if (cmp > 0) {
-              if(!conf->download_only)
+              if(!opkg_config->download_only)
                   opkg_msg(NOTICE,
                           "Not downgrading package %s on %s from %s to %s.\n",
                           old_pkg->name, old_pkg->dest->name, old_version, new_version);
 	       rc = 1;
 	  } else if (cmp < 0) {
-              if(!conf->download_only)
+              if(!opkg_config->download_only)
                   opkg_msg(NOTICE, "%s%s on %s from %s to %s...\n",
                           message_out, pkg->name, old_pkg->dest->name, old_version, new_version);
 	       pkg->dest = old_pkg->dest;
 	       rc = 0;
 	  } else /* cmp == 0 */ {
-               if(!conf->download_only)
+               if(!opkg_config->download_only)
                    opkg_msg(NOTICE, "%s (%s) already install on %s.\n",
 			pkg->name, new_version, old_pkg->dest->name);
 	       rc = 1;
@@ -528,7 +528,7 @@ opkg_install_check_downgrade(pkg_t *pkg, pkg_t *old_pkg, int message)
                strncpy( message_out,"Installing ",strlen("Installing ") );
           char *version = pkg_version_str_alloc(pkg);
 
-          if(!conf->download_only)
+          if(!opkg_config->download_only)
                opkg_msg(NOTICE, "%s%s (%s) to %s...\n", message_out,
                   pkg->name, version, pkg->dest->name);
           free(version);
@@ -703,7 +703,7 @@ backup_modified_conffiles(pkg_t *pkg, pkg_t *old_pkg)
      conffile_list_elt_t *iter;
      conffile_t *cf;
 
-     if (conf->noaction) return 0;
+     if (opkg_config->noaction) return 0;
 
      /* Backup all modified conffiles */
      if (old_pkg) {
@@ -803,7 +803,7 @@ check_data_file_clashes(pkg_t *pkg, pkg_t *old_pkg)
 	       }
 
 	       /* Pre-existing files are OK if force-overwrite was asserted. */
-	       if (conf->force_overwrite) {
+	       if (opkg_config->force_overwrite) {
 		    /* but we need to change who owns this file */
 		    file_hash_set_file_owner(filename, pkg);
 		    continue;
@@ -836,7 +836,7 @@ check_data_file_clashes(pkg_t *pkg, pkg_t *old_pkg)
 	       }
 
 	       /* Pre-existing files are OK if they are obsolete */
-	       obs = hash_table_get(&conf->obs_file_hash, filename);
+	       obs = hash_table_get(&opkg_config->obs_file_hash, filename);
 	       if (obs) {
 		    opkg_msg(INFO, "Pre-exiting file %s is obsolete."
 				   " obs_pkg=%s\n",
@@ -899,7 +899,7 @@ check_data_file_clashes_change(pkg_t *pkg, pkg_t *old_pkg)
 
 	       owner = file_hash_get_file_owner(filename);
 
-	       if (conf->force_overwrite) {
+	       if (opkg_config->force_overwrite) {
 		    /* but we need to change who owns this file */
 		    file_hash_set_file_owner(filename, pkg);
 		    continue;
@@ -1006,7 +1006,7 @@ remove_obsolesced_files(pkg_t *pkg, pkg_t *old_pkg)
 
 	  /* old file is obsolete */
 	  opkg_msg(NOTICE, "Removing obsolete file %s.\n", old);
-	  if (!conf->noaction) {
+	  if (!opkg_config->noaction) {
 	       err = unlink(old);
 	       if (err) {
 		    opkg_perror(ERROR, "unlinking %s failed", old);
@@ -1106,7 +1106,7 @@ resolve_conffiles(pkg_t *pkg)
      char *cf_backup;
      char *md5sum;
 
-     if (conf->noaction) return 0;
+     if (opkg_config->noaction) return 0;
 
      for (iter = nv_pair_list_first(&pkg->conffiles); iter; iter = nv_pair_list_next(&pkg->conffiles, iter)) {
 	  char *root_filename;
@@ -1129,7 +1129,7 @@ resolve_conffiles(pkg_t *pkg)
               /* Let's compute md5 to test if files are changed */
               md5sum = file_md5sum_alloc(cf_backup);
               if (md5sum && cf->value && strcmp(cf->value,md5sum) != 0 ) {
-                  if (conf->force_maintainer) {
+                  if (opkg_config->force_maintainer) {
                       opkg_msg(NOTICE, "Conffile %s using maintainer's setting.\n",
 				      cf_backup);
                   } else {
@@ -1186,7 +1186,7 @@ opkg_install_by_name(const char *pkg_name)
 	  new_version = pkg_version_str_alloc(new);
 
 	  cmp = pkg_compare_versions(old, new);
-          if ( (conf->force_downgrade==1) && (cmp > 0) ){     /* We've been asked to allow downgrade  and version is precedent */
+          if ( (opkg_config->force_downgrade==1) && (cmp > 0) ){     /* We've been asked to allow downgrade  and version is precedent */
 	     opkg_msg(DEBUG, "Forcing downgrade\n");
              cmp = -1 ;                                       /* then we force opkg to downgrade */
                                                               /* We need to use a value < 0 because in the 0 case we are asking to */
@@ -1251,7 +1251,7 @@ opkg_install_pkg(pkg_t *pkg, int from_upgrade)
 		       pkg->architecture, pkg->name);
 	  return -1;
      }
-     if (pkg->state_status == SS_INSTALLED && conf->nodeps == 0) {
+     if (pkg->state_status == SS_INSTALLED && opkg_config->nodeps == 0) {
 	  err = satisfy_dependencies_for(pkg);
 	  if (err)
 		  return -1;
@@ -1262,7 +1262,7 @@ opkg_install_pkg(pkg_t *pkg, int from_upgrade)
      }
 
      if (pkg->dest == NULL) {
-	  pkg->dest = conf->default_dest;
+	  pkg->dest = opkg_config->default_dest;
      }
 
      old_pkg = pkg_hash_fetch_installed_by_name(pkg->name);
@@ -1292,14 +1292,14 @@ opkg_install_pkg(pkg_t *pkg, int from_upgrade)
 	     return -1;
 
      if (pkg->local_filename == NULL) {
-         if(!conf->cache && conf->download_only){
+         if(!opkg_config->cache && opkg_config->download_only){
              char cwd[4096];
              if(getcwd(cwd, sizeof(cwd)) != NULL)
                 err = opkg_download_pkg(pkg, cwd);
              else
                 return -1;
          } else {
-             err = opkg_download_pkg(pkg, conf->tmp_dir);
+             err = opkg_download_pkg(pkg, opkg_config->tmp_dir);
          }
 	  if (err) {
 	       opkg_msg(ERROR, "Failed to download %s. "
@@ -1314,12 +1314,12 @@ opkg_install_pkg(pkg_t *pkg, int from_upgrade)
      char *list_file_name, *sig_file_name, *lists_dir;
 
      /* check to ensure the package has come from a repository */
-     if (conf->check_signature && pkg->src)
+     if (opkg_config->check_signature && pkg->src)
      {
        sprintf_alloc (&lists_dir, "%s",
-                     (conf->restrict_to_default_dest)
-                      ? conf->default_dest->lists_dir
-                      : conf->lists_dir);
+                     (opkg_config->restrict_to_default_dest)
+                      ? opkg_config->default_dest->lists_dir
+                      : opkg_config->lists_dir);
        sprintf_alloc (&list_file_name, "%s/%s", lists_dir, pkg->src->name);
        sprintf_alloc (&sig_file_name, "%s/%s.sig", lists_dir, pkg->src->name);
 
@@ -1378,8 +1378,8 @@ opkg_install_pkg(pkg_t *pkg, int from_upgrade)
               free(file_sha256);
      }
 #endif
-     if(conf->download_only) {
-         if (conf->nodeps == 0) {
+     if(opkg_config->download_only) {
+         if (opkg_config->nodeps == 0) {
              err = satisfy_dependencies_for(pkg);
              if (err)
                  return -1;
@@ -1399,7 +1399,7 @@ opkg_install_pkg(pkg_t *pkg, int from_upgrade)
      if (err)
 	     return -1;
 
-     if (conf->nodeps == 0) {
+     if (opkg_config->nodeps == 0) {
 	  err = satisfy_dependencies_for(pkg);
 	  if (err)
 		return -1;
@@ -1454,7 +1454,7 @@ opkg_install_pkg(pkg_t *pkg, int from_upgrade)
 	  if (err)
 		  goto UNWIND_POSTRM_UPGRADE_OLD_PKG;
 
-	  if (conf->noaction)
+	  if (opkg_config->noaction)
 		  return 0;
 
 	  /* point of no return: no unwinding after this */

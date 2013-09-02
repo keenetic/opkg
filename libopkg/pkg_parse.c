@@ -95,7 +95,7 @@ get_arch_priority(const char *arch)
 {
 	nv_pair_list_elt_t *l;
 
-	list_for_each_entry(l , &conf->arch_list.head, node) {
+	list_for_each_entry(l , &opkg_config->arch_list.head, node) {
 		nv_pair_t *nv = (nv_pair_t *)l->data;
 		if (strcmp(nv->name, arch) == 0)
 			return strtol(nv->value, NULL, 0);
@@ -113,7 +113,7 @@ pkg_parse_line(void *ptr, const char *line, uint mask)
 	int ret = 0;
 
 	/* Exclude globally masked fields. */
-	mask |= conf->pfm;
+	mask |= opkg_config->pfm;
 
 	/* Flip the semantics of the mask. */
 	mask ^= PFM_ALL;

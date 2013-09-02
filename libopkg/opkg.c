@@ -114,13 +114,13 @@ curl_progress_cb(struct _curl_cb_data *cb_data, double t,	/* dltotal */
 }
 
 
-static struct opkg_conf saved_conf;
+static opkg_conf_t saved_conf;
 /*** Public API ***/
 
 int
 opkg_new()
 {
-	saved_conf = *conf;
+	saved_conf = *opkg_config;
 
 	if (opkg_conf_init())
 		goto err0;
@@ -156,7 +156,7 @@ int
 opkg_re_read_config_files(void)
 {
 	opkg_free();
-	*conf = saved_conf;
+	*opkg_config = saved_conf;
 	return opkg_new();
 }
 
@@ -328,7 +328,7 @@ opkg_install_package(const char *package_name,
 		if (!stripped_filename)
 			stripped_filename = pkg->filename;
 
-		sprintf_alloc(&pkg->local_filename, "%s/%s", conf->tmp_dir,
+		sprintf_alloc(&pkg->local_filename, "%s/%s", opkg_config->tmp_dir,
 			      stripped_filename);
 
 		cb_data.cb = progress_callback;
@@ -412,9 +412,9 @@ opkg_remove_package(const char *package_name,
 	pdata.pkg = pkg;
 	progress(pdata, 0);
 
-	if (conf->restrict_to_default_dest) {
+	if (opkg_config->restrict_to_default_dest) {
 		pkg_to_remove = pkg_hash_fetch_installed_by_name_dest(pkg->name,
-						      conf->default_dest);
+						      opkg_config->default_dest);
 	} else {
 		pkg_to_remove = pkg_hash_fetch_installed_by_name(pkg->name);
 	}
@@ -446,9 +446,9 @@ opkg_upgrade_package(const char *package_name,
 
 	pkg_info_preinstall_check();
 
-	if (conf->restrict_to_default_dest) {
+	if (opkg_config->restrict_to_default_dest) {
 		pkg = pkg_hash_fetch_installed_by_name_dest(package_name,
-							    conf->default_dest);
+							    opkg_config->default_dest);
 	} else {
 		pkg = pkg_hash_fetch_installed_by_name(package_name);
 	}
@@ -541,8 +541,8 @@ opkg_update_package_lists(opkg_progress_callback_t progress_callback,
 	pdata.pkg = NULL;
 	progress(pdata, 0);
 
-	sprintf_alloc(&lists_dir, "%s", (conf->restrict_to_default_dest)
-		? conf->default_dest->lists_dir : conf->lists_dir);
+	sprintf_alloc(&lists_dir, "%s", (opkg_config->restrict_to_default_dest)
+		? opkg_config->default_dest->lists_dir : opkg_config->lists_dir);
 
 	if (!file_is_dir(lists_dir)) {
 		if (file_exists(lists_dir)) {
@@ -560,7 +560,7 @@ opkg_update_package_lists(opkg_progress_callback_t progress_callback,
 		}
 	}
 
-	sprintf_alloc(&tmp, "%s/update-XXXXXX", conf->tmp_dir);
+	sprintf_alloc(&tmp, "%s/update-XXXXXX", opkg_config->tmp_dir);
 	if (mkdtemp(tmp) == NULL) {
 		opkg_perror(ERROR, "Coundn't create temporary directory %s",
 				tmp);
@@ -572,11 +572,11 @@ opkg_update_package_lists(opkg_progress_callback_t progress_callback,
 	/* count the number of sources so we can give some progress updates */
 	sources_list_count = 0;
 	sources_done = 0;
-	list_for_each_entry(iter, &conf->pkg_src_list.head, node) {
+	list_for_each_entry(iter, &opkg_config->pkg_src_list.head, node) {
 		sources_list_count++;
 	}
 
-	list_for_each_entry(iter, &conf->pkg_src_list.head, node) {
+	list_for_each_entry(iter, &opkg_config->pkg_src_list.head, node) {
 		char *url, *list_file_name = NULL;
 
 		src = (pkg_src_t *) iter->data;
@@ -639,7 +639,7 @@ opkg_update_package_lists(opkg_progress_callback_t progress_callback,
 		free(url);
 
 #if defined(HAVE_GPGME) || defined(HAVE_OPENSSL)
-		if (conf->check_signature) {
+		if (opkg_config->check_signature) {
 			char *sig_file_name;
 			/* download detached signitures to verify the package lists */
 			/* get the url for the sig file */
@@ -833,7 +833,7 @@ opkg_repository_accessibility_check(void)
 
 	src = str_list_alloc();
 
-	list_for_each_entry(iter, &conf->pkg_src_list.head, node) {
+	list_for_each_entry(iter, &opkg_config->pkg_src_list.head, node) {
 		host = strstr(((pkg_src_t *)iter->data)->value, "://") + 3;
 		end = index(host, '/');
 		if (strstr(((pkg_src_t *) iter->data)->value, "://") && end)

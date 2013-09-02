@@ -33,7 +33,7 @@
 void
 pkg_hash_init(void)
 {
-	hash_table_init("pkg-hash", &conf->pkg_hash,
+	hash_table_init("pkg-hash", &opkg_config->pkg_hash,
 			OPKG_CONF_DEFAULT_HASH_LEN);
 }
 
@@ -67,8 +67,8 @@ free_pkgs(const char *key, void *entry, void *data)
 void
 pkg_hash_deinit(void)
 {
-	hash_table_foreach(&conf->pkg_hash, free_pkgs, NULL);
-	hash_table_deinit(&conf->pkg_hash);
+	hash_table_foreach(&opkg_config->pkg_hash, free_pkgs, NULL);
+	hash_table_deinit(&opkg_config->pkg_hash);
 }
 
 int
@@ -77,7 +77,7 @@ dist_hash_add_from_file(const char *lists_dir, pkg_src_t *dist)
 	nv_pair_list_elt_t *l;
 	char *list_file, *subname;
 
-	list_for_each_entry(l , &conf->arch_list.head, node) {
+	list_for_each_entry(l , &opkg_config->arch_list.head, node) {
 		nv_pair_t *nv = (nv_pair_t *)l->data;
 		sprintf_alloc(&subname, "%s-%s", dist->name, nv->name);
 		sprintf_alloc(&list_file, "%s/%s", lists_dir, subname);
@@ -87,7 +87,7 @@ dist_hash_add_from_file(const char *lists_dir, pkg_src_t *dist)
 				free(list_file);
 				return -1;
 			}
-			pkg_src_list_append (&conf->pkg_src_list, subname, dist->value, "__dummy__", 0);
+			pkg_src_list_append (&opkg_config->pkg_src_list, subname, dist->value, "__dummy__", 0);
 		}
 
 		free(list_file);
@@ -168,11 +168,11 @@ pkg_hash_load_feeds(void)
 
 	opkg_msg(INFO, "\n");
 
-	lists_dir = conf->restrict_to_default_dest ?
-		conf->default_dest->lists_dir : conf->lists_dir;
+	lists_dir = opkg_config->restrict_to_default_dest ?
+		opkg_config->default_dest->lists_dir : opkg_config->lists_dir;
 
-	for (iter = void_list_first(&conf->dist_src_list); iter;
-			iter = void_list_next(&conf->dist_src_list, iter)) {
+	for (iter = void_list_first(&opkg_config->dist_src_list); iter;
+			iter = void_list_next(&opkg_config->dist_src_list, iter)) {
 
 		src = (pkg_src_t *)iter->data;
 
@@ -205,8 +205,8 @@ pkg_hash_load_feeds(void)
 		free(list_file);
 	}
 
-	for (iter = void_list_first(&conf->pkg_src_list); iter;
-			iter = void_list_next(&conf->pkg_src_list, iter)) {
+	for (iter = void_list_first(&opkg_config->pkg_src_list); iter;
+			iter = void_list_next(&opkg_config->pkg_src_list, iter)) {
 
 		src = (pkg_src_t *)iter->data;
 
@@ -235,8 +235,8 @@ pkg_hash_load_status_files(void)
 
 	opkg_msg(INFO, "\n");
 
-	for (iter = void_list_first(&conf->pkg_dest_list); iter;
-			iter = void_list_next(&conf->pkg_dest_list, iter)) {
+	for (iter = void_list_first(&opkg_config->pkg_dest_list); iter;
+			iter = void_list_next(&opkg_config->pkg_dest_list, iter)) {
 
 		dest = (pkg_dest_t *)iter->data;
 
@@ -252,7 +252,7 @@ pkg_hash_load_status_files(void)
 static abstract_pkg_t *
 abstract_pkg_fetch_by_name(const char * pkg_name)
 {
-	return (abstract_pkg_t *)hash_table_get(&conf->pkg_hash, pkg_name);
+	return (abstract_pkg_t *)hash_table_get(&opkg_config->pkg_hash, pkg_name);
 }
 
 pkg_t *
@@ -382,7 +382,7 @@ pkg_hash_fetch_best_installation_candidate(abstract_pkg_t *apkg,
                  break;
              }
              /* Respect to the arch priorities when given alternatives */
-             if (good_pkg_by_name && conf->prefer_arch_to_version) {
+             if (good_pkg_by_name && opkg_config->prefer_arch_to_version) {
                  if (matching->arch_priority >= good_pkg_by_name->arch_priority) {
                      good_pkg_by_name = matching;
                      opkg_msg(DEBUG, "%s %s wins by priority.\n",
@@ -425,7 +425,7 @@ pkg_hash_fetch_best_installation_candidate(abstract_pkg_t *apkg,
 
           }
 
-     if (conf->verbosity >= INFO && matching_apkgs->len > 1) {
+     if (opkg_config->verbosity >= INFO && matching_apkgs->len > 1) {
 	  opkg_msg(INFO, "%d matching pkgs for apkg=%s:\n",
 				matching_pkgs->len, apkg->name);
 	  for (i = 0; i < matching_pkgs->len; i++) {
@@ -607,7 +607,7 @@ pkg_hash_fetch_available_helper(const char *pkg_name, void *entry, void *data)
 void
 pkg_hash_fetch_available(pkg_vec_t *all)
 {
-	hash_table_foreach(&conf->pkg_hash, pkg_hash_fetch_available_helper,
+	hash_table_foreach(&opkg_config->pkg_hash, pkg_hash_fetch_available_helper,
 			all);
 }
 
@@ -633,7 +633,7 @@ pkg_hash_fetch_all_installed_helper(const char *pkg_name, void *entry, void *dat
 void
 pkg_hash_fetch_all_installed(pkg_vec_t *all)
 {
-	hash_table_foreach(&conf->pkg_hash, pkg_hash_fetch_all_installed_helper,
+	hash_table_foreach(&opkg_config->pkg_hash, pkg_hash_fetch_all_installed_helper,
 			all);
 }
 
@@ -648,7 +648,7 @@ add_new_abstract_pkg_by_name(const char *pkg_name)
 	ab_pkg = abstract_pkg_new();
 
 	ab_pkg->name = xstrdup(pkg_name);
-	hash_table_insert(&conf->pkg_hash, pkg_name, ab_pkg);
+	hash_table_insert(&opkg_config->pkg_hash, pkg_name, ab_pkg);
 
 	return ab_pkg;
 }
@@ -702,9 +702,9 @@ strip_offline_root(const char *file_name)
 {
 	unsigned int len;
 
-	if (conf->offline_root) {
-		len = strlen(conf->offline_root);
-		if (strncmp(file_name, conf->offline_root, len) == 0)
+	if (opkg_config->offline_root) {
+		len = strlen(opkg_config->offline_root);
+		if (strncmp(file_name, opkg_config->offline_root, len) == 0)
 			file_name += len;
 	}
 
@@ -715,14 +715,14 @@ void
 file_hash_remove(const char *file_name)
 {
 	file_name = strip_offline_root(file_name);
-	hash_table_remove(&conf->file_hash, file_name);
+	hash_table_remove(&opkg_config->file_hash, file_name);
 }
 
 pkg_t *
 file_hash_get_file_owner(const char *file_name)
 {
 	file_name = strip_offline_root(file_name);
-	return hash_table_get(&conf->file_hash, file_name);
+	return hash_table_get(&opkg_config->file_hash, file_name);
 }
 
 void
@@ -732,8 +732,8 @@ file_hash_set_file_owner(const char *file_name, pkg_t *owning_pkg)
 
 	file_name = strip_offline_root(file_name);
 
-	old_owning_pkg = hash_table_get(&conf->file_hash, file_name);
-	hash_table_insert(&conf->file_hash, file_name, owning_pkg);
+	old_owning_pkg = hash_table_get(&opkg_config->file_hash, file_name);
+	hash_table_insert(&opkg_config->file_hash, file_name, owning_pkg);
 
 	if (old_owning_pkg) {
 		pkg_get_installed_files(old_owning_pkg);

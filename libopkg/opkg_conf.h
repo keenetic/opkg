@@ -18,8 +18,6 @@
 #ifndef OPKG_CONF_H
 #define OPKG_CONF_H
 
-typedef struct opkg_conf opkg_conf_t;
-extern opkg_conf_t *conf;
 
 #include "config.h"
 
@@ -42,8 +40,7 @@ extern opkg_conf_t *conf;
 
 #define OPKG_CONF_DEFAULT_HASH_LEN 1024
 
-struct opkg_conf
-{
+typedef struct opkg_conf {
      pkg_src_list_t pkg_src_list;
      pkg_src_list_t dist_src_list;
      pkg_dest_list_t pkg_dest_list;
@@ -120,7 +117,7 @@ struct opkg_conf
      hash_table_t pkg_hash;
      hash_table_t file_hash;
      hash_table_t obs_file_hash;
-};
+} opkg_conf_t;
 
 enum opkg_option_type {
      OPKG_OPT_TYPE_BOOL,
@@ -135,6 +132,9 @@ struct opkg_option {
      const opkg_option_type_t type;
      void * const value;
 };
+
+extern opkg_conf_t *opkg_config;
+
 
 int opkg_conf_init(void);
 int opkg_conf_load(void);

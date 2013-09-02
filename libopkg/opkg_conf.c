@@ -39,7 +39,7 @@ static int lock_fd;
 static char *lock_file = NULL;
 
 static opkg_conf_t _conf;
-opkg_conf_t *conf = &_conf;
+opkg_conf_t *opkg_config = &_conf;
 
 /*
  * Config file options
@@ -98,30 +98,30 @@ resolve_pkg_dest_list(void)
      pkg_dest_t *dest;
      char *root_dir;
 
-     for (iter = nv_pair_list_first(&conf->tmp_dest_list); iter;
-		     iter = nv_pair_list_next(&conf->tmp_dest_list, iter)) {
+     for (iter = nv_pair_list_first(&opkg_config->tmp_dest_list); iter;
+		     iter = nv_pair_list_next(&opkg_config->tmp_dest_list, iter)) {
 	  nv_pair = (nv_pair_t *)iter->data;
 
-	  if (conf->offline_root) {
-	       sprintf_alloc(&root_dir, "%s%s", conf->offline_root, nv_pair->value);
+	  if (opkg_config->offline_root) {
+	       sprintf_alloc(&root_dir, "%s%s", opkg_config->offline_root, nv_pair->value);
 	  } else {
 	       root_dir = xstrdup(nv_pair->value);
 	  }
 
-	  dest = pkg_dest_list_append(&conf->pkg_dest_list, nv_pair->name, root_dir, conf->lists_dir);
+	  dest = pkg_dest_list_append(&opkg_config->pkg_dest_list, nv_pair->name, root_dir, opkg_config->lists_dir);
 	  free(root_dir);
 
-	  if (conf->default_dest == NULL)
-	       conf->default_dest = dest;
+	  if (opkg_config->default_dest == NULL)
+	       opkg_config->default_dest = dest;
 
-	  if (conf->dest_str && !strcmp(dest->name, conf->dest_str)) {
-	       conf->default_dest = dest;
-	       conf->restrict_to_default_dest = 1;
+	  if (opkg_config->dest_str && !strcmp(dest->name, opkg_config->dest_str)) {
+	       opkg_config->default_dest = dest;
+	       opkg_config->restrict_to_default_dest = 1;
 	  }
      }
 
-     if (conf->dest_str && !conf->restrict_to_default_dest) {
-	  opkg_msg(ERROR, "Unknown dest name: `%s'.\n", conf->dest_str);
+     if (opkg_config->dest_str && !opkg_config->restrict_to_default_dest) {
+	  opkg_msg(ERROR, "Unknown dest name: `%s'.\n", opkg_config->dest_str);
 	  return -1;
      }
 
@@ -278,8 +278,8 @@ opkg_conf_parse_file(const char *filename,
 		       filename, line_num, line);
 	  } else {
 
-	  /* We use the conf->tmp_dest_list below instead of
-	     conf->pkg_dest_list because we might encounter an
+	  /* We use the opkg_conf->tmp_dest_list below instead of
+	     opkg_conf->pkg_dest_list because we might encounter an
 	     offline_root option later and that would invalidate the
 	     directories we would have computed in
 	     pkg_dest_list_init. (We do a similar thing with
@@ -315,9 +315,9 @@ opkg_conf_parse_file(const char *filename,
 				   "Skipping.\n", name, value);
 	       }
 	  } else if (strcmp(type, "dest") == 0) {
-	       nv_pair_list_append(&conf->tmp_dest_list, name, value);
+	       nv_pair_list_append(&opkg_config->tmp_dest_list, name, value);
 	  } else if (strcmp(type, "lists_dir") == 0) {
-	       conf->lists_dir = xstrdup(value);
+	       opkg_config->lists_dir = xstrdup(value);
 	  } else if (strcmp(type, "arch") == 0) {
 	       opkg_msg(INFO, "Supported arch %s priority (%s)\n", name, value);
 	       if (!value) {
@@ -325,7 +325,7 @@ opkg_conf_parse_file(const char *filename,
 				   "defaulting to 10\n", name);
 		    value = xstrdup("10");
 	       }
-	       nv_pair_list_append(&conf->arch_list, name, value);
+	       nv_pair_list_append(&opkg_config->arch_list, name, value);
 	  } else {
 	       opkg_msg(ERROR, "%s:%d: Ignoring invalid line: `%s'\n",
 		       filename, line_num, line);
@@ -364,10 +364,10 @@ opkg_conf_write_status_files(void)
      pkg_t *pkg;
      int i, ret = 0;
 
-     if (conf->noaction)
+     if (opkg_config->noaction)
 	  return 0;
 
-     list_for_each_entry(iter, &conf->pkg_dest_list.head, node) {
+     list_for_each_entry(iter, &opkg_config->pkg_dest_list.head, node) {
           dest = (pkg_dest_t *)iter->data;
 
           dest->status_fp = fopen(dest->status_file_name, "w");
@@ -402,7 +402,7 @@ opkg_conf_write_status_files(void)
 
      pkg_vec_free(all);
 
-     list_for_each_entry(iter, &conf->pkg_dest_list.head, node) {
+     list_for_each_entry(iter, &opkg_config->pkg_dest_list.head, node) {
           dest = (pkg_dest_t *)iter->data;
           if (dest->status_fp && fclose(dest->status_fp) == EOF) {
                opkg_perror(ERROR, "Couldn't close %s", dest->status_file_name);
@@ -419,7 +419,7 @@ root_filename_alloc(char *filename)
 {
 	char *root_filename;
 	sprintf_alloc(&root_filename, "%s%s",
-		(conf->offline_root ? conf->offline_root : ""), filename);
+		(opkg_config->offline_root ? opkg_config->offline_root : ""), filename);
 	return root_filename;
 }
 
@@ -437,11 +437,11 @@ glob_errfunc(const char *epath, int eerrno)
 int
 opkg_conf_init(void)
 {
-	pkg_src_list_init(&conf->pkg_src_list);
-	pkg_src_list_init(&conf->dist_src_list);
-	pkg_dest_list_init(&conf->pkg_dest_list);
-	pkg_dest_list_init(&conf->tmp_dest_list);
-	nv_pair_list_init(&conf->arch_list);
+	pkg_src_list_init(&opkg_config->pkg_src_list);
+	pkg_src_list_init(&opkg_config->dist_src_list);
+	pkg_dest_list_init(&opkg_config->pkg_dest_list);
+	pkg_dest_list_init(&opkg_config->tmp_dest_list);
+	nv_pair_list_init(&opkg_config->arch_list);
 
 	return 0;
 }
@@ -454,28 +454,28 @@ opkg_conf_load(void)
 	glob_t globbuf;
 	char *etc_opkg_conf_pattern;
 
-	conf->restrict_to_default_dest = 0;
-	conf->default_dest = NULL;
+	opkg_config->restrict_to_default_dest = 0;
+	opkg_config->default_dest = NULL;
 #if defined(HAVE_PATHFINDER)
-	conf->check_x509_path = 1;
+	opkg_conf->check_x509_path = 1;
 #endif
 
-	if (!conf->offline_root)
-		conf->offline_root = xstrdup(getenv("OFFLINE_ROOT"));
+	if (!opkg_config->offline_root)
+		opkg_config->offline_root = xstrdup(getenv("OFFLINE_ROOT"));
 
-	if (conf->conf_file) {
+	if (opkg_config->conf_file) {
 		struct stat st;
-		if (stat(conf->conf_file, &st) == -1) {
-			opkg_perror(ERROR, "Couldn't stat %s", conf->conf_file);
+		if (stat(opkg_config->conf_file, &st) == -1) {
+			opkg_perror(ERROR, "Couldn't stat %s", opkg_config->conf_file);
 			goto err0;
 		}
-		if (opkg_conf_parse_file(conf->conf_file,
-				&conf->pkg_src_list, &conf->dist_src_list))
+		if (opkg_conf_parse_file(opkg_config->conf_file,
+				&opkg_config->pkg_src_list, &opkg_config->dist_src_list))
 			goto err1;
 	}
 	else {
-		if (conf->offline_root)
-			sprintf_alloc(&etc_opkg_conf_pattern, "%s/etc/opkg/*.conf", conf->offline_root);
+		if (opkg_config->offline_root)
+			sprintf_alloc(&etc_opkg_conf_pattern, "%s/etc/opkg/*.conf", opkg_config->offline_root);
 		else {
 			const char *conf_file_dir = getenv("OPKG_CONF_DIR");
 			if (conf_file_dir == NULL)
@@ -495,11 +495,11 @@ opkg_conf_load(void)
 
 		for (i = 0; i < globbuf.gl_pathc; i++) {
 			if (globbuf.gl_pathv[i])
-				if (conf->conf_file &&
-						!strcmp(conf->conf_file, globbuf.gl_pathv[i]))
+				if (opkg_config->conf_file &&
+						!strcmp(opkg_config->conf_file, globbuf.gl_pathv[i]))
 					continue;
 			if ( opkg_conf_parse_file(globbuf.gl_pathv[i],
-				&conf->pkg_src_list, &conf->dist_src_list)<0) {
+				&opkg_config->pkg_src_list, &opkg_config->dist_src_list)<0) {
 				globfree(&globbuf);
 				goto err1;
 			}
@@ -508,8 +508,8 @@ opkg_conf_load(void)
 		globfree(&globbuf);
 	}
 
-	if (conf->offline_root)
-		sprintf_alloc (&lock_file, "%s/%s", conf->offline_root, OPKGLOCKFILE);
+	if (opkg_config->offline_root)
+		sprintf_alloc (&lock_file, "%s/%s", opkg_config->offline_root, OPKGLOCKFILE);
 	else
 		sprintf_alloc (&lock_file, "%s", OPKGLOCKFILE);
 
@@ -528,45 +528,45 @@ opkg_conf_load(void)
 		goto err2;
 	}
 
-	if (conf->tmp_dir)
-		tmp_dir_base = conf->tmp_dir;
+	if (opkg_config->tmp_dir)
+		tmp_dir_base = opkg_config->tmp_dir;
 	else
 		tmp_dir_base = getenv("TMPDIR");
 
 	sprintf_alloc(&tmp, "%s/%s",
 		tmp_dir_base ? tmp_dir_base : OPKG_CONF_DEFAULT_TMP_DIR_BASE,
 		OPKG_CONF_TMP_DIR_SUFFIX);
-	if (conf->tmp_dir)
-		free(conf->tmp_dir);
-	conf->tmp_dir = mkdtemp(tmp);
-	if (conf->tmp_dir == NULL) {
+	if (opkg_config->tmp_dir)
+		free(opkg_config->tmp_dir);
+	opkg_config->tmp_dir = mkdtemp(tmp);
+	if (opkg_config->tmp_dir == NULL) {
 		opkg_perror(ERROR, "Creating temp dir %s failed", tmp);
 		goto err3;
 	}
 
 	pkg_hash_init();
-	hash_table_init("file-hash", &conf->file_hash, OPKG_CONF_DEFAULT_HASH_LEN);
-	hash_table_init("obs-file-hash", &conf->obs_file_hash, OPKG_CONF_DEFAULT_HASH_LEN/16);
+	hash_table_init("file-hash", &opkg_config->file_hash, OPKG_CONF_DEFAULT_HASH_LEN);
+	hash_table_init("obs-file-hash", &opkg_config->obs_file_hash, OPKG_CONF_DEFAULT_HASH_LEN/16);
 
-	if (conf->lists_dir == NULL)
-		conf->lists_dir = xstrdup(OPKG_CONF_LISTS_DIR);
+	if (opkg_config->lists_dir == NULL)
+		opkg_config->lists_dir = xstrdup(OPKG_CONF_LISTS_DIR);
 
-	if (conf->offline_root) {
-		sprintf_alloc(&tmp, "%s/%s", conf->offline_root, conf->lists_dir);
-		free(conf->lists_dir);
-		conf->lists_dir = tmp;
+	if (opkg_config->offline_root) {
+		sprintf_alloc(&tmp, "%s/%s", opkg_config->offline_root, opkg_config->lists_dir);
+		free(opkg_config->lists_dir);
+		opkg_config->lists_dir = tmp;
 	}
 
 	/* if no architectures were defined, then default all, noarch, and host architecture */
-	if (nv_pair_list_empty(&conf->arch_list)) {
-		nv_pair_list_append(&conf->arch_list, "all", "1");
-		nv_pair_list_append(&conf->arch_list, "noarch", "1");
-		nv_pair_list_append(&conf->arch_list, HOST_CPU_STR, "10");
+	if (nv_pair_list_empty(&opkg_config->arch_list)) {
+		nv_pair_list_append(&opkg_config->arch_list, "all", "1");
+		nv_pair_list_append(&opkg_config->arch_list, "noarch", "1");
+		nv_pair_list_append(&opkg_config->arch_list, HOST_CPU_STR, "10");
 	}
 
 	/* Even if there is no conf file, we'll need at least one dest. */
-	if (nv_pair_list_empty(&conf->tmp_dest_list)) {
-		nv_pair_list_append(&conf->tmp_dest_list,
+	if (nv_pair_list_empty(&opkg_config->tmp_dest_list)) {
+		nv_pair_list_append(&opkg_config->tmp_dest_list,
 			OPKG_CONF_DEFAULT_DEST_NAME,
 			OPKG_CONF_DEFAULT_DEST_ROOT_DIR);
 	}
@@ -574,20 +574,20 @@ opkg_conf_load(void)
 	if (resolve_pkg_dest_list())
 		goto err4;
 
-	nv_pair_list_deinit(&conf->tmp_dest_list);
+	nv_pair_list_deinit(&opkg_config->tmp_dest_list);
 
 	return 0;
 
 
 err4:
-	free(conf->lists_dir);
+	free(opkg_config->lists_dir);
 
 	pkg_hash_deinit();
-	hash_table_deinit(&conf->file_hash);
-	hash_table_deinit(&conf->obs_file_hash);
+	hash_table_deinit(&opkg_config->file_hash);
+	hash_table_deinit(&opkg_config->obs_file_hash);
 
-	if (rmdir(conf->tmp_dir) == -1)
-		opkg_perror(ERROR, "Couldn't remove dir %s", conf->tmp_dir);
+	if (rmdir(opkg_config->tmp_dir) == -1)
+		opkg_perror(ERROR, "Couldn't remove dir %s", opkg_config->tmp_dir);
 err3:
 	if (lockf(lock_fd, F_ULOCK, (off_t)0) == -1)
 		opkg_perror(ERROR, "Couldn't unlock %s", lock_file);
@@ -603,10 +603,10 @@ err2:
 		lock_file = NULL;
 	}
 err1:
-	pkg_src_list_deinit(&conf->pkg_src_list);
-	pkg_src_list_deinit(&conf->dist_src_list);
-	pkg_dest_list_deinit(&conf->pkg_dest_list);
-	nv_pair_list_deinit(&conf->arch_list);
+	pkg_src_list_deinit(&opkg_config->pkg_src_list);
+	pkg_src_list_deinit(&opkg_config->dist_src_list);
+	pkg_dest_list_deinit(&opkg_config->pkg_dest_list);
+	nv_pair_list_deinit(&opkg_config->arch_list);
 
 	for (i=0; options[i].name; i++) {
 		if (options[i].type == OPKG_OPT_TYPE_STRING) {
@@ -618,11 +618,11 @@ err1:
 		}
 	}
 err0:
-	nv_pair_list_deinit(&conf->tmp_dest_list);
-	if (conf->dest_str)
-		free(conf->dest_str);
-	if (conf->conf_file)
-		free(conf->conf_file);
+	nv_pair_list_deinit(&opkg_config->tmp_dest_list);
+	if (opkg_config->dest_str)
+		free(opkg_config->dest_str);
+	if (opkg_config->conf_file)
+		free(opkg_config->conf_file);
 
 	return -1;
 }
@@ -633,22 +633,22 @@ opkg_conf_deinit(void)
 	int i;
 	char **tmp;
 
-	if (conf->tmp_dir)
-		rm_r(conf->tmp_dir);
+	if (opkg_config->tmp_dir)
+		rm_r(opkg_config->tmp_dir);
 
-	if (conf->lists_dir)
-		free(conf->lists_dir);
+	if (opkg_config->lists_dir)
+		free(opkg_config->lists_dir);
 
-	if (conf->dest_str)
-		free(conf->dest_str);
+	if (opkg_config->dest_str)
+		free(opkg_config->dest_str);
 
-	if (conf->conf_file)
-		free(conf->conf_file);
+	if (opkg_config->conf_file)
+		free(opkg_config->conf_file);
 
-	pkg_src_list_deinit(&conf->pkg_src_list);
-	pkg_src_list_deinit(&conf->dist_src_list);
-	pkg_dest_list_deinit(&conf->pkg_dest_list);
-	nv_pair_list_deinit(&conf->arch_list);
+	pkg_src_list_deinit(&opkg_config->pkg_src_list);
+	pkg_src_list_deinit(&opkg_config->dist_src_list);
+	pkg_dest_list_deinit(&opkg_config->pkg_dest_list);
+	nv_pair_list_deinit(&opkg_config->arch_list);
 
 	for (i=0; options[i].name; i++) {
 		if (options[i].type == OPKG_OPT_TYPE_STRING) {
@@ -660,15 +660,15 @@ opkg_conf_deinit(void)
 		}
 	}
 
-	if (conf->verbosity >= DEBUG) {
-		hash_print_stats(&conf->pkg_hash);
-		hash_print_stats(&conf->file_hash);
-		hash_print_stats(&conf->obs_file_hash);
+	if (opkg_config->verbosity >= DEBUG) {
+		hash_print_stats(&opkg_config->pkg_hash);
+		hash_print_stats(&opkg_config->file_hash);
+		hash_print_stats(&opkg_config->obs_file_hash);
 	}
 
 	pkg_hash_deinit();
-	hash_table_deinit(&conf->file_hash);
-	hash_table_deinit(&conf->obs_file_hash);
+	hash_table_deinit(&opkg_config->file_hash);
+	hash_table_deinit(&opkg_config->obs_file_hash);
 
 	if (lock_fd != -1) {
 		if (lockf(lock_fd, F_ULOCK, (off_t)0) == -1)

@@ -60,11 +60,11 @@ int opkg_state_changed;
 static void
 write_status_files_if_changed(void)
 {
-     if (opkg_state_changed && !conf->noaction) {
+     if (opkg_state_changed && !opkg_config->noaction) {
 	  opkg_msg(INFO, "Writing status file.\n");
 	  opkg_conf_write_status_files();
 	  pkg_write_changed_filelists();
-	  if (!conf->offline_root)
+	  if (!opkg_config->offline_root)
 	      sync();
      } else {
 	  opkg_msg(DEBUG, "Nothing to be done.\n");
@@ -91,7 +91,7 @@ opkg_update_cmd(int argc, char **argv)
      pkg_src_t *src;
 
 
-    sprintf_alloc(&lists_dir, "%s", conf->restrict_to_default_dest ? conf->default_dest->lists_dir : conf->lists_dir);
+    sprintf_alloc(&lists_dir, "%s", opkg_config->restrict_to_default_dest ? opkg_config->default_dest->lists_dir : opkg_config->lists_dir);
 
     if (! file_is_dir(lists_dir)) {
 	  if (file_exists(lists_dir)) {
@@ -109,14 +109,14 @@ opkg_update_cmd(int argc, char **argv)
 
      failures = 0;
 
-     sprintf_alloc(&tmp, "%s/update-XXXXXX", conf->tmp_dir);
+     sprintf_alloc(&tmp, "%s/update-XXXXXX", opkg_config->tmp_dir);
      if (mkdtemp (tmp) == NULL) {
-	 opkg_perror(ERROR, "Failed to make temp dir %s", conf->tmp_dir);
+	 opkg_perror(ERROR, "Failed to make temp dir %s", opkg_config->tmp_dir);
 	 return -1;
      }
 
 
-     for (iter = void_list_first(&conf->dist_src_list); iter; iter = void_list_next(&conf->dist_src_list, iter)) {
+     for (iter = void_list_first(&opkg_config->dist_src_list); iter; iter = void_list_next(&opkg_config->dist_src_list, iter)) {
 	  char *url, *list_file_name;
 
 	  src = (pkg_src_t *)iter->data;
@@ -149,7 +149,7 @@ opkg_update_cmd(int argc, char **argv)
 	  free(url);
      }
 
-     for (iter = void_list_first(&conf->pkg_src_list); iter; iter = void_list_next(&conf->pkg_src_list, iter)) {
+     for (iter = void_list_first(&opkg_config->pkg_src_list); iter; iter = void_list_next(&opkg_config->pkg_src_list, iter)) {
 	  char *url, *list_file_name;
 
 	  src = (pkg_src_t *)iter->data;
@@ -195,7 +195,7 @@ opkg_update_cmd(int argc, char **argv)
 	  }
 	  free(url);
 #if defined(HAVE_GPGME) || defined(HAVE_OPENSSL)
-          if (conf->check_signature) {
+          if (opkg_config->check_signature) {
               /* download detached signitures to verify the package lists */
               /* get the url for the sig file */
               if (src->extra_data)	/* debian style? */
@@ -262,7 +262,7 @@ opkg_prep_intercepts(void)
     ctx = xcalloc(1, sizeof (*ctx));
     ctx->oldpath = xstrdup(getenv("PATH"));
     sprintf_alloc(&newpath, "%s/opkg/intercept:%s", DATADIR, ctx->oldpath);
-    sprintf_alloc(&ctx->statedir, "%s/opkg-intercept-XXXXXX", conf->tmp_dir);
+    sprintf_alloc(&ctx->statedir, "%s/opkg-intercept-XXXXXX", opkg_config->tmp_dir);
 
     if (mkdtemp(ctx->statedir) == NULL) {
         opkg_perror(ERROR,"Failed to make temp dir %s", ctx->statedir);
@@ -413,7 +413,7 @@ opkg_configure_packages(char *pkg_name)
      opkg_intercept_t ic;
      int r, err = 0;
 
-     if (conf->offline_root && !conf->force_postinstall) {
+     if (opkg_config->offline_root && !opkg_config->force_postinstall) {
          opkg_msg(INFO, "Offline root mode: not configuring unpacked packages.\n");
          return 0;
      }
@@ -454,7 +454,7 @@ opkg_configure_packages(char *pkg_name)
 		    pkg->state_flag &= ~SF_PREFER;
 		    opkg_state_changed++;
 	       } else {
-                    if (!conf->offline_root)
+                    if (!opkg_config->offline_root)
 		         err = -1;
 	       }
 	  }
@@ -481,12 +481,12 @@ opkg_install_cmd(int argc, char **argv)
      char *arg;
      int err = 0;
 
-     if (conf->force_reinstall) {
-	     int saved_force_depends = conf->force_depends;
-	     conf->force_depends = 1;
+     if (opkg_config->force_reinstall) {
+	     int saved_force_depends = opkg_config->force_depends;
+	     opkg_config->force_depends = 1;
 	     (void)opkg_remove_cmd(argc, argv);
-	     conf->force_depends = saved_force_depends;
-	     conf->force_reinstall = 0;
+	     opkg_config->force_depends = saved_force_depends;
+	     opkg_config->force_reinstall = 0;
      }
 
      signal(SIGINT, sigint_handler);
@@ -539,12 +539,12 @@ opkg_upgrade_cmd(int argc, char **argv)
 
 	  for (i=0; i < argc; i++) {
 	       char *arg = argv[i];
-	       if (conf->restrict_to_default_dest) {
+	       if (opkg_config->restrict_to_default_dest) {
 		    pkg = pkg_hash_fetch_installed_by_name_dest(argv[i],
-							conf->default_dest);
+							opkg_config->default_dest);
 		    if (pkg == NULL) {
 			 opkg_msg(NOTICE, "Package %s not installed in %s.\n",
-				      argv[i], conf->default_dest->name);
+				      argv[i], opkg_config->default_dest->name);
 			 continue;
 		    }
 	       } else {
@@ -747,7 +747,7 @@ opkg_info_status_cmd(int argc, char **argv, int installed_only)
 
 	  pkg_formatted_info(stdout, pkg);
 
-	  if (conf->verbosity >= NOTICE) {
+	  if (opkg_config->verbosity >= NOTICE) {
 	       conffile_list_elt_t *iter;
 	       for (iter = nv_pair_list_first(&pkg->conffiles); iter; iter = nv_pair_list_next(&pkg->conffiles, iter)) {
 		    conffile_t *cf = (conffile_t *)iter->data;
@@ -814,10 +814,10 @@ opkg_remove_cmd(int argc, char **argv)
 	    if (fnmatch(argv[i], pkg->name, 0)) {
                continue;
             }
-            if (conf->restrict_to_default_dest) {
+            if (opkg_config->restrict_to_default_dest) {
 	         pkg_to_remove = pkg_hash_fetch_installed_by_name_dest(
 				        pkg->name,
-				        conf->default_dest);
+				        opkg_config->default_dest);
             } else {
 	         pkg_to_remove = pkg_hash_fetch_installed_by_name(pkg->name);
             }
@@ -857,9 +857,9 @@ opkg_flag_cmd(int argc, char **argv)
      signal(SIGINT, sigint_handler);
 
      for (i=1; i < argc; i++) {
-	  if (conf->restrict_to_default_dest) {
+	  if (opkg_config->restrict_to_default_dest) {
 	       pkg = pkg_hash_fetch_installed_by_name_dest(argv[i],
-							   conf->default_dest);
+							   opkg_config->default_dest);
 	  } else {
 	       pkg = pkg_hash_fetch_installed_by_name(argv[i]);
 	  }
@@ -936,7 +936,7 @@ opkg_depends_cmd(int argc, char **argv)
 	pkg_info_preinstall_check();
 
 	available_pkgs = pkg_vec_alloc();
-	if (conf->query_all)
+	if (opkg_config->query_all)
 	       pkg_hash_fetch_available(available_pkgs);
 	else
 	       pkg_hash_fetch_all_installed(available_pkgs);
@@ -1017,7 +1017,7 @@ opkg_what_depends_conflicts_cmd(enum depend_type what_field_type, int recursive,
 
 	available_pkgs = pkg_vec_alloc();
 
-	if (conf->query_all)
+	if (opkg_config->query_all)
 	       pkg_hash_fetch_available(available_pkgs);
 	else
 	       pkg_hash_fetch_all_installed(available_pkgs);
@@ -1147,7 +1147,7 @@ opkg_what_provides_replaces_cmd(enum what_field_type what_field_type, int argc, 
 
 	  pkg_info_preinstall_check();
 
-	  if (conf->query_all)
+	  if (opkg_config->query_all)
 	       pkg_hash_fetch_available(available_pkgs);
 	  else
 	       pkg_hash_fetch_all_installed(available_pkgs);
@@ -1253,7 +1253,7 @@ opkg_print_architecture_cmd(int argc, char **argv)
 {
      nv_pair_list_elt_t *l;
 
-     list_for_each_entry(l, &conf->arch_list.head, node) {
+     list_for_each_entry(l, &opkg_config->arch_list.head, node) {
 	  nv_pair_t *nv = (nv_pair_t *)l->data;
 	  printf("arch %s %s\n", nv->name, nv->value);
      }

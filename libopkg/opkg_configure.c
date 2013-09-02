@@ -35,7 +35,7 @@ opkg_configure(pkg_t *pkg)
 
     err = pkg_run_script(pkg, "postinst", "configure");
     if (err) {
-        if (!conf->offline_root)
+        if (!opkg_config->offline_root)
 	     opkg_msg(ERROR, "%s.postinst returned %d.\n", pkg->name, err);
         else
 	     opkg_msg(NOTICE, "%s.postinst returned %d, marking as unpacked only, configuration required on target.\n", pkg->name, err);

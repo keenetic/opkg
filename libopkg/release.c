@@ -121,7 +121,7 @@ release_arch_supported(release_t *release)
 {
      nv_pair_list_elt_t *l;
 
-     list_for_each_entry(l , &conf->arch_list.head, node) {
+     list_for_each_entry(l , &opkg_config->arch_list.head, node) {
 	  nv_pair_t *nv = (nv_pair_t *)l->data;
 	  if (item_in_list(nv->name, release->architectures, release->architectures_count)) {
 	       opkg_msg(DEBUG, "Arch %s (priority %s) supported for dist %s.\n",
@@ -184,7 +184,7 @@ release_download(release_t *release, pkg_src_t *dist, char *lists_dir, char *tmp
 	  sprintf_alloc(&prefix, "%s/dists/%s/%s/binary", dist->value, dist->name,
 			comps[i]);
 
-	  list_for_each_entry(l , &conf->arch_list.head, node) {
+	  list_for_each_entry(l , &opkg_config->arch_list.head, node) {
 	       char *url;
 	       char *tmp_file_name, *list_file_name;
 	       char *subpath = NULL;

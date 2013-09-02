@@ -117,70 +117,70 @@ args_parse(int argc, char *argv[])
 
 		switch (c) {
 		case 'A':
-			conf->query_all = 1;
+			opkg_config->query_all = 1;
 			break;
 		case 'd':
-			conf->dest_str = xstrdup(optarg);
+			opkg_config->dest_str = xstrdup(optarg);
 			break;
 		case 'f':
-			conf->conf_file = xstrdup(optarg);
+			opkg_config->conf_file = xstrdup(optarg);
 			break;
 		case 'o':
-			conf->offline_root = xstrdup(optarg);
+			opkg_config->offline_root = xstrdup(optarg);
 			break;
 		case 't':
-			conf->tmp_dir = xstrdup(optarg);
+			opkg_config->tmp_dir = xstrdup(optarg);
 			break;
 		case 'v':
 			printf("opkg version %s\n", VERSION);
 			exit(0);
 		case 'V':
-			conf->verbosity = INFO;
+			opkg_config->verbosity = INFO;
 			if (optarg != NULL)
-				conf->verbosity = atoi(optarg);
+				opkg_config->verbosity = atoi(optarg);
 			break;
 		case ARGS_OPT_AUTOREMOVE:
-			conf->autoremove = 1;
+			opkg_config->autoremove = 1;
 			break;
 		case ARGS_OPT_CACHE:
-			free(conf->cache);
-			conf->cache = xstrdup(optarg);
+			free(opkg_config->cache);
+			opkg_config->cache = xstrdup(optarg);
 			break;
 		case ARGS_OPT_FORCE_MAINTAINER:
-			conf->force_maintainer = 1;
+			opkg_config->force_maintainer = 1;
 			break;
 		case ARGS_OPT_FORCE_DEPENDS:
-			conf->force_depends = 1;
+			opkg_config->force_depends = 1;
 			break;
 		case ARGS_OPT_FORCE_OVERWRITE:
-			conf->force_overwrite = 1;
+			opkg_config->force_overwrite = 1;
 			break;
 		case ARGS_OPT_FORCE_DOWNGRADE:
-			conf->force_downgrade = 1;
+			opkg_config->force_downgrade = 1;
 			break;
 		case ARGS_OPT_FORCE_REINSTALL:
-			conf->force_reinstall = 1;
+			opkg_config->force_reinstall = 1;
 			break;
 		case ARGS_OPT_FORCE_REMOVAL_OF_ESSENTIAL_PACKAGES:
-			conf->force_removal_of_essential_packages = 1;
+			opkg_config->force_removal_of_essential_packages = 1;
 			break;
 		case ARGS_OPT_FORCE_REMOVAL_OF_DEPENDENT_PACKAGES:
-			conf->force_removal_of_dependent_packages = 1;
+			opkg_config->force_removal_of_dependent_packages = 1;
 			break;
 		case ARGS_OPT_FORCE_SPACE:
-			conf->force_space = 1;
+			opkg_config->force_space = 1;
 			break;
 		case ARGS_OPT_FORCE_POSTINSTALL:
-			conf->force_postinstall = 1;
+			opkg_config->force_postinstall = 1;
 			break;
 		case ARGS_OPT_FORCE_REMOVE:
-			conf->force_remove = 1;
+			opkg_config->force_remove = 1;
 			break;
 		case ARGS_OPT_PREFER_ARCH_TO_VERSION:
-			conf->prefer_arch_to_version = 1;
+			opkg_config->prefer_arch_to_version = 1;
 			break;
 		case ARGS_OPT_NODEPS:
-			conf->nodeps = 1;
+			opkg_config->nodeps = 1;
 			break;
 		case ARGS_OPT_ADD_ARCH:
 		case ARGS_OPT_ADD_DEST:
@@ -190,17 +190,17 @@ args_parse(int argc, char *argv[])
 				if ((strlen(tuple) > 0) && (strlen(targ) > 0)) {
 					nv_pair_list_append(
 						(c == ARGS_OPT_ADD_ARCH)
-							? &conf->arch_list : &conf->tmp_dest_list,
+							? &opkg_config->arch_list : &opkg_config->tmp_dest_list,
 						tuple, targ);
 				}
 			}
 			free(tuple);
 			break;
 		case ARGS_OPT_NOACTION:
-			conf->noaction = 1;
+			opkg_config->noaction = 1;
 			break;
         case ARGS_OPT_DOWNLOAD_ONLY:
-			conf->download_only = 1;
+			opkg_config->download_only = 1;
 			break;
 		case ':':
 			parse_err = -1;
@@ -324,7 +324,7 @@ main(int argc, char *argv[])
 	if (opkg_conf_init())
 		goto err0;
 
-	conf->verbosity = NOTICE;
+	opkg_config->verbosity = NOTICE;
 
 	opts = args_parse(argc, argv);
 	if (opts == argc || opts < 0) {
@@ -361,7 +361,7 @@ main(int argc, char *argv[])
 		usage();
 	}
 
-	conf->pfm = cmd->pfm;
+	opkg_config->pfm = cmd->pfm;
 
 	if (opkg_conf_load())
 		goto err0;

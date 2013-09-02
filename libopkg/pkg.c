@@ -285,7 +285,7 @@ pkg_init_from_file(pkg_t *pkg, const char *filename)
 
 	tmp = xstrdup(filename);
 	sprintf_alloc(&control_path, "%s/%s.control.XXXXXX",
-                        conf->tmp_dir,
+                        opkg_config->tmp_dir,
                         basename(tmp));
 	free(tmp);
 	fd = mkstemp(control_path);
@@ -1097,7 +1097,7 @@ pkg_get_installed_files(pkg_t *pkg)
 	     simply return the file list as a char *[] rather than
 	     insisting on writing it to a FILE * as it does now. */
 	  sprintf_alloc(&list_file_name, "%s/%s.list.XXXXXX",
-					  conf->tmp_dir, pkg->name);
+					  opkg_config->tmp_dir, pkg->name);
 	  fd = mkstemp(list_file_name);
 	  if (fd == -1) {
 	       opkg_perror(ERROR, "Failed to make temp file %s.",
@@ -1139,8 +1139,8 @@ pkg_get_installed_files(pkg_t *pkg)
 	  free(list_file_name);
      }
 
-     if (conf->offline_root)
-          rootdirlen = strlen(conf->offline_root);
+     if (opkg_config->offline_root)
+          rootdirlen = strlen(opkg_config->offline_root);
 
      while (1) {
 	  char *file_name;
@@ -1161,10 +1161,10 @@ pkg_get_installed_files(pkg_t *pkg)
 	       sprintf_alloc(&installed_file_name, "%s%s",
 			       pkg->dest->root_dir, file_name);
 	  } else {
-	       if (conf->offline_root &&
-	               strncmp(conf->offline_root, file_name, rootdirlen)) {
+	       if (opkg_config->offline_root &&
+	               strncmp(opkg_config->offline_root, file_name, rootdirlen)) {
 	            sprintf_alloc(&installed_file_name, "%s%s",
-				    conf->offline_root, file_name);
+				    opkg_config->offline_root, file_name);
 	       } else {
 	            // already contains root_dir as header -> ABSOLUTE
 	            sprintf_alloc(&installed_file_name, "%s", file_name);
@@ -1213,7 +1213,7 @@ pkg_remove_installed_files_list(pkg_t *pkg)
 	sprintf_alloc(&list_file_name, "%s/%s.list",
 		pkg->dest->info_dir, pkg->name);
 
-	if (!conf->noaction)
+	if (!opkg_config->noaction)
 		(void)unlink(list_file_name);
 
 	free(list_file_name);
@@ -1247,10 +1247,10 @@ pkg_run_script(pkg_t *pkg, const char *script, const char *args)
      char *path;
      char *cmd;
 
-     if (conf->noaction)
+     if (opkg_config->noaction)
 	     return 0;
 
-     if (conf->offline_root && !conf->force_postinstall) {
+     if (opkg_config->offline_root && !opkg_config->force_postinstall) {
           opkg_msg(INFO, "Offline root mode: not running %s.%s.\n",
 			  pkg->name, script);
 	  return 0;
@@ -1277,7 +1277,7 @@ pkg_run_script(pkg_t *pkg, const char *script, const char *args)
      opkg_msg(INFO, "Running script %s.\n", path);
 
      setenv("PKG_ROOT",
-	    pkg->dest ? pkg->dest->root_dir : conf->default_dest->root_dir, 1);
+	    pkg->dest ? pkg->dest->root_dir : opkg_config->default_dest->root_dir, 1);
 
      if (! file_exists(path)) {
 	  free(path);
@@ -1293,7 +1293,7 @@ pkg_run_script(pkg_t *pkg, const char *script, const char *args)
      free(cmd);
 
      if (err) {
-          if (!conf->offline_root)
+          if (!opkg_config->offline_root)
 	       opkg_msg(ERROR, "package \"%s\" %s script returned status %d.\n",
                     pkg->name, script, err);
 	  return err;
@@ -1310,7 +1310,7 @@ pkg_arch_supported(pkg_t *pkg)
      if (!pkg->architecture)
 	  return 1;
 
-     list_for_each_entry(l , &conf->arch_list.head, node) {
+     list_for_each_entry(l , &opkg_config->arch_list.head, node) {
 	  nv_pair_t *nv = (nv_pair_t *)l->data;
 	  if (strcmp(nv->name, pkg->architecture) == 0) {
 	       opkg_msg(DEBUG, "Arch %s (priority %s) supported for pkg %s.\n",
@@ -1389,7 +1389,7 @@ pkg_write_filelist(pkg_t *pkg)
 	}
 
 	data.pkg = pkg;
-	hash_table_foreach(&conf->file_hash, pkg_write_filelist_helper, &data);
+	hash_table_foreach(&opkg_config->file_hash, pkg_write_filelist_helper, &data);
 	fclose(data.stream);
 	free(list_file_name);
 
@@ -1404,7 +1404,7 @@ pkg_write_changed_filelists(void)
 	pkg_vec_t *installed_pkgs = pkg_vec_alloc();
 	int i, err, ret = 0;
 
-	if (conf->noaction)
+	if (opkg_config->noaction)
 		return 0;
 
 	opkg_msg(INFO, "Saving changed filelists.\n");

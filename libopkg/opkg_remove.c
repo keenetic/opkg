@@ -232,7 +232,7 @@ opkg_remove_pkg(pkg_t *pkg, int from_upgrade)
  * ignore the essential flag.
  */
      if (pkg->essential && !from_upgrade) {
-	  if (conf->force_removal_of_essential_packages) {
+	  if (opkg_config->force_removal_of_essential_packages) {
 	       opkg_msg(NOTICE,
 		       "Removing essential package %s under your coercion.\n"
 		       "\tIf your system breaks, you get to keep both pieces\n",
@@ -254,7 +254,7 @@ opkg_remove_pkg(pkg_t *pkg, int from_upgrade)
       * force_depends is not specified or the package is being
       * replaced.
       */
-     if (!conf->force_depends
+     if (!opkg_config->force_depends
 	 && !(pkg->state_flag & SF_REPLACE)) {
 	  abstract_pkg_t **dependents;
 	  int has_installed_dependents =
@@ -266,7 +266,7 @@ opkg_remove_pkg(pkg_t *pkg, int from_upgrade)
 		* not remove it or we should remove it and all of its dependents
 		*/
 
-	       if (!conf->force_removal_of_dependent_packages) {
+	       if (!opkg_config->force_removal_of_dependent_packages) {
 		    print_dependents_warning(pkg, dependents);
 		    free(dependents);
 		    return -1;
@@ -293,7 +293,7 @@ opkg_remove_pkg(pkg_t *pkg, int from_upgrade)
      opkg_state_changed++;
 
      if (pkg_run_script(pkg, "prerm", "remove") != 0) {
-         if (!conf->force_remove) {
+         if (!opkg_config->force_remove) {
              opkg_msg(ERROR, "not removing package \"%s\", "
                              "prerm script failed\n", pkg->name);
              opkg_msg(NOTICE, "You can force removal of packages with failed "
@@ -319,7 +319,7 @@ opkg_remove_pkg(pkg_t *pkg, int from_upgrade)
 	  parent_pkg->state_status = SS_NOT_INSTALLED;
 
      /* remove autoinstalled packages that are orphaned by the removal of this one */
-     if (conf->autoremove) {
+     if (opkg_config->autoremove) {
          if (remove_autoinstalled(pkg) != 0) {
              err = -1;
          }
@@ -349,8 +349,8 @@ remove_data_files_and_list(pkg_t *pkg)
      str_list_init(&installed_dirs);
 
      /* don't include trailing slash */
-     if (conf->offline_root)
-          rootdirlen = strlen(conf->offline_root);
+     if (opkg_config->offline_root)
+          rootdirlen = strlen(opkg_config->offline_root);
 
      for (iter = str_list_first(installed_files); iter; iter = str_list_next(installed_files, iter)) {
 	  file_name = (char *)iter->data;
@@ -374,7 +374,7 @@ remove_data_files_and_list(pkg_t *pkg)
 	       }
 	  }
 
-	  if (!conf->noaction) {
+	  if (!opkg_config->noaction) {
 	  	opkg_msg(INFO, "Deleting %s.\n", file_name);
 	       unlink(file_name);
 	  } else
@@ -385,7 +385,7 @@ remove_data_files_and_list(pkg_t *pkg)
      }
 
      /* Remove empty directories */
-     if (!conf->noaction) {
+     if (!opkg_config->noaction) {
 	  do {
 	       removed_a_dir = 0;
 	       for (iter = str_list_first(&installed_dirs); iter; iter = str_list_next(&installed_dirs, iter)) {
@@ -431,7 +431,7 @@ remove_maintainer_scripts(pkg_t *pkg)
 	char *globpattern;
 	glob_t globbuf;
 
-	if (conf->noaction)
+	if (opkg_config->noaction)
 		return;
 
 	sprintf_alloc(&globpattern, "%s/%s.*",

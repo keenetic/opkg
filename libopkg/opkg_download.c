@@ -101,7 +101,7 @@ opkg_download(const char *src, const char *dest_file_name,
 	return err;
     }
 
-    sprintf_alloc(&tmp_file_location, "%s/%s", conf->tmp_dir, src_base);
+    sprintf_alloc(&tmp_file_location, "%s/%s", opkg_config->tmp_dir, src_base);
     free(src_basec);
     err = unlink(tmp_file_location);
     if (err && errno != ENOENT) {
@@ -110,20 +110,20 @@ opkg_download(const char *src, const char *dest_file_name,
 	return -1;
     }
 
-    if (conf->http_proxy) {
+    if (opkg_config->http_proxy) {
 	opkg_msg(DEBUG, "Setting environment variable: http_proxy = %s.\n",
-		conf->http_proxy);
-	setenv("http_proxy", conf->http_proxy, 1);
+		opkg_config->http_proxy);
+	setenv("http_proxy", opkg_config->http_proxy, 1);
     }
-    if (conf->ftp_proxy) {
+    if (opkg_config->ftp_proxy) {
 	opkg_msg(DEBUG, "Setting environment variable: ftp_proxy = %s.\n",
-		conf->ftp_proxy);
-	setenv("ftp_proxy", conf->ftp_proxy, 1);
+		opkg_config->ftp_proxy);
+	setenv("ftp_proxy", opkg_config->ftp_proxy, 1);
     }
-    if (conf->no_proxy) {
+    if (opkg_config->no_proxy) {
 	opkg_msg(DEBUG,"Setting environment variable: no_proxy = %s.\n",
-		conf->no_proxy);
-	setenv("no_proxy", conf->no_proxy, 1);
+		opkg_config->no_proxy);
+	setenv("no_proxy", opkg_config->no_proxy, 1);
     }
 
 #ifdef HAVE_CURL
@@ -162,7 +162,7 @@ opkg_download(const char *src, const char *dest_file_name,
 
       argv[i++] = "wget";
       argv[i++] = "-q";
-      if (conf->http_proxy || conf->ftp_proxy) {
+      if (opkg_config->http_proxy || opkg_config->ftp_proxy) {
 	argv[i++] = "-Y";
 	argv[i++] = "on";
       }
@@ -195,14 +195,14 @@ opkg_download_cache(const char *src, const char *dest_file_name,
     char *cache_location, *p;
     int err = 0;
 
-    if (!conf->cache || str_starts_with(src, "file:")) {
+    if (!opkg_config->cache || str_starts_with(src, "file:")) {
 	err = opkg_download(src, dest_file_name, cb, data, 0);
 	goto out1;
     }
 
-    if(!file_is_dir(conf->cache)){
+    if(!file_is_dir(opkg_config->cache)){
 	    opkg_msg(ERROR, "%s is not a directory.\n",
-			    conf->cache);
+			    opkg_config->cache);
 	    err = 1;
 	    goto out1;
     }
@@ -211,7 +211,7 @@ opkg_download_cache(const char *src, const char *dest_file_name,
 	if (*p == '/')
 	    *p = ',';	/* looks nicer than | or # */
 
-    sprintf_alloc(&cache_location, "%s/%s", conf->cache, cache_name);
+    sprintf_alloc(&cache_location, "%s/%s", opkg_config->cache, cache_name);
     if (file_exists(cache_location))
 	opkg_msg(NOTICE, "Copying %s.\n", cache_location);
     else {
@@ -223,7 +223,7 @@ opkg_download_cache(const char *src, const char *dest_file_name,
         else
            cache_name = xstrdup(dest_file_name);
         free(cache_location);
-        sprintf_alloc(&cache_location, "%s/%s", conf->cache, cache_name);
+        sprintf_alloc(&cache_location, "%s/%s", opkg_config->cache, cache_name);
         if (file_exists(cache_location))
            opkg_msg(NOTICE, "Copying %s.\n", cache_location);
         else  {
@@ -299,7 +299,7 @@ opkg_prepare_url_for_install(const char *url, char **namep)
 	  char *file_basec = xstrdup(url);
 	  char *file_base = basename(file_basec);
 
-	  sprintf_alloc(&tmp_file, "%s/%s", conf->tmp_dir, file_base);
+	  sprintf_alloc(&tmp_file, "%s/%s", opkg_config->tmp_dir, file_base);
 	  err = opkg_download(url, tmp_file, NULL, NULL, 0);
 	  if (err)
 	       return err;
@@ -328,7 +328,7 @@ opkg_prepare_url_for_install(const char *url, char **namep)
        return 0;
      }
 
-     pkg->dest = conf->default_dest;
+     pkg->dest = opkg_config->default_dest;
      pkg->state_want = SW_INSTALL;
      pkg->state_flag |= SF_PREFER;
      hash_insert_pkg(pkg, 1);
@@ -355,7 +355,7 @@ opkg_verify_file (char *text_file, char *sig_file)
     gpgme_protocol_t protocol = GPGME_PROTOCOL_OpenPGP;
     char *trusted_path = NULL;
 
-    if (conf->check_signature == 0)
+    if (opkg_config->check_signature == 0 )
 	return 0;
 
     gpgme_check_version (NULL);
@@ -453,7 +453,7 @@ out_err:
     openssl_init();
 
     // Set-up the key store
-    if(!(store = setup_verify(conf->signature_ca_file, conf->signature_ca_path))){
+    if(!(store = setup_verify(opkg_conf->signature_ca_file, conf->signature_ca_path))){
         opkg_msg(ERROR, "Can't open CA certificates.\n");
         goto verify_file_end;
     }
@@ -472,7 +472,7 @@ out_err:
         goto verify_file_end;
     }
 #if defined(HAVE_PATHFINDER)
-    if(conf->check_x509_path){
+    if(opkg_conf->check_x509_path){
 	if(!pkcs7_pathfinder_verify_signers(p7)){
 	    opkg_msg(ERROR, "pkcs7_pathfinder_verify_signers: "
 		    "Path verification failed.\n");
@@ -507,7 +507,7 @@ verify_file_end:
     /* mute `unused variable' warnings. */
     (void) sig_file;
     (void) text_file;
-    (void) conf;
+    (void) opkg_config;
     return 0;
 #endif
 }
@@ -603,12 +603,12 @@ opkg_curl_init(curl_progress_func cb, void *data)
 #ifdef HAVE_SSLCURL
 	openssl_init();
 
-	if (conf->ssl_engine) {
+	if (opkg_config->ssl_engine) {
 
 	    /* use crypto engine */
-	    if (curl_easy_setopt(curl, CURLOPT_SSLENGINE, conf->ssl_engine) != CURLE_OK){
+	    if (curl_easy_setopt(curl, CURLOPT_SSLENGINE, opkg_config->ssl_engine) != CURLE_OK){
 		opkg_msg(ERROR, "Can't set crypto engine '%s'.\n",
-			conf->ssl_engine);
+			opkg_config->ssl_engine);
 
 		opkg_curl_cleanup();
 		return NULL;
@@ -616,7 +616,7 @@ opkg_curl_init(curl_progress_func cb, void *data)
 	    /* set the crypto engine as default */
 	    if (curl_easy_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1L) != CURLE_OK){
 		opkg_msg(ERROR, "Can't set crypto engine '%s' as default.\n",
-			conf->ssl_engine);
+			opkg_config->ssl_engine);
 
 		opkg_curl_cleanup();
 		return NULL;
@@ -624,48 +624,48 @@ opkg_curl_init(curl_progress_func cb, void *data)
 	}
 
 	/* cert & key can only be in PEM case in the same file */
-	if(conf->ssl_key_passwd){
-	    if (curl_easy_setopt(curl, CURLOPT_SSLKEYPASSWD, conf->ssl_key_passwd) != CURLE_OK)
+	if(opkg_config->ssl_key_passwd){
+	    if (curl_easy_setopt(curl, CURLOPT_SSLKEYPASSWD, opkg_config->ssl_key_passwd) != CURLE_OK)
 	    {
 	        opkg_msg(DEBUG, "Failed to set key password.\n");
 	    }
 	}
 
 	/* sets the client certificate and its type */
-	if(conf->ssl_cert_type){
-	    if (curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, conf->ssl_cert_type) != CURLE_OK)
+	if(opkg_config->ssl_cert_type){
+	    if (curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, opkg_config->ssl_cert_type) != CURLE_OK)
 	    {
 	        opkg_msg(DEBUG, "Failed to set certificate format.\n");
 	    }
 	}
 	/* SSL cert name isn't mandatory */
-	if(conf->ssl_cert){
-	        curl_easy_setopt(curl, CURLOPT_SSLCERT, conf->ssl_cert);
+	if(opkg_config->ssl_cert){
+	        curl_easy_setopt(curl, CURLOPT_SSLCERT, opkg_config->ssl_cert);
 	}
 
 	/* sets the client key and its type */
-	if(conf->ssl_key_type){
-	    if (curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, conf->ssl_key_type) != CURLE_OK)
+	if(opkg_config->ssl_key_type){
+	    if (curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, opkg_config->ssl_key_type) != CURLE_OK)
 	    {
 	        opkg_msg(DEBUG, "Failed to set key format.\n");
 	    }
 	}
-	if(conf->ssl_key){
-	    if (curl_easy_setopt(curl, CURLOPT_SSLKEY, conf->ssl_key) != CURLE_OK)
+	if(opkg_config->ssl_key){
+	    if (curl_easy_setopt(curl, CURLOPT_SSLKEY, opkg_config->ssl_key) != CURLE_OK)
 	    {
 	        opkg_msg(DEBUG, "Failed to set key.\n");
 	    }
 	}
 
 	/* Should we verify the peer certificate ? */
-	if(conf->ssl_dont_verify_peer){
+	if(opkg_config->ssl_dont_verify_peer){
 	    /*
 	     * CURLOPT_SSL_VERIFYPEER default is nonzero (curl => 7.10)
 	     */
 	    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
 	}else{
 #ifdef HAVE_PATHFINDER
-	    if(conf->check_x509_path){
+	    if(opkg_conf->check_x509_path){
     	        if (curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, curl_ssl_ctx_function) != CURLE_OK){
 		    opkg_msg(DEBUG, "Failed to set ssl path verification callback.\n");
 		}else{
@@ -676,21 +676,21 @@ opkg_curl_init(curl_progress_func cb, void *data)
 	}
 
 	/* certification authority file and/or path */
-	if(conf->ssl_ca_file){
-	    curl_easy_setopt(curl, CURLOPT_CAINFO, conf->ssl_ca_file);
+	if(opkg_config->ssl_ca_file){
+	    curl_easy_setopt(curl, CURLOPT_CAINFO, opkg_config->ssl_ca_file);
 	}
-	if(conf->ssl_ca_path){
-	    curl_easy_setopt(curl, CURLOPT_CAPATH, conf->ssl_ca_path);
+	if(opkg_config->ssl_ca_path){
+	    curl_easy_setopt(curl, CURLOPT_CAPATH, opkg_config->ssl_ca_path);
 	}
 #endif
 
 	curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, 1);
 	curl_easy_setopt (curl, CURLOPT_FAILONERROR, 1);
-	if (conf->http_proxy || conf->ftp_proxy)
+	if (opkg_config->http_proxy || opkg_config->ftp_proxy)
 	{
 	    char *userpwd;
-	    sprintf_alloc (&userpwd, "%s:%s", conf->proxy_user,
-		    conf->proxy_passwd);
+	    sprintf_alloc (&userpwd, "%s:%s", opkg_config->proxy_user,
+		    opkg_config->proxy_passwd);
 	    curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, userpwd);
 	    free (userpwd);
 	}

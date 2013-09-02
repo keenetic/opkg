@@ -78,13 +78,13 @@ opkg_message (message_level_t level, const char *fmt, ...)
 {
 	va_list ap;
 
-	if (conf->verbosity < level)
+	if (opkg_config->verbosity < level)
 		return;
 
-	if (conf->opkg_vmessage) {
+	if (opkg_config->opkg_vmessage) {
 		/* Pass the message to libopkg users. */
 		va_start (ap, fmt);
-		conf->opkg_vmessage(level, fmt, ap);
+		opkg_config->opkg_vmessage(level, fmt, ap);
 		va_end (ap);
 		return;
 	}

@@ -30,7 +30,7 @@
 #include "opkg_conf.h"
 #include "conffile_list.h"
 
-struct opkg_conf;
+struct opkg_config;
 
 
 #define ARRAY_SIZE(array) sizeof(array) / sizeof((array)[0])
