@@ -128,8 +128,8 @@ resolve_pkg_dest_list(void)
      return 0;
 }
 
-static int
-opkg_conf_set_option(const char *name, const char *value)
+int
+opkg_conf_set_option(const char *name, const char *value, int overwrite)
 {
      int i = 0;
 
@@ -137,7 +137,7 @@ opkg_conf_set_option(const char *name, const char *value)
 	  if (strcmp(options[i].name, name) == 0) {
 	       switch (options[i].type) {
 	       case OPKG_OPT_TYPE_BOOL:
-		    if (*(int *)options[i].value) {
+		    if (*(int *)options[i].value && !overwrite) {
 			    opkg_msg(ERROR, "Duplicate boolean option %s, "
 				"leaving this option on.\n", name);
 			    return 0;
@@ -146,7 +146,7 @@ opkg_conf_set_option(const char *name, const char *value)
 		    return 0;
 	       case OPKG_OPT_TYPE_INT:
 		    if (value) {
-			    if (*(int *)options[i].value) {
+			    if (*(int *)options[i].value && !overwrite) {
 				    opkg_msg(ERROR, "Duplicate option %s, "
 					"using first seen value \"%d\".\n",
 					name, *((int *)options[i].value));
@@ -162,10 +162,15 @@ opkg_conf_set_option(const char *name, const char *value)
 	       case OPKG_OPT_TYPE_STRING:
 		    if (value) {
 			    if (*(char **)options[i].value) {
-				    opkg_msg(ERROR, "Duplicate option %s, "
-					"using first seen value \"%s\".\n",
-					name, *((char **)options[i].value));
-				    return 0;
+				    if (!overwrite) {
+					opkg_msg(ERROR, "Duplicate option %s, "
+						"using first seen value \"%s\".\n",
+						name, *((char **)options[i].value));
+					return 0;
+				    } else {
+					/* Let's not leak memory. */
+					free(*((char ** const)options[i].value));
+				    }
 			    }
 			 *((char ** const)options[i].value) = xstrdup(value);
 			 return 0;
@@ -285,7 +290,7 @@ opkg_conf_parse_file(const char *filename,
 	     pkg_dest_list_init. (We do a similar thing with
 	     tmp_src_nv_pair_list for sake of symmetry.) */
 	  if (strcmp(type, "option") == 0) {
-	       opkg_conf_set_option(name, value);
+	       opkg_conf_set_option(name, value, 0);
  	  } else if (strcmp(type, "dist") == 0) {
  	       if (!nv_pair_list_find((nv_pair_list_t*) dist_src_list, name)) {
  		    pkg_src_list_append (dist_src_list, name, value, extra, 0);

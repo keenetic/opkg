@@ -143,4 +143,6 @@ void opkg_conf_deinit(void);
 int opkg_conf_write_status_files(void);
 char *root_filename_alloc(char *filename);
 
+int opkg_conf_set_option(const char *name, const char *value, int overwrite);
+
 #endif
