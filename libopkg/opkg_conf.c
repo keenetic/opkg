@@ -128,33 +128,41 @@ resolve_pkg_dest_list(void)
      return 0;
 }
 
-int
-opkg_conf_get_option(char *name, void *value)
+static opkg_option_t *
+opkg_conf_find_option(const char *name)
 {
 	int i;
-
-	*(char**)value = NULL;
 
 	for (i=0; options[i].name; i++) {
 		if (strcmp(options[i].name, name) == 0)
 			break;
 	}
 
-	if (options[i].name == NULL)
+	/* Not found. */
+	return NULL;
+}
+
+int
+opkg_conf_get_option(char *name, void *value)
+{
+	opkg_option_t * o;
+
+	o = opkg_conf_find_option(name);
+	if (o == NULL) {
 		/* Not found. */
+		opkg_msg(ERROR, "Unrecognized option: %s\n", name);
+		*(char**)value = NULL;
 		return -1;
+	}
 
-	switch (options[i].type) {
+	switch (o->type) {
 	case OPKG_OPT_TYPE_BOOL:
-		*(int *)value = *(int *)options[i].value;
-		break;
-
 	case OPKG_OPT_TYPE_INT:
-		*(int *)value = *(int *)options[i].value;
+		*(int *)value = *(int *)o->value;
 		break;
 
 	case OPKG_OPT_TYPE_STRING:
-		*(char **)value = xstrdup(*(char **)options[i].value);
+		*(char **)value = xstrdup(*(char **)o->value);
 		break;
 	}
 
@@ -164,61 +172,69 @@ opkg_conf_get_option(char *name, void *value)
 int
 opkg_conf_set_option(const char *name, const char *value, int overwrite)
 {
-     int i = 0;
+	opkg_option_t * o;
 
-     while (options[i].name) {
-	  if (strcmp(options[i].name, name) == 0) {
-	       switch (options[i].type) {
-	       case OPKG_OPT_TYPE_BOOL:
-		    if (*(int *)options[i].value && !overwrite) {
-			    opkg_msg(ERROR, "Duplicate boolean option %s, "
+	o = opkg_conf_find_option(name);
+	if (o == NULL) {
+		/* Not found. */
+		opkg_msg(ERROR, "Unrecognized option: %s=%s\n", name, value);
+		return -1;
+	}
+
+	switch (o->type) {
+	case OPKG_OPT_TYPE_BOOL:
+		if (*(int *)o->value && !overwrite) {
+			opkg_msg(ERROR, "Duplicate boolean option %s, "
 				"leaving this option on.\n", name);
-			    return 0;
-		    }
-		    *((int * const)options[i].value) = 1;
-		    return 0;
-	       case OPKG_OPT_TYPE_INT:
-		    if (value) {
-			    if (*(int *)options[i].value && !overwrite) {
-				    opkg_msg(ERROR, "Duplicate option %s, "
-					"using first seen value \"%d\".\n",
-					name, *((int *)options[i].value));
-				    return 0;
-			    }
-			 *((int * const)options[i].value) = atoi(value);
-			 return 0;
-		    } else {
-			 opkg_msg(ERROR, "Option %s needs an argument\n",
-				name);
-			 return -1;
-		    }
-	       case OPKG_OPT_TYPE_STRING:
-		    if (value) {
-			    if (*(char **)options[i].value) {
-				    if (!overwrite) {
-					opkg_msg(ERROR, "Duplicate option %s, "
-						"using first seen value \"%s\".\n",
-						name, *((char **)options[i].value));
-					return 0;
-				    } else {
-					/* Let's not leak memory. */
-					free(*((char ** const)options[i].value));
-				    }
-			    }
-			 *((char ** const)options[i].value) = xstrdup(value);
-			 return 0;
-		    } else {
-			 opkg_msg(ERROR, "Option %s needs an argument\n",
-				name);
-			 return -1;
-		    }
-	       }
-	  }
-	  i++;
-     }
+			return 0;
+		}
+		*((int * const)o->value) = 1;
+		return 0;
 
-     opkg_msg(ERROR, "Unrecognized option: %s=%s\n", name, value);
-     return -1;
+	case OPKG_OPT_TYPE_INT:
+		if (!value) {
+			opkg_msg(ERROR, "Option %s needs an argument\n",
+			name);
+			return -1;
+		}
+
+		if (*(int *)o->value && !overwrite) {
+			opkg_msg(ERROR, "Duplicate option %s, "
+				"using first seen value \"%d\".\n",
+				name, *((int *)o->value));
+			return 0;
+		}
+
+		*((int * const)o->value) = atoi(value);
+		return 0;
+
+	case OPKG_OPT_TYPE_STRING:
+		if (!value) {
+			opkg_msg(ERROR, "Option %s needs an argument\n",
+			name);
+			return -1;
+		}
+
+		if (*(char **)o->value) {
+			if (!overwrite) {
+				opkg_msg(ERROR, "Duplicate option %s, "
+					"using first seen value \"%s\".\n",
+					name, *((char **)o->value));
+				return 0;
+			} else {
+				/* Let's not leak memory. */
+				free(*((char ** const)o->value));
+			}
+		}
+
+		*((char ** const)o->value) = xstrdup(value);
+		return 0;
+	}
+
+	/* The compiler doesn't seem to notice that all cases return, this line
+	 * should never be reached but it stops a warning.
+	 */
+	return -1;
 }
 
 static int
