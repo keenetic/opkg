@@ -380,7 +380,7 @@ opkg_install_package(const char *package_name,
 		return -1;
 	}
 
-	progress(&pdata, 75, progress_callback, user_data);
+	progress(&pdata, 90, progress_callback, user_data);
 
 	/* run configure scripts, etc. */
 	err = opkg_configure_packages(NULL);
