@@ -95,7 +95,7 @@ struct _curl_cb_data {
 	int finish_range;
 };
 
-int
+static int
 curl_progress_cb(struct _curl_cb_data *cb_data, double t,	/* dltotal */
 		double d,	/* dlnow */
 		double ultotal, double ulnow)
