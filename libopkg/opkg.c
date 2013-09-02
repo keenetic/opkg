@@ -41,9 +41,17 @@
     printf ("opkg: file %s: line %d (%s): Assertation '%s' failed",\
             __FILE__, __LINE__, __PRETTY_FUNCTION__, # expr); abort (); }
 
-#define progress(d, p) d.percentage = p; if (progress_callback) progress_callback (&d, user_data);
-
 /** Private Functions ***/
+
+static void progress(opkg_progress_data_t * d, int p, opkg_progress_callback_t callback, void * user_data)
+{
+	opkg_assert(d);
+
+	d->percentage = p;
+
+	if (callback)
+		callback(d, user_data);
+}
 
 static int
 opkg_configure_packages(char *pkg_name)
@@ -278,7 +286,7 @@ opkg_install_package(const char *package_name,
 	pdata.action = -1;
 	pdata.pkg = new;
 
-	progress(pdata, 0);
+	progress(&pdata, 0, progress_callback, user_data);
 
 	/* find dependancies and download them */
 	deps = pkg_vec_alloc();
@@ -363,7 +371,7 @@ opkg_install_package(const char *package_name,
 	/* 75% of "install" progress is for downloading */
 	pdata.pkg = new;
 	pdata.action = OPKG_INSTALL;
-	progress(pdata, 75);
+	progress(&pdata, 75, progress_callback, user_data);
 
 	/* unpack the package */
 	err = opkg_install_pkg(new, 0);
@@ -372,7 +380,7 @@ opkg_install_package(const char *package_name,
 		return -1;
 	}
 
-	progress(pdata, 75);
+	progress(&pdata, 75, progress_callback, user_data);
 
 	/* run configure scripts, etc. */
 	err = opkg_configure_packages(NULL);
@@ -384,7 +392,7 @@ opkg_install_package(const char *package_name,
 	opkg_conf_write_status_files();
 	pkg_write_changed_filelists();
 
-	progress(pdata, 100);
+	progress(&pdata, 100, progress_callback, user_data);
 	return 0;
 }
 
@@ -410,7 +418,7 @@ opkg_remove_package(const char *package_name,
 
 	pdata.action = OPKG_REMOVE;
 	pdata.pkg = pkg;
-	progress(pdata, 0);
+	progress(&pdata, 0, progress_callback, user_data);
 
 	if (opkg_config->restrict_to_default_dest) {
 		pkg_to_remove = pkg_hash_fetch_installed_by_name_dest(pkg->name,
@@ -420,7 +428,7 @@ opkg_remove_package(const char *package_name,
 	}
 
 
-	progress(pdata, 75);
+	progress(&pdata, 75, progress_callback, user_data);
 
 	err = opkg_remove_pkg(pkg_to_remove, 0);
 
@@ -429,7 +437,7 @@ opkg_remove_package(const char *package_name,
 	pkg_write_changed_filelists();
 
 
-	progress(pdata, 100);
+	progress(&pdata, 100, progress_callback, user_data);
 	return (err) ? -1 : 0;
 }
 
@@ -460,13 +468,13 @@ opkg_upgrade_package(const char *package_name,
 
 	pdata.action = OPKG_INSTALL;
 	pdata.pkg = pkg;
-	progress(pdata, 0);
+	progress(&pdata, 0, progress_callback, user_data);
 
 	err = opkg_upgrade_pkg(pkg);
 	if (err) {
 		return -1;
 	}
-	progress(pdata, 75);
+	progress(&pdata, 75, progress_callback, user_data);
 
 	err = opkg_configure_packages(NULL);
 	if (err) {
@@ -477,7 +485,7 @@ opkg_upgrade_package(const char *package_name,
 	opkg_conf_write_status_files();
 	pkg_write_changed_filelists();
 
-	progress(pdata, 100);
+	progress(&pdata, 100, progress_callback, user_data);
 	return 0;
 }
 
@@ -493,7 +501,7 @@ opkg_upgrade_all(opkg_progress_callback_t progress_callback, void *user_data)
 	pdata.action = OPKG_INSTALL;
 	pdata.pkg = NULL;
 
-	progress(pdata, 0);
+	progress(&pdata, 0, progress_callback, user_data);
 
 	installed = pkg_vec_alloc();
 	pkg_info_preinstall_check();
@@ -503,7 +511,7 @@ opkg_upgrade_all(opkg_progress_callback_t progress_callback, void *user_data)
 		pkg = installed->pkgs[i];
 
 		pdata.pkg = pkg;
-		progress(pdata, 99 * i / installed->len);
+		progress(&pdata, 99 * i / installed->len, progress_callback, user_data);
 
 		err += opkg_upgrade_pkg(pkg);
 	}
@@ -521,7 +529,7 @@ opkg_upgrade_all(opkg_progress_callback_t progress_callback, void *user_data)
 	pkg_write_changed_filelists();
 
 	pdata.pkg = NULL;
-	progress(pdata, 100);
+	progress(&pdata, 100, progress_callback, user_data);
 	return 0;
 }
 
@@ -539,7 +547,7 @@ opkg_update_package_lists(opkg_progress_callback_t progress_callback,
 
 	pdata.action = OPKG_DOWNLOAD;
 	pdata.pkg = NULL;
-	progress(pdata, 0);
+	progress(&pdata, 0, progress_callback, user_data);
 
 	sprintf_alloc(&lists_dir, "%s", (opkg_config->restrict_to_default_dest)
 		? opkg_config->default_dest->lists_dir : opkg_config->lists_dir);
@@ -685,7 +693,7 @@ opkg_update_package_lists(opkg_progress_callback_t progress_callback,
 		free(list_file_name);
 
 		sources_done++;
-		progress(pdata, 100 * sources_done / sources_list_count);
+		progress(&pdata, 100 * sources_done / sources_list_count, progress_callback, user_data);
 	}
 
 	rmdir(tmp);
