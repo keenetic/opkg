@@ -44,7 +44,7 @@ opkg_conf_t *opkg_config = &_conf;
 /*
  * Config file options
  */
-opkg_option_t options[] = {
+static opkg_option_t options[] = {
 	  { "cache", OPKG_OPT_TYPE_STRING, &_conf.cache},
 	  { "force_defaults", OPKG_OPT_TYPE_BOOL, &_conf.force_defaults },
           { "force_maintainer", OPKG_OPT_TYPE_BOOL, &_conf.force_maintainer },
