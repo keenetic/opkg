@@ -82,8 +82,8 @@ pkg_has_installed_dependents(pkg_t *pkg, abstract_pkg_t *** pdependents)
 static int
 opkg_remove_dependent_pkgs(pkg_t *pkg, abstract_pkg_t **dependents)
 {
-    int i;
-    int a;
+    unsigned int i;
+    unsigned int a;
     int count;
     pkg_vec_t *dependent_pkgs;
     abstract_pkg_t * ab_pkg;
@@ -103,15 +103,13 @@ opkg_remove_dependent_pkgs(pkg_t *pkg, abstract_pkg_t **dependents)
 	                                   // of marking packages for removal - Karthik
     ab_pkg->dependencies_checked = 2;
 
-    i = 0;
     count = 1;
     dependent_pkgs = pkg_vec_alloc();
 
-    while (dependents [i] != NULL) {
+    for (i = 0; dependents[i] != NULL; i++) {
         abstract_pkg_t *dep_ab_pkg = dependents[i];
 
 	if (dep_ab_pkg->dependencies_checked == 2){
-	    i++;
 	    continue;
         }
         if (dep_ab_pkg->state_status == SS_INSTALLED) {
@@ -123,7 +121,6 @@ opkg_remove_dependent_pkgs(pkg_t *pkg, abstract_pkg_t **dependents)
                 }
             }
         }
-	i++;
 	/* 1 - to keep track of visited ab_pkgs when checking for possiblility of a broken removal of pkgs.
 	 * 2 - to keep track of pkgs whose deps have been checked alrdy  - Karthik */
     }
