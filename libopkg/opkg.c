@@ -768,11 +768,14 @@ pkg_t *
 opkg_find_package(const char *name, const char *ver, const char *arch,
 		const char *repo)
 {
-	int pkg_found = 0;
 	pkg_t *pkg = NULL;
 	pkg_vec_t *all;
 	int i;
-#define sstrcmp(x,y) (x && y) ? strcmp (x, y) : 0
+
+	/* We expect to be given a name to search for, all other arguments are
+	 * optional.
+	 */
+	opkg_assert(name);
 
 	all = pkg_vec_alloc();
 	pkg_hash_fetch_available(all);
@@ -782,37 +785,41 @@ opkg_find_package(const char *name, const char *ver, const char *arch,
 		pkg = all->pkgs[i];
 
 		/* check name */
-		if (sstrcmp(pkg->name, name))
+		/* We can assume all packages have a name and we always want to
+		 * check the name.
+		 */
+		if (strcmp(pkg->name, name))
 			continue;
 
 		/* check version */
+		/* We can assume all packages have a version but we might not
+		 * have been given a version as an argument if we don't care
+		 * what it is.
+		 */
 		pkgv = pkg_version_str_alloc(pkg);
-		if (sstrcmp(pkgv, ver)) {
+		if (ver && strcmp(pkgv, ver)) {
 			free(pkgv);
 			continue;
 		}
 		free(pkgv);
 
 		/* check architecture */
-		if (arch) {
-			if (sstrcmp(pkg->architecture, arch))
-				continue;
-		}
+		if (arch && pkg->architecture && strcmp(pkg->architecture, arch))
+			continue;
 
 		/* check repository */
-		if (repo) {
-			if (sstrcmp(pkg->src->name, repo))
-				continue;
-		}
+		if (repo && pkg->src && pkg->src->name
+				&& strcmp(pkg->src->name, repo))
+			continue;
 
 		/* match found */
-		pkg_found = 1;
-		break;
+		pkg_vec_free(all);
+		return pkg;
 	}
 
+	/* no match found */
 	pkg_vec_free(all);
-
-	return pkg_found ? pkg : NULL;
+	return NULL;
 }
 
 /**
