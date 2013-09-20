@@ -73,7 +73,11 @@ opkg_upgrade_pkg(pkg_t *old)
 
     free(old_version);
     free(new_version);
-    new->state_flag |= SF_USER;
+
+    new->state_flag = old->state_flag;
+    /* maintain the "Auto-Installed: yes" flag */
+    new->auto_installed = old->auto_installed;
+
     return opkg_install_pkg(new,1);
 }
 
