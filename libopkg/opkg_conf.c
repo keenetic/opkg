@@ -745,6 +745,9 @@ opkg_conf_deinit(void)
 				free(*tmp);
 				*tmp = NULL;
 			}
+		} else {
+			int *val = (int *) options[i].value;
+			*val = 0;
 		}
 	}
 
