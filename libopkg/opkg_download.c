@@ -419,6 +419,16 @@ opkg_download_internal(const char *src, const char *dest,
     }
 #endif /* HAVE_SSLCURL */
 
+    if (opkg_config->connect_timeout_ms > 0) {
+	long timeout_ms = opkg_config->connect_timeout_ms;
+	curl_easy_setopt (curl, CURLOPT_CONNECTTIMEOUT_MS, timeout_ms);
+    }
+
+    if (opkg_config->transfer_timeout_ms > 0) {
+	long timeout_ms = opkg_config->transfer_timeout_ms;
+	curl_easy_setopt (curl, CURLOPT_TIMEOUT_MS, timeout_ms);
+    }
+
     if (use_cache) {
         ret = opkg_validate_cached_file(src, dest);
         if (ret <= 0)

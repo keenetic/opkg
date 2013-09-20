@@ -81,6 +81,10 @@ static opkg_option_t options[] = {
 #if defined(HAVE_PATHFINDER)
           { "check_x509_path", OPKG_OPT_TYPE_BOOL, &_conf.check_x509_path },
 #endif
+#if defined(HAVE_CURL)
+          { "connect_timeout_ms", OPKG_OPT_TYPE_INT, &_conf.connect_timeout_ms},
+          { "transfer_timeout_ms", OPKG_OPT_TYPE_INT, &_conf.transfer_timeout_ms},
+#endif
 #if defined(HAVE_SSLCURL) && defined(HAVE_CURL)
           { "ssl_engine", OPKG_OPT_TYPE_STRING, &_conf.ssl_engine },
           { "ssl_cert", OPKG_OPT_TYPE_STRING, &_conf.ssl_cert },

@@ -90,6 +90,12 @@ typedef struct opkg_conf {
      int overwrite_no_owner;
      int volatile_cache;
 
+     /* ssl options: used only when opkg is configured with '--enable-curl',
+      * otherwise always NULL or 0.
+      */
+     int connect_timeout_ms;
+     int transfer_timeout_ms;
+
      /* ssl-curl options: used only when opkg is configured with
       * '--enable-ssl-curl', otherwise always NULL or 0.
       *
