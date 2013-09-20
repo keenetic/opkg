@@ -36,6 +36,12 @@ opkg_upgrade_pkg(pkg_t *old)
           return 0;
      }
 
+     if (old->state_flag & SF_REPLACE) {
+          opkg_msg(NOTICE, "Not upgrading package %s which is marked "
+                       "replace (flags=%#x).\n", old->name, old->state_flag);
+          return 0;
+     }
+
      new = pkg_hash_fetch_best_installation_candidate_by_name(old->name);
      if (new == NULL) {
           old_version = pkg_version_str_alloc(old);
