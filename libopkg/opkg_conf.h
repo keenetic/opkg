@@ -95,6 +95,7 @@ typedef struct opkg_conf {
       */
      int connect_timeout_ms;
      int transfer_timeout_ms;
+     int follow_location;
 
      /* ssl-curl options: used only when opkg is configured with
       * '--enable-ssl-curl', otherwise always NULL or 0.

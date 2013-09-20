@@ -429,6 +429,9 @@ opkg_download_internal(const char *src, const char *dest,
 	curl_easy_setopt (curl, CURLOPT_TIMEOUT_MS, timeout_ms);
     }
 
+    if (opkg_config->follow_location)
+	curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, 1);
+
     if (use_cache) {
         ret = opkg_validate_cached_file(src, dest);
         if (ret <= 0)
