@@ -81,8 +81,11 @@ opkg_prepare_upgrade_pkg(pkg_t *old, pkg_t **pkg)
 
     free(old_version);
     free(new_version);
-    new->state_flag |= SF_USER;
+
+    new->state_flag = old->state_flag;
     new->state_want = SW_INSTALL;
+    /* maintain the "Auto-Installed: yes" flag */
+    new->auto_installed = old->auto_installed;
 
     *pkg = new;
     return 1;
