@@ -442,12 +442,12 @@ pkg_hash_fetch_best_installation_candidate(abstract_pkg_t *apkg,
      abstract_pkg_vec_free(matching_apkgs);
      abstract_pkg_vec_free(providers);
 
-     if (good_pkg_by_name) {   /* We found a good candidate, we will install it */
-	  return good_pkg_by_name;
-     }
      if (held_pkg) {
 	  opkg_msg(INFO, "Using held package %s.\n", held_pkg->name);
 	  return held_pkg;
+     }
+     if (good_pkg_by_name) {   /* We found a good candidate, we will install it */
+	  return good_pkg_by_name;
      }
      if (latest_installed_parent) {
 	  opkg_msg(INFO, "Using latest version of installed package %s.\n",
