@@ -36,6 +36,9 @@ PKG_PROG_PKG_CONFIG([0.20])
 
 # Checks for libraries
 
+# Require libarchive
+PKG_CHECK_MODULES([LIBARCHIVE], [libarchive])
+
 dnl extra argument: --enable-pathfinder
 AC_ARG_ENABLE(pathfinder,
               AC_HELP_STRING([--enable-pathfinder], [Enable libpathfinder support.

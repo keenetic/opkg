@@ -1,5 +1,9 @@
 
-AM_CFLAGS=-Wall -DHOST_CPU_STR=\"@host_cpu@\" -DLIBDIR=\"@libdir@\" -DOPKGLIBDIR=\"@opkglibdir@\" -DOPKGETCDIR=\"@opkgetcdir@\" -DOPKGLOCKFILE=\"@opkglockfile@\" -DDATADIR=\"@datadir@\" -I$(top_srcdir) $(BIGENDIAN_CFLAGS) $(CURL_CFLAGS) $(GPGME_CFLAGS) $(GPGERR_CFLAGS) $(PATHFINDER_CFLAGS)
+AM_CFLAGS=-Wall -DHOST_CPU_STR=\"@host_cpu@\" -DLIBDIR=\"@libdir@\" \
+	-DOPKGLIBDIR=\"@opkglibdir@\" -DOPKGETCDIR=\"@opkgetcdir@\" \
+	-DOPKGLOCKFILE=\"@opkglockfile@\" -DDATADIR=\"@datadir@\" \
+	-I$(top_srcdir)	$(LIBARCHIVE_CFLAGS) $(BIGENDIAN_CFLAGS) $(CURL_CFLAGS) \
+	$(GPGME_CFLAGS) $(GPGERR_CFLAGS) $(PATHFINDER_CFLAGS)
 
 libopkg_includedir=$(includedir)/libopkg
 
@@ -85,7 +89,9 @@ libopkg_la_SOURCES = \
 	$(opkg_cmd_sources) $(opkg_db_sources) \
 	$(opkg_util_sources) $(opkg_list_sources)
 
-libopkg_la_LIBADD = $(top_builddir)/libbb/libbb.la $(CURL_LIBS) $(GPGME_LIBS) $(GPGERR_LIBS) $(OPENSSL_LIBS) $(PATHFINDER_LIBS)
+libopkg_la_LIBADD = $(top_builddir)/libbb/libbb.la $(LIBARCHIVE_LIBS) \
+		    $(CURL_LIBS) $(GPGME_LIBS) $(GPGERR_LIBS) $(OPENSSL_LIBS) \
+		    $(PATHFINDER_LIBS)
 
 libopkg_la_LDFLAGS = -version-info 1:0:0
 
