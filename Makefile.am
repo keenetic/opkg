@@ -24,9 +24,6 @@ install-data-hook:
 
 EXTRA_DIST = $(intercept_DATA) tests/regress CONTRIBUTORS ChangeLog.ipkg
 
-package: all-recursive
-	STRIPPROG=$(STRIP) INSTALL=$$PWD/install-sh  binary-arch
-
 # Ensure libopkg/config.h doesn't slip into a distribution archive.
 # TODO: Fix headers and remove config.h from libopkg_include_HEADERS so that
 # this hack isn't needed!
