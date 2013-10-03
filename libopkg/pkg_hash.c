@@ -454,8 +454,14 @@ pkg_hash_fetch_best_installation_candidate(abstract_pkg_t *apkg,
      abstract_pkg_vec_free(providers);
 
      if (held_pkg) {
-	  opkg_msg(INFO, "Using held package %s %s.\n",
+	  if (prefer_pkg) {
+	       opkg_msg(NOTICE, "Ignoring preferred package %s %s due to held package %s %s.\n",
+			prefer_pkg->name, prefer_pkg->version,
 			held_pkg->name, held_pkg->version);
+	  } else {
+	       opkg_msg(INFO, "Using held package %s %s.\n",
+			held_pkg->name, held_pkg->version);
+	  }
 	  return held_pkg;
      }
      if (prefer_pkg) {
