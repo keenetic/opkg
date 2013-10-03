@@ -84,6 +84,7 @@ typedef struct opkg_conf {
      int noaction;
      int download_only;
      char *cache;
+     int overwrite_no_owner;
 
 #ifdef HAVE_SSLCURL
      /* some options could be used by
