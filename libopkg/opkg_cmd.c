@@ -165,31 +165,19 @@ opkg_update_cmd(int argc, char **argv)
 
 	  sprintf_alloc(&list_file_name, "%s/%s", lists_dir, src->name);
 	  if (src->gzip) {
-	      char *tmp_file_name;
-	      FILE *in, *out;
 	      char *cache_location;
 
 	      cache_location = opkg_download_cache(url, NULL, NULL);
 	      if (cache_location) {
-		   opkg_msg(NOTICE, "Inflating %s.\n", url);
-		   sprintf_alloc (&tmp_file_name, "%s.@@", list_file_name);
-		   in = fopen (cache_location, "r");
-		   out = fopen (tmp_file_name, "w");
-		   if (in && out)
-			unzip (in, out);
-		   else
-			err = 1;
-		   if (in)
-			fclose (in);
-		   if (out)
-			fclose (out);
-		   rename(tmp_file_name, list_file_name);
-		   free(tmp_file_name);
+		   err = file_decompress(cache_location, list_file_name);
+		   if (err)
+		        opkg_msg(ERROR, "Couldn't decompress %s", url);
 	      } else
                    err = 1;
 	      free(cache_location);
 	  } else
 	      err = opkg_download(url, list_file_name, NULL, NULL);
+
 	  if (err) {
 	       failures++;
 	  } else {

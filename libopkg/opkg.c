@@ -534,7 +534,6 @@ opkg_update_package_lists(opkg_progress_callback_t progress_callback,
 
 		sprintf_alloc(&list_file_name, "%s/%s", lists_dir, src->name);
 		if (src->gzip) {
-			FILE *in, *out;
 			struct _curl_cb_data cb_data;
 			char *cached_location;
 
@@ -553,19 +552,12 @@ opkg_update_package_lists(opkg_progress_callback_t progress_callback,
 					  &cb_data);
 
 			if (cached_location) {
-				opkg_msg(INFO, "Inflating %s...\n", src->name);
-				in = fopen(cached_location, "r");
-				out = fopen(list_file_name, "w");
-				if (in && out)
-					unzip(in, out);
-				else
-					err = -1;
-				if (in)
-					fclose(in);
-				if (out)
-					fclose(out);
+				err = file_decompress(cached_location, list_file_name);
+				if (err) {
+					opkg_msg(ERROR, "Couldn't decompress %s", url);
+				}
+				free(cached_location);
 			}
-			free(cached_location);
 		} else
 			err = opkg_download(url, list_file_name, NULL, NULL);
 

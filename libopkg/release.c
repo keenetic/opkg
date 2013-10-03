@@ -186,7 +186,7 @@ release_download(release_t *release, pkg_src_t *dist, char *lists_dir, char *tmp
 
 	  list_for_each_entry(l , &opkg_config->arch_list.head, node) {
 	       char *url;
-	       char *tmp_file_name, *list_file_name;
+	       char *list_file_name;
 	       char *subpath = NULL;
 
 	       nv_pair_t *nv = (nv_pair_t *)l->data;
@@ -203,26 +203,12 @@ release_download(release_t *release, pkg_src_t *dist, char *lists_dir, char *tmp
 			 err = release_verify_file(release, cache_location, subpath);
 			 if (err) {
 			      unlink (list_file_name);
+			 } else {
+			      err = file_decompress(cache_location, list_file_name);
+			      if (err) {
+				   opkg_msg(ERROR, "Couldn't decompress %s", url);
+			      }
 			 }
-		    }
-		    if (!err) {
-			 FILE *in, *out;
-			 opkg_msg(NOTICE, "Inflating %s.\n", url);
-			 sprintf_alloc (&tmp_file_name, "%s.@@", list_file_name);
-			 in = fopen (cache_location, "r");
-			 out = fopen (tmp_file_name, "w");
-			 if (in && out) {
-			      err = unzip (in, out);
-			      if (err)
-				   opkg_msg(INFO, "Corrupt file at %s.\n", url);
-			 } else
-			      err = 1;
-			 if (in)
-			      fclose (in);
-			 if (out)
-			      fclose (out);
-			 rename(tmp_file_name, list_file_name);
-			 free(tmp_file_name);
 		    }
 		    free(url);
 		    free(cache_location);
