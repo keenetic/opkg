@@ -135,7 +135,7 @@ opkg_conf_find_option(const char *name)
 
 	for (i=0; options[i].name; i++) {
 		if (strcmp(options[i].name, name) == 0)
-			break;
+			return &options[i];
 	}
 
 	/* Not found. */
