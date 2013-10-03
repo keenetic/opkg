@@ -18,6 +18,7 @@
 
 #include "config.h"
 
+#include <archive.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -312,4 +313,71 @@ rm_r(const char *path)
 	}
 
 	return ret;
+}
+
+int
+file_decompress(const char * in, const char * out)
+{
+	int r = 0;
+	size_t sz;
+	void * buffer = NULL;
+	struct archive * ar = NULL;
+	struct archive_entry * entry;
+	FILE * f = NULL;
+
+	buffer = xmalloc(EXTRACT_BUFFER_LEN);
+	ar = archive_read_new();
+	if (!ar) {
+		r = -1;
+		goto err;
+	}
+
+	/* Support raw data in any compression format. */
+	archive_read_support_filter_all(ar);
+	archive_read_support_format_raw(ar);
+
+	/* Open input file and prepare for reading. */
+	r = archive_read_open_filename(ar, in, EXTRACT_BUFFER_LEN);
+	if (r != ARCHIVE_OK)
+		goto err;
+
+	r = archive_read_next_header(ar, &entry);
+	if (r != ARCHIVE_OK)
+		goto err;
+
+	/* Open output file. */
+	f = fopen(out, "w");
+	if (!f) {
+		r = -1;
+		goto err;
+	}
+
+	/* Copy decompressed data. */
+	while (1) {
+		sz = archive_read_data(ar, buffer, EXTRACT_BUFFER_LEN);
+		if (sz < 0) {
+			r = sz;
+			break;
+		}
+		if (sz == 0) {
+			/* We finished. */
+			r = 0;
+			break;
+		}
+
+		r = fwrite(buffer, 1, sz, f);
+		if (r < sz) {
+			break;
+		}
+	}
+
+err:
+	if (ar)
+		archive_read_free(ar);
+	if (buffer)
+		free(buffer);
+	if (f)
+		fclose(f);
+
+	return r;
 }
