@@ -2,11 +2,7 @@ AM_CFLAGS = -Wall
 
 noinst_LTLIBRARIES = libbb.la
 
-libbb_la_SOURCES = gz_open.c \
-	libbb.h \
-	unzip.c \
-	wfopen.c \
-	unarchive.c \
+libbb_la_SOURCES = libbb.h \
 	copy_file.c \
 	copy_file_chunk.c \
 	xreadlink.c \
@@ -14,8 +10,4 @@ libbb_la_SOURCES = gz_open.c \
 	xfuncs.c \
 	last_char_is.c \
 	make_directory.c \
-	safe_strncpy.c \
-	parse_mode.c \
-	time_string.c \
-	all_read.c \
-	mode_string.c
+	safe_strncpy.c

@@ -75,14 +75,6 @@ extern char * xstrndup (const char *s, int n) {
 	return safe_strncpy(t,s,n);
 }
 
-FILE *xfopen(const char *path, const char *mode)
-{
-	FILE *fp;
-	if ((fp = fopen(path, mode)) == NULL)
-		perror_msg_and_die("%s", path);
-	return fp;
-}
-
 /* END CODE */
 /*
 Local Variables:
