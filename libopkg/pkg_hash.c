@@ -273,6 +273,7 @@ pkg_hash_fetch_best_installation_candidate(abstract_pkg_t *apkg,
      pkg_t *latest_matching = NULL;
      pkg_t *priorized_matching = NULL;
      pkg_t *held_pkg = NULL;
+     pkg_t *prefer_pkg = NULL;
      pkg_t *good_pkg_by_name = NULL;
 
      if (apkg == NULL || apkg->provided_by == NULL || (apkg->provided_by->len == 0))
@@ -401,13 +402,23 @@ pkg_hash_fetch_best_installation_candidate(abstract_pkg_t *apkg,
 	  latest_matching = matching;
 	  if (matching->parent->state_status == SS_INSTALLED || matching->parent->state_status == SS_UNPACKED)
 	       latest_installed_parent = matching;
-	  if (matching->state_flag & (SF_HOLD|SF_PREFER)) {
+	  if (matching->state_flag & SF_HOLD) {
 	       if (held_pkg)
-		    opkg_msg(NOTICE, "Multiple packages (%s and %s) providing"
-				" same name marked HOLD or PREFER. "
+		    opkg_msg(NOTICE, "Multiple packages (%s %s and %s %s) providing"
+				" same name marked HOLD. "
 				"Using latest.\n",
-				held_pkg->name, matching->name);
+				held_pkg->name, held_pkg->version,
+				matching->name, matching->version);
 	       held_pkg = matching;
+	  }
+	  if (matching->state_flag & SF_PREFER) {
+	       if (prefer_pkg)
+		    opkg_msg(NOTICE, "Multiple packages (%s %s and %s %s) providing"
+				" same name marked PREFER. "
+				"Using latest.\n",
+				prefer_pkg->name, prefer_pkg->version,
+				matching->name, matching->version);
+	       prefer_pkg = matching;
 	  }
      }
 
@@ -443,8 +454,14 @@ pkg_hash_fetch_best_installation_candidate(abstract_pkg_t *apkg,
      abstract_pkg_vec_free(providers);
 
      if (held_pkg) {
-	  opkg_msg(INFO, "Using held package %s.\n", held_pkg->name);
+	  opkg_msg(INFO, "Using held package %s %s.\n",
+			held_pkg->name, held_pkg->version);
 	  return held_pkg;
+     }
+     if (prefer_pkg) {
+	  opkg_msg(INFO, "Using prefered package %s %s.\n",
+			prefer_pkg->name, prefer_pkg->version);
+	  return prefer_pkg;
      }
      if (good_pkg_by_name) {   /* We found a good candidate, we will install it */
 	  return good_pkg_by_name;
