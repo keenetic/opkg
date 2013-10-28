@@ -366,11 +366,12 @@ pkg_remove_orphan_dependent(pkg_t *pkg, pkg_t *old_pkg)
 
 			for (k=0; k<count1; k++) {
 				cd1 = &pkg->depends[k];
-				if (cd1->type != DEPEND)
+				if (cd1->type != DEPEND && cd1->type != RECOMMEND)
 					continue;
 				for (l=0; l<cd1->possibility_count; l++) {
-					if (cd0->possibilities[j]
-					 == cd1->possibilities[l]) {
+					if ( (cd0->type == cd1->type && cd0->possibilities[j] == cd1->possibilities[l]) ||
+					     (cd0->type != cd1->type && !strcmp(cd0->possibilities[j]->pkg->name, cd1->possibilities[l]->pkg->name) )
+					   ) {
 						found = 1;
 						break;
 					}
