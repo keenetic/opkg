@@ -282,6 +282,11 @@ fi
 
 CLEAN_DATE=`date +"%B %Y" | tr -d '\n'`
 
+AC_ARG_WITH(static-libopkg,
+[  --with-static-libopkg   Statically link libopkg into opkg-cl.],
+[static_libopkg="${withval}"])
+AM_CONDITIONAL(STATIC_LIBOPKG, test "x$static_libopkg" = "xyes")
+
 AC_SUBST(opkglibdir)
 AC_SUBST(opkgetcdir)
 AC_SUBST(opkglockfile)

@@ -3,3 +3,6 @@ bin_PROGRAMS = opkg-cl
 
 opkg_cl_SOURCES = opkg-cl.c
 opkg_cl_LDADD = $(top_builddir)/libopkg/libopkg.la
+if STATIC_LIBOPKG
+opkg_cl_LDFLAGS = -static
+endif
