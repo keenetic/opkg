@@ -1,4 +1,4 @@
-AM_CFLAGS = -I${top_srcdir}/libopkg ${ALL_CFLAGS}
+AM_CFLAGS = -I${top_srcdir}/libopkg
 bin_PROGRAMS = opkg-cl
 
 opkg_cl_SOURCES = opkg-cl.c

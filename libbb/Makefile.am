@@ -1,6 +1,4 @@
-HOST_CPU=@host_cpu@
-BUILD_CPU=@build_cpu@
-ALL_CFLAGS=-Wall -DHOST_CPU_STR=\"@host_cpu@\" -DBUILD_CPU=@build_cpu@
+AM_CFLAGS = -Wall
 
 noinst_LTLIBRARIES = libbb.la
 
@@ -21,6 +19,3 @@ libbb_la_SOURCES = gz_open.c \
 	time_string.c \
 	all_read.c \
 	mode_string.c
-
-libbb_la_CFLAGS = $(ALL_CFLAGS)
-#libbb_la_LDFLAGS = -static

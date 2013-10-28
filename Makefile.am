@@ -2,15 +2,6 @@ ACLOCAL_AMFLAGS = -I shave
 
 SUBDIRS = libbb libopkg src tests utils man
 
-
-HOST_CPU=@host_cpu@
-BUILD_CPU=@build_cpu@
-OPKGLIBDIR=@opkglibdir@ 
-ALL_CFLAGS=-Wall -DHOST_CPU_STR=\"@host_cpu@\" -DBUILD_CPU=@build_cpu@ -DLIBDIR=\"@libdir@\" -DOPKGLIBDIR=\"@opkglibdir@\" -DDATADIR=\"@datadir@\"
-
-PATHFINDER_CFLAGS = @PATHFINDER_CFLAGS@
-PATHFINDER_LIBS   = @PATHFINDER_LIBS@
-
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libopkg.pc
 
