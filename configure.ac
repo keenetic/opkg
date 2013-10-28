@@ -177,6 +177,7 @@ if test "x$want_gpgme" = "xyes"; then
     AC_MSG_ERROR(GPGERR is required to build gpgme support)
   fi
 fi
+AM_CONDITIONAL(HAVE_GPGME, test "x$want_gpgme" = "xyes")
 
 AC_SUBST(GPGME_CFLAGS)
 AC_SUBST(GPGME_LIBS)
