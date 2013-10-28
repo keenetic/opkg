@@ -283,6 +283,29 @@ opkg_download_pkg(pkg_t *pkg, const char *dir)
 }
 
 /*
+ * Returns 1 if URL "url" is prefixed by a remote protocol, 0 otherwise.
+ */
+static int
+url_has_remote_protocol(const char* url)
+{
+  static const char* remote_protos[] = {
+    "http://",
+    "https://",
+    "ftp://"
+  };
+  static const size_t nb_remote_protos = sizeof(remote_protos) / sizeof(char*);
+
+  unsigned int i = 0;
+  for (i = 0; i < nb_remote_protos; ++i)
+  {
+    if (str_starts_with(url, remote_protos[i]))
+      return 1;
+  }
+
+  return 0;
+}
+
+/*
  * Downloads file from url, installs in package database, return package name.
  */
 int
@@ -293,8 +316,7 @@ opkg_prepare_url_for_install(const char *url, char **namep)
 
      pkg = pkg_new();
 
-     if (str_starts_with(url, "http://")
-	 || str_starts_with(url, "ftp://")) {
+     if (url_has_remote_protocol(url)) {
 	  char *tmp_file;
 	  char *file_basec = xstrdup(url);
 	  char *file_base = basename(file_basec);
