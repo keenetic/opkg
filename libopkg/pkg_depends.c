@@ -431,6 +431,22 @@ static void __pkg_hash_fetch_conflicts(pkg_t * pkg, pkg_vec_t * installed_confli
     }
 }
 
+static void __pkg_hash_fetch_conflictees(pkg_t *pkg, pkg_vec_t *installed_conflicts)
+{
+    int i;
+
+    pkg_vec_t *available_pkgs = pkg_vec_alloc();
+    pkg_hash_fetch_all_installed(available_pkgs);
+
+    for (i = 0; i < available_pkgs->len; i++) {
+        pkg_t *cpkg = available_pkgs->pkgs[i];
+        if (pkg_conflicts(cpkg, pkg) && !is_pkg_in_pkg_vec(installed_conflicts, cpkg))
+            pkg_vec_insert(installed_conflicts, cpkg);
+    }
+
+    pkg_vec_free(available_pkgs);
+}
+
 pkg_vec_t * pkg_hash_fetch_conflicts(pkg_t * pkg)
 {
     pkg_vec_t * installed_conflicts;
@@ -448,6 +464,7 @@ pkg_vec_t * pkg_hash_fetch_conflicts(pkg_t * pkg)
     installed_conflicts = pkg_vec_alloc();
 
     __pkg_hash_fetch_conflicts(pkg, installed_conflicts);
+    __pkg_hash_fetch_conflictees(pkg, installed_conflicts);
 
     if (installed_conflicts->len)
 	    return installed_conflicts;
