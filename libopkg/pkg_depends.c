@@ -370,34 +370,22 @@ is_pkg_a_replaces(pkg_t *pkg_scout,pkg_t *pkg)
 
 }
 
-
-pkg_vec_t * pkg_hash_fetch_conflicts(pkg_t * pkg)
+static void __pkg_hash_fetch_conflicts(pkg_t * pkg, pkg_vec_t * installed_conflicts)
 {
-    pkg_vec_t * installed_conflicts, * test_vec;
+    pkg_vec_t * test_vec;
     compound_depend_t * conflicts;
     depend_t ** possible_satisfiers;
     depend_t * possible_satisfier;
     int j;
     unsigned int i, k;
     unsigned int count;
-    abstract_pkg_t * ab_pkg;
     pkg_t **pkg_scouts;
     pkg_t *pkg_scout;
 
-    /*
-     * this is a setup to check for redundant/cyclic dependency checks,
-     * which are marked at the abstract_pkg level
-     */
-    if(!(ab_pkg = pkg->parent)){
-	opkg_msg(ERROR, "Internal error: %s not in hash table\n", pkg->name);
-	return (pkg_vec_t *)NULL;
-    }
-
     conflicts = pkg->conflicts;
     if(!conflicts){
-	return (pkg_vec_t *)NULL;
+	return;
     }
-    installed_conflicts = pkg_vec_alloc();
 
     count = pkg->conflicts_count;
 
@@ -441,6 +429,25 @@ pkg_vec_t * pkg_hash_fetch_conflicts(pkg_t * pkg)
 	}
 	conflicts++;
     }
+}
+
+pkg_vec_t * pkg_hash_fetch_conflicts(pkg_t * pkg)
+{
+    pkg_vec_t * installed_conflicts;
+    abstract_pkg_t * ab_pkg;
+
+    /*
+     * this is a setup to check for redundant/cyclic dependency checks,
+     * which are marked at the abstract_pkg level
+     */
+    if(!(ab_pkg = pkg->parent)){
+	opkg_msg(ERROR, "Internal error: %s not in hash table\n", pkg->name);
+	return (pkg_vec_t *)NULL;
+    }
+
+    installed_conflicts = pkg_vec_alloc();
+
+    __pkg_hash_fetch_conflicts(pkg, installed_conflicts);
 
     if (installed_conflicts->len)
 	    return installed_conflicts;
