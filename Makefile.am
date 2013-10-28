@@ -1,5 +1,3 @@
-ACLOCAL_AMFLAGS = -I shave
-
 SUBDIRS = libbb libopkg src tests utils man
 
 pkgconfigdir = $(libdir)/pkgconfig

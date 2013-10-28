@@ -19,10 +19,6 @@ Makefile.in.in
 # The local aclocal.m4 file
 aclocal.m4
 m4/
-shave/lt*
-shave/libtool.m4
-shave/shave
-shave/shave-libtool
 
 # The output of the configure script
 conf/

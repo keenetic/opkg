@@ -4,7 +4,6 @@ AC_CONFIG_SRCDIR([libopkg/pkg.c])
 
 AC_CONFIG_AUX_DIR([conf])
 AC_CONFIG_MACRO_DIR([m4])
-AC_CONFIG_MACRO_DIR([shave])
 
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS(libopkg/config.h)
@@ -24,6 +23,7 @@ done
 # large file support can be useful for gpgme
 AC_SYS_LARGEFILE
 
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 # Checks for programs
 AC_PROG_AWK
@@ -287,9 +287,6 @@ AC_SUBST(opkgetcdir)
 AC_SUBST(opkglockfile)
 AC_SUBST([CLEAN_DATE])
 
-# Setup output beautifier.
-SHAVE_INIT([shave], [enable])
-
 AC_OUTPUT(
     Makefile
     libopkg/Makefile
@@ -299,8 +296,6 @@ AC_OUTPUT(
     utils/Makefile
     utils/update-alternatives
     libopkg.pc
-    shave/shave
-    shave/shave-libtool
     man/Makefile
     man/opkg-cl.1
     man/opkg-key.1

@@ -13,8 +13,6 @@ if [ \( $# -eq 1 \) -a \( "$1" = "--clean" \) ]; then
 	rm -f Makefile {libbb,libopkg,tests,man,utils,src}/Makefile
 	rm -f Makefile.in {libbb,libopkg,tests,man,utils,src}/Makefile.in
 	rm -f libopkg/config.h{,.in}
-	rm -f shave/{ltoptions.m4,ltsugar.m4,ltversion.m4,lt~obsolete.m4}
-	rm -f shave/{libtool.m4,shave,shave-libtool}
 	rm -rf po conf autom4te.cache
 	rm -rf {libbb,libopkg,src,tests}/.deps
 
