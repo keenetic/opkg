@@ -399,10 +399,14 @@ pkg_vec_t * pkg_hash_fetch_conflicts(pkg_t * pkg)
 	/* foreach possible satisfier */
 	for(j = 0; j < conflicts->possibility_count; j++){
             possible_satisfier = possible_satisfiers[j];
-            if (!possible_satisfier)
+            if (!possible_satisfier) {
                 opkg_msg(ERROR, "Internal error: possible_satisfier=NULL\n");
-            if (!possible_satisfier->pkg)
+                continue;
+            }
+            if (!possible_satisfier->pkg) {
                 opkg_msg(ERROR, "Internal error: possible_satisfier->pkg=NULL\n");
+                continue;
+            }
 	    test_vec = possible_satisfier->pkg->pkgs;
 	    if (test_vec) {
                 /* pkg_vec found, it is an actual package conflict
