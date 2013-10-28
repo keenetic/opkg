@@ -367,7 +367,21 @@ is_pkg_a_replaces(pkg_t *pkg_scout,pkg_t *pkg)
         }
     }
     return 0;
+}
 
+static int is_pkg_a_provides(const pkg_t *pkg_scout, const pkg_t *pkg)
+{
+    int i ;
+
+    for (i = 0; i < pkg->provides_count; i++) {
+        if (strcmp(pkg_scout->name,pkg->provides[i]->name)==0) {      // Found
+            opkg_msg(DEBUG2, "Seems I've found a provide %s %s\n",
+			pkg_scout->name, pkg->provides[i]->name);
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 static void __pkg_hash_fetch_conflicts(pkg_t * pkg, pkg_vec_t * installed_conflicts)
@@ -419,7 +433,7 @@ static void __pkg_hash_fetch_conflicts(pkg_t * pkg, pkg_vec_t * installed_confli
                         continue;
                     }
 		    if ((pkg_scout->state_status == SS_INSTALLED || pkg_scout->state_want == SW_INSTALL) &&
-		       version_constraints_satisfied(possible_satisfier, pkg_scout) && !is_pkg_a_replaces(pkg_scout,pkg)){
+		       version_constraints_satisfied(possible_satisfier, pkg_scout) && !is_pkg_a_replaces(pkg_scout,pkg) && !is_pkg_a_provides(pkg_scout,pkg)){
  	 	        if (!is_pkg_in_pkg_vec(installed_conflicts, pkg_scout)){
 			    pkg_vec_insert(installed_conflicts, pkg_scout);
 			}
@@ -440,7 +454,7 @@ static void __pkg_hash_fetch_conflictees(pkg_t *pkg, pkg_vec_t *installed_confli
 
     for (i = 0; i < available_pkgs->len; i++) {
         pkg_t *cpkg = available_pkgs->pkgs[i];
-        if (pkg_conflicts(cpkg, pkg) && !is_pkg_in_pkg_vec(installed_conflicts, cpkg))
+        if (pkg_conflicts(cpkg, pkg) && !is_pkg_a_provides(cpkg, pkg) && !is_pkg_in_pkg_vec(installed_conflicts, cpkg))
             pkg_vec_insert(installed_conflicts, cpkg);
     }
 
