@@ -475,7 +475,7 @@ out_err:
     openssl_init();
 
     // Set-up the key store
-    if(!(store = setup_verify(opkg_conf->signature_ca_file, conf->signature_ca_path))){
+    if(!(store = setup_verify(opkg_config->signature_ca_file, opkg_config->signature_ca_path))){
         opkg_msg(ERROR, "Can't open CA certificates.\n");
         goto verify_file_end;
     }
@@ -494,7 +494,7 @@ out_err:
         goto verify_file_end;
     }
 #if defined(HAVE_PATHFINDER)
-    if(opkg_conf->check_x509_path){
+    if(opkg_config->check_x509_path){
 	if(!pkcs7_pathfinder_verify_signers(p7)){
 	    opkg_msg(ERROR, "pkcs7_pathfinder_verify_signers: "
 		    "Path verification failed.\n");
@@ -687,7 +687,7 @@ opkg_curl_init(curl_progress_func cb, void *data)
 	    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
 	}else{
 #ifdef HAVE_PATHFINDER
-	    if(opkg_conf->check_x509_path){
+	    if(opkg_config->check_x509_path){
     	        if (curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, curl_ssl_ctx_function) != CURLE_OK){
 		    opkg_msg(DEBUG, "Failed to set ssl path verification callback.\n");
 		}else{

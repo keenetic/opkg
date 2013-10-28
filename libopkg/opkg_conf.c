@@ -334,8 +334,8 @@ opkg_conf_parse_file(const char *filename,
 		       filename, line_num, line);
 	  } else {
 
-	  /* We use the opkg_conf->tmp_dest_list below instead of
-	     opkg_conf->pkg_dest_list because we might encounter an
+	  /* We use the opkg_config->tmp_dest_list below instead of
+	     opkg_config->pkg_dest_list because we might encounter an
 	     offline_root option later and that would invalidate the
 	     directories we would have computed in
 	     pkg_dest_list_init. (We do a similar thing with
@@ -515,7 +515,7 @@ opkg_conf_load(void)
 	opkg_config->restrict_to_default_dest = 0;
 	opkg_config->default_dest = NULL;
 #if defined(HAVE_PATHFINDER)
-	opkg_conf->check_x509_path = 1;
+	opkg_config->check_x509_path = 1;
 #endif
 
 	if (!opkg_config->offline_root)
