@@ -1,4 +1,4 @@
-AM_CFLAGS = $(ALL_CFLAGS) -Wall -g -O3 -I${top_srcdir}/libopkg
+AM_CFLAGS = $(ALL_CFLAGS) -Wall -I${top_srcdir}/libopkg
 
 #noinst_PROGRAMS = opkg_hash_test opkg_extract_test
 #noinst_PROGRAMS = libopkg_test opkg_active_list_test

@@ -1,6 +1,6 @@
 HOST_CPU=@host_cpu@
 BUILD_CPU=@build_cpu@
-ALL_CFLAGS=-g -O -Wall -DHOST_CPU_STR=\"@host_cpu@\" -DBUILD_CPU=@build_cpu@
+ALL_CFLAGS=-Wall -DHOST_CPU_STR=\"@host_cpu@\" -DBUILD_CPU=@build_cpu@
 
 noinst_LTLIBRARIES = libbb.la
 
