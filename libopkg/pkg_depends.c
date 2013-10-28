@@ -694,8 +694,8 @@ void buildConflicts(pkg_t * pkg)
 
     conflicts = pkg->conflicts = xcalloc(pkg->conflicts_count, sizeof(compound_depend_t));
     for (i = 0; i < pkg->conflicts_count; i++) {
-	 conflicts->type = CONFLICTS;
 	 parseDepends(conflicts, pkg->conflicts_str[i]);
+	 conflicts->type = CONFLICTS;
 	 free(pkg->conflicts_str[i]);
 	 conflicts++;
     }
