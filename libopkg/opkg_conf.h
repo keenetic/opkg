@@ -21,8 +21,6 @@
 typedef struct opkg_conf opkg_conf_t;
 extern opkg_conf_t *conf;
 
-#include "config.h"
-
 #include <stdarg.h>
 
 #include "hash_table.h"
