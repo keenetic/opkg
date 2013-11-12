@@ -316,7 +316,7 @@ int
 main(int argc, char *argv[])
 {
 	int opts, err = -1;
-	char *cmd_name;
+	char *cmd_name = NULL;
 	opkg_cmd_t *cmd;
 	int nocheckfordirorfile = 0;
         int noreadfeedsfile = 0;
