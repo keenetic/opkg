@@ -1,16 +1,21 @@
 opkg uses autoconf and friends for configuration. The familiar steps of:
 
-	./configure
-	make
+    ./configure [options]
+    make
+    make install
 
-should be sufficient, (you may need an initial ./autoconfigure.sh), if
-you don't have a generated configure script, (ie. you're compiling a
-version out of CVS).
+should be sufficient if you downloaded an official release of opkg. If you
+obtained opkg from a Git or Subversion repository, you may need to run
+autogen.sh before running configure, as follows.
+
+    [ACLOCAL_FLAGS=foo] ./autogen.sh
+
+The 'ACLOCAL_FLAGS' variable is optional.
 
 The remainder of this document is the standard INSTALL document
 provided by autoconf.
 
--Carl <cworth@handhelds.org>
+- Opkg maintainers
 
 Basic Installation
 ==================

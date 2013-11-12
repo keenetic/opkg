@@ -1,9 +1,16 @@
-#! /bin/sh
+#!/bin/sh
 
-set -e
+PACKAGE="opkg"
+
+srcdir=`dirname $0`
+test -z "$srcdir" && srcdir=.
+
+cd "$srcdir"
+DIE=0
 
 if [ \( $# -eq 1 \) -a \( "$1" = "--clean" \) ]; then
 	# Deep clean of all generated files
+	echo "Removing old files (no Makefile around?) ..."
 	rm -f configure
 	rm -f config.log config.status
 	rm -f libtool
@@ -27,11 +34,89 @@ if [ \( $# -eq 1 \) -a \( "$1" = "--clean" \) ]; then
 	rm -f tests/regress/*.py{c,o}
 	rm -rf tests/regress/__pycache__
 
+	echo "Done. If you want regenerate the Autotool files call 'autogen.sh' without the '--clean' argument."
 	exit 0
 fi
 
-# If we didn't get '--clean' we're bootstrapping the project
-autoreconf -v --install || exit 1
-glib-gettextize --force --copy || exit 1
-./configure "$@"
+(autoconf --version) < /dev/null > /dev/null 2>&1 || {
+	echo
+	echo "You must have autoconf installed to compile $PACKAGE."
+	echo "Download the appropriate PACKAGE for your system,"
+	echo "or get the source from one of the GNU ftp sites"
+	echo "listed in http://www.gnu.org/order/ftp.html"
+	DIE=1
+}
 
+(automake --version) < /dev/null > /dev/null 2>&1 || {
+	echo
+	echo "You must have automake installed to compile $PACKAGE."
+	echo "Download the appropriate PACKAGE for your system,"
+	echo "or get the source from one of the GNU ftp sites"
+	echo "listed in http://www.gnu.org/order/ftp.html"
+	DIE=1
+}
+
+(libtool --version) < /dev/null > /dev/null 2>&1 || {
+	echo
+	echo "You must have libtool installed to compile $PACKAGE."
+	echo "Download the appropriate PACKAGE for your system,"
+	echo "or get the source from one of the GNU ftp sites"
+	echo "listed in http://www.gnu.org/order/ftp.html"
+	DIE=1
+}
+
+# currently gettext is not used, no need to check
+#(gettext --version) < /dev/null > /dev/null 2>&1 || {
+#	echo
+#	echo "You must have gettext installed to compile $PACKAGE."
+#	echo "Download the appropriate PACKAGE for your system,"
+#	echo "or get the source from one of the GNU ftp sites"
+#	echo "listed in http://www.gnu.org/order/ftp.html"
+#	DIE=1
+#}
+
+if test "$DIE" -eq 1; then
+	exit 1
+fi
+
+echo "Generating configuration files for $PACKAGE, please wait...."
+if [ "$ACLOCAL_FLAGS" == "" ]; then
+        echo "No option for 'aclocal' given. Possibly you have forgotten to use 'ACLOCAL_FLAGS='?"
+fi
+
+echo "  aclocal $ACLOCAL_FLAGS"
+aclocal $ACLOCAL_FLAGS
+if [ "$?" = "1" ]; then
+	echo "aclocal failed!" && exit 1
+fi
+
+echo "  libtoolize --automake"
+libtoolize --automake
+if [ "$?" = "1" ]; then
+	echo "libtoolize failed!" && exit 1
+fi
+
+#echo "  gettextize"
+#gettextize
+#if [ "$?" = "1" ]; then
+#	"echo gettextsize failed!" && exit 1
+#fi
+echo "  autoconf"
+autoconf
+if [ "$?" = "1" ]; then
+	echo "autoconf failed!" && exit 1
+fi
+
+echo "  autoheader"
+autoheader
+if [ "$?" = "1" ]; then
+	echo "autoheader failed!" && exit 1
+fi
+
+echo "  automake --add-missing"
+automake --add-missing
+if [ "$?" = "1" ]; then
+	echo "automake failed!" && exit 1
+fi
+
+echo "You can now run 'configure [options]' to configure $PACKAGE."
