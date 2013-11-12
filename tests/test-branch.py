@@ -51,7 +51,8 @@ def do_checkout(commit):
 
 def do_test():
 	os.chdir(opkg_dir)
-	rsh("./autogen.sh %s" % OPKG_CONFIGURE_OPTIONS)
+	rsh("./autogen.sh")
+	rsh("./configure %s" % OPKG_CONFIGURE_OPTIONS)
 	rsh("make")
 	rsh("make check")
 	rsh("make DESTDIR=%s install" % install_in_dir)
