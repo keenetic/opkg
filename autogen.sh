@@ -87,14 +87,14 @@ if [ "$ACLOCAL_FLAGS" == "" ]; then
         echo "No option for 'aclocal' given. Possibly you have forgotten to use 'ACLOCAL_FLAGS='?"
 fi
 
-echo "  aclocal $ACLOCAL_FLAGS"
-aclocal $ACLOCAL_FLAGS
+echo "  aclocal --install $ACLOCAL_FLAGS"
+aclocal --install $ACLOCAL_FLAGS
 if [ "$?" = "1" ]; then
 	echo "aclocal failed!" && exit 1
 fi
 
-echo "  libtoolize --automake"
-libtoolize --automake
+echo "  libtoolize --automake --install"
+libtoolize --automake --install
 if [ "$?" = "1" ]; then
 	echo "libtoolize failed!" && exit 1
 fi
