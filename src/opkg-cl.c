@@ -59,8 +59,8 @@ static struct option long_options[] = {
 	{"conf-file", 1, 0, 'f'},
 	{"conf", 1, 0, 'f'},
 	{"dest", 1, 0, 'd'},
-        {"force-maintainer", 0, 0, ARGS_OPT_FORCE_MAINTAINER},
-        {"force_maintainer", 0, 0, ARGS_OPT_FORCE_MAINTAINER},
+	{"force-maintainer", 0, 0, ARGS_OPT_FORCE_MAINTAINER},
+	{"force_maintainer", 0, 0, ARGS_OPT_FORCE_MAINTAINER},
 	{"force-depends", 0, 0, ARGS_OPT_FORCE_DEPENDS},
 	{"force_depends", 0, 0, ARGS_OPT_FORCE_DEPENDS},
 	{"force-overwrite", 0, 0, ARGS_OPT_FORCE_OVERWRITE},
@@ -199,7 +199,7 @@ args_parse(int argc, char *argv[])
 		case ARGS_OPT_NOACTION:
 			opkg_config->noaction = 1;
 			break;
-        case ARGS_OPT_DOWNLOAD_ONLY:
+		case ARGS_OPT_DOWNLOAD_ONLY:
 			opkg_config->download_only = 1;
 			break;
 		case ':':
@@ -319,7 +319,7 @@ main(int argc, char *argv[])
 	char *cmd_name = NULL;
 	opkg_cmd_t *cmd;
 	int nocheckfordirorfile = 0;
-        int noreadfeedsfile = 0;
+	int noreadfeedsfile = 0;
 
 	if (opkg_conf_init())
 		goto err0;
