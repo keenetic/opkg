@@ -2,8 +2,49 @@
 AM_CFLAGS=-Wall -DHOST_CPU_STR=\"@host_cpu@\" -DBUILD_CPU=@build_cpu@ -DLIBDIR=\"@libdir@\" -DOPKGLIBDIR=\"@opkglibdir@\" -DOPKGETCDIR=\"@opkgetcdir@\" -DOPKGLOCKFILE=\"@opkglockfile@\" -DDATADIR=\"@datadir@\" -I$(top_srcdir) $(BIGENDIAN_CFLAGS) $(CURL_CFLAGS) $(GPGME_CFLAGS) $(PATHFINDER_CFLAGS)
 
 libopkg_includedir=$(includedir)/libopkg
-libopkg_include_HEADERS= *.h $(srcdir)/*.h
 
+# Headers to be installed: everything except opkg_pathfinder.h as that header
+# requires symbols from config.h
+libopkg_include_HEADERS = $(srcdir)/active_list.h \
+	$(srcdir)/cksum_list.h \
+	$(srcdir)/conffile.h \
+	$(srcdir)/conffile_list.h \
+	$(srcdir)/file_util.h \
+	$(srcdir)/hash_table.h \
+	$(srcdir)/list.h \
+	$(srcdir)/md5.h \
+	$(srcdir)/nv_pair.h \
+	$(srcdir)/nv_pair_list.h \
+	$(srcdir)/opkg.h \
+	$(srcdir)/opkg_cmd.h \
+	$(srcdir)/opkg_conf.h \
+	$(srcdir)/opkg_configure.h \
+	$(srcdir)/opkg_defines.h \
+	$(srcdir)/opkg_download.h \
+	$(srcdir)/opkg_install.h \
+	$(srcdir)/opkg_message.h \
+	$(srcdir)/opkg_remove.h \
+	$(srcdir)/opkg_upgrade.h \
+	$(srcdir)/opkg_utils.h \
+	$(srcdir)/parse_util.h \
+	$(srcdir)/pkg.h \
+	$(srcdir)/pkg_depends.h \
+	$(srcdir)/pkg_dest.h \
+	$(srcdir)/pkg_dest_list.h \
+	$(srcdir)/pkg_extract.h \
+	$(srcdir)/pkg_hash.h \
+	$(srcdir)/pkg_parse.h \
+	$(srcdir)/pkg_src.h \
+	$(srcdir)/pkg_src_list.h \
+	$(srcdir)/pkg_vec.h \
+	$(srcdir)/release.h \
+	$(srcdir)/release_parse.h \
+	$(srcdir)/sha256.h \
+	$(srcdir)/sprintf_alloc.h \
+	$(srcdir)/str_list.h \
+	$(srcdir)/void_list.h \
+	$(srcdir)/xregex.h \
+	$(srcdir)/xsystem.h
 
 opkg_libcore_sources = \
 		    opkg.c opkg.h \
