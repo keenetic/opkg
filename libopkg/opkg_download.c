@@ -555,14 +555,16 @@ end:
 
 #endif
 
-#ifdef HAVE_CURL
 void opkg_curl_cleanup(void){
+#ifdef HAVE_CURL
     if(curl != NULL){
 	curl_easy_cleanup (curl);
 	curl = NULL;
     }
+#endif
 }
 
+#ifdef HAVE_CURL
 static CURL *
 opkg_curl_init(curl_progress_func cb, void *data)
 {
