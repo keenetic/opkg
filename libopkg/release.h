@@ -29,9 +29,7 @@ struct release
      char **components;
      unsigned int components_count;
      cksum_list_t *md5sums;
-#ifdef HAVE_SHA256
      cksum_list_t *sha256sums;
-#endif
      char **complist;
      unsigned int complist_count;
 };

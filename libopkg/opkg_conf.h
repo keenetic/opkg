@@ -88,8 +88,10 @@ struct opkg_conf
      int download_only;
      char *cache;
 
-#ifdef HAVE_SSLCURL
-     /* some options could be used by
+     /* ssl-curl options: used only when opkg is configured with
+      * '--enable-ssl-curl', otherwise always NULL or 0.
+      *
+      * some options could be used by
       * wget if curl support isn't builtin
       * If someone want to try...
       */
@@ -102,10 +104,11 @@ struct opkg_conf
      char *ssl_ca_file;
      char *ssl_ca_path;
      int ssl_dont_verify_peer;
-#endif
-#ifdef HAVE_PATHFINDER
+
+     /* pathfinder options: used only when opkg is configured with
+      * '--enable-pathfinder', otherwise always NULL or 0 as above.
+      */
      int check_x509_path;
-#endif
 
      /* proxy options */
      char *http_proxy;
