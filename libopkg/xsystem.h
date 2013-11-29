@@ -18,6 +18,10 @@
 #ifndef XSYSTEM_H
 #define XSYSTEM_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Like system(3), but with error messages printed if the fork fails
    or if the child process dies due to an uncaught signal. Also, the
    return value is a bit simpler:
@@ -27,6 +31,10 @@
    as defined in <sys/wait.h>.
 */
 int xsystem(const char *argv[]);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

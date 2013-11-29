@@ -18,6 +18,10 @@
 #ifndef PKG_PARSE_H
 #define PKG_PARSE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "pkg.h"
 
 int parse_version(pkg_t *pkg, const char *raw);
@@ -53,5 +57,9 @@ int pkg_parse_line(void *ptr, const char *line, uint mask);
 #define PFM_VERSION		(1 << 26)
 
 #define PFM_ALL	(~(uint)0)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

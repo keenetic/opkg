@@ -20,6 +20,10 @@
 #ifndef _LINUX_LIST_H
 #define _LINUX_LIST_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct list_head {
     struct list_head *next, *prev;
 };
@@ -300,5 +304,9 @@ static inline void list_splice_init(struct list_head *list,
 		n = list_entry(pos->member.next, typeof(*pos), member);	\
 	     &pos->member != (head); 					\
 	     pos = n, n = list_entry(n->member.next, typeof(*n), member))
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

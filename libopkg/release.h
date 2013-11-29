@@ -16,6 +16,10 @@
 #ifndef RELEASE_H
 #define RELEASE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include "pkg.h"
 #include "cksum_list.h"
@@ -47,5 +51,9 @@ int release_download(release_t *release, pkg_src_t *dist, char *lists_dir, char 
 const char **release_comps(release_t *release, unsigned int *count);
 
 int release_verify_file(release_t *release, const char *filename, const char *pathname);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

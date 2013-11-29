@@ -15,8 +15,16 @@
 #ifndef OPKG_UPGRADE_H
 #define OPKG_UPGRADE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "active_list.h"
 int opkg_upgrade_pkg(pkg_t *old);
 struct active_list * prepare_upgrade_list (void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

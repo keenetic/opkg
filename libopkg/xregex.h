@@ -21,11 +21,18 @@
 #include <sys/types.h>
 #include <regex.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int xregcomp(regex_t *preg, const char *regex, int cflags);
 static inline void xregfree(regex_t *preg)
 {
      regfree(preg);
 }
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

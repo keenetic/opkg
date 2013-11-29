@@ -18,6 +18,10 @@
 #ifndef PKG_DEPENDS_H
 #define PKG_DEPENDS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "pkg.h"
 #include "pkg_hash.h"
 
@@ -89,5 +93,9 @@ int pkg_dependence_satisfied(depend_t *depend);
 const char* constraint_to_str(enum version_constraint c);
 enum version_constraint str_to_constraint(char **str);
 int is_pkg_in_pkg_vec(pkg_vec_t * vec, pkg_t * pkg);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

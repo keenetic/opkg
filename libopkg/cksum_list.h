@@ -16,6 +16,10 @@
 #ifndef CKSUM_LIST_H
 #define CKSUM_LIST_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct 
 {
   char *name;
@@ -42,5 +46,9 @@ void cksum_list_deinit(cksum_list_t *list);
 
 cksum_t *cksum_list_append(cksum_list_t *list, char **itemlist);
 const cksum_t *cksum_list_find(cksum_list_t *list, const char *name);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

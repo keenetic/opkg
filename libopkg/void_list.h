@@ -18,6 +18,10 @@
 #ifndef VOID_LIST_H
 #define VOID_LIST_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "list.h"
 
 typedef struct void_list_elt void_list_elt_t;
@@ -60,5 +64,8 @@ void_list_elt_t *void_list_last(void_list_t *list);
 
 void void_list_purge(void_list_t *list);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

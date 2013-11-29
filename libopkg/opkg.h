@@ -18,6 +18,10 @@
 #ifndef OPKG_H
 #define OPKG_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "pkg.h"
 #include "opkg_message.h"
 
@@ -59,5 +63,9 @@ pkg_t* opkg_find_package (const char *name, const char *version, const char *arc
 int opkg_repository_accessibility_check(void);
 
 int opkg_compare_versions (const char *ver1, const char *ver2);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* OPKG_H */

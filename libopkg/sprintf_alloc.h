@@ -18,6 +18,14 @@
 #ifndef SPRINTF_ALLOC_H
 #define SPRINTF_ALLOC_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void sprintf_alloc(char **str, const char *fmt, ...);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

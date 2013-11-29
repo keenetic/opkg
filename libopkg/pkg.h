@@ -20,6 +20,10 @@
 
 #include <sys/types.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "pkg_vec.h"
 #include "str_list.h"
 #include "active_list.h"
@@ -224,5 +228,9 @@ void pkg_info_preinstall_check(void);
 
 int pkg_write_filelist(pkg_t *pkg);
 int pkg_write_changed_filelists(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

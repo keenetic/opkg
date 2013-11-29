@@ -23,6 +23,10 @@ extern opkg_conf_t *conf;
 
 #include <stdarg.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "hash_table.h"
 #include "pkg_src_list.h"
 #include "pkg_dest_list.h"
@@ -143,5 +147,9 @@ void opkg_conf_deinit(void);
 
 int opkg_conf_write_status_files(void);
 char *root_filename_alloc(char *filename);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -18,6 +18,10 @@
 #ifndef NV_PAIR_LIST_H
 #define NV_PAIR_LIST_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "nv_pair.h"
 #include "void_list.h"
 
@@ -44,5 +48,8 @@ nv_pair_list_elt_t *nv_pair_list_prev(nv_pair_list_t *list, nv_pair_list_elt_t *
 nv_pair_list_elt_t *nv_pair_list_next(nv_pair_list_t *list, nv_pair_list_elt_t *node);
 nv_pair_list_elt_t *nv_pair_list_last(nv_pair_list_t *list);
 
+#ifdef __cplusplus
+}
 #endif
 
+#endif

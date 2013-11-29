@@ -18,6 +18,10 @@
 #ifndef PARSE_UTIL_H
 #define PARSE_UTIL_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int is_field(const char *type, const char *line);
 char *parse_simple(const char *type, const char *line);
 char **parse_list(const char *raw, unsigned int *count, const char sep, int skip_field);
@@ -27,5 +31,9 @@ int parse_from_stream_nomalloc(parse_line_t parse_line, void *item, FILE *fp, ui
 						char **buf0, size_t buf0len);
 
 #define EXCESSIVE_LINE_LEN	(4096 << 8)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

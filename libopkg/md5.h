@@ -24,6 +24,10 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define MD5_DIGEST_SIZE 16
 #define MD5_BLOCK_SIZE 64
 
@@ -114,5 +118,9 @@ extern int __md5_stream (FILE *stream, void *resblock) __THROW;
    digest.  */
 extern void *__md5_buffer (const char *buffer, size_t len,
 			   void *resblock) __THROW;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* md5.h */

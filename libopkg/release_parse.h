@@ -16,6 +16,14 @@
 #ifndef RELEASE_PARSE_H
 #define RELEASE_PARSE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int release_parse_from_stream(release_t *release, FILE *fp);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

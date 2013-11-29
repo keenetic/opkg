@@ -18,6 +18,10 @@
 #ifndef OPKG_DOWNLOAD_H
 #define OPKG_DOWNLOAD_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "pkg.h"
 
 typedef void (*opkg_download_progress_callback)(int percent, char *url);
@@ -40,4 +44,8 @@ int opkg_verify_file (char *text_file, char *sig_file);
  * order to present a consistent API.
  */
 void opkg_curl_cleanup(void);
+
+#ifdef __cplusplus
+}
+#endif
 #endif
