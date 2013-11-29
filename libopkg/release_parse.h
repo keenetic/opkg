@@ -26,4 +26,4 @@ int release_parse_from_stream(release_t *release, FILE *fp);
 }
 #endif
 
-#endif
+#endif /* RELEASE_PARSE_H */

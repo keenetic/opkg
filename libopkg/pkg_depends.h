@@ -98,4 +98,4 @@ int is_pkg_in_pkg_vec(pkg_vec_t * vec, pkg_t * pkg);
 }
 #endif
 
-#endif
+#endif /* PKG_DEPENDS_H */

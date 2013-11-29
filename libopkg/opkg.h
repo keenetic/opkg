@@ -32,16 +32,16 @@ typedef void (*opkg_package_callback_t) (pkg_t *pkg, void *user_data);
 
 enum _opkg_action_t
 {
-  OPKG_INSTALL,
-  OPKG_REMOVE,
-  OPKG_DOWNLOAD
+	OPKG_INSTALL,
+	OPKG_REMOVE,
+	OPKG_DOWNLOAD
 };
 
 struct _opkg_progress_data_t
 {
-  int percentage;
-  int action;
-  pkg_t *pkg;
+	int percentage;
+	int action;
+	pkg_t *pkg;
 };
 
 int opkg_new (void);

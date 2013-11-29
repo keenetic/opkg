@@ -43,5 +43,4 @@ pkg_dest_list_elt_t *pkg_dest_list_pop(pkg_dest_list_t *list);
 }
 #endif
 
-#endif
-
+#endif /* PKG_DEST_LIST_H */

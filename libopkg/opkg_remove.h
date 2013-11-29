@@ -34,4 +34,4 @@ void remove_maintainer_scripts(pkg_t *pkg);
 }
 #endif
 
-#endif
+#endif /* OPKG_REMOVE_H */

@@ -43,5 +43,4 @@ void pkg_dest_deinit(pkg_dest_t *dest);
 }
 #endif
 
-#endif
-
+#endif /* PKG_DEST_H */

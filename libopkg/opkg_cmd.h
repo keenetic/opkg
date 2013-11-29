@@ -42,4 +42,4 @@ extern int opkg_state_changed;
 }
 #endif
 
-#endif
+#endif /* OPKG_CMD_H */

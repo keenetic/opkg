@@ -73,7 +73,6 @@ static inline void list_add_tail(struct list_head *newitem, struct list_head *he
     __list_add(newitem, head->prev, head);
 }
 
-
 /*
  * Delete a list entry by making the prev/next entries
  * point to each other.
@@ -191,8 +190,6 @@ static inline void list_splice_init(struct list_head *list,
     }
 }
 
-
-
 #define _offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
 #define container_of(ptr, type, member) ({                      \
         const typeof( ((type *)0)->member ) *__mptr = (ptr);    \
@@ -309,4 +306,4 @@ static inline void list_splice_init(struct list_head *list,
 }
 #endif
 
-#endif
+#endif /* _LINUX_LIST_H */

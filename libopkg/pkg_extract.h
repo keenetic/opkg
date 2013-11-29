@@ -36,4 +36,4 @@ int pkg_extract_data_file_names_to_stream(pkg_t *pkg, FILE *file);
 }
 #endif
 
-#endif
+#endif /* PKG_EXTRACT_H */

@@ -26,10 +26,10 @@ extern "C" {
 
 typedef struct
 {
-  char *name;
-  char *value;
-  char *extra_data;
-  int gzip;
+	char *name;
+	char *value;
+	char *extra_data;
+	int gzip;
 } pkg_src_t;
 
 int pkg_src_init(pkg_src_t *src, const char *name, const char *base_url, const char *extra_data, int gzip);
@@ -39,4 +39,4 @@ void pkg_src_deinit(pkg_src_t *src);
 }
 #endif
 
-#endif
+#endif /* PKG_SRC_H */

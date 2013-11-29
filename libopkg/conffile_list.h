@@ -41,4 +41,4 @@ conffile_list_elt_t *conffile_list_pop(conffile_list_t *list);
 }
 #endif
 
-#endif
+#endif /* CONFFILE_LIST_H */

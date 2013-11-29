@@ -19,7 +19,7 @@
    Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 #ifndef _MD5_H
-#define _MD5_H 1
+#define _MD5_H
 
 #include <stdio.h>
 #include <stdint.h>
@@ -100,12 +100,10 @@ extern void __md5_process_bytes (const void *buffer, size_t len,
    ASCII representation of the message digest.  */
 extern void *__md5_finish_ctx (struct md5_ctx *ctx, void *resbuf) __THROW;
 
-
 /* Put result from CTX in first 16 bytes following RESBUF.  The result is
    always in little endian byte order, so that a byte-wise output yields
    to the wanted ASCII representation of the message digest.  */
 extern void *__md5_read_ctx (const struct md5_ctx *ctx, void *resbuf) __THROW;
-
 
 /* Compute MD5 message digest for bytes read from STREAM.  The
    resulting message digest number will be written into the 16 bytes
@@ -123,4 +121,4 @@ extern void *__md5_buffer (const char *buffer, size_t len,
 }
 #endif
 
-#endif /* md5.h */
+#endif /* MD5_H */

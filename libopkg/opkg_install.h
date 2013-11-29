@@ -32,4 +32,4 @@ int opkg_install_pkg(pkg_t *pkg, int from_upgrading);
 }
 #endif
 
-#endif
+#endif /* OPKG_INSTALL_H */

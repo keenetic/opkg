@@ -36,5 +36,5 @@ int xsystem(const char *argv[]);
 }
 #endif
 
-#endif
+#endif /* XSYSTEM_H */
 

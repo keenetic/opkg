@@ -27,4 +27,4 @@ struct active_list * prepare_upgrade_list (void);
 }
 #endif
 
-#endif
+#endif /* OPKG_UPGRADE_H */

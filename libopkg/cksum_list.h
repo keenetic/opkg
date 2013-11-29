@@ -51,4 +51,4 @@ const cksum_t *cksum_list_find(cksum_list_t *list, const char *name);
 }
 #endif
 
-#endif
+#endif /* CKSUM_LIST_H */

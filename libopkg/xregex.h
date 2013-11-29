@@ -35,4 +35,4 @@ static inline void xregfree(regex_t *preg)
 }
 #endif
 
-#endif
+#endif /* XREGEX_H */

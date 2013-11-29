@@ -28,4 +28,4 @@ void sprintf_alloc(char **str, const char *fmt, ...);
 }
 #endif
 
-#endif
+#endif /* SPRINTF_ALLOC_H */

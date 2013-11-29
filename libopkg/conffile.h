@@ -33,4 +33,4 @@ int conffile_has_been_modified(conffile_t *conffile);
 }
 #endif
 
-#endif
+#endif /* CONFFILE_H */

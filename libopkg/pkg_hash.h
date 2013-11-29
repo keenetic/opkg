@@ -27,7 +27,6 @@ extern "C" {
 #include "pkg_dest.h"
 #include "hash_table.h"
 
-
 void pkg_hash_init(void);
 void pkg_hash_deinit(void);
 
@@ -60,5 +59,4 @@ void file_hash_set_file_owner(const char *file_name, pkg_t *pkg);
 }
 #endif
 
-#endif
-
+#endif /* PKG_HASH_H */

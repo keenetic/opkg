@@ -30,4 +30,4 @@ int opkg_configure(pkg_t *pkg);
 }
 #endif
 
-#endif
+#endif /* OPKG_CONFIGURE_H */

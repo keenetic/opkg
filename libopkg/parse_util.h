@@ -36,4 +36,4 @@ int parse_from_stream_nomalloc(parse_line_t parse_line, void *item, FILE *fp, ui
 }
 #endif
 
-#endif
+#endif /* PARSE_UTIL_H */

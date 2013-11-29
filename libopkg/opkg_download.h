@@ -27,7 +27,6 @@ extern "C" {
 typedef void (*opkg_download_progress_callback)(int percent, char *url);
 typedef int (*curl_progress_func)(void *data, double t, double d, double ultotal, double ulnow);
 
-
 int opkg_download(const char *src, const char *dest_file_name, curl_progress_func cb, void *data, const short hide_error);
 int opkg_download_pkg(pkg_t *pkg, const char *dir);
 /*
@@ -48,4 +47,4 @@ void opkg_curl_cleanup(void);
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif /* OPKG_DOWNLOAD_H */

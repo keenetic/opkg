@@ -30,4 +30,4 @@ int line_is_blank(const char *line);
 }
 #endif
 
-#endif
+#endif /* OPKG_UTILS_H */

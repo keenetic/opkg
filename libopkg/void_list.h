@@ -68,4 +68,4 @@ void void_list_purge(void_list_t *list);
 }
 #endif
 
-#endif
+#endif /* VOID_LIST_H */

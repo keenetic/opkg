@@ -41,7 +41,6 @@ struct abstract_pkg_vec
     unsigned int len;
 };
 
-
 pkg_vec_t * pkg_vec_alloc(void);
 void pkg_vec_free(pkg_vec_t *vec);
 
@@ -68,5 +67,4 @@ int pkg_compare_names(const void *p1, const void *p2);
 }
 #endif
 
-#endif
-
+#endif /* PKG_VEC_H */

@@ -56,4 +56,4 @@ int release_verify_file(release_t *release, const char *filename, const char *pa
 }
 #endif
 
-#endif
+#endif /* RELEASE_H */

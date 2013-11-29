@@ -52,4 +52,4 @@ nv_pair_list_elt_t *nv_pair_list_last(nv_pair_list_t *list);
 }
 #endif
 
-#endif
+#endif /* NV_PAIR_LIST_H */

@@ -152,4 +152,4 @@ char *root_filename_alloc(char *filename);
 }
 #endif
 
-#endif
+#endif /* OPKG_CONF_H */

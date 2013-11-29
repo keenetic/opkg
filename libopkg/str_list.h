@@ -52,4 +52,4 @@ void str_list_purge(str_list_t *list);
 }
 #endif
 
-#endif
+#endif /* STR_LIST_H */

@@ -36,4 +36,4 @@ void nv_pair_deinit(nv_pair_t *nv_pair);
 }
 #endif
 
-#endif
+#endif /* NV_PAIR_H */

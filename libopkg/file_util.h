@@ -36,4 +36,4 @@ int rm_r(const char *path);
 }
 #endif
 
-#endif
+#endif /* FILE_UTIL_H */
