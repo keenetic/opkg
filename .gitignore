@@ -31,12 +31,14 @@ config.log
 config.status
 config.sub
 
+# Auto-generated config header
+config.h
+config.h.in
+
 # The configure script itself
 configure
 
 # The libopkg directory artifacts
-libopkg/config.h
-libopkg/config.h.in
 libopkg/stamp-h1
 
 # Various scripts used for libtool and the like
