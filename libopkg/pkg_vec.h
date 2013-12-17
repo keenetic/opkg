@@ -18,6 +18,10 @@
 #ifndef PKG_VEC_H
 #define PKG_VEC_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct pkg pkg_t;
 typedef struct abstract_pkg abstract_pkg_t;
 typedef struct pkg_vec pkg_vec_t;
@@ -36,7 +40,6 @@ struct abstract_pkg_vec
     abstract_pkg_t **pkgs;
     unsigned int len;
 };
-
 
 pkg_vec_t * pkg_vec_alloc(void);
 void pkg_vec_free(pkg_vec_t *vec);
@@ -59,5 +62,9 @@ int abstract_pkg_vec_contains(abstract_pkg_vec_t *vec, abstract_pkg_t *apkg);
 void abstract_pkg_vec_sort(pkg_vec_t *vec, compare_fcn_t compar);
 
 int pkg_compare_names(const void *p1, const void *p2);
+
+#ifdef __cplusplus
+}
 #endif
 
+#endif /* PKG_VEC_H */

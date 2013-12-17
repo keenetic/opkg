@@ -18,11 +18,14 @@
 #ifndef PKG_HASH_H
 #define PKG_HASH_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "pkg.h"
 #include "pkg_src.h"
 #include "pkg_dest.h"
 #include "hash_table.h"
-
 
 void pkg_hash_init(void);
 void pkg_hash_deinit(void);
@@ -52,5 +55,8 @@ void file_hash_remove(const char *file_name);
 pkg_t *file_hash_get_file_owner(const char *file_name);
 void file_hash_set_file_owner(const char *file_name, pkg_t *pkg);
 
+#ifdef __cplusplus
+}
 #endif
 
+#endif /* PKG_HASH_H */

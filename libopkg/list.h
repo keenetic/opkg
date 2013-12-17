@@ -20,6 +20,10 @@
 #ifndef _LINUX_LIST_H
 #define _LINUX_LIST_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct list_head {
     struct list_head *next, *prev;
 };
@@ -68,7 +72,6 @@ static inline void list_add(struct list_head *newitem, struct list_head *head) {
 static inline void list_add_tail(struct list_head *newitem, struct list_head *head) {
     __list_add(newitem, head->prev, head);
 }
-
 
 /*
  * Delete a list entry by making the prev/next entries
@@ -187,8 +190,6 @@ static inline void list_splice_init(struct list_head *list,
     }
 }
 
-
-
 #define _offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
 #define container_of(ptr, type, member) ({                      \
         const typeof( ((type *)0)->member ) *__mptr = (ptr);    \
@@ -301,4 +302,8 @@ static inline void list_splice_init(struct list_head *list,
 	     &pos->member != (head); 					\
 	     pos = n, n = list_entry(n->member.next, typeof(*n), member))
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* _LINUX_LIST_H */

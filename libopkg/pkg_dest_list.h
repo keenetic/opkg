@@ -18,6 +18,10 @@
 #ifndef PKG_DEST_LIST_H
 #define PKG_DEST_LIST_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "pkg_dest.h"
 
 typedef struct void_list_elt pkg_dest_list_elt_t;
@@ -35,5 +39,8 @@ pkg_dest_t *pkg_dest_list_append(pkg_dest_list_t *list, const char *name,
 void pkg_dest_list_push(pkg_dest_list_t *list, pkg_dest_t *data);
 pkg_dest_list_elt_t *pkg_dest_list_pop(pkg_dest_list_t *list);
 
+#ifdef __cplusplus
+}
 #endif
 
+#endif /* PKG_DEST_LIST_H */

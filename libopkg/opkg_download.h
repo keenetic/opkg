@@ -18,12 +18,14 @@
 #ifndef OPKG_DOWNLOAD_H
 #define OPKG_DOWNLOAD_H
 
-#include "config.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "pkg.h"
 
 typedef void (*opkg_download_progress_callback)(int percent, char *url);
 typedef int (*curl_progress_func)(void *data, double t, double d, double ultotal, double ulnow);
-
 
 int opkg_download(const char *src, const char *dest_file_name, curl_progress_func cb, void *data, const short hide_error);
 int opkg_download_pkg(pkg_t *pkg, const char *dir);
@@ -33,7 +35,16 @@ int opkg_download_pkg(pkg_t *pkg, const char *dir);
 int opkg_prepare_url_for_install(const char *url, char **namep);
 
 int opkg_verify_file (char *text_file, char *sig_file);
-#ifdef HAVE_CURL
+
+/* Curl cleanup function, does nothing unless opkg is configured with
+ * '--enable-curl'.
+ *
+ * This function is callable regardless of whether curl support is enabled in
+ * order to present a consistent API.
+ */
 void opkg_curl_cleanup(void);
+
+#ifdef __cplusplus
+}
 #endif
-#endif
+#endif /* OPKG_DOWNLOAD_H */

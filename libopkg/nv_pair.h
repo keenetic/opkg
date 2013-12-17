@@ -18,6 +18,10 @@
 #ifndef NV_PAIR_H
 #define NV_PAIR_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct nv_pair nv_pair_t;
 struct nv_pair
 {
@@ -28,5 +32,8 @@ struct nv_pair
 int nv_pair_init(nv_pair_t *nv_pair, const char *name, const char *value);
 void nv_pair_deinit(nv_pair_t *nv_pair);
 
+#ifdef __cplusplus
+}
 #endif
 
+#endif /* NV_PAIR_H */

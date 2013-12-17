@@ -20,6 +20,10 @@
 #include <string.h>
 #include <errno.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
 	ERROR,	/* error conditions */
 	NOTICE,	/* normal but significant condition */
@@ -43,5 +47,9 @@ void opkg_message(message_level_t level, const char *fmt, ...)
 
 #define opkg_perror(l, fmt, args...) \
 	opkg_msg(l, fmt": %s.\n", ##args, strerror(errno))
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _OPKG_MESSAGE_H_ */

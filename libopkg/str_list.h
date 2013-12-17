@@ -18,6 +18,10 @@
 #ifndef STR_LIST_H
 #define STR_LIST_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "void_list.h"
 
 typedef struct void_list_elt str_list_elt_t;
@@ -44,4 +48,8 @@ str_list_elt_t *str_list_last(str_list_t *list);
 
 void str_list_purge(str_list_t *list);
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* STR_LIST_H */

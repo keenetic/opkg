@@ -18,6 +18,10 @@
 #ifndef FILE_UTIL_H
 #define FILE_UTIL_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int file_exists(const char *file_name);
 int file_is_dir(const char *file_name);
 char *file_read_line_alloc(FILE *file);
@@ -28,4 +32,8 @@ char *file_md5sum_alloc(const char *file_name);
 char *file_sha256sum_alloc(const char *file_name);
 int rm_r(const char *path);
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* FILE_UTIL_H */

@@ -19,9 +19,11 @@
 #define OPKG_CONF_H
 
 
-#include "config.h"
-
 #include <stdarg.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "hash_table.h"
 #include "pkg_src_list.h"
@@ -86,8 +88,10 @@ typedef struct opkg_conf {
      char *cache;
      int overwrite_no_owner;
 
-#ifdef HAVE_SSLCURL
-     /* some options could be used by
+     /* ssl-curl options: used only when opkg is configured with
+      * '--enable-ssl-curl', otherwise always NULL or 0.
+      *
+      * some options could be used by
       * wget if curl support isn't builtin
       * If someone want to try...
       */
@@ -100,10 +104,11 @@ typedef struct opkg_conf {
      char *ssl_ca_file;
      char *ssl_ca_path;
      int ssl_dont_verify_peer;
-#endif
-#ifdef HAVE_PATHFINDER
+
+     /* pathfinder options: used only when opkg is configured with
+      * '--enable-pathfinder', otherwise always NULL or 0 as above.
+      */
      int check_x509_path;
-#endif
 
      /* proxy options */
      char *http_proxy;
@@ -147,4 +152,8 @@ char *root_filename_alloc(char *filename);
 int opkg_conf_get_option(char *option, void *value);
 int opkg_conf_set_option(const char *name, const char *value, int overwrite);
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* OPKG_CONF_H */

@@ -18,6 +18,10 @@
 #ifndef CONFFILE_LIST_H
 #define CONFFILE_LIST_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "nv_pair_list.h"
 
 typedef nv_pair_list_elt_t conffile_list_elt_t;
@@ -33,5 +37,8 @@ conffile_t *conffile_list_append(conffile_list_t *list, const char *name,
 void conffile_list_push(conffile_list_t *list, conffile_t *data);
 conffile_list_elt_t *conffile_list_pop(conffile_list_t *list);
 
+#ifdef __cplusplus
+}
 #endif
 
+#endif /* CONFFILE_LIST_H */

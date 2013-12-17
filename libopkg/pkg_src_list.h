@@ -18,6 +18,10 @@
 #ifndef PKG_SRC_LIST_H
 #define PKG_SRC_LIST_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "pkg_src.h"
 #include "void_list.h"
 
@@ -36,9 +40,16 @@ void pkg_src_list_elt_deinit(pkg_src_list_elt_t *elt);
 void pkg_src_list_init(pkg_src_list_t *list);
 void pkg_src_list_deinit(pkg_src_list_t *list);
 
-pkg_src_t *pkg_src_list_append(pkg_src_list_t *list, const char *name, const char *root_dir, const char *extra_data, int gzip);
+pkg_src_t *pkg_src_list_append(pkg_src_list_t *list,
+                               const char *name,
+                               const char *root_dir,
+                               const char *extra_data,
+                               int gzip);
 void pkg_src_list_push(pkg_src_list_t *list, pkg_src_t *data);
 pkg_src_list_elt_t *pkg_src_list_pop(pkg_src_list_t *list);
 
+#ifdef __cplusplus
+}
 #endif
 
+#endif /* PKG_SRC_LIST_H */

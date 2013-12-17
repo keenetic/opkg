@@ -18,6 +18,10 @@
 #ifndef OPKG_CMD_H
 #define OPKG_CMD_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef int (*opkg_cmd_fun_t)(int argc, const char **argv);
 
 struct opkg_cmd
@@ -33,4 +37,9 @@ opkg_cmd_t *opkg_cmd_find(const char *name);
 int opkg_cmd_exec(opkg_cmd_t *cmd, int argc, const char **argv);
 
 extern int opkg_state_changed;
+
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* OPKG_CMD_H */

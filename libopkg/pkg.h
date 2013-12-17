@@ -18,9 +18,11 @@
 #ifndef PKG_H
 #define PKG_H
 
-#include "config.h"
-
 #include <sys/types.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "pkg_vec.h"
 #include "str_list.h"
@@ -31,7 +33,6 @@
 #include "conffile_list.h"
 
 struct opkg_config;
-
 
 #define ARRAY_SIZE(array) sizeof(array) / sizeof((array)[0])
 
@@ -63,6 +64,7 @@ enum pkg_state_flag
     SF_LAST_STATE_FLAG
 };
 typedef enum pkg_state_flag pkg_state_flag_t;
+
 #define SF_NONVOLATILE_FLAGS (SF_HOLD|SF_NOPRUNE|SF_PREFER|SF_OBSOLETE|SF_USER)
 
 enum pkg_state_status
@@ -161,11 +163,9 @@ struct pkg
      char *local_filename;
      char *tmp_unpack_dir;
      char *md5sum;
-#if defined HAVE_SHA256
      char *sha256sum;
-#endif
-     unsigned long size;		/* in bytes */
-     unsigned long installed_size;	/* in bytes */
+     unsigned long size;            /* in bytes */
+     unsigned long installed_size;  /* in bytes */
      char *priority;
      char *source;
      conffile_list_t conffiles;
@@ -173,17 +173,19 @@ struct pkg
      /* As pointer for lazy evaluation */
      str_list_t *installed_files;
      /* XXX: CLEANUP: I'd like to perhaps come up with a better
-	mechanism to avoid the problem here, (which is that the
-	installed_files list was being freed from an inner loop while
-	still being used within an outer loop. */
+        mechanism to avoid the problem here, (which is that the
+        installed_files list was being freed from an inner loop while
+        still being used within an outer loop. */
      int installed_files_ref_cnt;
      int essential;
      int arch_priority;
-/* Adding this flag, to "force" opkg to choose a "provided_by_hand" package, if there are multiple choice */
+     /* Adding this flag, to "force" opkg to choose a "provided_by_hand"
+      * package, if there are multiple choice */
      int provided_by_hand;
 
      /* this flag specifies whether the package was installed to satisfy another
-      * package's dependancies */
+      * package's dependancies
+      */
      int auto_installed;
 };
 
@@ -229,4 +231,8 @@ void pkg_info_preinstall_check(void);
 int pkg_write_filelist(pkg_t *pkg);
 int pkg_write_changed_filelists(void);
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* PKG_H */

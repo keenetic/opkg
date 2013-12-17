@@ -1,3 +1,13 @@
+opkg-0.2.1
+==========
+
+- Updated AUTHORS, README, CONTRIBUTING, etc
+
+- Dropped "config.h" from the list of installed headers and removed checks for
+  HAVE_* symbols from all installed headers
+
+- Made libopkg usable from C++ via `extern "C"` wrapping
+
 opkg-0.2.0
 ==========
 

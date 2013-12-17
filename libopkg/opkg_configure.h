@@ -18,8 +18,16 @@
 #ifndef OPKG_CONFIGURE_H
 #define OPKG_CONFIGURE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "pkg.h"
 
 int opkg_configure(pkg_t *pkg);
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* OPKG_CONFIGURE_H */

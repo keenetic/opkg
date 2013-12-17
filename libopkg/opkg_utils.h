@@ -18,8 +18,16 @@
 #ifndef OPKG_UTILS_H
 #define OPKG_UTILS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 unsigned long get_available_kbytes(char * filesystem);
 char *trim_xstrdup(const char *line);
 int line_is_blank(const char *line);
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* OPKG_UTILS_H */

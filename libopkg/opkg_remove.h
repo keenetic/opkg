@@ -18,6 +18,10 @@
 #ifndef OPKG_REMOVE_H
 #define OPKG_REMOVE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "pkg.h"
 #include "opkg_conf.h"
 
@@ -26,5 +30,8 @@ int pkg_has_installed_dependents(pkg_t *pkg, abstract_pkg_t *** pdependents);
 void remove_data_files_and_list(pkg_t *pkg);
 void remove_maintainer_scripts(pkg_t *pkg);
 
-
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* OPKG_REMOVE_H */

@@ -18,6 +18,10 @@
 #ifndef OPKG_H
 #define OPKG_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "pkg.h"
 #include "opkg_message.h"
 
@@ -28,16 +32,16 @@ typedef void (*opkg_package_callback_t) (pkg_t *pkg, void *user_data);
 
 enum _opkg_action_t
 {
-  OPKG_INSTALL,
-  OPKG_REMOVE,
-  OPKG_DOWNLOAD
+	OPKG_INSTALL,
+	OPKG_REMOVE,
+	OPKG_DOWNLOAD
 };
 
 struct _opkg_progress_data_t
 {
-  int percentage;
-  int action;
-  pkg_t *pkg;
+	int percentage;
+	int action;
+	pkg_t *pkg;
 };
 
 int opkg_new (void);
@@ -59,5 +63,9 @@ pkg_t* opkg_find_package (const char *name, const char *version, const char *arc
 int opkg_repository_accessibility_check(void);
 
 int opkg_compare_versions (const char *ver1, const char *ver2);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* OPKG_H */
