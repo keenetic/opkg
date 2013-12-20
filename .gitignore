@@ -27,15 +27,14 @@ config.log
 config.status
 config.sub
 
-# Auto-generated config header
+# Auto-generated config header and timestamp
 config.h
 config.h.in
+stamp-h1
 
 # The configure script itself
 configure
 
-# The libopkg directory artifacts
-libopkg/stamp-h1
 
 # Various scripts used for libtool and the like
 install-sh
