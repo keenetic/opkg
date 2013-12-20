@@ -26,8 +26,9 @@ Install \fIpackage(s)\fP
 \fBconfigure <\fIpackage(s)\fP>\fR
 Configure unpacked \fIpackage(s)\fP
 .TP
-\fBremove <\fIpackages\fP|\fIregexp\fP>\fR
-Remove \fIpackage(s)\fP. \fIregexp\fP could be something like 'pkgname*' '*file*' or similar
+\fBremove <\fIpackages\fP|\fIglob\fP>\fR
+Remove \fIpackage(s)\fP. \fIglob\fP works like a shell globbing pattern and
+could be something like 'pkgname*' '*file*' or similar
 .TP
 \fBflag <\fIflag\fP> <\fIpackages\fP>\fR
 Flag \fIpackage(s)\fP. Available flags (one per invocation):
@@ -58,13 +59,13 @@ List package configuration files which have been modified after installation
 \fBfiles <\fIpackage\fP>\fR
 List files belonging to \fIpackage\fP
 .TP
-\fBsearch <\fIfile\fP|\fIregexp\fP>\fR
+\fBsearch <\fIfile\fP|\fIglob\fP>\fR
 List package providing \fIfile\fP
 .TP
-\fBinfo [\fIpackage\fP|\fIregexp\fP]\fR
+\fBinfo [\fIpackage\fP|\fIglob\fP]\fR
 Display all info for selected packages
 .TP
-\fBstatus [\fIpackage\fP|\fIregexp\fP]\fR
+\fBstatus [\fIpackage\fP|\fIglob\fP]\fR
 Display all statuses for selected packages
 .TP
 \fBdownload <\fIpackage\fP>\fR
@@ -87,15 +88,15 @@ c l.
 \fBprint-architecture\fR
 List installable package architectures
 .TP
-\fBwhatdepends [\fI\-A\fP] <\fIpackage(s)\fP|\fIregexp\fP>\fR
+\fBwhatdepends [\fI\-A\fP] <\fIpackage(s)\fP|\fIglob\fP>\fR
 .TP
-\fBwhatdependsrec [\fI\-A\fP] <\fIpackage(s)\fP|\fIregexp\fP>\fR
+\fBwhatdependsrec [\fI\-A\fP] <\fIpackage(s)\fP|\fIglob\fP>\fR
 .TP
-\fBwhatprovides [\fI\-A\fP] <\fIpackage(s)\fP|\fIregexp\fP>\fR
+\fBwhatprovides [\fI\-A\fP] <\fIpackage(s)\fP|\fIglob\fP>\fR
 .TP
-\fBwhatconflicts [\fI\-A\fP] <\fIpackage(s)\fP|\fIregexp\fP>\fR
+\fBwhatconflicts [\fI\-A\fP] <\fIpackage(s)\fP|\fIglob\fP>\fR
 .TP
-\fBwhatreplaces [\fI\-A\fP] <\fIpackage(s)\fP|\fIregexp\fP>\fR
+\fBwhatreplaces [\fI\-A\fP] <\fIpackage(s)\fP|\fIglob\fP>\fR
 
 .SS OPTIONS
 .TP 

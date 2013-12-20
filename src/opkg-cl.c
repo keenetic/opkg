@@ -230,7 +230,7 @@ usage()
 	printf("\tupgrade			Upgrade installed packages\n");
 	printf("\tinstall <pkgs>		Install package(s)\n");
 	printf("\tconfigure <pkgs>	Configure unpacked package(s)\n");
-	printf("\tremove <pkgs|regexp>	Remove package(s)\n");
+	printf("\tremove <pkgs|glob>	Remove package(s)\n");
 	printf("\tflag <flag> <pkgs>	Flag package(s)\n");
 	printf("\t <flag>=hold|noprune|user|ok|installed|unpacked (one per invocation)\n");
 
@@ -240,21 +240,21 @@ usage()
 	printf("\tlist-upgradable		List installed and upgradable packages\n");
 	printf("\tlist-changed-conffiles	List user modified configuration files\n");
 	printf("\tfiles <pkg>		List files belonging to <pkg>\n");
-	printf("\tsearch <file|regexp>	List package providing <file>\n");
-	printf("\tinfo [pkg|regexp]	Display all info for <pkg>\n");
-	printf("\tstatus [pkg|regexp]	Display all status for <pkg>\n");
+	printf("\tsearch <file|glob>	List package providing <file>\n");
+	printf("\tinfo [pkg|glob]	Display all info for <pkg>\n");
+	printf("\tstatus [pkg|glob]	Display all status for <pkg>\n");
 	printf("\tdownload <pkg>		Download <pkg> to current directory\n");
 	printf("\tcompare-versions <v1> <op> <v2>\n");
 	printf("\t                    compare versions using <= < > >= = << >>\n");
 	printf("\tprint-architecture	List installable package architectures\n");
-	printf("\tdepends [-A] [pkgname|pat]+\n");
-	printf("\twhatdepends [-A] [pkgname|pat]+\n");
-	printf("\twhatdependsrec [-A] [pkgname|pat]+\n");
-	printf("\twhatrecommends[-A] [pkgname|pat]+\n");
-	printf("\twhatsuggests[-A] [pkgname|pat]+\n");
-	printf("\twhatprovides [-A] [pkgname|pat]+\n");
-	printf("\twhatconflicts [-A] [pkgname|pat]+\n");
-	printf("\twhatreplaces [-A] [pkgname|pat]+\n");
+	printf("\tdepends [-A] [pkgname|glob]+\n");
+	printf("\twhatdepends [-A] [pkgname|glob]+\n");
+	printf("\twhatdependsrec [-A] [pkgname|glob]+\n");
+	printf("\twhatrecommends[-A] [pkgname|glob]+\n");
+	printf("\twhatsuggests[-A] [pkgname|glob]+\n");
+	printf("\twhatprovides [-A] [pkgname|glob]+\n");
+	printf("\twhatconflicts [-A] [pkgname|glob]+\n");
+	printf("\twhatreplaces [-A] [pkgname|glob]+\n");
 
 	printf("\nOptions:\n");
 	printf("\t-A			Query all packages not just those installed\n");
@@ -302,7 +302,7 @@ usage()
 
 	printf("\n");
 
-	printf(" regexp could be something like 'pkgname*' '*file*' or similar\n");
+	printf(" glob could be something like 'pkgname*' '*file*' or similar\n");
 	printf(" e.g. opkg info 'libstd*' or opkg search '*libop*' or opkg remove 'libncur*'\n");
 
 	/* --force-removal-of-essential-packages	Let opkg remove essential packages.
