@@ -19,7 +19,7 @@ if [ \( $# -eq 1 \) -a \( "$1" = "--clean" \) ]; then
 	rm -f man/{opkg-cl.1,opkg-key.1}
 	rm -f Makefile {libbb,libopkg,tests,man,utils,src}/Makefile
 	rm -f Makefile.in {libbb,libopkg,tests,man,utils,src}/Makefile.in
-	rm -f libopkg/config.h{,.in}
+	rm -f config.h{,.in}
 	rm -rf po conf autom4te.cache m4
 	rm -rf {libbb,libopkg,src,tests}/.deps
 
@@ -27,7 +27,7 @@ if [ \( $# -eq 1 \) -a \( "$1" = "--clean" \) ]; then
 	rm -f {libbb,libopkg}/*.lo
 	rm -f {libbb,libopkg}/*.la
 	rm -f src/opkg-cl tests/libopkg_test
-	rm -f libopkg/stamp-h1
+	rm -f stamp-h1
 	rm -f utils/update-alternatives
 	rm -rf {libbb,libopkg,tests,src}/.libs
 
