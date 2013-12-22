@@ -25,28 +25,33 @@
 #include <unistd.h>
 #include "libbb.h"
 
-
 extern void *xmalloc(size_t size)
 {
 	void *ptr = malloc(size);
-	if (ptr == NULL && size != 0)
-		perror_msg_and_die("malloc");
+	if (ptr == NULL && size != 0) {
+		opkg_perror(ERROR, "malloc");
+		exit(EXIT_FAILURE);
+	}
 	return ptr;
 }
 
 extern void *xrealloc(void *ptr, size_t size)
 {
 	ptr = realloc(ptr, size);
-	if (ptr == NULL && size != 0)
-		perror_msg_and_die("realloc");
+	if (ptr == NULL && size != 0) {
+		opkg_perror(ERROR, "realloc");
+		exit(EXIT_FAILURE);
+	}
 	return ptr;
 }
 
 extern void *xcalloc(size_t nmemb, size_t size)
 {
 	void *ptr = calloc(nmemb, size);
-	if (ptr == NULL && nmemb != 0 && size != 0)
-		perror_msg_and_die("calloc");
+	if (ptr == NULL && nmemb != 0 && size != 0) {
+		opkg_perror(ERROR, "calloc");
+		exit(EXIT_FAILURE);
+	}
 	return ptr;
 }
 
@@ -58,8 +63,10 @@ extern char * xstrdup (const char *s) {
 
 	t = strdup (s);
 
-	if (t == NULL)
-		perror_msg_and_die("strdup");
+	if (t == NULL) {
+		opkg_perror(ERROR, "strdup");
+		exit(EXIT_FAILURE);
+	}
 
 	return t;
 }
@@ -72,8 +79,10 @@ extern char * xstrndup (const char *s, int n) {
 
 	t = strndup (s, n);
 
-	if (t == NULL)
-		perror_msg_and_die("strdup");
+	if (t == NULL) {
+		opkg_perror(ERROR, "strdup");
+		exit(EXIT_FAILURE);
+	}
 
 	return t;
 }

@@ -38,12 +38,12 @@ int make_directory (const char *path, long mode, int flags)
 {
 	if (!(flags & FILEUTILS_RECUR)) {
 		if (mkdir (path, 0777) < 0) {
-			perror_msg ("Cannot create directory `%s'", path);
+			opkg_perror(ERROR, "Cannot create directory `%s'", path);
 			return -1;
 		}
 
 		if (mode != -1 && chmod (path, mode) < 0) {
-			perror_msg ("Cannot set permissions of directory `%s'", path);
+			opkg_perror(ERROR, "Cannot set permissions of directory `%s'", path);
 			return -1;
 		}
 	} else {

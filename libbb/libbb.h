@@ -29,19 +29,6 @@
 
 #include "../libopkg/opkg_message.h"
 
-#define error_msg(fmt, args...) opkg_msg(ERROR, fmt"\n", ##args)
-#define perror_msg(fmt, args...) opkg_perror(ERROR, fmt, ##args)
-#define error_msg_and_die(fmt, args...) \
-	do { \
-		error_msg(fmt, ##args); \
-		exit(EXIT_FAILURE); \
-	} while (0)
-#define perror_msg_and_die(fmt, args...) \
-	do { \
-		perror_msg(fmt, ##args); \
-		exit(EXIT_FAILURE); \
-	} while (0)
-
 int copy_file(const char *source, const char *dest, int flags);
 int copy_file_chunk(FILE *src_file, FILE *dst_file, unsigned long long chunksize);
 

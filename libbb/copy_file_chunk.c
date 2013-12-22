@@ -41,11 +41,11 @@ extern int copy_file_chunk(FILE *src_file, FILE *dst_file, unsigned long long ch
 		nread = fread (buffer, 1, size, src_file);
 
 		if (nread != size && ferror (src_file)) {
-			perror_msg ("read");
+			opkg_perror(ERROR, "read");
 			return -1;
 		} else if (nread == 0) {
 			if (chunksize != -1) {
-				error_msg ("Unable to read all data");
+				opkg_msg(ERROR, "Unable to read all data.\n");
 				return -1;
 			}
 
@@ -56,9 +56,9 @@ extern int copy_file_chunk(FILE *src_file, FILE *dst_file, unsigned long long ch
 
 		if (nwritten != nread) {
 			if (ferror (dst_file))
-				perror_msg ("write");
+				opkg_perror(ERROR, "write");
 			else
-				error_msg ("Unable to write all data");
+				opkg_msg(ERROR, "Unable to write all data.\n");
 			return -1;
 		}
 

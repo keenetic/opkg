@@ -41,13 +41,13 @@ int copy_file(const char *source, const char *dest, int flags)
 	int status = 0;
 
 	if (stat(source, &source_stat) < 0) {
-		perror_msg("%s", source);
+		opkg_perror(ERROR, "%s", source);
 		return -1;
 	}
 
 	if (stat(dest, &dest_stat) < 0) {
 		if (errno != ENOENT) {
-			perror_msg("unable to stat `%s'", dest);
+			opkg_perror(ERROR, "unable to stat `%s'", dest);
 			return -1;
 		}
 		dest_exists = 0;
@@ -55,12 +55,12 @@ int copy_file(const char *source, const char *dest, int flags)
 
 	if (dest_exists && source_stat.st_rdev == dest_stat.st_rdev &&
 			source_stat.st_ino == dest_stat.st_ino) {
-		error_msg("`%s' and `%s' are the same file", source, dest);
+		opkg_msg(ERROR, "`%s' and `%s' are the same file.\n", source, dest);
 		return -1;
 	}
 
 	if (S_ISDIR(source_stat.st_mode)) {
-		error_msg("%s: omitting directory", source);
+		opkg_msg(ERROR, "%s: omitting directory.\n", source);
 		return -1;
 	} else if (S_ISREG(source_stat.st_mode)) {
 		FILE *sfp, *dfp;
@@ -68,12 +68,12 @@ int copy_file(const char *source, const char *dest, int flags)
 		if (dest_exists) {
 			if ((dfp = fopen(dest, "w")) == NULL) {
 				if (!(flags & FILEUTILS_FORCE)) {
-					perror_msg("unable to open `%s'", dest);
+					opkg_perror(ERROR, "unable to open `%s'", dest);
 					return -1;
 				}
 
 				if (unlink(dest) < 0) {
-					perror_msg("unable to remove `%s'", dest);
+					opkg_perror(ERROR, "unable to remove `%s'", dest);
 					return -1;
 				}
 
@@ -88,14 +88,14 @@ int copy_file(const char *source, const char *dest, int flags)
 					(dfp = fdopen(fd, "w")) == NULL) {
 				if (fd >= 0)
 					close(fd);
-				perror_msg("unable to open `%s'", dest);
+				opkg_perror(ERROR, "unable to open `%s'", dest);
 				return -1;
 			}
 		}
 
 		if ((sfp = fopen(source, "r")) == NULL) {
 			fclose(dfp);
-			perror_msg("unable to open `%s'", source);
+			opkg_perror(ERROR, "unable to open `%s'", source);
 			status = -1;
 			goto end;
 		}
@@ -104,27 +104,27 @@ int copy_file(const char *source, const char *dest, int flags)
 			status = -1;
 
 		if (fclose(dfp) < 0) {
-			perror_msg("unable to close `%s'", dest);
+			opkg_perror(ERROR, "unable to close `%s'", dest);
 			status = -1;
 		}
 
 		if (fclose(sfp) < 0) {
-			perror_msg("unable to close `%s'", source);
+			opkg_perror(ERROR, "unable to close `%s'", source);
 			status = -1;
 		}
 	} else if (S_ISBLK(source_stat.st_mode) || S_ISCHR(source_stat.st_mode) ||
 			S_ISSOCK(source_stat.st_mode)) {
 		if (mknod(dest, source_stat.st_mode, source_stat.st_rdev) < 0) {
-			perror_msg("unable to create `%s'", dest);
+			opkg_perror(ERROR, "unable to create `%s'", dest);
 			return -1;
 		}
 	} else if (S_ISFIFO(source_stat.st_mode)) {
 		if (mkfifo(dest, source_stat.st_mode) < 0) {
-			perror_msg("cannot create fifo `%s'", dest);
+			opkg_perror(ERROR, "cannot create fifo `%s'", dest);
 			return -1;
 		}
 	} else {
-		error_msg("internal error: unrecognized file type");
+		opkg_msg(ERROR, "internal error: unrecognized file type.\n");
 		return -1;
 	}
 
@@ -136,13 +136,13 @@ end:
 		times.actime = source_stat.st_atime;
 		times.modtime = source_stat.st_mtime;
 		if (utime(dest, &times) < 0)
-			perror_msg("unable to preserve times of `%s'", dest);
+			opkg_perror(ERROR, "unable to preserve times of `%s'", dest);
 		if (chown(dest, source_stat.st_uid, source_stat.st_gid) < 0) {
 			source_stat.st_mode &= ~(S_ISUID | S_ISGID);
-			perror_msg("unable to preserve ownership of `%s'", dest);
+			opkg_perror(ERROR, "unable to preserve ownership of `%s'", dest);
 		}
 		if (chmod(dest, source_stat.st_mode) < 0)
-			perror_msg("unable to preserve permissions of `%s'", dest);
+			opkg_perror(ERROR, "unable to preserve permissions of `%s'", dest);
 	}
 
 	return status;
