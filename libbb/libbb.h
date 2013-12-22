@@ -30,7 +30,6 @@
 #include "../libopkg/opkg_message.h"
 
 int copy_file(const char *source, const char *dest, int flags);
-int copy_file_chunk(FILE *src_file, FILE *dst_file, unsigned long long chunksize);
 
 extern void *xmalloc (size_t size);
 extern void *xrealloc(void *old, size_t size);

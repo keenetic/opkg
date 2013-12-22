@@ -33,6 +33,35 @@
 
 #include "libbb.h"
 
+static int copy_file_data(FILE *src_file, FILE *dst_file)
+{
+	size_t nread, nwritten;
+	char buffer[BUFSIZ];
+
+	while (1) {
+		nread = fread (buffer, 1, BUFSIZ, src_file);
+
+		if (nread != BUFSIZ && ferror (src_file)) {
+			opkg_perror(ERROR, "read");
+			return -1;
+		}
+
+		/* Check for EOF. */
+		if (nread == 0)
+			return 0;
+
+		nwritten = fwrite (buffer, 1, nread, dst_file);
+
+		if (nwritten != nread) {
+			if (ferror (dst_file))
+				opkg_perror(ERROR, "write");
+			else
+				opkg_msg(ERROR, "Unable to write all data.\n");
+			return -1;
+		}
+	}
+}
+
 int copy_file(const char *source, const char *dest, int flags)
 {
 	struct stat source_stat;
@@ -100,7 +129,7 @@ int copy_file(const char *source, const char *dest, int flags)
 			goto end;
 		}
 
-		if (copy_file_chunk(sfp, dfp, -1) < 0)
+		if (copy_file_data(sfp, dfp) < 0)
 			status = -1;
 
 		if (fclose(dfp) < 0) {
