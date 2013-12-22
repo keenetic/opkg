@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#include <libgen.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -85,6 +86,22 @@ extern char * xstrndup (const char *s, int n) {
 	}
 
 	return t;
+}
+
+/* Sane dirname. */
+extern char * xdirname (const char *path)
+{
+	char *pathcopy, *parent, *tmp;
+
+	/* dirname is unsafe, it may both modify the memory of the path argument
+	 * and may return a pointer to static memory, which can then be modified
+	 * by consequtive calls to dirname.
+	 */
+	pathcopy = xstrdup(path);
+	tmp = dirname(pathcopy);
+	parent = xstrdup(tmp);
+	free(pathcopy);
+	return parent;
 }
 
 /* END CODE */

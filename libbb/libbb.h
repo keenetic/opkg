@@ -36,6 +36,7 @@ extern void *xrealloc(void *old, size_t size);
 extern void *xcalloc(size_t nmemb, size_t size);
 extern char *xstrdup (const char *s);
 extern char *xstrndup (const char *s, int n);
+extern char *xdirname(const char *path);
 
 int make_directory (const char *path, long mode, int flags);
 
