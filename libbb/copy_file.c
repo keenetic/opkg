@@ -40,10 +40,7 @@ int copy_file(const char *source, const char *dest, int flags)
 	int dest_exists = 1;
 	int status = 0;
 
-	if (((flags & FILEUTILS_PRESERVE_SYMLINKS) &&
-			lstat(source, &source_stat) < 0) ||
-			(!(flags & FILEUTILS_PRESERVE_SYMLINKS) &&
-			 stat(source, &source_stat) < 0)) {
+	if (stat(source, &source_stat) < 0) {
 		perror_msg("%s", source);
 		return -1;
 	}
@@ -63,73 +60,8 @@ int copy_file(const char *source, const char *dest, int flags)
 	}
 
 	if (S_ISDIR(source_stat.st_mode)) {
-		DIR *dp;
-		struct dirent *d;
-		mode_t saved_umask = 0;
-
-		if (!(flags & FILEUTILS_RECUR)) {
-			error_msg("%s: omitting directory", source);
-			return -1;
-		}
-
-		/* Create DEST.  */
-		if (dest_exists) {
-			if (!S_ISDIR(dest_stat.st_mode)) {
-				error_msg("`%s' is not a directory", dest);
-				return -1;
-			}
-		} else {
-			mode_t mode;
-			saved_umask = umask(0);
-
-			mode = source_stat.st_mode;
-			if (!(flags & FILEUTILS_PRESERVE_STATUS))
-				mode = source_stat.st_mode & ~saved_umask;
-			mode |= S_IRWXU;
-
-			if (mkdir(dest, mode) < 0) {
-				umask(saved_umask);
-				perror_msg("cannot create directory `%s'", dest);
-				return -1;
-			}
-
-			umask(saved_umask);
-		}
-
-		/* Recursively copy files in SOURCE.  */
-		if ((dp = opendir(source)) == NULL) {
-			perror_msg("unable to open directory `%s'", source);
-			status = -1;
-			goto end;
-		}
-
-		while ((d = readdir(dp)) != NULL) {
-			char *new_source, *new_dest;
-
-			if (strcmp(d->d_name, ".") == 0 ||
-					strcmp(d->d_name, "..") == 0)
-				continue;
-
-			new_source = concat_path_file(source, d->d_name);
-			new_dest = concat_path_file(dest, d->d_name);
-			if (copy_file(new_source, new_dest, flags) < 0)
-				status = -1;
-			free(new_source);
-			free(new_dest);
-		}
-
-		/* ??? What if an error occurs in readdir?  */
-
-		if (closedir(dp) < 0) {
-			perror_msg("unable to close directory `%s'", source);
-			status = -1;
-		}
-
-		if (!dest_exists &&
-				chmod(dest, source_stat.st_mode & ~saved_umask) < 0) {
-			perror_msg("unable to change permissions of `%s'", dest);
-			status = -1;
-		}
+		error_msg("%s: omitting directory", source);
+		return -1;
 	} else if (S_ISREG(source_stat.st_mode)) {
 		FILE *sfp, *dfp;
 
@@ -191,20 +123,6 @@ int copy_file(const char *source, const char *dest, int flags)
 			perror_msg("cannot create fifo `%s'", dest);
 			return -1;
 		}
-	} else if (S_ISLNK(source_stat.st_mode)) {
-		char *lpath = xreadlink(source);
-		if (symlink(lpath, dest) < 0) {
-			perror_msg("cannot create symlink `%s'", dest);
-			return -1;
-		}
-		free(lpath);
-
-#if (__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 1)
-		if (flags & FILEUTILS_PRESERVE_STATUS)
-			if (lchown(dest, source_stat.st_uid, source_stat.st_gid) < 0)
-				perror_msg("unable to preserve ownership of `%s'", dest);
-#endif
-		return 0;
 	} else {
 		error_msg("internal error: unrecognized file type");
 		return -1;

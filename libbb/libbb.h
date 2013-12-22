@@ -60,15 +60,10 @@ extern char *xstrdup (const char *s);
 extern char *xstrndup (const char *s, int n);
 extern char *safe_strncpy(char *dst, const char *src, size_t size);
 
-char *xreadlink(const char *path);
-char *concat_path_file(const char *path, const char *filename);
-char *last_char_is(const char *s, int c);
-
 int make_directory (const char *path, long mode, int flags);
 
 enum {
 	FILEUTILS_PRESERVE_STATUS = 1,
-	FILEUTILS_PRESERVE_SYMLINKS = 2,
 	FILEUTILS_RECUR = 4,
 	FILEUTILS_FORCE = 8,
 };
