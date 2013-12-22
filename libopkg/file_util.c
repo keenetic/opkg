@@ -133,7 +133,31 @@ file_copy(const char *src, const char *dest)
 int
 file_mkdir_hier(const char *path, long mode)
 {
-	return make_directory(path, mode, FILEUTILS_RECUR);
+	struct stat st;
+
+	if (stat (path, &st) < 0 && errno == ENOENT) {
+		int status;
+		char *parent;
+
+		parent = xdirname(path);
+		status = file_mkdir_hier(parent, mode | 0300);
+		free(parent);
+
+		if (status < 0)
+			return -1;
+
+		if (mkdir (path, 0777) < 0) {
+			opkg_perror(ERROR, "Cannot create directory `%s'", path);
+			return -1;
+		}
+
+		if (mode != -1 && chmod (path, mode) < 0) {
+			opkg_perror(ERROR, "Cannot set permissions of directory `%s'", path);
+			return -1;
+		}
+	}
+
+	return 0;
 }
 
 char *file_md5sum_alloc(const char *file_name)

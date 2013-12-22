@@ -38,11 +38,8 @@ extern char *xstrdup (const char *s);
 extern char *xstrndup (const char *s, int n);
 extern char *xdirname(const char *path);
 
-int make_directory (const char *path, long mode, int flags);
-
 enum {
 	FILEUTILS_PRESERVE_STATUS = 1,
-	FILEUTILS_RECUR = 4,
 	FILEUTILS_FORCE = 8,
 };
 
