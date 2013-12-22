@@ -29,14 +29,6 @@
 
 #include "../libopkg/opkg_message.h"
 
-#ifndef FALSE
-#define FALSE   ((int) 0)
-#endif
-
-#ifndef TRUE
-#define TRUE    ((int) 1)
-#endif
-
 #define error_msg(fmt, args...) opkg_msg(ERROR, fmt"\n", ##args)
 #define perror_msg(fmt, args...) opkg_perror(ERROR, fmt, ##args)
 #define error_msg_and_die(fmt, args...) \
