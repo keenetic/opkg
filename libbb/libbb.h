@@ -29,18 +29,11 @@
 
 #include "../libopkg/opkg_message.h"
 
-int copy_file(const char *source, const char *dest, int flags);
-
 extern void *xmalloc (size_t size);
 extern void *xrealloc(void *old, size_t size);
 extern void *xcalloc(size_t nmemb, size_t size);
 extern char *xstrdup (const char *s);
 extern char *xstrndup (const char *s, int n);
 extern char *xdirname(const char *path);
-
-enum {
-	FILEUTILS_PRESERVE_STATUS = 1,
-	FILEUTILS_FORCE = 8,
-};
 
 #endif /* __LIBBB_H__ */

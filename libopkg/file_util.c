@@ -24,6 +24,8 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <utime.h>
+#include <fcntl.h>
 
 #include "sprintf_alloc.h"
 #include "file_util.h"
@@ -117,17 +119,141 @@ file_move(const char *src, const char *dest)
 	return err;
 }
 
+static int
+copy_file_data(FILE *src_file, FILE *dst_file)
+{
+	size_t nread, nwritten;
+	char buffer[BUFSIZ];
+
+	while (1) {
+		nread = fread (buffer, 1, BUFSIZ, src_file);
+
+		if (nread != BUFSIZ && ferror (src_file)) {
+			opkg_perror(ERROR, "read");
+			return -1;
+		}
+
+		/* Check for EOF. */
+		if (nread == 0)
+			return 0;
+
+		nwritten = fwrite (buffer, 1, nread, dst_file);
+
+		if (nwritten != nread) {
+			if (ferror (dst_file))
+				opkg_perror(ERROR, "write");
+			else
+				opkg_msg(ERROR, "Unable to write all data.\n");
+			return -1;
+		}
+	}
+}
+
 int
 file_copy(const char *src, const char *dest)
 {
-	int err;
+	struct stat src_stat;
+	struct stat dest_stat;
+	int dest_exists = 1;
+	int status = 0;
 
-	err = copy_file(src, dest, FILEUTILS_FORCE | FILEUTILS_PRESERVE_STATUS);
-	if (err)
-		opkg_msg(ERROR, "Failed to copy file %s to %s.\n",
-				src, dest);
+	if (stat(src, &src_stat) < 0) {
+		opkg_perror(ERROR, "%s", src);
+		return -1;
+	}
 
-	return err;
+	if (stat(dest, &dest_stat) < 0) {
+		if (errno != ENOENT) {
+			opkg_perror(ERROR, "unable to stat `%s'", dest);
+			return -1;
+		}
+		dest_exists = 0;
+	}
+
+	if (dest_exists && src_stat.st_rdev == dest_stat.st_rdev &&
+			src_stat.st_ino == dest_stat.st_ino) {
+		opkg_msg(ERROR, "`%s' and `%s' are the same file.\n", src, dest);
+		return -1;
+	}
+
+	if (S_ISREG(src_stat.st_mode)) {
+		FILE *sfp, *dfp;
+		struct utimbuf times;
+
+		if (dest_exists) {
+			dfp = fopen(dest, "w");
+			if (dfp == NULL) {
+				if (unlink(dest) < 0) {
+					opkg_perror(ERROR, "unable to remove `%s'", dest);
+					return -1;
+				}
+			}
+		} else {
+			int fd;
+
+			fd = open(dest, O_WRONLY|O_CREAT, src_stat.st_mode);
+			if (fd < 0) {
+				opkg_perror(ERROR, "unable to open `%s'", dest);
+				return -1;
+			}
+			dfp = fdopen(fd, "w");
+			if (dfp == NULL) {
+				if (fd >= 0)
+					close(fd);
+				opkg_perror(ERROR, "unable to open `%s'", dest);
+				return -1;
+			}
+		}
+
+		sfp = fopen(src, "r");
+		if (sfp) {
+			if (copy_file_data(sfp, dfp) < 0)
+				status = -1;
+
+			if (fclose(sfp) < 0) {
+				opkg_perror(ERROR, "unable to close `%s'", src);
+				status = -1;
+			}
+		} else {
+			opkg_perror(ERROR, "unable to open `%s'", src);
+			status = -1;
+		}
+
+		if (fclose(dfp) < 0) {
+			opkg_perror(ERROR, "unable to close `%s'", dest);
+			status = -1;
+		}
+
+		times.actime = src_stat.st_atime;
+		times.modtime = src_stat.st_mtime;
+		if (utime(dest, &times) < 0)
+			opkg_perror(ERROR, "unable to preserve times of `%s'", dest);
+		if (chown(dest, src_stat.st_uid, src_stat.st_gid) < 0) {
+			src_stat.st_mode &= ~(S_ISUID | S_ISGID);
+			opkg_perror(ERROR, "unable to preserve ownership of `%s'", dest);
+		}
+		if (chmod(dest, src_stat.st_mode) < 0)
+			opkg_perror(ERROR, "unable to preserve permissions of `%s'", dest);
+
+		return status;
+	} else if (S_ISBLK(src_stat.st_mode) || S_ISCHR(src_stat.st_mode) ||
+			S_ISSOCK(src_stat.st_mode)) {
+		if (mknod(dest, src_stat.st_mode, src_stat.st_rdev) < 0) {
+			opkg_perror(ERROR, "unable to create `%s'", dest);
+			return -1;
+		}
+	} else if (S_ISFIFO(src_stat.st_mode)) {
+		if (mkfifo(dest, src_stat.st_mode) < 0) {
+			opkg_perror(ERROR, "cannot create fifo `%s'", dest);
+			return -1;
+		}
+	} else if (S_ISDIR(src_stat.st_mode)) {
+		opkg_msg(ERROR, "%s: omitting directory.\n", src);
+		return -1;
+	}
+
+	opkg_msg(ERROR, "internal error: unrecognized file type.\n");
+	return -1;
 }
 
 int
