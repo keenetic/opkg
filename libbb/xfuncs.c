@@ -68,11 +68,14 @@ extern char * xstrndup (const char *s, int n) {
 	char *t;
 
 	if (s == NULL)
-		error_msg_and_die("xstrndup bug");
+		return NULL;
 
-	t = xmalloc(++n);
+	t = strndup (s, n);
 
-	return safe_strncpy(t,s,n);
+	if (t == NULL)
+		perror_msg_and_die("strdup");
+
+	return t;
 }
 
 /* END CODE */

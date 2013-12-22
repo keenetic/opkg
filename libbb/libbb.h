@@ -58,7 +58,6 @@ extern void *xrealloc(void *old, size_t size);
 extern void *xcalloc(size_t nmemb, size_t size);
 extern char *xstrdup (const char *s);
 extern char *xstrndup (const char *s, int n);
-extern char *safe_strncpy(char *dst, const char *src, size_t size);
 
 int make_directory (const char *path, long mode, int flags);
 

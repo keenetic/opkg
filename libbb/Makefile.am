@@ -6,5 +6,4 @@ libbb_la_SOURCES = libbb.h \
 	copy_file.c \
 	copy_file_chunk.c \
 	xfuncs.c \
-	make_directory.c \
-	safe_strncpy.c
+	make_directory.c
