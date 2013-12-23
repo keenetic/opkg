@@ -32,7 +32,7 @@
 #include "xsystem.h"
 #include "file_util.h"
 #include "opkg_defines.h"
-#include "libbb/libbb.h"
+#include "xfuncs.h"
 
 #ifdef HAVE_CURL
 #include <curl/curl.h>

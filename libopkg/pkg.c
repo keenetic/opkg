@@ -32,7 +32,7 @@
 #include "opkg_message.h"
 #include "opkg_utils.h"
 
-#include "libbb/libbb.h"
+#include "xfuncs.h"
 #include "sprintf_alloc.h"
 #include "file_util.h"
 #include "xsystem.h"

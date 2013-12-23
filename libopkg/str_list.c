@@ -19,7 +19,7 @@
 #include <string.h>
 
 #include "str_list.h"
-#include "libbb/libbb.h"
+#include "xfuncs.h"
 
 void str_list_elt_init(str_list_elt_t *elt, char *data)
 {

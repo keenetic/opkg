@@ -21,7 +21,7 @@
 #include "pkg_dest.h"
 #include "void_list.h"
 #include "pkg_dest_list.h"
-#include "libbb/libbb.h"
+#include "xfuncs.h"
 
 void pkg_dest_list_elt_init(pkg_dest_list_elt_t *elt, pkg_dest_t *data)
 {

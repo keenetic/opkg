@@ -17,19 +17,19 @@ if [ \( $# -eq 1 \) -a \( "$1" = "--clean" \) ]; then
 	rm -f aclocal.m4
 	rm -f libopkg.pc
 	rm -f man/{opkg-cl.1,opkg-key.1}
-	rm -f Makefile {libbb,libopkg,tests,man,utils,src}/Makefile
-	rm -f Makefile.in {libbb,libopkg,tests,man,utils,src}/Makefile.in
+	rm -f Makefile {libopkg,tests,man,utils,src}/Makefile
+	rm -f Makefile.in {libopkg,tests,man,utils,src}/Makefile.in
 	rm -f config.h{,.in}
 	rm -rf po conf autom4te.cache m4
-	rm -rf {libbb,libopkg,src,tests}/.deps
+	rm -rf {libopkg,src,tests}/.deps
 
-	rm -f {libbb,libopkg,tests,src}/*.o
-	rm -f {libbb,libopkg}/*.lo
-	rm -f {libbb,libopkg}/*.la
+	rm -f {libopkg,tests,src}/*.o
+	rm -f libopkg/*.lo
+	rm -f libopkg/*.la
 	rm -f src/opkg-cl tests/libopkg_test
 	rm -f stamp-h1
 	rm -f utils/update-alternatives
-	rm -rf {libbb,libopkg,tests,src}/.libs
+	rm -rf {libopkg,tests,src}/.libs
 
 	rm -f tests/regress/*.py{c,o}
 	rm -rf tests/regress/__pycache__

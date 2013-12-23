@@ -18,7 +18,7 @@
 #include <stdlib.h>
 
 #include "sprintf_alloc.h"
-#include "libbb/libbb.h"
+#include "xfuncs.h"
 
 void
 sprintf_alloc(char **str, const char *fmt, ...)

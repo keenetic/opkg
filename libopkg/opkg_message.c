@@ -20,7 +20,7 @@
 
 #include "opkg_conf.h"
 #include "opkg_message.h"
-#include "libbb/libbb.h"
+#include "xfuncs.h"
 
 struct errlist {
 	char *errmsg;

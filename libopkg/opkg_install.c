@@ -42,7 +42,7 @@
 #include "sprintf_alloc.h"
 #include "file_util.h"
 #include "xsystem.h"
-#include "libbb/libbb.h"
+#include "xfuncs.h"
 
 static int
 satisfy_dependencies_for(pkg_t *pkg)

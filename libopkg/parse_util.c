@@ -22,7 +22,7 @@
 
 #include "opkg_message.h"
 #include "opkg_utils.h"
-#include "libbb/libbb.h"
+#include "xfuncs.h"
 
 #include "parse_util.h"
 

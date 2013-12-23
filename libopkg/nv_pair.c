@@ -18,7 +18,7 @@
 #include <malloc.h>
 
 #include "nv_pair.h"
-#include "libbb/libbb.h"
+#include "xfuncs.h"
 
 int nv_pair_init(nv_pair_t *nv_pair, const char *name, const char *value)
 {

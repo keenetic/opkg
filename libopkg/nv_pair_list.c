@@ -21,7 +21,7 @@
 #include "nv_pair.h"
 #include "void_list.h"
 #include "nv_pair_list.h"
-#include "libbb/libbb.h"
+#include "xfuncs.h"
 
 void nv_pair_list_init(nv_pair_list_t *list)
 {

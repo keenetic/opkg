@@ -25,7 +25,7 @@
 #include "opkg_cmd.h"
 #include "file_util.h"
 #include "sprintf_alloc.h"
-#include "libbb/libbb.h"
+#include "xfuncs.h"
 
 /*
  * Returns number of the number of packages depending on the packages provided by this package.

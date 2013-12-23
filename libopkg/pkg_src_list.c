@@ -19,7 +19,7 @@
 
 #include "pkg_src_list.h"
 #include "void_list.h"
-#include "libbb/libbb.h"
+#include "xfuncs.h"
 
 void pkg_src_list_init(pkg_src_list_t *list)
 {

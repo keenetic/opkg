@@ -25,7 +25,7 @@
 #include "opkg_message.h"
 #include "pkg_parse.h"
 #include "hash_table.h"
-#include "libbb/libbb.h"
+#include "xfuncs.h"
 
 static int parseDepends(compound_depend_t *compound_depend, const char * depend_str);
 static depend_t * depend_init(void);

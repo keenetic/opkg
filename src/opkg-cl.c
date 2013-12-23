@@ -31,7 +31,7 @@
 #include "file_util.h"
 #include "opkg_message.h"
 #include "opkg_download.h"
-#include "../libbb/libbb.h"
+#include "xfuncs.h"
 
 enum {
 	ARGS_OPT_FORCE_MAINTAINER = 129,

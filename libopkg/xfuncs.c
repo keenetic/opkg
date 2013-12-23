@@ -24,7 +24,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "libbb.h"
+
+#include "opkg_message.h"
+#include "xfuncs.h"
 
 extern void *xmalloc(size_t size)
 {

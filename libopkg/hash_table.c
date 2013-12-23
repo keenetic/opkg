@@ -20,7 +20,7 @@
 #include <string.h>
 #include "hash_table.h"
 #include "opkg_message.h"
-#include "libbb/libbb.h"
+#include "xfuncs.h"
 
 
 static unsigned long

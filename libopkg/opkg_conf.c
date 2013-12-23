@@ -35,7 +35,7 @@
 #include "opkg_message.h"
 #include "file_util.h"
 #include "opkg_defines.h"
-#include "libbb/libbb.h"
+#include "xfuncs.h"
 
 static int lock_fd;
 static char *lock_file = NULL;

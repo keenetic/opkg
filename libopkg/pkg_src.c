@@ -18,7 +18,7 @@
 #include <malloc.h>
 
 #include "pkg_src.h"
-#include "libbb/libbb.h"
+#include "xfuncs.h"
 
 int pkg_src_init(pkg_src_t *src, const char *name, const char *base_url, const char *extra_data, int gzip)
 {

@@ -37,7 +37,7 @@
 #include "sprintf_alloc.h"
 #include "file_util.h"
 
-#include <libbb/libbb.h>
+#include "xfuncs.h"
 
 #define opkg_assert(expr) if (!(expr)) { \
     printf ("opkg: file %s: line %d (%s): Assertation '%s' failed",\

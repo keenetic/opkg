@@ -22,8 +22,8 @@
 #include <curl/curl.h>
 #endif
 
-#include "libbb/libbb.h"
 #include "opkg_message.h"
+#include "xfuncs.h"
 
 #if defined(HAVE_SSLCURL) || defined(HAVE_OPENSSL)
 /*

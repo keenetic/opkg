@@ -1,4 +1,4 @@
-SUBDIRS = libbb libopkg src tests utils man
+SUBDIRS = libopkg src tests utils man
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libopkg.pc

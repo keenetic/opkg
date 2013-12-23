@@ -22,7 +22,7 @@
 
 #include "pkg.h"
 #include "opkg_message.h"
-#include "libbb/libbb.h"
+#include "xfuncs.h"
 
 pkg_vec_t * pkg_vec_alloc(void)
 {

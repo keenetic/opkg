@@ -25,7 +25,7 @@
 #include "file_util.h"
 #include "pkg_extract.h"
 #include "sprintf_alloc.h"
-#include "libbb/libbb.h"
+#include "xfuncs.h"
 
 struct inner_data {
 	/* Pointer to the original archive file we're extracting from. */

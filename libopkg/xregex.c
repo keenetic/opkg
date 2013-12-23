@@ -19,7 +19,7 @@
 
 #include "opkg_message.h"
 #include "xregex.h"
-#include "libbb/libbb.h"
+#include "xfuncs.h"
 
 static void print_regcomp_err(const regex_t *preg, int err);
 

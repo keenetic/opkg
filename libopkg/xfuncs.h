@@ -1,6 +1,6 @@
 /* vi: set sw=4 ts=4: */
 /*
- * Busybox main internal header file
+ * Utility routines.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,17 +17,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef	__LIBBB_H__
-#define	__LIBBB_H__    1
+#ifndef	XFUNCS_H
+#define	XFUNCS_H
 
-#include <stdio.h>
-#include <stdarg.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <stdlib.h>
-#include <netdb.h>
-
-#include "../libopkg/opkg_message.h"
+#include <stddef.h>
 
 extern void *xmalloc (size_t size);
 extern void *xrealloc(void *old, size_t size);
@@ -36,4 +29,4 @@ extern char *xstrdup (const char *s);
 extern char *xstrndup (const char *s, int n);
 extern char *xdirname(const char *path);
 
-#endif /* __LIBBB_H__ */
+#endif /* XFUNCS_H */

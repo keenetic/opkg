@@ -29,7 +29,7 @@
 #include "opkg_utils.h"
 #include "sprintf_alloc.h"
 #include "file_util.h"
-#include "libbb/libbb.h"
+#include "xfuncs.h"
 
 void
 pkg_hash_init(void)

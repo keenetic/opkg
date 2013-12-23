@@ -75,7 +75,7 @@ opkg_util_sources = file_util.c file_util.h opkg_message.h opkg_message.c md5.c 
 		    parse_util.c parse_util.h \
 		    cksum_list.c cksum_list.h \
 		    sprintf_alloc.c sprintf_alloc.h \
-		    xregex.c xregex.h xsystem.c xsystem.h
+		    xregex.c xregex.h xsystem.c xsystem.h xfuncs.c xfuncs.h
 if HAVE_PATHFINDER
 opkg_util_sources += opkg_pathfinder.c opkg_pathfinder.h
 endif
@@ -89,7 +89,7 @@ libopkg_la_SOURCES = \
 	$(opkg_cmd_sources) $(opkg_db_sources) \
 	$(opkg_util_sources) $(opkg_list_sources)
 
-libopkg_la_LIBADD = $(top_builddir)/libbb/libbb.la $(LIBARCHIVE_LIBS) \
+libopkg_la_LIBADD = $(LIBARCHIVE_LIBS) \
 		    $(CURL_LIBS) $(GPGME_LIBS) $(GPGERR_LIBS) $(OPENSSL_LIBS) \
 		    $(PATHFINDER_LIBS)
 

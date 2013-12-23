@@ -36,7 +36,6 @@
 #include "sprintf_alloc.h"
 #include "pkg.h"
 #include "file_util.h"
-#include "libbb/libbb.h"
 #include "opkg_utils.h"
 #include "opkg_defines.h"
 #include "opkg_download.h"
@@ -45,6 +44,7 @@
 #include "opkg_remove.h"
 #include "opkg_configure.h"
 #include "xsystem.h"
+#include "xfuncs.h"
 
 static void
 print_pkg(pkg_t *pkg)

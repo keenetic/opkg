@@ -19,7 +19,7 @@
 
 #include "opkg_message.h"
 #include "void_list.h"
-#include "libbb/libbb.h"
+#include "xfuncs.h"
 
 void void_list_elt_init(void_list_elt_t *elt, void *data)
 {

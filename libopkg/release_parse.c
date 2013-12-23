@@ -21,7 +21,7 @@
 #include "opkg_message.h"
 #include "release.h"
 #include "release_parse.h"
-#include "libbb/libbb.h"
+#include "xfuncs.h"
 #include "parse_util.h"
 
 static int

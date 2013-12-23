@@ -21,7 +21,7 @@
 #include <string.h>
 
 #include "cksum_list.h"
-#include "libbb/libbb.h"
+#include "xfuncs.h"
 
 
 int cksum_init(cksum_t *cksum, char **itemlist)

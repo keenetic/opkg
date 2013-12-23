@@ -33,7 +33,7 @@
 #include "sprintf_alloc.h"
 #include "file_util.h"
 #include "md5.h"
-#include "libbb/libbb.h"
+#include "xfuncs.h"
 
 #if defined HAVE_SHA256
 #include "sha256.h"

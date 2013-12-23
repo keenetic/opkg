@@ -21,7 +21,7 @@
 #include "opkg_message.h"
 #include "release.h"
 #include "opkg_utils.h"
-#include "libbb/libbb.h"
+#include "xfuncs.h"
 
 #include "opkg_download.h"
 #include "sprintf_alloc.h"
