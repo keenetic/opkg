@@ -195,7 +195,7 @@ opkg_set_option(char *option, void *value)
  * @param progress_callback The callback function that report the status to caller.
  */
 int
-opkg_install_package(const char *package_name,
+opkg_install_package(const char *package_url,
 		opkg_progress_callback_t progress_callback,
 		void *user_data)
 {
@@ -205,8 +205,14 @@ opkg_install_package(const char *package_name,
 	pkg_vec_t *deps, *all;
 	unsigned int i;
 	char **unresolved = NULL;
+	char * package_name;
 
-	opkg_assert(package_name != NULL);
+	opkg_assert(package_url != NULL);
+
+	/* Pre-process the package name to handle remote URLs and paths to
+	 * ipk/opk files.
+	 */
+	opkg_prepare_url_for_install(package_url, &package_name);
 
 	/* ... */
 	pkg_info_preinstall_check();

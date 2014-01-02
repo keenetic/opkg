@@ -50,7 +50,7 @@ int opkg_re_read_config_files (void);
 int opkg_get_option (char *option, void *value);
 void opkg_set_option (char *option, void *value);
 
-int opkg_install_package (const char *package_name, opkg_progress_callback_t callback, void *user_data);
+int opkg_install_package (const char *package_url, opkg_progress_callback_t callback, void *user_data);
 int opkg_remove_package (const char *package_name, opkg_progress_callback_t callback, void *user_data);
 int opkg_upgrade_package (const char *package_name, opkg_progress_callback_t callback, void *user_data);
 int opkg_upgrade_all (opkg_progress_callback_t callback, void *user_data);
