@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "opkg_message.h"
 #include "file_util.h"
 #include "pkg_extract.h"
 #include "sprintf_alloc.h"

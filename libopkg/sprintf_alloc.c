@@ -14,6 +14,8 @@
 */
 
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "sprintf_alloc.h"
 #include "libbb/libbb.h"

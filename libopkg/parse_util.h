@@ -18,6 +18,8 @@
 #ifndef PARSE_UTIL_H
 #define PARSE_UTIL_H
 
+#include <sys/types.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

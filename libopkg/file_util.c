@@ -26,7 +26,10 @@
 #include <unistd.h>
 #include <utime.h>
 #include <fcntl.h>
+#include <malloc.h>
+#include <string.h>
 
+#include "opkg_message.h"
 #include "sprintf_alloc.h"
 #include "file_util.h"
 #include "md5.h"

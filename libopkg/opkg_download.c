@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <libgen.h>
 #include <ctype.h>
+#include <sys/stat.h>
 
 #include "opkg_download.h"
 #include "opkg_message.h"

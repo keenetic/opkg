@@ -20,7 +20,12 @@
 
 #include <stdio.h>
 #include <ctype.h>
+#include <malloc.h>
+#include <string.h>
+#include <stdlib.h>
+#include <errno.h>
 
+#include "opkg_message.h"
 #include "opkg_utils.h"
 #include "pkg_parse.h"
 #include "libbb/libbb.h"

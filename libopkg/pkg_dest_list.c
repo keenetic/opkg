@@ -16,6 +16,7 @@
 */
 
 #include <stdio.h>
+#include <malloc.h>
 
 #include "pkg_dest.h"
 #include "void_list.h"

@@ -16,6 +16,7 @@
 */
 
 #include <stdio.h>
+#include <malloc.h>
 
 #include "hash_table.h"
 #include "release.h"

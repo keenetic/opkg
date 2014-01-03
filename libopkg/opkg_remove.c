@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <glob.h>
 #include <unistd.h>
+#include <malloc.h>
 
 #include "opkg_message.h"
 #include "opkg_remove.h"

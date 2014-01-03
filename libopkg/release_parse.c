@@ -16,7 +16,9 @@
 #include "config.h"
 
 #include <stdio.h>
+#include <malloc.h>
 
+#include "opkg_message.h"
 #include "release.h"
 #include "release_parse.h"
 #include "libbb/libbb.h"

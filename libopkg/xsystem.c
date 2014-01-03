@@ -19,6 +19,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "opkg_message.h"
 #include "xsystem.h"
 #include "libbb/libbb.h"
 

@@ -15,6 +15,8 @@
    General Public License for more details.
 */
 
+#include <malloc.h>
+
 #include "nv_pair.h"
 #include "libbb/libbb.h"
 

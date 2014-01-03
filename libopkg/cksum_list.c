@@ -16,6 +16,9 @@
 #include "config.h"
 
 #include <stdio.h>
+#include <malloc.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "cksum_list.h"
 #include "libbb/libbb.h"

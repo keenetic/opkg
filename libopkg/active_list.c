@@ -22,6 +22,8 @@
 #include <stdlib.h>
 
 #include "libbb/libbb.h"
+#include "opkg_message.h"
+#include "active_list.h"
 
 void active_list_init(struct active_list *ptr) {
     INIT_LIST_HEAD(&ptr->node);

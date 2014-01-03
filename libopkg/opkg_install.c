@@ -22,6 +22,8 @@
 #include <signal.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <malloc.h>
+#include <stdlib.h>
 
 #include "pkg.h"
 #include "pkg_hash.h"

@@ -17,8 +17,10 @@
 
 #include <ctype.h>
 #include <sys/statvfs.h>
+#include <string.h>
 
 #include "libbb/libbb.h"
+#include "opkg_message.h"
 
 unsigned long
 get_available_kbytes(char * filesystem)

@@ -15,6 +15,8 @@
 */
 
 #include <stdio.h>
+#include <malloc.h>
+#include <stdlib.h>
 
 #include "opkg_conf.h"
 #include "opkg_message.h"

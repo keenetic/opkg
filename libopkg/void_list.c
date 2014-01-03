@@ -15,6 +15,9 @@
    General Public License for more details.
 */
 
+#include <malloc.h>
+
+#include "opkg_message.h"
 #include "void_list.h"
 #include "libbb/libbb.h"
 

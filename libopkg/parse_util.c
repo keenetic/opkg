@@ -17,7 +17,10 @@
 */
 
 #include <ctype.h>
+#include <string.h>
+#include <stdio.h>
 
+#include "opkg_message.h"
 #include "opkg_utils.h"
 #include "libbb/libbb.h"
 

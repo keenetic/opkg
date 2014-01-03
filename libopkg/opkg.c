@@ -20,6 +20,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <fnmatch.h>
+#include <malloc.h>
+#include <stdlib.h>
 
 #include "opkg.h"
 #include "opkg_conf.h"

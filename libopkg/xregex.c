@@ -15,6 +15,9 @@
    GNU General Public License for more details.
 */
 
+#include <malloc.h>
+
+#include "opkg_message.h"
 #include "xregex.h"
 #include "libbb/libbb.h"
 

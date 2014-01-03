@@ -15,6 +15,9 @@
    General Public License for more details.
 */
 
+#include <malloc.h>
+#include <string.h>
+
 #include "str_list.h"
 #include "libbb/libbb.h"
 

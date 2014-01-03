@@ -17,6 +17,8 @@
 
 #include <stdio.h>
 #include <fnmatch.h>
+#include <malloc.h>
+#include <stdlib.h>
 
 #include "pkg.h"
 #include "opkg_message.h"
