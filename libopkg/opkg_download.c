@@ -96,7 +96,7 @@ replace_token_in_str(const char *str, const char *token, const char *replacement
      * the fact that the user gets a newly allocated string back
      */
     if (!token || *token == '\0')
-	return strdup(str);
+	return xstrdup(str);
 
     char *found_token = strstr(str, token);
     if (!found_token)
@@ -104,7 +104,7 @@ replace_token_in_str(const char *str, const char *token, const char *replacement
 	 * There's nothing to replace, just clone the string to be consistent
 	 * with the fact that the user gets a newly allocated string back
 	 */
-	return strdup(str);
+	return xstrdup(str);
 
     size_t str_len          = strlen(str);
     size_t replacement_len  = strlen(replacement);
