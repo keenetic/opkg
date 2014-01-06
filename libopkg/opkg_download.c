@@ -91,44 +91,45 @@ str_starts_with(const char *str, const char *prefix)
 static char *
 replace_token_in_str(const char *str, const char *token, const char *replacement)
 {
-  /*
-   * There's nothing to replace, just clone the string
-   * to be consistent with the fact that the user gets a newly allocated
-   * string back
-   */
-  if (!token || *token == '\0')
-    return strdup(str);
-
-  char *found_token = strstr(str, token);
-  if (!found_token)
     /*
-     * There's nothing to replace, just clone the string
-     * to be consistent with the fact that the user gets a newly allocated
-     * string back
+     * There's nothing to replace, just clone the string to be consistent with
+     * the fact that the user gets a newly allocated string back
      */
-    return strdup(str);
+    if (!token || *token == '\0')
+	return strdup(str);
 
-  size_t str_len          = strlen(str);
-  size_t replacement_len  = strlen(replacement);
+    char *found_token = strstr(str, token);
+    if (!found_token)
+	/*
+	 * There's nothing to replace, just clone the string to be consistent
+	 * with the fact that the user gets a newly allocated string back
+	 */
+	return strdup(str);
 
-  size_t token_len        = strlen(token);
-  unsigned int token_idx  = found_token - str;
+    size_t str_len          = strlen(str);
+    size_t replacement_len  = strlen(replacement);
 
-  size_t replaced_str_len = str_len - (strlen(token) - strlen(replacement));
-  char *replaced_str      = xmalloc(replaced_str_len * sizeof(char));
+    size_t token_len        = strlen(token);
+    unsigned int token_idx  = found_token - str;
 
-  /* first copy the string part *before* the substring to replace */
-  strncpy(replaced_str, str, token_idx);
-  /* then copy the replacement at the same position than the token to replace */
-  strncpy(replaced_str + token_idx, replacement, strlen(replacement));
-  /* finally complete the string with characters following the token to replace */
-  strncpy(replaced_str + token_idx + replacement_len,
-          str + token_idx + token_len,
-          strlen(str + token_idx + token_len));
+    size_t replaced_str_len = str_len - (strlen(token) - strlen(replacement));
+    char *replaced_str      = xmalloc(replaced_str_len * sizeof(char));
 
-  replaced_str[replaced_str_len] = '\0';
+    /* first copy the string part *before* the substring to replace */
+    strncpy(replaced_str, str, token_idx);
+    /* then copy the replacement at the same position than the token to replace
+     */
+    strncpy(replaced_str + token_idx, replacement, strlen(replacement));
+    /* finally complete the string with characters following the token to
+     * replace
+     */
+    strncpy(replaced_str + token_idx + replacement_len,
+	    str + token_idx + token_len,
+	    strlen(str + token_idx + token_len));
 
-  return replaced_str;
+    replaced_str[replaced_str_len] = '\0';
+
+    return replaced_str;
 }
 
 int
@@ -188,25 +189,26 @@ opkg_download(const char *src, const char *dest_file_name,
 	curl_easy_setopt (curl, CURLOPT_WRITEDATA, file);
 
 #ifdef HAVE_SSLCURL
-  if (opkg_config->ftp_explicit_ssl)
-  {
-    /*
-     * This is what enables explicit FTP SSL mode on curl's side
-     * As per the official documentation at
-     * http://curl.haxx.se/libcurl/c/curl_easy_setopt.html :
-     * "This option was known as CURLOPT_FTP_SSL up to 7.16.4, and the
-     * constants were known as CURLFTPSSL_*"
-     */
-    curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
+	if (opkg_config->ftp_explicit_ssl)
+	{
+	    /*
+	     * This is what enables explicit FTP SSL mode on curl's side As per
+	     * the official documentation at
+	     * http://curl.haxx.se/libcurl/c/curl_easy_setopt.html : "This
+	     * option was known as CURLOPT_FTP_SSL up to 7.16.4, and the
+	     * constants were known as CURLFTPSSL_*"
+	     */
+	    curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
 
-    /*
-     * If a URL with the ftps:// scheme is passed to curl, then it considers
-     * it's implicit mode. Thus, we need to fix it before invoking curl.
-     */
-    char *fixed_src = replace_token_in_str(src, "ftps://", "ftp://");
-    curl_easy_setopt(curl, CURLOPT_URL, fixed_src);
-    free(fixed_src);
-  }
+	    /*
+	     * If a URL with the ftps:// scheme is passed to curl, then it
+	     * considers it's implicit mode. Thus, we need to fix it before
+	     * invoking curl.
+	     */
+	    char *fixed_src = replace_token_in_str(src, "ftps://", "ftp://");
+	    curl_easy_setopt(curl, CURLOPT_URL, fixed_src);
+	    free(fixed_src);
+	}
 #endif /* HAVE_SSLCURL */
 
 	res = curl_easy_perform (curl);
