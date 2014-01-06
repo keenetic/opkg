@@ -104,6 +104,7 @@ typedef struct opkg_conf {
      char *ssl_ca_file;
      char *ssl_ca_path;
      int ssl_dont_verify_peer;
+     int ftp_explicit_ssl;
 
      /* pathfinder options: used only when opkg is configured with
       * '--enable-pathfinder', otherwise always NULL or 0 as above.
