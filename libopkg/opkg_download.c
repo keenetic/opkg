@@ -453,12 +453,18 @@ opkg_download(const char *src, const char *dest_file_name,
     return err;
 }
 
+/** \brief opkg_download_pkg: downloads a OPKG package
+ *
+ * \param pkg the package to download
+ * \param dir destination directory or NULL to store package in cache
+ * \return 0 if success, -1 if error occurs
+ *
+ */
 int
 opkg_download_pkg(pkg_t *pkg, const char *dir)
 {
-    int err;
     char *url;
-    char *stripped_filename;
+    int err = -1;
 
     if (pkg->src == NULL) {
 	opkg_msg(ERROR, "Package %s is not available from any configured src.\n",
@@ -472,19 +478,17 @@ opkg_download_pkg(pkg_t *pkg, const char *dir)
     }
 
     sprintf_alloc(&url, "%s/%s", pkg->src->value, pkg->filename);
-
-    /* The pkg->filename might be something like
-       "../../foo.opk". While this is correct, and exactly what we
-       want to use to construct url above, here we actually need to
-       use just the filename part, without any directory. */
-
-    stripped_filename = strrchr(pkg->filename, '/');
-    if ( ! stripped_filename )
-        stripped_filename = pkg->filename;
-
-    sprintf_alloc(&pkg->local_filename, "%s/%s", dir, stripped_filename);
-
-    err = opkg_download(url, pkg->local_filename, NULL, NULL);
+    pkg->local_filename = opkg_download_cache(url, NULL, NULL);
+    if (pkg->local_filename) {
+	err = 0;
+	if (dir)
+	{
+	    char* dest_file_name;
+	    sprintf_alloc(&dest_file_name, "%s/%s", dir, pkg->filename);
+	    err = file_copy(pkg->local_filename, dest_file_name);
+	    free(dest_file_name);
+	}
+    }
     free(url);
 
     return err;
@@ -527,22 +531,16 @@ opkg_prepare_url_for_install(const char *url, char **namep)
      pkg = pkg_new();
 
      if (url_has_remote_protocol(url)) {
-	  char *tmp_file;
-	  char *file_basec = xstrdup(url);
-	  char *file_base = basename(file_basec);
+	  char *cache_location;
 
-	  sprintf_alloc(&tmp_file, "%s/%s", opkg_config->tmp_dir, file_base);
-	  err = opkg_download(url, tmp_file, NULL, NULL);
+	  cache_location = opkg_download_cache(url, NULL, NULL);
+	  if (!cache_location)
+	       return -1;
+
+	  err = pkg_init_from_file(pkg, cache_location);
+	  free(cache_location);
 	  if (err)
 	       return err;
-
-	  err = pkg_init_from_file(pkg, tmp_file);
-	  if (err)
-	       return err;
-
-	  free(tmp_file);
-	  free(file_basec);
-
      } else if (strcmp(&url[strlen(url) - 4], OPKG_PKG_EXTENSION) == 0
                 || strcmp(&url[strlen(url) - 4], IPKG_PKG_EXTENSION) == 0
 		|| strcmp(&url[strlen(url) - 4], DPKG_PKG_EXTENSION) == 0) {

@@ -178,7 +178,7 @@ release_download(release_t *release, pkg_src_t *dist, char *lists_dir, char *tmp
      unsigned int i;
 
      for(i = 0; i < ncomp; i++){
-	  int err = 0;
+	  int err = -1;
 	  char *prefix;
 
 	  sprintf_alloc(&prefix, "%s/dists/%s/%s/binary", dist->value, dist->name,
@@ -193,25 +193,24 @@ release_download(release_t *release, pkg_src_t *dist, char *lists_dir, char *tmp
 
 	       sprintf_alloc(&list_file_name, "%s/%s-%s-%s", lists_dir, dist->name, comps[i], nv->name);
 
-	       sprintf_alloc(&tmp_file_name, "%s/%s-%s-%s%s", tmpdir, dist->name, comps[i], nv->name, ".gz");
-
 	       sprintf_alloc(&subpath, "%s/binary-%s/%s", comps[i], nv->name, dist->gzip ? "Packages.gz" : "Packages");
 
 	       if (dist->gzip) {
+	       char *cache_location;
 	       sprintf_alloc(&url, "%s-%s/Packages.gz", prefix, nv->name);
-	       err = opkg_download(url, tmp_file_name, NULL, NULL);
-	       if (!err) {
-		    err = release_verify_file(release, tmp_file_name, subpath);
+	       cache_location = opkg_download_cache(url, NULL, NULL);
+	       if (cache_location) {
+		    err = release_verify_file(release, cache_location, subpath);
 		    if (err) {
-			 unlink (tmp_file_name);
 			 unlink (list_file_name);
 		    }
 	       }
 	       if (!err) {
 		    FILE *in, *out;
 		    opkg_msg(NOTICE, "Inflating %s.\n", url);
-		    in = fopen (tmp_file_name, "r");
-		    out = fopen (list_file_name, "w");
+		    sprintf_alloc (&tmp_file_name, "%s.@@", list_file_name);
+		    in = fopen (cache_location, "r");
+		    out = fopen (tmp_file_name, "w");
 		    if (in && out) {
 			 err = unzip (in, out);
 			 if (err)
@@ -222,9 +221,11 @@ release_download(release_t *release, pkg_src_t *dist, char *lists_dir, char *tmp
 			 fclose (in);
 		    if (out)
 			 fclose (out);
-		    unlink (tmp_file_name);
+		    rename(tmp_file_name, list_file_name);
+		    free(tmp_file_name);
 	       }
 	       free(url);
+	       free(cache_location);
 	       }
 
 	       if (err) {
@@ -238,7 +239,6 @@ release_download(release_t *release, pkg_src_t *dist, char *lists_dir, char *tmp
 		    free(url);
 	       }
 
-	       free(tmp_file_name);
 	       free(list_file_name);
 	  }
 

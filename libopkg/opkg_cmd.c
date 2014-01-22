@@ -167,13 +167,14 @@ opkg_update_cmd(int argc, char **argv)
 	  if (src->gzip) {
 	      char *tmp_file_name;
 	      FILE *in, *out;
+	      char *cache_location;
 
-	      sprintf_alloc (&tmp_file_name, "%s/%s.gz", tmp, src->name);
-	      err = opkg_download(url, tmp_file_name, NULL, NULL);
+	      cache_location = opkg_download_cache(url, NULL, NULL);
 	      if (err == 0) {
 		   opkg_msg(NOTICE, "Inflating %s.\n", url);
-		   in = fopen (tmp_file_name, "r");
-		   out = fopen (list_file_name, "w");
+		   sprintf_alloc (&tmp_file_name, "%s.@@", list_file_name);
+		   in = fopen (cache_location, "r");
+		   out = fopen (tmp_file_name, "w");
 		   if (in && out)
 			unzip (in, out);
 		   else
@@ -182,9 +183,10 @@ opkg_update_cmd(int argc, char **argv)
 			fclose (in);
 		   if (out)
 			fclose (out);
-		   unlink (tmp_file_name);
+		   rename(tmp_file_name, list_file_name);
+		   free(tmp_file_name);
 	      }
-	      free(tmp_file_name);
+		  free(cache_location);
 	  } else
 	      err = opkg_download(url, list_file_name, NULL, NULL);
 	  if (err) {
@@ -606,7 +608,7 @@ opkg_download_cmd(int argc, char **argv)
 	       opkg_msg(ERROR, "Failed to download %s.\n", pkg->name);
 	  } else {
 	       opkg_msg(NOTICE, "Downloaded %s as %s.\n",
-			    pkg->name, pkg->local_filename);
+			    pkg->name, pkg->filename);
 	  }
      }
 

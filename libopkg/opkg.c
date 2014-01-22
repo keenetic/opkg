@@ -198,7 +198,6 @@ opkg_install_package(const char *package_name,
 		void *user_data)
 {
 	int err;
-	char *stripped_filename;
 	opkg_progress_data_t pdata;
 	pkg_t *old, *new;
 	pkg_vec_t *deps, *all;
@@ -275,14 +274,6 @@ opkg_install_package(const char *package_name,
 
 		sprintf_alloc(&url, "%s/%s", pkg->src->value, pkg->filename);
 
-		/* Get the filename part, without any directory */
-		stripped_filename = strrchr(pkg->filename, '/');
-		if (!stripped_filename)
-			stripped_filename = pkg->filename;
-
-		sprintf_alloc(&pkg->local_filename, "%s/%s", opkg_config->tmp_dir,
-			      stripped_filename);
-
 		cb_data.cb = progress_callback;
 		cb_data.progress_data = &pdata;
 		cb_data.user_data = user_data;
@@ -290,12 +281,12 @@ opkg_install_package(const char *package_name,
 		cb_data.start_range = 75 * i / deps->len;
 		cb_data.finish_range = 75 * (i + 1) / deps->len;
 
-		err = opkg_download(url, pkg->local_filename,
+		pkg->local_filename = opkg_download_cache(url,
 				    (curl_progress_func) curl_progress_cb,
 				    &cb_data);
 		free(url);
 
-		if (err) {
+		if (pkg->local_filename == NULL) {
 			pkg_vec_free(deps);
 			return -1;
 		}
@@ -545,13 +536,9 @@ opkg_update_package_lists(opkg_progress_callback_t progress_callback,
 		if (src->gzip) {
 			FILE *in, *out;
 			struct _curl_cb_data cb_data;
-			char *tmp_file_name = NULL;
+			char *cached_location;
 
-			sprintf_alloc(&tmp_file_name, "%s/%s.gz", tmp,
-				      src->name);
-
-			opkg_msg(INFO, "Downloading %s to %s...\n", url,
-					tmp_file_name);
+			opkg_msg(INFO, "Downloading %s...\n", url);
 
 			cb_data.cb = progress_callback;
 			cb_data.progress_data = &pdata;
@@ -561,26 +548,24 @@ opkg_update_package_lists(opkg_progress_callback_t progress_callback,
 			cb_data.finish_range =
 			    100 * (sources_done + 1) / sources_list_count;
 
-			err = opkg_download(url, tmp_file_name,
+			cached_location = opkg_download_cache(url,
 					  (curl_progress_func) curl_progress_cb,
 					  &cb_data);
 
-			if (err == 0) {
-				opkg_msg(INFO, "Inflating %s...\n",
-						tmp_file_name);
-				in = fopen(tmp_file_name, "r");
+			if (cached_location) {
+				opkg_msg(INFO, "Inflating %s...\n", src->name);
+				in = fopen(cached_location, "r");
 				out = fopen(list_file_name, "w");
 				if (in && out)
 					unzip(in, out);
 				else
-					err = 1;
+					err = -1;
 				if (in)
 					fclose(in);
 				if (out)
 					fclose(out);
-				unlink(tmp_file_name);
 			}
-			free(tmp_file_name);
+			free(cached_location);
 		} else
 			err = opkg_download(url, list_file_name, NULL, NULL);
 
@@ -818,11 +803,15 @@ opkg_repository_accessibility_check(void)
 	}
 
 	while (repositories > 0) {
+		char* cache_location;
 		iter1 = str_list_pop(src);
 		repositories--;
 
-		if (opkg_download(iter1->data, "/dev/null", NULL, NULL))
+		cache_location = opkg_download_cache(iter1->data, NULL, NULL);
+		if (cache_location) {
+			free(cache_location);
 			ret++;
+		}
 		str_list_elt_deinit(iter1);
 	}
 

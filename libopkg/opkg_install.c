@@ -1298,7 +1298,7 @@ opkg_install_pkg(pkg_t *pkg, int from_upgrade)
 	     return -1;
 
      if (pkg->local_filename == NULL) {
-      err = opkg_download_pkg(pkg, opkg_config->tmp_dir);
+      err = opkg_download_pkg(pkg, NULL);
 	  if (err) {
 	       opkg_msg(ERROR, "Failed to download %s. "
 			       "Perhaps you need to run 'opkg update'?\n",
