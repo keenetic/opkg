@@ -225,6 +225,7 @@ usage()
 	printf("\tinstall <pkgs>                  Install package(s)\n");
 	printf("\tconfigure <pkgs>                Configure unpacked package(s)\n");
 	printf("\tremove <pkgs|glob>              Remove package(s)\n");
+	printf("\tclean                           Clean internal cache\n");
 	printf("\tflag <flag> <pkgs>              Flag package(s)\n");
 	printf("\t <flag>=hold|noprune|user|ok|installed|unpacked (one per invocation)\n");
 

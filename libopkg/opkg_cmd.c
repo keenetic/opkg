@@ -796,6 +796,14 @@ opkg_configure_cmd(int argc, char **argv)
 }
 
 static int
+opkg_clean_cmd(int argc, char **argv)
+{
+	int err;
+	err = rm_r(opkg_config->cache_dir);
+	return err;
+}
+
+static int
 opkg_remove_cmd(int argc, char **argv)
 {
      int i, done, err = 0;
@@ -1285,6 +1293,7 @@ static opkg_cmd_t cmds[] = {
      {"status", 0, (opkg_cmd_fun_t)opkg_status_cmd, PFM_DESCRIPTION|PFM_SOURCE},
      {"install", 1, (opkg_cmd_fun_t)opkg_install_cmd, PFM_DESCRIPTION|PFM_SOURCE},
      {"remove", 1, (opkg_cmd_fun_t)opkg_remove_cmd, PFM_DESCRIPTION|PFM_SOURCE},
+     {"clean", 0, (opkg_cmd_fun_t)opkg_clean_cmd, 0},
      {"configure", 0, (opkg_cmd_fun_t)opkg_configure_cmd, PFM_DESCRIPTION|PFM_SOURCE},
      {"files", 1, (opkg_cmd_fun_t)opkg_files_cmd, PFM_DESCRIPTION|PFM_SOURCE},
      {"search", 1, (opkg_cmd_fun_t)opkg_search_cmd, PFM_DESCRIPTION|PFM_SOURCE},
