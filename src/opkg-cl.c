@@ -49,13 +49,11 @@ enum {
 	ARGS_OPT_DOWNLOAD_ONLY,
 	ARGS_OPT_NODEPS,
 	ARGS_OPT_AUTOREMOVE,
-	ARGS_OPT_CACHE,
 };
 
 static struct option long_options[] = {
 	{"query-all", 0, 0, 'A'},
 	{"autoremove", 0, 0, ARGS_OPT_AUTOREMOVE},
-	{"cache", 1, 0, ARGS_OPT_CACHE},
 	{"conf-file", 1, 0, 'f'},
 	{"conf", 1, 0, 'f'},
 	{"dest", 1, 0, 'd'},
@@ -141,10 +139,6 @@ args_parse(int argc, char *argv[])
 			break;
 		case ARGS_OPT_AUTOREMOVE:
 			opkg_config->autoremove = 1;
-			break;
-		case ARGS_OPT_CACHE:
-			free(opkg_config->cache);
-			opkg_config->cache = xstrdup(optarg);
 			break;
 		case ARGS_OPT_FORCE_MAINTAINER:
 			opkg_config->force_maintainer = 1;
@@ -267,7 +261,6 @@ usage()
 	printf("\t                                  4 debug level 2\n");
 	printf("\t-f <conf_file>                  Use <conf_file> as the opkg configuration file\n");
 	printf("\t--conf <conf_file>\n");
-	printf("\t--cache <directory>             Use a package cache\n");
 	printf("\t-d <dest_name>                  Use <dest_name> as the the root directory for\n");
 	printf("\t--dest <dest_name>              package installation, removal, upgrading.\n");
 	printf("\t                                <dest_name> should be a defined dest name from\n");

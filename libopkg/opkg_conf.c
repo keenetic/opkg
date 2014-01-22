@@ -45,7 +45,7 @@ opkg_conf_t *opkg_config = &_conf;
  * Config file options
  */
 static opkg_option_t options[] = {
-	  { "cache", OPKG_OPT_TYPE_STRING, &_conf.cache},
+	  { "cache_dir", OPKG_OPT_TYPE_STRING, &_conf.cache_dir},
 	  { "force_defaults", OPKG_OPT_TYPE_BOOL, &_conf.force_defaults },
           { "force_maintainer", OPKG_OPT_TYPE_BOOL, &_conf.force_maintainer },
 	  { "force_depends", OPKG_OPT_TYPE_BOOL, &_conf.force_depends },
@@ -610,10 +610,17 @@ opkg_conf_load(void)
 	if (opkg_config->lists_dir == NULL)
 		opkg_config->lists_dir = xstrdup(OPKG_CONF_LISTS_DIR);
 
+	if (opkg_config->cache_dir == NULL)
+		opkg_config->cache_dir = xstrdup(OPKG_CONF_CACHE_DIR);
+
 	if (opkg_config->offline_root) {
 		sprintf_alloc(&tmp, "%s/%s", opkg_config->offline_root, opkg_config->lists_dir);
 		free(opkg_config->lists_dir);
 		opkg_config->lists_dir = tmp;
+
+		sprintf_alloc(&tmp, "%s/%s", opkg_config->offline_root, opkg_config->cache_dir);
+		free(opkg_config->cache_dir);
+		opkg_config->cache_dir = tmp;
 	}
 
 	/* if no architectures were defined, then default all, noarch, and host architecture */
@@ -628,6 +635,11 @@ opkg_conf_load(void)
 		nv_pair_list_append(&opkg_config->tmp_dest_list,
 			OPKG_CONF_DEFAULT_DEST_NAME,
 			OPKG_CONF_DEFAULT_DEST_ROOT_DIR);
+	}
+
+	if (file_mkdir_hier(opkg_config->cache_dir, 0755)) {
+		opkg_perror(ERROR, "Creating cache dir %s failed", opkg_config->cache_dir);
+		goto err4;
 	}
 
 	if (resolve_pkg_dest_list())

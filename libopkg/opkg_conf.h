@@ -33,6 +33,7 @@ extern "C" {
 #define OPKG_CONF_DEFAULT_TMP_DIR_BASE "/tmp"
 #define OPKG_CONF_TMP_DIR_SUFFIX "opkg-XXXXXX"
 #define OPKG_CONF_LISTS_DIR  OPKG_STATE_DIR_PREFIX "/lists"
+#define OPKG_CONF_CACHE_DIR  OPKG_STATE_DIR_PREFIX "/cache"
 
 #define OPKG_CONF_DEFAULT_CONF_FILE_DIR OPKGETCDIR"/opkg"
 
@@ -57,6 +58,7 @@ typedef struct opkg_conf {
 
      char *tmp_dir;
      char *lists_dir;
+     char *cache_dir;
 
      unsigned int pfm; /* package field mask */
 
@@ -85,7 +87,6 @@ typedef struct opkg_conf {
      int verbosity;
      int noaction;
      int download_only;
-     char *cache;
      int overwrite_no_owner;
 
      /* ssl-curl options: used only when opkg is configured with
