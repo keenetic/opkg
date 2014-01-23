@@ -199,7 +199,7 @@ release_download(release_t *release, pkg_src_t *dist, char *lists_dir, char *tmp
 
 	       if (dist->gzip) {
 	       sprintf_alloc(&url, "%s-%s/Packages.gz", prefix, nv->name);
-	       err = opkg_download(url, tmp_file_name, NULL, NULL, 1);
+	       err = opkg_download(url, tmp_file_name, NULL, NULL);
 	       if (!err) {
 		    err = release_verify_file(release, tmp_file_name, subpath);
 		    if (err) {
@@ -229,7 +229,7 @@ release_download(release_t *release, pkg_src_t *dist, char *lists_dir, char *tmp
 
 	       if (err) {
 		    sprintf_alloc(&url, "%s-%s/Packages", prefix, nv->name);
-		    err = opkg_download(url, list_file_name, NULL, NULL, 1);
+		    err = opkg_download(url, list_file_name, NULL, NULL);
 		    if (!err) {
 			 err = release_verify_file(release, tmp_file_name, subpath);
 			 if (err)
