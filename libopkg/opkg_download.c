@@ -361,6 +361,11 @@ opkg_download_nocache(const char *src, const char *dest,
 	}
 
 	file = fopen(dest, "ab");
+	if (!file) {
+	    opkg_msg(ERROR, "Failed to open download destination file %s\n",
+		    dest);
+	    return -1;
+	}
 	fseek(file, 0, SEEK_END);
 	resume_from = ftell(file);
 
