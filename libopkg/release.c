@@ -233,7 +233,7 @@ release_download(release_t *release, pkg_src_t *dist, char *lists_dir, char *tmp
 		    sprintf_alloc(&url, "%s-%s/Packages", prefix, nv->name);
 		    err = opkg_download(url, list_file_name, NULL, NULL, 1);
 		    if (!err) {
-			 err = release_verify_file(release, tmp_file_name, subpath);
+			 err = release_verify_file(release, list_file_name, subpath);
 			 if (err)
 			      unlink (list_file_name);
 		    }
