@@ -326,39 +326,39 @@ opkg_download_nocache(const char *src, const char *dest,
 
 	curl_easy_setopt(curl, CURLOPT_URL, src);
 
-    if (!str_starts_with(src, "file:")) {
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &dummy_write);
-        curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, &header_write);
-        curl_easy_setopt(curl, CURLOPT_WRITEHEADER, &etag);
-        curl_easy_setopt(curl, CURLOPT_HEADER, TRUE);
-        curl_easy_setopt(curl, CURLOPT_NOBODY, TRUE); // remove body
+	if (!str_starts_with(src, "file:")) {
+	    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &dummy_write);
+	    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, &header_write);
+	    curl_easy_setopt(curl, CURLOPT_WRITEHEADER, &etag);
+	    curl_easy_setopt(curl, CURLOPT_HEADER, TRUE);
+	    curl_easy_setopt(curl, CURLOPT_NOBODY, TRUE); // remove body
 
-        res = curl_easy_perform(curl);
-        if (res) {
-            long error_code;
-            curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &error_code);
-            opkg_msg(ERROR, "Failed to download %s headers: %s.\n",
-                    src, curl_easy_strerror(res));
-            return -1;
-        }
-        curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &src_size);
+	    res = curl_easy_perform(curl);
+	    if (res) {
+		long error_code;
+		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &error_code);
+		opkg_msg(ERROR, "Failed to download %s headers: %s.\n",
+			src, curl_easy_strerror(res));
+		return -1;
+	    }
+	    curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &src_size);
 
-        if (!file_exists(dest) ||
-            !etag ||
-            check_file_stamp(dest, etag)) {
-                unlink(dest);
-                if (etag && create_file_stamp(dest, etag))
-                opkg_msg(ERROR, "Failed to create stamp for %s.\n",
-                        dest);
-        }
-        free(etag);
+	    if (!file_exists(dest) ||
+		!etag ||
+		check_file_stamp(dest, etag)) {
+		    unlink(dest);
+		    if (etag && create_file_stamp(dest, etag))
+		    opkg_msg(ERROR, "Failed to create stamp for %s.\n",
+			    dest);
+	    }
+	    free(etag);
 
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NULL);
-        curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, NULL);
-        curl_easy_setopt(curl, CURLOPT_WRITEHEADER, NULL);
-        curl_easy_setopt(curl, CURLOPT_HEADER, FALSE);
-        curl_easy_setopt(curl, CURLOPT_NOBODY, FALSE);
-    }
+	    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NULL);
+	    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, NULL);
+	    curl_easy_setopt(curl, CURLOPT_WRITEHEADER, NULL);
+	    curl_easy_setopt(curl, CURLOPT_HEADER, FALSE);
+	    curl_easy_setopt(curl, CURLOPT_NOBODY, FALSE);
+	}
 
 	file = fopen(dest, "ab");
 	fseek(file, 0, SEEK_END);
