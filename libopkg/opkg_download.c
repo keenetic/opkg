@@ -398,13 +398,11 @@ opkg_download_nocache(const char *src, const char *dest,
         }
     } else {
       int res;
-      const char *argv[10];
+      const char *argv[8];
       int i = 0;
 
       argv[i++] = "wget";
       argv[i++] = "-q";
-      argv[i++] = "-c";
-      argv[i++] = "-N";
       if (opkg_config->http_proxy || opkg_config->ftp_proxy) {
 	argv[i++] = "-Y";
 	argv[i++] = "on";
