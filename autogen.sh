@@ -83,7 +83,7 @@ fi
 mkdir -p m4
 
 echo "Generating configuration files for $PACKAGE, please wait...."
-if [ "$ACLOCAL_FLAGS" == "" ]; then
+if [ "$ACLOCAL_FLAGS" = "" ]; then
         echo "No option for 'aclocal' given. Possibly you have forgotten to use 'ACLOCAL_FLAGS='?"
 fi
 
