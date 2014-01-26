@@ -238,41 +238,24 @@ check_file_stamp(const char *file_name, char *stamp)
     return diff;
 }
 
-/** \brief opkg_download_cache: downloads file into cache
+/** \brief opkg_validate_cached_file: check if file exists in cache
  *
- * \param src absolute URI of file to download
- * \param cb callback for curl download progress
- * \param data data to pass to progress callback
- * \return path of downloaded file in cache or NULL if error occurs
- *
+ * \param src absolute URI of remote file
+ * \param cache_location absolute name of cached file
+ * \return 0 if file exists in cache and is completely downloaded.
+ *         1 if file needs further downloading.
+ *         -1 if error occurs.
  */
-char *
-opkg_download_cache(const char *src,
-	curl_progress_func cb, void *data)
+int
+opkg_validate_cached_file(const char *src,
+		const char *cache_location)
 {
-    char *cache_name = xstrdup(src);
-    char *cache_location, *p;
     double src_size = -1;
-
-    opkg_msg(NOTICE,"Downloading %s.\n", src);
-
-    for (p = cache_name; *p; p++)
-	if (*p == '/')
-	    *p = '_';
-
-    sprintf_alloc(&cache_location, "%s/%s", opkg_config->cache_dir, cache_name);
-    free(cache_name);
 
     if (str_starts_with(src, "file:")) {
         const char *file_src = src + 5;
         struct stat src_st;
         char src_stamp[21];
-
-        if (!file_exists(file_src)) {
-            opkg_msg(ERROR, "%s: No such file.\n", file_src);
-            free(cache_location);
-            return NULL;
-        }
 
         stat(file_src, &src_st);
         src_size = src_st.st_size;
@@ -285,6 +268,99 @@ opkg_download_cache(const char *src,
                 if (create_file_stamp(cache_location, src_stamp))
                     opkg_msg(ERROR, "Failed to create stamp for %s.\n",
                             cache_location);
+        }
+    }
+
+#ifdef HAVE_CURL
+    CURLcode res;
+    FILE * file;
+    long resume_from = 0;
+    char* etag = NULL;
+
+    if (!str_starts_with(src, "file:")) {
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &dummy_write);
+        curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, &header_write);
+        curl_easy_setopt(curl, CURLOPT_WRITEHEADER, &etag);
+        curl_easy_setopt(curl, CURLOPT_HEADER, TRUE);
+        curl_easy_setopt(curl, CURLOPT_NOBODY, TRUE); // remove body
+
+        res = curl_easy_perform(curl);
+        if (res) {
+            long error_code;
+            curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &error_code);
+            opkg_msg(ERROR, "Failed to download %s headers: %s.\n",
+                src, curl_easy_strerror(res));
+            return -1;
+        }
+        curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &src_size);
+
+        if (!file_exists(cache_location) ||
+            !etag ||
+            check_file_stamp(cache_location, etag)) {
+                unlink(cache_location);
+                if (etag && create_file_stamp(cache_location, etag))
+		    opkg_msg(ERROR, "Failed to create stamp for %s.\n",
+                        cache_location);
+	}
+        free(etag);
+
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NULL);
+        curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, NULL);
+        curl_easy_setopt(curl, CURLOPT_WRITEHEADER, NULL);
+        curl_easy_setopt(curl, CURLOPT_HEADER, FALSE);
+        curl_easy_setopt(curl, CURLOPT_NOBODY, FALSE);
+    }
+
+    file = fopen(cache_location, "ab");
+    if (!file) {
+        opkg_msg(ERROR, "Failed to open cache file %s\n",
+            cache_location);
+        return -1;
+    }
+    fseek(file, 0, SEEK_END);
+    resume_from = ftell(file);
+    fclose (file);
+
+    if (resume_from < src_size) {
+        curl_easy_setopt(curl, CURLOPT_RESUME_FROM, resume_from);
+        return 1;
+    }
+#else
+    if (str_starts_with(src, "file:")) {
+        struct stat dest_st;
+        if (!file_exists(cache_location) ||
+            stat(cache_location, &dest_st) ||
+            (src_size != dest_st.st_size))
+                return 1;
+    }
+#endif
+    return 0;
+}
+
+/** \brief opkg_download_internal: downloads file with existence check
+ *
+ * \param src absolute URI of file to download
+ * \param dest destination path for downloaded file
+ * \param cb callback for curl download progress
+ * \param data data to pass to progress callback
+ * \param use_cache 1 if file is downloaded into cache or 0 otherwise
+ * \return 0 if success, -1 if error occurs
+ *
+ */
+int
+opkg_download_internal(const char *src, const char *dest,
+	curl_progress_func cb, void *data, int use_cache)
+{
+    int ret;
+
+    opkg_msg(NOTICE,"Downloading %s.\n", src);
+
+    if (str_starts_with(src, "file:")) {
+        const char *file_src = src + 5;
+
+        if (!file_exists(file_src)) {
+            opkg_msg(ERROR, "%s: No such file.\n", file_src);
+            return -1;
         }
     }
 
@@ -306,114 +382,77 @@ opkg_download_cache(const char *src,
 
 #ifdef HAVE_CURL
     curl = opkg_curl_init (cb, data);
-    if (curl) {
-	CURLcode res;
-	FILE * file;
-	long resume_from = 0;
-	char* etag = NULL;
+    if (!curl)
+        return -1;
+    CURLcode res;
+    FILE * file;
+
+    curl_easy_setopt(curl, CURLOPT_URL, src);
 
 #ifdef HAVE_SSLCURL
-	if (opkg_config->ftp_explicit_ssl)
-	{
-	    /*
-	     * This is what enables explicit FTP SSL mode on curl's side As per
-	     * the official documentation at
-	     * http://curl.haxx.se/libcurl/c/curl_easy_setopt.html : "This
-	     * option was known as CURLOPT_FTP_SSL up to 7.16.4, and the
-	     * constants were known as CURLFTPSSL_*"
-	     */
-	    curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
+    if (opkg_config->ftp_explicit_ssl)
+    {
+        /*
+         * This is what enables explicit FTP SSL mode on curl's side As per
+         * the official documentation at
+         * http://curl.haxx.se/libcurl/c/curl_easy_setopt.html : "This
+         * option was known as CURLOPT_FTP_SSL up to 7.16.4, and the
+         * constants were known as CURLFTPSSL_*"
+         */
+        curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
 
-	    /*
-	     * If a URL with the ftps:// scheme is passed to curl, then it
-	     * considers it's implicit mode. Thus, we need to fix it before
-	     * invoking curl.
-	     */
-	    char *fixed_src = replace_token_in_str(src, "ftps://", "ftp://");
-	    curl_easy_setopt(curl, CURLOPT_URL, fixed_src);
-	    free(fixed_src);
-	}
+        /*
+	 * If a URL with the ftps:// scheme is passed to curl, then it
+         * considers it's implicit mode. Thus, we need to fix it before
+         * invoking curl.
+         */
+	char *fixed_src = replace_token_in_str(src, "ftps://", "ftp://");
+        curl_easy_setopt(curl, CURLOPT_URL, fixed_src);
+        free(fixed_src);
+    }
 #endif /* HAVE_SSLCURL */
 
-	curl_easy_setopt(curl, CURLOPT_URL, src);
-
-	if (!str_starts_with(src, "file:")) {
-	    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &dummy_write);
-	    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, &header_write);
-	    curl_easy_setopt(curl, CURLOPT_WRITEHEADER, &etag);
-	    curl_easy_setopt(curl, CURLOPT_HEADER, TRUE);
-	    curl_easy_setopt(curl, CURLOPT_NOBODY, TRUE); // remove body
-
-	    res = curl_easy_perform(curl);
-	    if (res) {
-		long error_code;
-		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &error_code);
-		opkg_msg(ERROR, "Failed to download %s headers: %s.\n",
-			src, curl_easy_strerror(res));
-            free(cache_location);
-            return NULL;
-	    }
-	    curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &src_size);
-
-        if (!file_exists(cache_location) ||
-		!etag ||
-            check_file_stamp(cache_location, etag)) {
-                unlink(cache_location);
-                if (etag && create_file_stamp(cache_location, etag))
-		    opkg_msg(ERROR, "Failed to create stamp for %s.\n",
-                        cache_location);
-	    }
-	    free(etag);
-
-	    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NULL);
-	    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, NULL);
-	    curl_easy_setopt(curl, CURLOPT_WRITEHEADER, NULL);
-	    curl_easy_setopt(curl, CURLOPT_HEADER, FALSE);
-	    curl_easy_setopt(curl, CURLOPT_NOBODY, FALSE);
-	}
-
-	file = fopen(cache_location, "ab");
-	if (!file) {
-	    opkg_msg(ERROR, "Failed to open cache file %s\n",
-		    cache_location);
-	    return -1;
-	}
-	fseek(file, 0, SEEK_END);
-	resume_from = ftell(file);
-
-	res = 0;
-	if (resume_from < src_size) {
-	    curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
-	    curl_easy_setopt(curl, CURLOPT_RESUME_FROM, resume_from);
-
-	    res = curl_easy_perform (curl);
-	}
-	fclose (file);
-	if (res) {
-	    long error_code;
-	    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &error_code);
-	    opkg_msg(ERROR, "Failed to download %s: %s.\n",
-			src, curl_easy_strerror(res));
-	    free(cache_location);
-	    cache_location = NULL;
-	}
+    if (use_cache) {
+        ret = opkg_validate_cached_file(src, dest);
+        if (ret <= 0)
+            return ret;
     }
     else {
-	free(cache_location);
-	cache_location = NULL;
+        unlink(dest);
+    }
+
+    file = fopen(dest, "ab");
+    if (!file) {
+        opkg_msg(ERROR, "Failed to open destination file %s\n",
+            dest);
+        return -1;
+    }
+
+    res = 0;
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
+    res = curl_easy_perform (curl);
+    fclose (file);
+    if (res) {
+        long error_code;
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &error_code);
+        opkg_msg(ERROR, "Failed to download %s: %s.\n",
+            src, curl_easy_strerror(res));
+        return -1;
     }
 #else
+    if (use_cache) {
+        ret = opkg_validate_cached_file(src, dest);
+        if (ret <= 0)
+            return ret;
+    }
+    else {
+        unlink(dest);
+    }
+
     if (str_starts_with(src, "file:")) {
         const char *file_src = src + 5;
-        struct stat dest_st;
-        if (!file_exists(cache_location) ||
-            stat(cache_location, &dest_st) ||
-            (src_size != dest_st.st_size)) {
-                if (file_copy(file_src, cache_location)) {
-                    free(cache_location);
-                    cache_location = NULL;
-                }
-        }
+        if (file_copy(file_src, dest))
+            return -1;
     } else {
       int res;
       const char *argv[8];
@@ -426,19 +465,65 @@ opkg_download_cache(const char *src,
 	argv[i++] = "on";
       }
       argv[i++] = "-O";
-      argv[i++] = cache_location;
+      argv[i++] = dest;
       argv[i++] = src;
       argv[i++] = NULL;
       res = xsystem(argv);
 
       if (res) {
 	opkg_msg(ERROR, "Failed to download %s, wget returned %d.\n", src, res);
-	free(cache_location);
-	cache_location = NULL;
+	return -1;
       }
     }
 #endif
+    return 0;
+}
+
+/** \brief opkg_download_cache: downloads file into cache
+ *
+ * \param src absolute URI of file to download
+ * \param cb callback for curl download progress
+ * \param data data to pass to progress callback
+ * \return path of downloaded file in cache or NULL if error occurs
+ *
+ */
+char *
+opkg_download_cache(const char *src,
+	curl_progress_func cb, void *data)
+{
+    char *cache_name = xstrdup(src);
+    char *cache_location, *p;
+	int err;
+
+    for (p = cache_name; *p; p++)
+	if (*p == '/')
+	    *p = '_';
+
+    sprintf_alloc(&cache_location, "%s/%s", opkg_config->cache_dir, cache_name);
+    free(cache_name);
+
+    err = opkg_download_internal(src, cache_location, cb, data, 1);
+    if (err) {
+        free(cache_location);
+        cache_location = NULL;
+    }
     return cache_location;
+}
+
+/** \brief opkg_download_direct: downloads file directly
+ *
+ * \param src absolute URI of file to download
+ * \param dest destination path for downloaded file
+ * \param cb callback for curl download progress
+ * \param data data to pass to progress callback
+ * \return 0 on success, <0 on failure
+ *
+ */
+int
+opkg_download_direct(const char *src, const char *dest,
+	curl_progress_func cb, void *data)
+{
+    return opkg_download_internal(src, dest, cb, data, 0);
 }
 
 int
