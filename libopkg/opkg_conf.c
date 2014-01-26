@@ -69,6 +69,7 @@ static opkg_option_t options[] = {
 	  { "proxy_user", OPKG_OPT_TYPE_STRING, &_conf.proxy_user },
 	  { "query-all", OPKG_OPT_TYPE_BOOL, &_conf.query_all },
 	  { "tmp_dir", OPKG_OPT_TYPE_STRING, &_conf.tmp_dir },
+	  { "volatile_cache", OPKG_OPT_TYPE_BOOL, &_conf.volatile_cache },
 	  { "verbosity", OPKG_OPT_TYPE_INT, &_conf.verbosity },
 	  { "overwrite_no_owner", OPKG_OPT_TYPE_BOOL, &_conf.overwrite_no_owner },
 #if defined(HAVE_OPENSSL)
@@ -637,6 +638,12 @@ opkg_conf_load(void)
 			OPKG_CONF_DEFAULT_DEST_ROOT_DIR);
 	}
 
+	if (opkg_config->volatile_cache) {
+		sprintf_alloc(&tmp, "%s/%s", opkg_config->cache_dir, "volatile");
+		free(opkg_config->cache_dir);
+		opkg_config->cache_dir = tmp;
+	}
+
 	if (file_mkdir_hier(opkg_config->cache_dir, 0755)) {
 		opkg_perror(ERROR, "Creating cache dir %s failed", opkg_config->cache_dir);
 		goto err4;
@@ -706,6 +713,9 @@ opkg_conf_deinit(void)
 
 	if (opkg_config->tmp_dir)
 		rm_r(opkg_config->tmp_dir);
+
+	if (opkg_config->volatile_cache)
+		rm_r(opkg_config->cache_dir);
 
 	if (opkg_config->lists_dir)
 		free(opkg_config->lists_dir);

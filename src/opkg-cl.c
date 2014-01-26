@@ -49,6 +49,7 @@ enum {
 	ARGS_OPT_DOWNLOAD_ONLY,
 	ARGS_OPT_NODEPS,
 	ARGS_OPT_AUTOREMOVE,
+	ARGS_OPT_VOLATILE_CACHE
 };
 
 static struct option long_options[] = {
@@ -94,6 +95,7 @@ static struct option long_options[] = {
 	{"test", 0, 0, ARGS_OPT_NOACTION},
 	{"tmp-dir", 1, 0, 't'},
 	{"tmp_dir", 1, 0, 't'},
+	{"volatile-cache", 0, 0, ARGS_OPT_VOLATILE_CACHE},
 	{"verbosity", 2, 0, 'V'},
 	{"version", 0, 0, 'v'},
 	{0, 0, 0, 0}
@@ -196,6 +198,9 @@ args_parse(int argc, char *argv[])
 		case ARGS_OPT_DOWNLOAD_ONLY:
 			opkg_config->download_only = 1;
 			break;
+		case ARGS_OPT_VOLATILE_CACHE:
+			opkg_config->volatile_cache = 1;
+			break;
 		case ':':
 			parse_err = -1;
 			break;
@@ -293,6 +298,8 @@ usage()
 	printf("\t                                automatically to satisfy dependencies\n");
 	printf("\t-t                              Specify tmp-dir.\n");
 	printf("\t--tmp-dir                       Specify tmp-dir.\n");
+	printf("\t--volatile-cache                Use volatile cache.\n");
+	printf("\t                                Volatile cache will be cleared on exit\n");
 
 	printf("\n");
 

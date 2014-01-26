@@ -530,13 +530,17 @@ int
 opkg_download(const char *src, const char *dest_file_name,
 	curl_progress_func cb, void *data)
 {
-    char *cache_location;
     int err = -1;
 
-    cache_location = opkg_download_cache(src, cb, data);
-    if (cache_location) {
-	err = file_copy(cache_location, dest_file_name);
-	free(cache_location);
+    if (!opkg_config->volatile_cache) {
+        char *cache_location = opkg_download_cache(src, cb, data);
+        if (cache_location) {
+            err = file_copy(cache_location, dest_file_name);
+            free(cache_location);
+        }
+    }
+    else {
+        err = opkg_download_direct(src, dest_file_name, NULL, NULL);
     }
     return err;
 }
@@ -552,7 +556,7 @@ int
 opkg_download_pkg(pkg_t *pkg, const char *dir)
 {
     char *url;
-    int err = -1;
+    int err = 0;
 
     if (pkg->src == NULL) {
 	opkg_msg(ERROR, "Package %s is not available from any configured src.\n",
@@ -566,18 +570,26 @@ opkg_download_pkg(pkg_t *pkg, const char *dir)
     }
 
     sprintf_alloc(&url, "%s/%s", pkg->src->value, pkg->filename);
-    pkg->local_filename = opkg_download_cache(url, NULL, NULL);
-    if (pkg->local_filename) {
-	err = 0;
-	if (dir)
-	{
-	    char* dest_file_name;
-	    sprintf_alloc(&dest_file_name, "%s/%s", dir, pkg->filename);
-	    err = file_copy(pkg->local_filename, dest_file_name);
-	    free(dest_file_name);
-	}
+    if (!dir || !opkg_config->volatile_cache)
+    {
+        pkg->local_filename = opkg_download_cache(url, NULL, NULL);
+        free(url);
+        if (pkg->local_filename == NULL)
+            return -1;
     }
-    free(url);
+    if (dir)
+    {
+        char* dest_file_name;
+        sprintf_alloc(&dest_file_name, "%s/%s", dir, pkg->filename);
+        if (opkg_config->volatile_cache) {
+            err = opkg_download_direct(url, dest_file_name, NULL, NULL);
+			free(url);
+        }
+        else {
+            err = file_copy(pkg->local_filename, dest_file_name);
+        }
+        free(dest_file_name);
+    }
 
     return err;
 }
