@@ -479,6 +479,27 @@ opkg_download_internal(const char *src, const char *dest,
     return 0;
 }
 
+/** \brief get_cache_location: generate cached file path
+ *
+ * \param src absolute URI of remote file to generate path for
+ * \return generated file path
+ *
+ */
+char *
+get_cache_location(const char *src)
+{
+    char *cache_name = xstrdup(src);
+    char *cache_location, *p;
+
+    for (p = cache_name; *p; p++)
+        if (*p == '/')
+            *p = '_';
+
+    sprintf_alloc(&cache_location, "%s/%s", opkg_config->cache_dir, cache_name);
+    free(cache_name);
+    return cache_location;
+}
+
 /** \brief opkg_download_cache: downloads file into cache
  *
  * \param src absolute URI of file to download
@@ -491,17 +512,10 @@ char *
 opkg_download_cache(const char *src,
 	curl_progress_func cb, void *data)
 {
-    char *cache_name = xstrdup(src);
-    char *cache_location, *p;
-	int err;
+    char *cache_location;
+    int err;
 
-    for (p = cache_name; *p; p++)
-	if (*p == '/')
-	    *p = '_';
-
-    sprintf_alloc(&cache_location, "%s/%s", opkg_config->cache_dir, cache_name);
-    free(cache_name);
-
+    cache_location = get_cache_location(src);
     err = opkg_download_internal(src, cache_location, cb, data, 1);
     if (err) {
         free(cache_location);
@@ -570,8 +584,23 @@ opkg_download_pkg(pkg_t *pkg, const char *dir)
     }
 
     sprintf_alloc(&url, "%s/%s", pkg->src->value, pkg->filename);
-    if (!dir || !opkg_config->volatile_cache)
-    {
+    if (!dir || !opkg_config->volatile_cache) {
+        char *cache_location = get_cache_location(url);
+
+        /* Check if package exists in cache */
+        if (file_exists(cache_location) && pkg->md5sum) {
+            char* file_md5 = file_md5sum_alloc(cache_location);
+            if (file_md5 && !strcmp(file_md5, pkg->md5sum)) {
+                free(file_md5);
+                free(url);
+                pkg->local_filename = cache_location;
+                return 0;
+             }
+             if (file_md5)
+                 free(file_md5);
+        }
+        free(cache_location);
+
         pkg->local_filename = opkg_download_cache(url, NULL, NULL);
         free(url);
         if (pkg->local_filename == NULL)
