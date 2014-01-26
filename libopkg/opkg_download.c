@@ -238,20 +238,30 @@ check_file_stamp(const char *file_name, char *stamp)
     return diff;
 }
 
-/** \brief opkg_download_nocache: downloads file directly
+/** \brief opkg_download_cache: downloads file into cache
  *
  * \param src absolute URI of file to download
- * \param dest relative or absolute destination path for downloaded file
  * \param cb callback for curl download progress
  * \param data data to pass to progress callback
- * \return 0 on success, <0 on failure
+ * \return path of downloaded file in cache or NULL if error occurs
  *
  */
-int
-opkg_download_nocache(const char *src, const char *dest,
+char *
+opkg_download_cache(const char *src,
 	curl_progress_func cb, void *data)
 {
+    char *cache_name = xstrdup(src);
+    char *cache_location, *p;
     double src_size = -1;
+
+    opkg_msg(NOTICE,"Downloading %s.\n", src);
+
+    for (p = cache_name; *p; p++)
+	if (*p == '/')
+	    *p = '_';
+
+    sprintf_alloc(&cache_location, "%s/%s", opkg_config->cache_dir, cache_name);
+    free(cache_name);
 
     if (str_starts_with(src, "file:")) {
         const char *file_src = src + 5;
@@ -260,7 +270,8 @@ opkg_download_nocache(const char *src, const char *dest,
 
         if (!file_exists(file_src)) {
             opkg_msg(ERROR, "%s: No such file.\n", file_src);
-            return -1;
+            free(cache_location);
+            return NULL;
         }
 
         stat(file_src, &src_st);
@@ -268,12 +279,12 @@ opkg_download_nocache(const char *src, const char *dest,
         sprintf(src_stamp, "%ld.%ld", src_st.st_mtim.tv_sec,
                 src_st.st_mtim.tv_nsec);
 
-        if (!file_exists(dest) ||
-            check_file_stamp(dest, src_stamp)) {
-                unlink(dest);
-                if (create_file_stamp(dest, src_stamp))
+        if (!file_exists(cache_location) ||
+            check_file_stamp(cache_location, src_stamp)) {
+                unlink(cache_location);
+                if (create_file_stamp(cache_location, src_stamp))
                     opkg_msg(ERROR, "Failed to create stamp for %s.\n",
-                            dest);
+                            cache_location);
         }
     }
 
@@ -339,17 +350,18 @@ opkg_download_nocache(const char *src, const char *dest,
 		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &error_code);
 		opkg_msg(ERROR, "Failed to download %s headers: %s.\n",
 			src, curl_easy_strerror(res));
-		return -1;
+            free(cache_location);
+            return NULL;
 	    }
 	    curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &src_size);
 
-	    if (!file_exists(dest) ||
+        if (!file_exists(cache_location) ||
 		!etag ||
-		check_file_stamp(dest, etag)) {
-		    unlink(dest);
-		    if (etag && create_file_stamp(dest, etag))
+            check_file_stamp(cache_location, etag)) {
+                unlink(cache_location);
+                if (etag && create_file_stamp(cache_location, etag))
 		    opkg_msg(ERROR, "Failed to create stamp for %s.\n",
-			    dest);
+                        cache_location);
 	    }
 	    free(etag);
 
@@ -360,10 +372,10 @@ opkg_download_nocache(const char *src, const char *dest,
 	    curl_easy_setopt(curl, CURLOPT_NOBODY, FALSE);
 	}
 
-	file = fopen(dest, "ab");
+	file = fopen(cache_location, "ab");
 	if (!file) {
-	    opkg_msg(ERROR, "Failed to open download destination file %s\n",
-		    dest);
+	    opkg_msg(ERROR, "Failed to open cache file %s\n",
+		    cache_location);
 	    return -1;
 	}
 	fseek(file, 0, SEEK_END);
@@ -382,19 +394,25 @@ opkg_download_nocache(const char *src, const char *dest,
 	    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &error_code);
 	    opkg_msg(ERROR, "Failed to download %s: %s.\n",
 			src, curl_easy_strerror(res));
-	    return -1;
+	    free(cache_location);
+	    cache_location = NULL;
 	}
-    } else
-	return -1;
+    }
+    else {
+	free(cache_location);
+	cache_location = NULL;
+    }
 #else
     if (str_starts_with(src, "file:")) {
         const char *file_src = src + 5;
         struct stat dest_st;
-        if (!file_exists(dest) ||
-            stat(dest, &dest_st) ||
+        if (!file_exists(cache_location) ||
+            stat(cache_location, &dest_st) ||
             (src_size != dest_st.st_size)) {
-                if (file_copy(file_src, dest))
-		    return -1;
+                if (file_copy(file_src, cache_location)) {
+                    free(cache_location);
+                    cache_location = NULL;
+                }
         }
     } else {
       int res;
@@ -408,49 +426,18 @@ opkg_download_nocache(const char *src, const char *dest,
 	argv[i++] = "on";
       }
       argv[i++] = "-O";
-      argv[i++] = dest;
+      argv[i++] = cache_location;
       argv[i++] = src;
       argv[i++] = NULL;
       res = xsystem(argv);
 
       if (res) {
 	opkg_msg(ERROR, "Failed to download %s, wget returned %d.\n", src, res);
-	return -1;
+	free(cache_location);
+	cache_location = NULL;
       }
     }
 #endif
-    return 0;
-}
-
-/** \brief opkg_download_cache: downloads file into cache
- *
- * \param src absolute URI of file to download
- * \param cb callback for curl download progress
- * \param data data to pass to progress callback
- * \return path of downloaded file in cache or NULL if error occurs
- *
- */
-char *
-opkg_download_cache(const char *src,
-	curl_progress_func cb, void *data)
-{
-    char *cache_name = xstrdup(src);
-    char *cache_location, *p;
-    int r;
-
-    opkg_msg(NOTICE,"Downloading %s.\n", src);
-
-    for (p = cache_name; *p; p++)
-	if (*p == '/')
-	    *p = '_';
-
-    sprintf_alloc(&cache_location, "%s/%s", opkg_config->cache_dir, cache_name);
-    free(cache_name);
-
-    r = opkg_download_nocache(src, cache_location, cb, data);
-    if (r != 0)
-	return NULL;
-
     return cache_location;
 }
 
