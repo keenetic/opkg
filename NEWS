@@ -1,3 +1,35 @@
+opkg-0.3.0 (in development)
+===========================
+
+- Improved testsuite with more tests, `make check` now runs the testsuite and
+  exits non-zero if any test fails
+
+- Improved `autogen.sh` script for developers & maintainers, no longer runs
+  configure directly. `./autogen.sh --clean` now removes all generated files
+  without requiring configure to have been ran
+
+- Renamed `conf` -> `opkg_config` to prevent global symbol clashes
+
+- Added functions `opkg_conf_get_option` and `opkg_conf_set_option`, direct
+  access to `options` array is no longer allowed
+
+- Better handling of hold flag on packages
+
+- Added config option `autoremove` equivalent to `--autoremove` command line
+  flag
+
+- Added config option `overwrite_no_owner`
+
+- Improved detection and handling of package conflicts
+
+- Only install `opkg-key` when gpg support is enabled
+
+- Support implicit and explicit FTP-over-SSL when curl is enabled
+
+- Improved download caching
+
+- Allow interrupted downloads to be resumed when curl is enabled
+
 opkg-0.2.1
 ==========
 
