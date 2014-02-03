@@ -170,7 +170,7 @@ opkg_update_cmd(int argc, char **argv)
 	      char *cache_location;
 
 	      cache_location = opkg_download_cache(url, NULL, NULL);
-	      if (err == 0) {
+	      if (cache_location) {
 		   opkg_msg(NOTICE, "Inflating %s.\n", url);
 		   sprintf_alloc (&tmp_file_name, "%s.@@", list_file_name);
 		   in = fopen (cache_location, "r");
@@ -185,8 +185,9 @@ opkg_update_cmd(int argc, char **argv)
 			fclose (out);
 		   rename(tmp_file_name, list_file_name);
 		   free(tmp_file_name);
-	      }
-		  free(cache_location);
+	      } else
+                   err = 1;
+	      free(cache_location);
 	  } else
 	      err = opkg_download(url, list_file_name, NULL, NULL);
 	  if (err) {
