@@ -321,20 +321,22 @@ opkg_validate_cached_file(const char *src,
     resume_from = ftell(file);
     fclose (file);
 
-    if (resume_from < src_size) {
-        curl_easy_setopt(curl, CURLOPT_RESUME_FROM, resume_from);
-        return 1;
-    }
+    if (resume_from < src_size)
+	curl_easy_setopt(curl, CURLOPT_RESUME_FROM, resume_from);
+    else
+        return 0;
+
 #else
     if (str_starts_with(src, "file:")) {
         struct stat dest_st;
-        if (!file_exists(cache_location) ||
-            stat(cache_location, &dest_st) ||
-            (src_size != dest_st.st_size))
-                return 1;
+	if (file_exists(cache_location) &&
+		(stat(cache_location, &dest_st) == 0) &&
+		(src_size == dest_st.st_size))
+	    return 0;
     }
 #endif
-    return 0;
+
+    return 1;
 }
 
 /** \brief opkg_download_internal: downloads file with existence check
