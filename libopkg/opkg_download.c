@@ -281,8 +281,8 @@ opkg_validate_cached_file(const char *src,
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &dummy_write);
         curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, &header_write);
         curl_easy_setopt(curl, CURLOPT_WRITEHEADER, &etag);
-        curl_easy_setopt(curl, CURLOPT_HEADER, TRUE);
-        curl_easy_setopt(curl, CURLOPT_NOBODY, TRUE); // remove body
+        curl_easy_setopt(curl, CURLOPT_HEADER, 1);
+        curl_easy_setopt(curl, CURLOPT_NOBODY, 1); // remove body
 
         res = curl_easy_perform(curl);
         if (res) {
@@ -307,8 +307,8 @@ opkg_validate_cached_file(const char *src,
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NULL);
         curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, NULL);
         curl_easy_setopt(curl, CURLOPT_WRITEHEADER, NULL);
-        curl_easy_setopt(curl, CURLOPT_HEADER, FALSE);
-        curl_easy_setopt(curl, CURLOPT_NOBODY, FALSE);
+        curl_easy_setopt(curl, CURLOPT_HEADER, 0);
+        curl_easy_setopt(curl, CURLOPT_NOBODY, 0);
     }
 
     file = fopen(cache_location, "ab");
