@@ -24,6 +24,8 @@
 #include <libgen.h>
 #include <ctype.h>
 #include <sys/stat.h>
+#include <malloc.h>
+#include <stdlib.h>
 
 #include "opkg_download.h"
 #include "opkg_message.h"
@@ -109,14 +111,7 @@ header_write(char *ptr, size_t size, size_t nmemb, void *userdata)
     return size * nmemb;
 }
 
-#endif
-
-static int
-str_starts_with(const char *str, const char *prefix)
-{
-    return (strncmp(str, prefix, strlen(prefix)) == 0);
-}
-
+#ifdef HAVE_SSLCURL
 /*
  * Creates a newly allocated string with the same content as str, but
  * the first occurence of "token" is replaced with "replacement".
@@ -167,6 +162,15 @@ replace_token_in_str(const char *str, const char *token, const char *replacement
     replaced_str[replaced_str_len] = '\0';
 
     return replaced_str;
+}
+
+#endif /* HAVE_SSLCURL */
+#endif /* HAVE_CURL */
+
+static int
+str_starts_with(const char *str, const char *prefix)
+{
+    return (strncmp(str, prefix, strlen(prefix)) == 0);
 }
 
 /** \brief create_file_stamp: creates stamp for file
