@@ -266,13 +266,12 @@ extract_outer(pkg_t * pkg, const char * arname)
 	data->buffer = xmalloc(EXTRACT_BUFFER_LEN);
 
 	outer = archive_read_new();
-	/* Outer package is in 'ar' format, optionally compressed. */
-	archive_read_support_filter_all(outer);
+	/* Outer package is in 'ar' format, uncompressed. */
 	archive_read_support_format_ar(outer);
 
 	inner = archive_read_new();
-	/* Inner package is in 'tar' format, optionally compressed. */
-	archive_read_support_filter_all(inner);
+	/* Inner package is in 'tar' format, gzip compressed. */
+	archive_read_support_filter_gzip(inner);
 	archive_read_support_format_tar(inner);
 
 	r = archive_read_open_filename(outer, pkg->local_filename, EXTRACT_BUFFER_LEN);

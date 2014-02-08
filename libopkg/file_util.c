@@ -496,8 +496,8 @@ file_decompress(const char * in, const char * out)
 		goto err;
 	}
 
-	/* Support raw data in any compression format. */
-	archive_read_support_filter_all(ar);
+	/* Support raw data in gzip compression format. */
+	archive_read_support_filter_gzip(ar);
 	archive_read_support_format_raw(ar);
 
 	/* Open input file and prepare for reading. */
