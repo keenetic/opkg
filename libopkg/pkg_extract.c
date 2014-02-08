@@ -137,6 +137,15 @@ extract_paths_to_stream(struct archive * a, FILE * stream)
 	return 0;
 }
 
+/* Join left and right path components without intervening '/' as left may end
+ * with a prefix to be applied to the names of extracted files.
+ *
+ * The right path component is stripped of leading '/' or './' components. If
+ * the right path component is simply '.' after stripping, it should not be
+ * created.
+ *
+ * Returns the joined path, or NULL if the resulting path should not be created.
+ */
 static char * join_paths(const char * left, const char * right)
 {
 	char * path;
@@ -158,47 +167,63 @@ static char * join_paths(const char * left, const char * right)
 	return path;
 }
 
-/* Transform path components of the given entry.
+/* Transform the destination path of the given entry.
+ *
+ * Returns 0 on success, 1 where the file does not need to be extracted and <0
+ * on error.
+ */
+static int transform_dest_path(struct archive_entry * entry, const char * dest)
+{
+	char * path;
+	const char * filename;
+
+	filename = archive_entry_pathname(entry);
+
+	path = join_paths(dest, filename);
+	if (!path)
+		return 1;
+
+	archive_entry_set_pathname(entry, path);
+	free(path);
+
+	return 0;
+}
+
+/* Transform all path components of the given entry. This includes hardlink and
+ * symlink paths as well as the destination path.
  *
  * Returns 0 on success, 1 where the file does not need to be extracted and <0
  * on error.
  */
 static int
-transform_path(struct archive_entry * entry, const char * dest)
+transform_all_paths(struct archive_entry * entry, const char * dest)
 {
 	char * path;
 	const char * filename;
+	int r;
 
-	/* Before we write the file, we need to transform the path.
-	 *
-	 * Join dest and filename without intervening '/' as left may end with a
-	 * prefix to be applied to the names of extracted files.
-	 */
-	filename = archive_entry_pathname(entry);
-
-	path = join_paths(dest, filename);
-	archive_entry_set_pathname(entry, path);
-	opkg_msg(DEBUG, "Extracting '%s'.\n", path);
-	free(path);
+	r = transform_dest_path(entry, dest);
+	if (r)
+		return r;
 
 	/* Next transform hardlink and symlink destinations. */
 	filename = archive_entry_hardlink(entry);
 	if (filename) {
 		/* Apply the same transform to the hardlink path as was applied
-		 * to the filename path.
+		 * to the destination path.
 		 */
 		path = join_paths(dest, filename);
+		if (!path) {
+			opkg_msg(ERROR, "Not extracting '%s': Hardlink to nowhere.\n", archive_entry_pathname(entry));
+			return 1;
+		}
+
 		archive_entry_set_hardlink(entry, path);
-		opkg_msg(DEBUG, "... hardlink to '%s'.\n", path);
 		free(path);
 	}
 
-	filename = archive_entry_symlink(entry);
-	if (filename) {
-		opkg_msg(DEBUG, "... symlink to '%s'.\n", filename);
-	}
+	/* Currently no transform to perform for symlinks. */
 
-	opkg_msg(DEBUG, ".\n");
 	return 0;
 }
 
@@ -211,6 +236,9 @@ extract_all(struct archive * a, const char * dest, int flags)
 	struct archive * disk;
 	struct archive_entry * entry;
 	int r;
+	const char * path;
+	const char * hardlink;
+	const char * symlink;
 
 	disk = archive_write_disk_new();
 	archive_write_disk_set_options(disk, flags);
@@ -225,13 +253,24 @@ extract_all(struct archive * a, const char * dest, int flags)
 			goto err_cleanup;
 		}
 
-		r = transform_path(entry, dest);
+		r = transform_all_paths(entry, dest);
 		if (r == 1)
 			continue;
 		if (r < 0) {
 			opkg_msg(ERROR, "Failed to transform path.\n");
 			goto err_cleanup;
 		}
+
+		/* Print destination paths at DEBUG level. */
+		path = archive_entry_pathname(entry);
+		hardlink = archive_entry_hardlink(entry);
+		symlink = archive_entry_symlink(entry);
+		if (hardlink)
+			opkg_msg(DEBUG, "Extracting '%s', hardlink to '%s'.\n", path, hardlink);
+		else if (symlink)
+			opkg_msg(DEBUG, "Extracting '%s', symlink to '%s'.\n", path, symlink);
+		else
+			opkg_msg(DEBUG, "Extracting '%s'.\n", path);
 
 		r = archive_read_extract2(a, entry, disk);
 		if (r != ARCHIVE_OK) {
