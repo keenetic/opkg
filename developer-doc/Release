@@ -1,0 +1,46 @@
+Releasing opkg
+==============
+
+## Release location
+
+http://downloads.yoctoproject.org/releases/opkg/
+
+## Release proceedure
+
+1)  Update NEWS, adding an entry to the top of the file detailling changes from
+    the last release. Commit this change.
+
+2)  Update the version number in configure.ac. Commit this change.
+
+3)  Tag the previous commit with the new version number, prefixed with 'v', eg.
+    'v0.3.0'. Use 'git tag -s' to produce a signed tag so that the release can
+    be trusted.
+
+4)  Run './autogen.sh && ./configure' to prepare the source tree.
+
+5)  Run 'make dist'. This will generate 'opkg-$VERSION.tar.gz'.
+
+6)  Sign the generated file using 'gpg -sab opkg-$VERSION.tar.gz'.
+
+7)  Send a release email including the URL at which the new release will be
+    available and a summary of the changes since the last release to
+    'opkg-devel@googlegroups.com'. Save this email as 'opkg-$VERSION.email'.
+
+8)  Add these files to the release directory. If a local copy of the release
+    directory doesn't exist, clone it from the public URL listed above using
+    wget.
+
+9)  Update sums files by running 'md5sum opkg-* > MD5SUMS',
+    'sha1sum opkg-* > SHA1SUMS' and 'sha256sum opkg-* > SHA256SUMS' in the
+    release directory.
+
+10) Upload the new release directory to a staging location which can be
+    publically accessed. This has usually been:
+        'http://www.paulbarker.me.uk/dist/opkg/'
+
+11) Inform the Yocto Project administrator (currently Michael Halstead) that a
+    new release has been made and ask for the release directory to be
+    synchronised to the new content of the staging directory.
+
+12) Update the opkg project page at 'http://code.google.com/p/opkg/' to link to
+    the new release.
