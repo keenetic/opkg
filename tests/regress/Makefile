@@ -5,7 +5,7 @@ REGRESSION_TESTS := 01_install.py 02_file.py 03_upgrade.py 04_upgrade_file.py \
 			10_virtual_conflicts_first.py \
 			11_virtual_conflicts_second.py \
 			12_virtual_no_conflicts.py \
-			13_virtual_upgrade.py \
+			13_virtual_upgrade.py 14_upgrade_by_uri.py \
 			issue26.py issue31.py issue45.py issue46.py \
 			issue50.py issue51.py issue55.py issue58.py \
 			issue72.py issue79.py issue85.py \
