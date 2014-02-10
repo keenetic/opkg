@@ -289,7 +289,7 @@ int
 opkg_prepare_url_for_install(const char *url, char **namep)
 {
      int err = 0;
-     pkg_t *pkg;
+     pkg_t *pkg, *tmp;
 
      pkg = pkg_new();
 
@@ -321,7 +321,22 @@ opkg_prepare_url_for_install(const char *url, char **namep)
 	  opkg_msg(DEBUG2, "Package %s provided by hand (%s).\n",
 		  pkg->name, pkg->local_filename);
           pkg->provided_by_hand = 1;
-
+     } else if (conf->force_reinstall) {
+	  /* Reload the given package from its package file into a new package
+	   * object. This new object can then be marked as force_reinstall and
+	   * the reinstall should go ahead like an upgrade.
+	   */
+	  tmp = pkg_hash_fetch_best_installation_candidate_by_name(url);
+	  if (!tmp) {
+	       opkg_msg(NOTICE, "Unknown package '%s'.\n", url);
+	       return -1;
+	  }
+	  err = opkg_download_pkg(tmp, conf->tmp_dir);
+	  if (err)
+	       return err;
+	  err = pkg_init_from_file(pkg, tmp->local_filename);
+	  if (err)
+	       return err;
      } else {
        pkg_deinit(pkg);
        free(pkg);
@@ -331,6 +346,10 @@ opkg_prepare_url_for_install(const char *url, char **namep)
      pkg->dest = conf->default_dest;
      pkg->state_want = SW_INSTALL;
      pkg->state_flag |= SF_PREFER;
+
+     if (conf->force_reinstall)
+	 pkg->force_reinstall = 1;
+
      hash_insert_pkg(pkg, 1);
 
      if (namep) {
