@@ -79,6 +79,7 @@ pkg_init(pkg_t *pkg)
      pkg->epoch = 0;
      pkg->version = NULL;
      pkg->revision = NULL;
+     pkg->force_reinstall = 0;
      pkg->dest = NULL;
      pkg->src = NULL;
      pkg->architecture = NULL;
@@ -169,6 +170,8 @@ pkg_deinit(pkg_t *pkg)
 	pkg->version = NULL;
 	/* revision shares storage with version, so don't free */
 	pkg->revision = NULL;
+
+	pkg->force_reinstall = 0;
 
 	/* owned by opkg_conf_t */
 	pkg->dest = NULL;
@@ -937,29 +940,34 @@ verrevcmp(const char *val, const char *ref) {
 }
 
 int
+pkg_compare_versions_no_reinstall(const pkg_t *pkg, const pkg_t *ref_pkg)
+{
+    int r;
+
+    r = pkg->epoch - ref_pkg->epoch;
+    if (r)
+        return r;
+
+    r = verrevcmp(pkg->version, ref_pkg->version);
+    if (r)
+        return r;
+
+    r = verrevcmp(pkg->revision, ref_pkg->revision);
+    return r;
+}
+
+int
 pkg_compare_versions(const pkg_t *pkg, const pkg_t *ref_pkg)
 {
-     int r;
+    int r;
 
-     if (pkg->epoch > ref_pkg->epoch) {
-	  return 1;
-     }
+    r = pkg_compare_versions_no_reinstall(pkg, ref_pkg);
+    if (r)
+        return r;
 
-     if (pkg->epoch < ref_pkg->epoch) {
-	  return -1;
-     }
-
-     r = verrevcmp(pkg->version, ref_pkg->version);
-     if (r) {
-	  return r;
-     }
-
-     r = verrevcmp(pkg->revision, ref_pkg->revision);
-     if (r) {
-	  return r;
-     }
-
-     return r;
+    /* Compare force_reinstall flags. */
+    r = pkg->force_reinstall - ref_pkg->force_reinstall;
+    return r;
 }
 
 
