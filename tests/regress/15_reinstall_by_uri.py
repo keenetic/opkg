@@ -45,4 +45,4 @@ opkgcl.install("a_1.0_all.opk", "--force-reinstall")
 if not os.path.exists("%s/test2" % cfg.offline_root):
 	opk.fail("Package 'a' force reinstalled but new file 'test2' not created.")
 if os.path.exists("%s/test1" % cfg.offline_root):
-	opk.xfail("Package 'a' force reinstalled but old file 'test1' not removed.")
+	opk.fail("Package 'a' force reinstalled but old file 'test1' not removed.")
