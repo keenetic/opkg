@@ -24,6 +24,7 @@ extern "C" {
 
 int file_exists(const char *file_name);
 int file_is_dir(const char *file_name);
+int file_is_symlink(const char *file_name);
 char *file_read_line_alloc(FILE *file);
 int file_move(const char *src, const char *dest);
 int file_copy(const char *src, const char *dest);
