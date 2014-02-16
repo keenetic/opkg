@@ -483,59 +483,78 @@ pkg_remove_installed_replacees_unwind(pkg_vec_t *replacees)
 static int
 opkg_install_check_downgrade(pkg_t *pkg, pkg_t *old_pkg, int message)
 {
-     if (old_pkg) {
-          char message_out[15];
-	  char *old_version = pkg_version_str_alloc(old_pkg);
-	  char *new_version = pkg_version_str_alloc(pkg);
-	  int cmp = pkg_compare_versions(old_pkg, pkg);
-	  int rc = 0;
+    if (old_pkg) {
+        int cmp = pkg_compare_versions(pkg, old_pkg);
 
-          memset(message_out,'\x0',15);
-          strncpy (message_out,"Upgrading ",strlen("Upgrading "));
-          if ( (conf->force_downgrade==1) && (cmp > 0) ){     /* We've been asked to allow downgrade  and version is precedent */
-             cmp = -1 ;                                       /* then we force opkg to downgrade */
-             strncpy (message_out,"Downgrading ",strlen("Downgrading "));         /* We need to use a value < 0 because in the 0 case we are asking to */
-                                                              /* reinstall, and some check could fail asking the "force-reinstall" option */
-          }
+        if (!conf->download_only) {
+            /* Print message. */
+            char * old_version = pkg_version_str_alloc(old_pkg);
+            char * new_version = pkg_version_str_alloc(pkg);
+            const char * s;
 
-	  if (cmp > 0) {
-              if(!conf->download_only)
-                  opkg_msg(NOTICE,
-                          "Not downgrading package %s on %s from %s to %s.\n",
-                          old_pkg->name, old_pkg->dest->name, old_version, new_version);
-	       rc = 1;
-	  } else if (cmp < 0) {
-              if(!conf->download_only)
-                  opkg_msg(NOTICE, "%s%s on %s from %s to %s...\n",
-                          message_out, pkg->name, old_pkg->dest->name, old_version, new_version);
-	       pkg->dest = old_pkg->dest;
-	       rc = 0;
-	  } else /* cmp == 0 */ {
-               if(!conf->download_only)
-                   opkg_msg(NOTICE, "%s (%s) already install on %s.\n",
-			pkg->name, new_version, old_pkg->dest->name);
-	       rc = 1;
-	  }
-	  free(old_version);
-	  free(new_version);
-	  return rc;
-     } else {
-          char message_out[15] ;
-          memset(message_out,'\x0',15);
-          if ( message )
-               strncpy( message_out,"Upgrading ",strlen("Upgrading ") );
-          else
-               strncpy( message_out,"Installing ",strlen("Installing ") );
-          char *version = pkg_version_str_alloc(pkg);
+            if (cmp < 0) {
+                if (conf->force_downgrade)
+                    s = "Downgrading";
+                else
+                    s = "Not downgrading";
+                opkg_msg(NOTICE, "%s %s from %s to %s on %s.\n", s,
+                        pkg->name, old_version, new_version, old_pkg->dest->name);
+            } else if (cmp == 0) {
+                opkg_msg(NOTICE, "%s (%s) already installed on %s.\n",
+                        pkg->name, new_version, old_pkg->dest->name);
+            } else {
+                /* Compare versions without force_reinstall flag to see if this
+                 * is really an upgrade or a reinstall.
+                 */
+                int is_upgrade = pkg_compare_versions_no_reinstall(pkg, old_pkg);
+                if (is_upgrade) {
+                    s = "Upgrading";
+                    opkg_msg(NOTICE, "%s %s from %s to %s on %s.\n", s,
+                            pkg->name, old_version, new_version, old_pkg->dest->name);
+                } else {
+                    s = "Reinstalling";
+                    opkg_msg(NOTICE, "%s %s (%s) on %s.\n", s,
+                            pkg->name, new_version, old_pkg->dest->name);
+                }
+            }
 
-          if(!conf->download_only)
-               opkg_msg(NOTICE, "%s%s (%s) to %s...\n", message_out,
-                  pkg->name, version, pkg->dest->name);
-          free(version);
-     }
-     return 0;
+            free(old_version);
+            free(new_version);
+        }
+
+        /* Do nothing if package already up-to-date. */
+        if (cmp == 0)
+            return 1;
+
+        /* Do nothing if newer version is installed and we're not forcing a
+         * downgrade.
+         */
+        if (cmp < 0 && !conf->force_downgrade)
+            return 1;
+
+        /* Install is go... */
+        pkg->dest = old_pkg->dest;
+        return 0;
+    }
+
+    /* No old package. */
+    if (!conf->download_only) {
+        char * version = pkg_version_str_alloc(pkg);
+        const char * s;
+
+        if (message)
+            s = "Upgrading";
+        else
+            s = "Installing";
+
+        opkg_msg(NOTICE, "%s %s (%s) on %s.\n", s,
+                pkg->name, version, pkg->dest->name);
+
+        free(version);
+    }
+
+    return 0;
 }
-
 
 static int
 prerm_upgrade_old_pkg(pkg_t *pkg, pkg_t *old_pkg)
