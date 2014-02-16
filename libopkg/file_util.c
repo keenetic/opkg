@@ -55,6 +55,17 @@ file_is_dir(const char *file_name)
 	return S_ISDIR(st.st_mode);
 }
 
+int
+file_is_symlink(const char *file_name)
+{
+	struct stat st;
+
+	if (lstat(file_name, &st) == -1)
+		return 0;
+
+	return S_ISLNK(st.st_mode);
+}
+
 /* read a single line from a file, stopping at a newline or EOF.
    If a newline is read, it will appear in the resulting string.
    Return value is a malloc'ed char * which should be freed at
