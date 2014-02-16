@@ -250,7 +250,7 @@ pkg_hash_load_status_files(void)
 	return 0;
 }
 
-static abstract_pkg_t *
+abstract_pkg_t *
 abstract_pkg_fetch_by_name(const char * pkg_name)
 {
 	return (abstract_pkg_t *)hash_table_get(&opkg_config->pkg_hash, pkg_name);
