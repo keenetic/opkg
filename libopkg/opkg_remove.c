@@ -358,7 +358,7 @@ remove_data_files_and_list(pkg_t *pkg)
 		  /* File may have been claimed by another package. */
 		  continue;
 
-	  if (file_is_dir(file_name)) {
+	  if (!file_is_symlink(file_name) && file_is_dir(file_name)) {
 	       str_list_append(&installed_dirs, file_name);
 	       continue;
 	  }
