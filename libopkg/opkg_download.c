@@ -655,73 +655,106 @@ url_has_remote_protocol(const char* url)
   return 0;
 }
 
-/*
- * Downloads file from url, installs in package database, return package name.
+static int
+opkg_prepare_file_for_install(const char * path, char **namep)
+{
+    int r;
+    pkg_t * pkg = pkg_new();
+
+    r = pkg_init_from_file(pkg, path);
+    if (r)
+        return r;
+
+    opkg_msg(DEBUG2, "Package %s provided by file '%s'.\n",
+            pkg->name, pkg->local_filename);
+    pkg->provided_by_hand = 1;
+
+    pkg->dest = opkg_config->default_dest;
+    pkg->state_want = SW_INSTALL;
+    pkg->state_flag |= SF_PREFER;
+
+    if (opkg_config->force_reinstall)
+        pkg->force_reinstall = 1;
+    else {
+        /* Disallow a reinstall of the same package version if force_reinstall
+         * is not set. This is because in this case orphaned files may be left
+         * behind.
+         */
+        pkg_t * old_pkg = pkg_hash_fetch_installed_by_name(pkg->name);
+        if (old_pkg && (pkg_compare_versions(pkg, old_pkg) == 0)) {
+            char * version = pkg_version_str_alloc(old_pkg);
+            opkg_msg(ERROR, "Refusing to load file '%s' as it matches the installed version of %s (%s).\n",
+                    path, old_pkg->name, version);
+            free(version);
+            pkg_deinit(pkg);
+            free(pkg);
+            return -1;
+        }
+    }
+
+    hash_insert_pkg(pkg, 1);
+
+    if (namep)
+        *namep = pkg->name;
+    return 0;
+}
+
+/* Prepare a given URL for installation. We use a few simple heuristics to
+ * determine whether this is a remote URL, file name or abstract package name.
  */
 int
 opkg_prepare_url_for_install(const char *url, char **namep)
 {
-     int err = 0;
-     pkg_t *pkg, *tmp;
+    int r;
 
-     pkg = pkg_new();
+    /* First heuristic: Maybe it's a remote URL. */
+    if (url_has_remote_protocol(url)) {
+        char *cache_location;
 
-     if (url_has_remote_protocol(url)) {
-	  char *cache_location;
+        cache_location = opkg_download_cache(url, NULL, NULL);
+        if (!cache_location)
+            return -1;
 
-	  cache_location = opkg_download_cache(url, NULL, NULL);
-	  if (!cache_location)
-	       return -1;
+        r = opkg_prepare_file_for_install(cache_location, namep);
+        free(cache_location);
+        return r;
+    }
 
-	  err = pkg_init_from_file(pkg, cache_location);
-	  free(cache_location);
-	  if (err)
-	       return err;
-     } else if (strcmp(&url[strlen(url) - 4], OPKG_PKG_EXTENSION) == 0
-                || strcmp(&url[strlen(url) - 4], IPKG_PKG_EXTENSION) == 0
-		|| strcmp(&url[strlen(url) - 4], DPKG_PKG_EXTENSION) == 0) {
+    /* Second heuristic: Maybe it's a package name.
+     *
+     * We check this before files incase an existing file incidentally shares a
+     * name with an available package.
+     */
+    if (abstract_pkg_fetch_by_name(url)) {
+        if (opkg_config->force_reinstall) {
+            /* Reload the given package from its package file into a new package
+             * object. This new object can then be marked as force_reinstall and
+             * the reinstall should go ahead like an upgrade.
+             */
+            pkg_t * pkg;
+            pkg = pkg_hash_fetch_best_installation_candidate_by_name(url);
+            if (!pkg) {
+                opkg_msg(ERROR, "Unknown package %s, cannot force reinstall.\n", url);
+                return -1;
+            }
+            r = opkg_download_pkg(pkg, NULL);
+            if (r)
+                return r;
 
-	  err = pkg_init_from_file(pkg, url);
-	  if (err)
-	       return err;
-	  opkg_msg(DEBUG2, "Package %s provided by hand (%s).\n",
-		  pkg->name, pkg->local_filename);
-          pkg->provided_by_hand = 1;
-     } else if (opkg_config->force_reinstall) {
-	  /* Reload the given package from its package file into a new package
-	   * object. This new object can then be marked as force_reinstall and
-	   * the reinstall should go ahead like an upgrade.
-	   */
-	  tmp = pkg_hash_fetch_best_installation_candidate_by_name(url);
-	  if (!tmp) {
-	       opkg_msg(NOTICE, "Unknown package '%s'.\n", url);
-	       return -1;
-	  }
-	  err = opkg_download_pkg(tmp, opkg_config->tmp_dir);
-	  if (err)
-	       return err;
-	  err = pkg_init_from_file(pkg, tmp->local_filename);
-	  if (err)
-	       return err;
-     } else {
-       pkg_deinit(pkg);
-       free(pkg);
-       return 0;
-     }
+            return opkg_prepare_file_for_install(pkg->local_filename, namep);
+        }
 
-     pkg->dest = opkg_config->default_dest;
-     pkg->state_want = SW_INSTALL;
-     pkg->state_flag |= SF_PREFER;
+        /* Nothing special to do. */
+        return 0;
+    }
 
-     if (opkg_config->force_reinstall)
-	 pkg->force_reinstall = 1;
+    /* Third heuristic: Maybe it's a file. */
+    if (file_exists(url))
+        return opkg_prepare_file_for_install(url, namep);
 
-     hash_insert_pkg(pkg, 1);
-
-     if (namep) {
-	  *namep = pkg->name;
-     }
-     return 0;
+    /* Can't find anything matching the requested URL. */
+    opkg_msg(ERROR, "Couldn't find anything to satisfy '%s'.\n", url);
+    return -1;
 }
 
 int
