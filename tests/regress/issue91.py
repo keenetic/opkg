@@ -44,4 +44,4 @@ if opkgcl.is_installed("a"):
 if os.path.exists("%s/test_dir" % cfg.offline_root):
 	opk.fail("Package 'a' removed but 'test_dir' not deleted")
 if os.path.lexists("%s/test_link" % cfg.offline_root):
-	opk.xfail("Package 'a' removed but 'test_link' not deleted")
+	opk.fail("Package 'a' removed but 'test_link' not deleted")
