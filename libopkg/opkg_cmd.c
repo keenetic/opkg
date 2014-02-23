@@ -475,14 +475,6 @@ opkg_install_cmd(int argc, char **argv)
      char *arg;
      int err = 0;
 
-     if (opkg_config->force_reinstall) {
-	     int saved_force_depends = opkg_config->force_depends;
-	     opkg_config->force_depends = 1;
-	     (void)opkg_remove_cmd(argc, argv);
-	     opkg_config->force_depends = saved_force_depends;
-	     opkg_config->force_reinstall = 0;
-     }
-
      signal(SIGINT, sigint_handler);
 
      /*

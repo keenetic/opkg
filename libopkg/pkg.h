@@ -123,6 +123,7 @@ struct pkg
      unsigned long epoch;
      char *version;
      char *revision;
+     int force_reinstall;
      pkg_src_t *src;
      pkg_dest_t *dest;
      char *architecture;
@@ -203,6 +204,7 @@ int pkg_merge(pkg_t *oldpkg, pkg_t *newpkg);
 char *pkg_version_str_alloc(pkg_t *pkg);
 
 int pkg_compare_versions(const pkg_t *pkg, const pkg_t *ref_pkg);
+int pkg_compare_versions_no_reinstall(const pkg_t *pkg, const pkg_t *ref_pkg);
 int pkg_name_version_and_architecture_compare(const void *a, const void *b);
 int abstract_pkg_name_compare(const void *a, const void *b);
 
