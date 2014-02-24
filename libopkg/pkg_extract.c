@@ -91,52 +91,6 @@ copy_to_stream(struct archive * a, FILE * stream)
 	}
 }
 
-/* Extact a single file from an open archive, writing data to an open stream.
- * Returns 0 on success or <0 on error.
- */
-static int
-extract_file_to_stream(struct archive * a, const char * name, FILE * stream)
-{
-	struct archive_entry * entry;
-	const char * path;
-
-	while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
-		path = archive_entry_pathname(entry);
-		if (strcmp(path, name) == 0)
-			/* We found the requested file. */
-			return copy_to_stream(a, stream);
-		else
-			archive_read_data_skip(a);
-	}
-
-	/* If we get here, we didn't find the listed file. */
-	opkg_msg(ERROR, "Could not find the file '%s' in archive.\n", name);
-	return -1;
-}
-
-/* Extact the paths of files contained in an open archive, writing data to an
- * open stream.  Returns 0 on success or <0 on error.
- */
-static int
-extract_paths_to_stream(struct archive * a, FILE * stream)
-{
-	struct archive_entry * entry;
-	int r;
-	const char * path;
-
-	while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
-		path = archive_entry_pathname(entry);
-		r = fprintf(stream, "%s\n", path);
-		if (r <= 0)
-			/* Read failed */
-			return -1;
-
-		archive_read_data_skip(a);
-	}
-
-	return 0;
-}
-
 /* Join left and right path components without intervening '/' as left may end
  * with a prefix to be applied to the names of extracted files.
  *
@@ -223,6 +177,62 @@ transform_all_paths(struct archive_entry * entry, const char * dest)
 	}
 
 	/* Currently no transform to perform for symlinks. */
+
+	return 0;
+}
+
+/* Extact a single file from an open archive, writing data to an open stream.
+ * Returns 0 on success or <0 on error.
+ */
+static int
+extract_file_to_stream(struct archive * a, const char * name, FILE * stream)
+{
+	struct archive_entry * entry;
+	const char * path;
+	int r;
+
+	while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
+		/* Cleanup the path of the entry incase it starts with './' or
+		 * other prefixes.
+		 */
+		r = transform_dest_path(entry, NULL);
+		path = archive_entry_pathname(entry);
+		if (r) {
+			opkg_msg(ERROR, "Refusing to extract path '%s'.\n", path);
+			return -1;
+		}
+
+		if (strcmp(path, name) == 0)
+			/* We found the requested file. */
+			return copy_to_stream(a, stream);
+		else
+			archive_read_data_skip(a);
+	}
+
+	/* If we get here, we didn't find the listed file. */
+	opkg_msg(ERROR, "Could not find the file '%s' in archive.\n", name);
+	return -1;
+}
+
+/* Extact the paths of files contained in an open archive, writing data to an
+ * open stream.  Returns 0 on success or <0 on error.
+ */
+static int
+extract_paths_to_stream(struct archive * a, FILE * stream)
+{
+	struct archive_entry * entry;
+	int r;
+	const char * path;
+
+	while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
+		path = archive_entry_pathname(entry);
+		r = fprintf(stream, "%s\n", path);
+		if (r <= 0)
+			/* Read failed */
+			return -1;
+
+		archive_read_data_skip(a);
+	}
 
 	return 0;
 }
