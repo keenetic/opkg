@@ -189,19 +189,17 @@ extract_file_to_stream(struct archive * a, const char * name, FILE * stream)
 {
 	struct archive_entry * entry;
 	const char * path;
-	int r;
 
 	while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
 		/* Cleanup the path of the entry incase it starts with './' or
 		 * other prefixes.
+		 *
+		 * We ignore the return value of transform_dest_path as bad
+		 * paths simply won't match the requested path name.
 		 */
-		r = transform_dest_path(entry, NULL);
-		path = archive_entry_pathname(entry);
-		if (r) {
-			opkg_msg(ERROR, "Refusing to extract path '%s'.\n", path);
-			return -1;
-		}
+		transform_dest_path(entry, NULL);
 
+		path = archive_entry_pathname(entry);
 		if (strcmp(path, name) == 0)
 			/* We found the requested file. */
 			return copy_to_stream(a, stream);
