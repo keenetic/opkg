@@ -114,6 +114,10 @@ static char * join_paths(const char * left, const char * right)
 	if (right[0] == '.' && right[1] == '\0')
 		return NULL;
 
+	/* Don't extract empty paths. */
+	if (right[0] == '\0')
+		return NULL;
+
 	if  (!left)
 		return xstrdup(right);
 
