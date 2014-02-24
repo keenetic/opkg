@@ -401,8 +401,12 @@ pkg_extract_control_files_to_dir_with_prefix(pkg_t *pkg, const char *dir,
 		return -1;
 	}
 
-	flags = ARCHIVE_EXTRACT_OWNER | ARCHIVE_EXTRACT_PERM |
-		ARCHIVE_EXTRACT_TIME;
+	/* We don't want to set ownership and permissions of control files
+	 * incase they're incorrect in the archive. They should instead be owned
+	 * by the user who ran opkg (usually root) and given permissions
+	 * according to the current umask.
+	 */
+	flags = 0;
 	err = extract_all(a, dir_with_prefix, flags);
 	archive_read_free(a);
 	free(dir_with_prefix);
