@@ -1,6 +1,40 @@
 opkg-0.3.0 (in development)
 ===========================
 
+User visible:
+
+- opkg now depends on libarchive
+
+- Added config option `autoremove` equivalent to `--autoremove` command line
+  flag
+
+- Added config option `overwrite_no_owner` allowing un-owned files to be
+  overwritten during package install (issue 99)
+
+- Added command line option `--volatile-cache`
+
+- Symlinks are now correctly removed during package uninstall (issue 91)
+
+- Fixed help and manual pages to reflect that shell globs not true regexps are
+  accepted by opkg (issue 107)
+
+- Support implicit and explicit FTP-over-SSL when curl is enabled
+
+- Improved download caching
+
+- Allow interrupted downloads to be resumed when curl is enabled (issue 115)
+
+- Improved heuristics to determine whether an argument is a package name, remote
+  URI or local path
+
+- Improved detection and handling of package conflicts
+
+- Better handling of hold flag on packages
+
+- Only install `opkg-key` when gpg support is enabled
+
+Developer visible:
+
 - Improved testsuite with more tests, `make check` now runs the testsuite and
   exits non-zero if any test fails
 
@@ -8,27 +42,15 @@ opkg-0.3.0 (in development)
   configure directly. `./autogen.sh --clean` now removes all generated files
   without requiring configure to have been ran
 
-- Renamed `conf` -> `opkg_config` to prevent global symbol clashes
+- Renamed `conf` -> `opkg_config` to prevent global symbol clashes (issue 92)
 
 - Added functions `opkg_conf_get_option` and `opkg_conf_set_option`, direct
   access to `options` array is no longer allowed
 
-- Better handling of hold flag on packages
+- Use libarchive to extract packages instead of hand-rolled tar, ar and gzip
+  handling (adds dependency on libarchive)
 
-- Added config option `autoremove` equivalent to `--autoremove` command line
-  flag
-
-- Added config option `overwrite_no_owner`
-
-- Improved detection and handling of package conflicts
-
-- Only install `opkg-key` when gpg support is enabled
-
-- Support implicit and explicit FTP-over-SSL when curl is enabled
-
-- Improved download caching
-
-- Allow interrupted downloads to be resumed when curl is enabled
+- Remove libbb!
 
 opkg-0.2.2 (in development)
 ===========================
