@@ -62,7 +62,10 @@
 #endif
 
 #ifdef HAVE_OPENSSL
-static void openssl_init(void);
+#include "opkg_openssl.h"
+#endif
+
+#ifdef HAVE_OPENSSL
 static X509_STORE *setup_verify(char *CAfile, char *CApath);
 #endif
 
@@ -939,22 +942,6 @@ verify_file_end:
     return 0;
 #endif
 }
-
-
-#ifdef HAVE_OPENSSL
-static void openssl_init(void){
-    static int init = 0;
-
-    if(!init){
-	OPENSSL_config(NULL);
-        OpenSSL_add_all_algorithms();
-        ERR_load_crypto_strings();
-        init = 1;
-    }
-}
-
-#endif
-
 
 #if defined HAVE_OPENSSL
 static X509_STORE *

@@ -85,6 +85,10 @@ endif
 if HAVE_SHA256
 opkg_util_sources += sha256.c sha256.h
 endif
+if HAVE_OPENSSL
+opkg_util_sources += opkg_openssl.c opkg_openssl.h
+libopkg_include_HEADERS += opkg_openssl.h
+endif
 
 lib_LTLIBRARIES = libopkg.la
 libopkg_la_SOURCES = \
