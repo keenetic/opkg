@@ -89,6 +89,10 @@ if HAVE_PATHFINDER
 opkg_util_sources += opkg_pathfinder.c opkg_pathfinder.h
 endif
 endif
+if HAVE_GPGME
+opkg_util_sources += opkg_gpg.c opkg_gpg.h
+libopkg_include_HEADERS += opkg_gpg.h
+endif
 
 lib_LTLIBRARIES = libopkg.la
 libopkg_la_SOURCES = \
