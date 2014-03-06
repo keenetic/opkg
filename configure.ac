@@ -87,6 +87,7 @@ if test "x$want_openssl" = "xyes"; then
   AC_DEFINE(HAVE_OPENSSL, 1, [Define if you want OpenSSL support])
   NEED_SSL_LIBS="yes"
 fi
+AM_CONDITIONAL(HAVE_OPENSSL, test "x$want_openssl" = "xyes")
 
 # check for libssl-curl
 AC_ARG_ENABLE(ssl-curl,
