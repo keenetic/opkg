@@ -23,6 +23,7 @@ extern "C" {
 #endif
 
 void openssl_init(void);
+int opkg_verify_openssl_signature(const char * file, const char * sigfile);
 
 #ifdef __cplusplus
 }
