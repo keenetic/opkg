@@ -40,7 +40,7 @@
 #include <curl/curl.h>
 #endif
 
-#if defined(HAVE_SSLCURL) || defined(HAVE_OPENSSL)
+#ifdef HAVE_OPENSSL
 #include <openssl/conf.h>
 #include <openssl/evp.h>
 #include <openssl/err.h>
@@ -61,11 +61,8 @@
 #include "opkg_pathfinder.h"
 #endif
 
-#if defined(HAVE_OPENSSL) || defined(HAVE_SSLCURL)
-static void openssl_init(void);
-#endif
-
 #ifdef HAVE_OPENSSL
+static void openssl_init(void);
 static X509_STORE *setup_verify(char *CAfile, char *CApath);
 #endif
 
@@ -944,7 +941,7 @@ verify_file_end:
 }
 
 
-#if defined(HAVE_OPENSSL) || defined(HAVE_SSLCURL)
+#ifdef HAVE_OPENSSL
 static void openssl_init(void){
     static int init = 0;
 
@@ -1034,7 +1031,9 @@ opkg_curl_init(curl_progress_func cb, void *data)
 	curl = curl_easy_init();
 
 #ifdef HAVE_SSLCURL
+#ifdef HAVE_OPENSSL
 	openssl_init();
+#endif /* HAVE_OPENSSL */
 
 	if (opkg_config->ssl_engine) {
 
