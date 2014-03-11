@@ -17,13 +17,7 @@
 #ifndef OPKG_PATHFINDER_H
 #define OPKG_PATHFINDER_H
 
-#include "config.h"
-
 int pkcs7_pathfinder_verify_signers(PKCS7* p7);
-
-#if defined(HAVE_SSLCURL)
-CURLcode curl_ssl_ctx_function(CURL * curl, void * sslctx, void * parm);
-#endif
-
+int pathfinder_verify_callback(X509_STORE_CTX *ctx, void *arg);
 
 #endif

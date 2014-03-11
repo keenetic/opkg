@@ -18,9 +18,6 @@
 #include <openssl/ssl.h>
 #include <libpathfinder.h>
 #include <stdlib.h>
-#if defined(HAVE_SSLCURL)
-#include <curl/curl.h>
-#endif
 
 #include "opkg_message.h"
 #include "xfuncs.h"
@@ -30,7 +27,7 @@
  *      validation on a certificate using pathfinder.
  *
  */
-static int pathfinder_verify_callback(X509_STORE_CTX *ctx, void *arg)
+int pathfinder_verify_callback(X509_STORE_CTX *ctx, void *arg)
 {
     char *errmsg;
     const char *hex = "0123456789ABCDEF";
@@ -84,13 +81,3 @@ int pkcs7_pathfinder_verify_signers(PKCS7* p7)
     sk_X509_free(signers);
     return ret;
 }
-
-#if defined(HAVE_SSLCURL)
-CURLcode curl_ssl_ctx_function(CURL * curl, void * sslctx, void * parm) {
-
-  SSL_CTX * ctx = (SSL_CTX *) sslctx;
-  SSL_CTX_set_cert_verify_callback(ctx, pathfinder_verify_callback, parm);
-
-  return CURLE_OK ;
-}
-#endif

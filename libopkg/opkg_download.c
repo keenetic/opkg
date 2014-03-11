@@ -164,6 +164,18 @@ replace_token_in_str(const char *str, const char *token, const char *replacement
     return replaced_str;
 }
 
+#if defined(HAVE_PATHFINDER) && defined(HAVE_OPENSSL)
+#include "opkg_pathfinder.h"
+
+static CURLcode
+curl_ssl_ctx_function(CURL * curl, void * sslctx, void * parm)
+{
+  SSL_CTX * ctx = (SSL_CTX *) sslctx;
+  SSL_CTX_set_cert_verify_callback(ctx, pathfinder_verify_callback, parm);
+
+  return CURLE_OK ;
+}
+#endif /* HAVE_PATHFINDER && HAVE_OPENSSL */
 #endif /* HAVE_SSLCURL */
 #endif /* HAVE_CURL */
 
