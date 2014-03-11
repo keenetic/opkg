@@ -56,52 +56,75 @@ inner_close(struct archive *inner, void *client_data)
 	return ARCHIVE_OK;
 }
 
+/* Read data from an archive into a buffer. Returns 0 on error as the return
+ * value is an unsigned size_t. If an eof pointer is provided, it will be set to
+ * 1 on EOF or 0 otherwise.
+ */
+static size_t
+read_data(struct archive * a, void * buffer, size_t len, int * eof)
+{
+	ssize_t r;
+	int retries = 0;
+
+	if (eof)
+		*eof = 0;
+
+retry:
+	/* Read data into buffer. */
+	r = archive_read_data(a, buffer, len);
+	if (r > 0) {
+		/* We got good data. */
+		return (size_t)r;
+	}
+	switch (r) {
+		case 0:
+			/* We reached EOF. */
+			if (eof)
+				*eof = 1;
+			return 0;
+
+		case ARCHIVE_WARN:
+			/* We don't know the size read so we have to treat this
+			 * as an error.
+			 */
+			opkg_msg(ERROR, "Warning when reading data from archive: %s\n",
+					archive_error_string(a));
+			return 0;
+
+		case ARCHIVE_RETRY:
+			opkg_msg(ERROR, "Failed to read data from archive: %s\n",
+					archive_error_string(a));
+			if (retries++ < 3) {
+				opkg_msg(NOTICE, "Retrying...");
+				goto retry;
+			} else
+				return 0;
+
+		default:
+			opkg_msg(ERROR, "Failed to read data from archive: %s\n",
+					archive_error_string(a));
+			return 0;
+	}
+}
+
 static int
 copy_to_stream(struct archive * a, FILE * stream)
 {
 	void * buffer;
 	size_t sz_out, sz_in;
-	ssize_t r;
+	int eof;
+	size_t len = EXTRACT_BUFFER_LEN;
 
-	buffer = xmalloc(EXTRACT_BUFFER_LEN);
+	buffer = xmalloc(len);
 
 	while (1) {
-		int retries = 0;
-retry:
-		/* Read data into buffer. */
-		r = archive_read_data(a, buffer, EXTRACT_BUFFER_LEN);
-		if (r == 0) {
-			/* We've reached the end of the file. */
+		sz_in = read_data(a, buffer, len, &eof);
+		if (eof) {
 			free(buffer);
 			return 0;
 		}
-		if (r < 0) {
-			switch (r) {
-				case ARCHIVE_WARN:
-					/* We don't know the size read so we
-					 * have to treat this as an error.
-					 */
-					opkg_msg(ERROR, "Warning when reading data from archive: %s\n",
-							archive_error_string(a));
-					goto err_cleanup;
-
-				case ARCHIVE_RETRY:
-					opkg_msg(ERROR, "Failed to read data from archive: %s\n",
-							archive_error_string(a));
-					if (retries++ < 3) {
-						opkg_msg(NOTICE, "Retrying...");
-						goto retry;
-					} else
-						goto err_cleanup;
-
-				default:
-					opkg_msg(ERROR, "Failed to read data from archive: %s\n",
-							archive_error_string(a));
-					goto err_cleanup;
-			}
-		}
-
-		sz_in = r;
+		if (sz_in == 0)
+			goto err_cleanup;
 
 		/* Now write data to the output stream. */
 		sz_out = fwrite(buffer, 1, sz_in, stream);
