@@ -7,8 +7,7 @@ AM_CFLAGS=-Wall -DHOST_CPU_STR=\"@host_cpu@\" -DLIBDIR=\"@libdir@\" \
 
 libopkg_includedir=$(includedir)/libopkg
 
-# Headers to be installed: everything except opkg_pathfinder.h as that header
-# requires symbols from config.h
+# Headers to be installed
 libopkg_include_HEADERS = $(srcdir)/active_list.h \
 	$(srcdir)/cksum_list.h \
 	$(srcdir)/conffile.h \
@@ -85,9 +84,6 @@ endif
 if HAVE_OPENSSL
 opkg_util_sources += opkg_openssl.c opkg_openssl.h
 libopkg_include_HEADERS += opkg_openssl.h
-if HAVE_PATHFINDER
-opkg_util_sources += opkg_pathfinder.c opkg_pathfinder.h
-endif
 endif
 if HAVE_GPGME
 opkg_util_sources += opkg_gpg.c opkg_gpg.h

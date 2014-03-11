@@ -144,8 +144,6 @@ replace_token_in_str(const char *str, const char *token, const char *replacement
 }
 
 #if defined(HAVE_PATHFINDER) && defined(HAVE_OPENSSL)
-#include "opkg_pathfinder.h"
-
 static CURLcode
 curl_ssl_ctx_function(CURL * curl, void * sslctx, void * parm)
 {
