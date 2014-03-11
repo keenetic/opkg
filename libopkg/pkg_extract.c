@@ -299,65 +299,104 @@ err_cleanup:
 	return (r == ARCHIVE_OK) ? 0 : -1;
 }
 
-/* Prepare to extract 'control.tar.gz' or 'data.tar.gz' from the outer package
- * archive, returning a `struct archive *` for the enclosed file. On error,
- * return NULL.
- */
+/* Open an outer archive with the given filename. */
 static struct archive *
-extract_outer(pkg_t * pkg, const char * arname)
+open_outer(const char * filename)
 {
+	struct archive * outer;
 	int r;
-	int retries = 0;
-	struct archive * inner = NULL;
-	struct archive * outer = NULL;
-	struct archive_entry * entry;
-	struct inner_data * data;
-	const char * path;
-
-	data = (struct inner_data *)xmalloc(sizeof(struct inner_data));
-	data->buffer = xmalloc(EXTRACT_BUFFER_LEN);
 
 	outer = archive_read_new();
 	if (!outer) {
 		opkg_msg(ERROR, "Failed to create outer archive object.\n");
-		goto err_cleanup;
+		return NULL;
 	}
+
 	/* Outer package is in 'ar' format, uncompressed. */
 	r = archive_read_support_format_ar(outer);
 	if (r != ARCHIVE_OK) {
-		opkg_msg(ERROR, "Ar format not supported: %s\n", archive_error_string(outer));
+		opkg_msg(ERROR, "Ar format not supported: %s\n",
+				archive_error_string(outer));
 		goto err_cleanup;
 	}
+
+	r = archive_read_open_filename(outer, filename, EXTRACT_BUFFER_LEN);
+	if (r != ARCHIVE_OK) {
+		opkg_msg(ERROR, "Failed to open package '%s': %s\n",
+				filename, archive_error_string(outer));
+		goto err_cleanup;
+	}
+
+	return outer;
+
+err_cleanup:
+	archive_read_free(outer);
+	return NULL;
+}
+
+/* Open an inner archive at the current position within the given outer archive. */
+static struct archive *
+open_inner(struct archive * outer)
+{
+	struct archive * inner;
+	struct inner_data * data;
+	int r;
 
 	inner = archive_read_new();
 	if (!inner) {
 		opkg_msg(ERROR, "Failed to create inner archive object.\n");
-		goto err_cleanup;
+		return NULL;
 	}
+
+	data = (struct inner_data *)xmalloc(sizeof(struct inner_data));
+	data->buffer = xmalloc(EXTRACT_BUFFER_LEN);
+	data->outer = outer;
+
 	/* Inner package is in 'tar' format, gzip compressed. */
 	r = archive_read_support_filter_gzip(inner);
-	if (r != ARCHIVE_OK) {
+	if (r == ARCHIVE_WARN) {
 		/* libarchive returns ARCHIVE_WARN if the filter is provided by
 		 * an external program.
 		 */
-		if (r == ARCHIVE_WARN) {
-			opkg_msg(INFO, "Gzip support provided by external program.\n");
-		} else {
-			opkg_msg(ERROR, "Gzip format not supported.\n");
-			goto err_cleanup;
-		}
-	}
-	r = archive_read_support_format_tar(inner);
-	if (r != ARCHIVE_OK) {
-		opkg_msg(ERROR, "Tar format not supported: %s\n", archive_error_string(outer));
+		opkg_msg(INFO, "Gzip support provided by external program.\n");
+	} else if (r != ARCHIVE_OK) {
+		opkg_msg(ERROR, "Gzip format not supported.\n");
 		goto err_cleanup;
 	}
 
-	r = archive_read_open_filename(outer, pkg->local_filename, EXTRACT_BUFFER_LEN);
+	r = archive_read_support_format_tar(inner);
 	if (r != ARCHIVE_OK) {
-		opkg_msg(ERROR, "Failed to open package '%s': %s\n", pkg->local_filename, archive_error_string(outer));
+		opkg_msg(ERROR, "Tar format not supported: %s\n",
+				archive_error_string(outer));
 		goto err_cleanup;
 	}
+
+	r = archive_read_open(inner, data, NULL, inner_read, inner_close);
+	if (r != ARCHIVE_OK) {
+		opkg_msg(ERROR, "Failed to open inner archive: %s\n",
+				archive_error_string(inner));
+		goto err_cleanup;
+	}
+
+	return inner;
+
+err_cleanup:
+	archive_read_free(inner);
+	free(data->buffer);
+	free(data);
+	return NULL;
+}
+
+/* Locate an inner archive with the given name in the given outer archive.
+ * Returns 0 if the item was found, <0 otherwise.
+ */
+static int
+find_inner(struct archive * outer, const char * arname)
+{
+	int r;
+	const char * path;
+	struct archive_entry * entry;
+	int retries = 0;
 
 	while (1) {
 		r = archive_read_next_header(outer, &entry);
@@ -371,9 +410,9 @@ extract_outer(pkg_t * pkg, const char * arname)
 				break;
 
 			case ARCHIVE_EOF:
-				opkg_msg(ERROR, "Could not find the inner archive '%s' in package '%s'\n",
-						arname, pkg->local_filename);
-				goto err_cleanup;
+				opkg_msg(ERROR, "Could not find the inner archive '%s'.\n",
+						arname);
+				return -1;
 
 			case ARCHIVE_RETRY:
 				opkg_msg(ERROR, "Error when reading outer archive header: %s\n",
@@ -381,40 +420,50 @@ extract_outer(pkg_t * pkg, const char * arname)
 				if (retries++ < 3)
 					continue;
 				else
-					goto err_cleanup;
+					return -1;
 
 			case ARCHIVE_FATAL:
 			default:
 				opkg_msg(ERROR, "Error when reading outer archive header: %s\n",
 						archive_error_string(outer));
-				goto err_cleanup;
+				return -1;
 		}
 
 		path = archive_entry_pathname(entry);
 		if (strcmp(path, arname) == 0) {
 			/* We found the requested file. */
-			data->outer = outer;
-			r = archive_read_open(inner, data, NULL, inner_read, inner_close);
-			if (r != ARCHIVE_OK) {
-				opkg_msg(ERROR, "Failed to open inner archive: %s\n", archive_error_string(inner));
-				goto err_cleanup;
-			}
-
-			return inner;
+			return 0;
 		}
 	}
+}
 
+/* Prepare to extract 'control.tar.gz' or 'data.tar.gz' from the outer package
+ * archive, returning a `struct archive *` for the enclosed file. On error,
+ * return NULL.
+ */
+static struct archive *
+extract_outer(pkg_t * pkg, const char * arname)
+{
+	int r;
+	struct archive * inner;
+	struct archive * outer;
+
+	outer = open_outer(pkg->local_filename);
+	if (!outer)
+		return NULL;
+
+	r = find_inner(outer, arname);
+	if (r < 0)
+		goto err_cleanup;
+
+	inner = open_inner(outer);
+	if (!inner)
+		goto err_cleanup;
+
+	return inner;
 
 err_cleanup:
-	free(data->buffer);
-	free(data);
-
-	if (inner)
-		archive_read_free(inner);
-
-	if (outer)
-		archive_read_free(outer);
-
+	archive_read_free(outer);
 	return NULL;
 }
 
