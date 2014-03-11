@@ -301,17 +301,41 @@ extract_all(struct archive * a, const char * dest, int flags)
 	const char * path;
 	const char * hardlink;
 	const char * symlink;
+	int retries;
+	int eof;
 
 	disk = archive_write_disk_new();
-	archive_write_disk_set_options(disk, flags);
-	archive_write_disk_set_standard_lookup(disk);
+	if (!disk) {
+		opkg_msg(ERROR, "Failed to create disk archive object.\n");
+		return -1;
+	}
+
+	r = archive_write_disk_set_options(disk, flags);
+	if (r == ARCHIVE_WARN)
+		opkg_msg(NOTICE, "Warning when setting disk options: %s\n",
+				archive_error_string(disk));
+	else if (r != ARCHIVE_OK) {
+		opkg_msg(ERROR, "Failed to set disk options: %s\n",
+				archive_error_string(disk));
+		goto err_cleanup;
+	}
+
+	r = archive_write_disk_set_standard_lookup(disk);
+	if (r == ARCHIVE_WARN)
+		opkg_msg(NOTICE, "Warning when setting user/group lookup functions: %s\n",
+				archive_error_string(disk));
+	else if (r != ARCHIVE_OK) {
+		opkg_msg(ERROR, "Failed to set user/group lookup functions: %s\n",
+				archive_error_string(disk));
+		goto err_cleanup;
+	}
 
 	while (1) {
-		r = archive_read_next_header(a, &entry);
-		if (r == ARCHIVE_EOF)
+		entry = read_header(a, &eof);
+		if (eof)
 			break;
-		if (r != ARCHIVE_OK) {
-			opkg_msg(ERROR, "Failed to read header from archive: %s\n", archive_error_string(a));
+		if (!entry) {
+			r = -1;
 			goto err_cleanup;
 		}
 
@@ -334,12 +358,34 @@ extract_all(struct archive * a, const char * dest, int flags)
 		else
 			opkg_msg(DEBUG, "Extracting '%s'.\n", path);
 
+		retries = 0;
+retry:
 		r = archive_read_extract2(a, entry, disk);
-		if (r != ARCHIVE_OK) {
-			opkg_msg(ERROR, "Failed to extract file '%s' to disk: %s\n",
-					archive_entry_pathname(entry),
-					archive_error_string(a));
-			goto err_cleanup;
+		switch (r) {
+			case ARCHIVE_OK:
+				break;
+
+			case ARCHIVE_WARN:
+				opkg_msg(NOTICE, "Warning when extracting archive entry: %s\n",
+						archive_error_string(a));
+				break;
+
+			case ARCHIVE_RETRY:
+				opkg_msg(ERROR, "Failed to extract archive entry '%s': %s\n",
+						archive_entry_pathname(entry),
+						archive_error_string(a));
+				if (retries++ < 3) {
+					opkg_msg(NOTICE, "Retrying...\n");
+					goto retry;
+				}
+				else
+					return -1;
+
+			default:
+				opkg_msg(ERROR, "Failed to extract archive entry '%s': %s\n",
+						archive_entry_pathname(entry),
+						archive_error_string(a));
+				return -1;
 		}
 	}
 
