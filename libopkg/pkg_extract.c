@@ -246,7 +246,11 @@ extract_file_to_stream(struct archive * a, const char * name, FILE * stream)
 	struct archive_entry * entry;
 	const char * path;
 
-	while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
+	while (1) {
+		entry = read_header(a, NULL);
+		if (!entry)
+			return -1;
+
 		/* Cleanup the path of the entry incase it starts with './' or
 		 * other prefixes.
 		 *
@@ -259,13 +263,7 @@ extract_file_to_stream(struct archive * a, const char * name, FILE * stream)
 		if (strcmp(path, name) == 0)
 			/* We found the requested file. */
 			return copy_to_stream(a, stream);
-		else
-			archive_read_data_skip(a);
 	}
-
-	/* If we get here, we didn't find the listed file. */
-	opkg_msg(ERROR, "Could not find the file '%s' in archive.\n", name);
-	return -1;
 }
 
 /* Extact the paths of files contained in an open archive, writing data to an
