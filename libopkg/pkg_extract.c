@@ -185,6 +185,56 @@ transform_all_paths(struct archive_entry * entry, const char * dest)
 	return 0;
 }
 
+/* Read a header from the given archive object and handle all possible outcomes.
+ * The returned pointer is managed by libarchive and should not be freed by the
+ * caller.
+ *
+ * If the caller needs to know whether EOF was hit without an error, they can
+ * pass an eof pointer which will be set to 1 in this case or 0 otherwise.
+ */
+static struct archive_entry *
+read_header(struct archive * ar, int * eof)
+{
+	struct archive_entry * entry;
+	int r;
+	int retries = 0;
+
+	if (eof)
+		*eof = 0;
+
+retry:
+	r = archive_read_next_header(ar, &entry);
+	switch (r) {
+		case ARCHIVE_OK:
+			break;
+
+		case ARCHIVE_WARN:
+			opkg_msg(NOTICE, "Warning when reading ar archive header: %s\n",
+					archive_error_string(ar));
+			break;
+
+		case ARCHIVE_EOF:
+			if (eof)
+				*eof = 1;
+			return NULL;
+
+		case ARCHIVE_RETRY:
+			opkg_msg(ERROR, "Failed to read archive header: %s\n",
+					archive_error_string(ar));
+			if (retries++ < 3)
+				goto retry;
+			else
+				return NULL;
+
+		default:
+			opkg_msg(ERROR, "Failed to read archive header: %s\n",
+					archive_error_string(ar));
+			return NULL;
+	}
+
+	return entry;
+}
+
 /* Extact a single file from an open archive, writing data to an open stream.
  * Returns 0 on success or <0 on error.
  */
@@ -393,41 +443,13 @@ err_cleanup:
 static int
 find_inner(struct archive * outer, const char * arname)
 {
-	int r;
 	const char * path;
 	struct archive_entry * entry;
-	int retries = 0;
 
 	while (1) {
-		r = archive_read_next_header(outer, &entry);
-		switch (r) {
-			case ARCHIVE_OK:
-				break;
-
-			case ARCHIVE_WARN:
-				opkg_msg(NOTICE, "Warning when reading outer archive header: %s\n",
-						archive_error_string(outer));
-				break;
-
-			case ARCHIVE_EOF:
-				opkg_msg(ERROR, "Could not find the inner archive '%s'.\n",
-						arname);
-				return -1;
-
-			case ARCHIVE_RETRY:
-				opkg_msg(ERROR, "Error when reading outer archive header: %s\n",
-						archive_error_string(outer));
-				if (retries++ < 3)
-					continue;
-				else
-					return -1;
-
-			case ARCHIVE_FATAL:
-			default:
-				opkg_msg(ERROR, "Error when reading outer archive header: %s\n",
-						archive_error_string(outer));
-				return -1;
-		}
+		entry = read_header(outer, NULL);
+		if (!entry)
+			return -1;
 
 		path = archive_entry_pathname(entry);
 		if (strcmp(path, arname) == 0) {
