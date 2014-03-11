@@ -1083,7 +1083,7 @@ opkg_curl_init(curl_progress_func cb, void *data)
 	     */
 	    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
 	}else{
-#ifdef HAVE_PATHFINDER
+#if defined(HAVE_PATHFINDER) && defined(HAVE_OPENSSL)
 	    if(opkg_config->check_x509_path){
     	        if (curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, curl_ssl_ctx_function) != CURLE_OK){
 		    opkg_msg(DEBUG, "Failed to set ssl path verification callback.\n");

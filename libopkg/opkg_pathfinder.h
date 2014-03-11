@@ -19,9 +19,7 @@
 
 #include "config.h"
 
-#if defined(HAVE_OPENSSL)
 int pkcs7_pathfinder_verify_signers(PKCS7* p7);
-#endif
 
 #if defined(HAVE_SSLCURL)
 CURLcode curl_ssl_ctx_function(CURL * curl, void * sslctx, void * parm);

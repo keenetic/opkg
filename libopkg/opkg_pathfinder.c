@@ -25,7 +25,6 @@
 #include "opkg_message.h"
 #include "xfuncs.h"
 
-#if defined(HAVE_SSLCURL) || defined(HAVE_OPENSSL)
 /*
  *      This callback is called instead of X509_verify_cert to perform path
  *      validation on a certificate using pathfinder.
@@ -62,9 +61,7 @@ static int pathfinder_verify_callback(X509_STORE_CTX *ctx, void *arg)
 
     return validated;
 }
-#endif
 
-#if defined(HAVE_OPENSSL)
 int pkcs7_pathfinder_verify_signers(PKCS7* p7)
 {
     STACK_OF(X509) *signers;
@@ -87,7 +84,6 @@ int pkcs7_pathfinder_verify_signers(PKCS7* p7)
     sk_X509_free(signers);
     return ret;
 }
-#endif
 
 #if defined(HAVE_SSLCURL)
 CURLcode curl_ssl_ctx_function(CURL * curl, void * sslctx, void * parm) {

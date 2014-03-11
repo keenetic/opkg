@@ -79,15 +79,15 @@ opkg_util_sources = file_util.c file_util.h opkg_message.h opkg_message.c md5.c 
 		    xregex.c xregex.h xsystem.c xsystem.h xfuncs.c xfuncs.h \
 		    opkg_archive.c opkg_archive.h
 
-if HAVE_PATHFINDER
-opkg_util_sources += opkg_pathfinder.c opkg_pathfinder.h
-endif
 if HAVE_SHA256
 opkg_util_sources += sha256.c sha256.h
 endif
 if HAVE_OPENSSL
 opkg_util_sources += opkg_openssl.c opkg_openssl.h
 libopkg_include_HEADERS += opkg_openssl.h
+if HAVE_PATHFINDER
+opkg_util_sources += opkg_pathfinder.c opkg_pathfinder.h
+endif
 endif
 
 lib_LTLIBRARIES = libopkg.la
