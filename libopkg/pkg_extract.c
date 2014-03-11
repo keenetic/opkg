@@ -100,7 +100,8 @@ copy_to_stream(struct archive * a, FILE * stream)
  *
  * Returns the joined path, or NULL if the resulting path should not be created.
  */
-static char * join_paths(const char * left, const char * right)
+static char *
+join_paths(const char * left, const char * right)
 {
 	char * path;
 
@@ -130,7 +131,8 @@ static char * join_paths(const char * left, const char * right)
  * Returns 0 on success, 1 where the file does not need to be extracted and <0
  * on error.
  */
-static int transform_dest_path(struct archive_entry * entry, const char * dest)
+static int
+transform_dest_path(struct archive_entry * entry, const char * dest)
 {
 	char * path;
 	const char * filename;
@@ -633,7 +635,6 @@ pkg_extract_control_files_to_dir(pkg_t *pkg, const char *dir)
 {
 	return pkg_extract_control_files_to_dir_with_prefix(pkg, dir, "");
 }
-
 
 int
 pkg_extract_data_files_to_dir(pkg_t *pkg, const char *dir)
