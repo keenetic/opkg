@@ -1,0 +1,21 @@
+opkg Version Policy
+===================
+
+Prior to a stable v1.0.0 release, the opkg verison policy shall be:
+
+- 0.x.y releases
+    - Increment y for releases including bugfixes and minor new features only.
+      Tests and documentation may be expanded. Backwards comparability should be
+      maintained.
+    - Increment x for releases including major new features. Backwards
+      compatibility may be broken but only with good reasons which should be
+      clearly documented.
+
+For opkg, the public API is the opkg-cl program (and its command line
+arguments), the configuration options, the API of libopkg and the on-disk
+structures of package files, status and control files, etc.
+
+The format of on-disk data structures (package files, status and control files,
+etc) should be preserved much more carefully and should not be changed without
+very strong reasons. If such a change is made, an upgrade path needs to be
+offered to users.
