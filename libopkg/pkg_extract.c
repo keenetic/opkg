@@ -289,25 +289,16 @@ extract_paths_to_stream(struct archive * a, FILE * stream)
 	return 0;
 }
 
-/* Extract all files in an archive to the filesystem under the path given by
- * dest. Returns 0 on success or <0 on error.
- */
-static int
-extract_all(struct archive * a, const char * dest, int flags)
+static struct archive *
+open_disk(int flags)
 {
 	struct archive * disk;
-	struct archive_entry * entry;
 	int r;
-	const char * path;
-	const char * hardlink;
-	const char * symlink;
-	int retries;
-	int eof;
 
 	disk = archive_write_disk_new();
 	if (!disk) {
 		opkg_msg(ERROR, "Failed to create disk archive object.\n");
-		return -1;
+		return NULL;
 	}
 
 	r = archive_write_disk_set_options(disk, flags);
@@ -330,6 +321,85 @@ extract_all(struct archive * a, const char * dest, int flags)
 		goto err_cleanup;
 	}
 
+	return disk;
+
+err_cleanup:
+	archive_write_free(disk);
+	return NULL;
+}
+
+/* Print destination paths at DEBUG level. */
+static void
+print_paths(struct archive_entry * entry)
+{
+	const char * path = archive_entry_pathname(entry);
+	const char * hardlink = archive_entry_hardlink(entry);
+	const char * symlink = archive_entry_symlink(entry);
+	if (hardlink)
+		opkg_msg(DEBUG, "Extracting '%s', hardlink to '%s'.\n",
+				path, hardlink);
+	else if (symlink)
+		opkg_msg(DEBUG, "Extracting '%s', symlink to '%s'.\n",
+				path, symlink);
+	else
+		opkg_msg(DEBUG, "Extracting '%s'.\n", path);
+
+}
+
+/* Extract an entry to disk, returns 0 on success or <0 on error. */
+static int
+extract_entry(struct archive * a, struct archive_entry * entry, struct archive * disk)
+{
+	int r;
+	int retries = 0;
+
+retry:
+	r = archive_read_extract2(a, entry, disk);
+	switch (r) {
+		case ARCHIVE_OK:
+			break;
+
+		case ARCHIVE_WARN:
+			opkg_msg(NOTICE, "Warning when extracting archive entry: %s\n",
+					archive_error_string(a));
+			break;
+
+		case ARCHIVE_RETRY:
+			opkg_msg(ERROR, "Failed to extract archive entry '%s': %s\n",
+					archive_entry_pathname(entry),
+					archive_error_string(a));
+			if (retries++ < 3) {
+				opkg_msg(NOTICE, "Retrying...\n");
+				goto retry;
+			}
+			else
+				return -1;
+
+		default:
+			opkg_msg(ERROR, "Failed to extract archive entry '%s': %s\n",
+					archive_entry_pathname(entry),
+					archive_error_string(a));
+			return -1;
+	}
+
+	return 0;
+}
+
+/* Extract all files in an archive to the filesystem under the path given by
+ * dest. Returns 0 on success or <0 on error.
+ */
+static int
+extract_all(struct archive * a, const char * dest, int flags)
+{
+	struct archive * disk;
+	struct archive_entry * entry;
+	int r;
+	int eof;
+
+	disk = open_disk(flags);
+	if (!disk)
+		return -1;
+
 	while (1) {
 		entry = read_header(a, &eof);
 		if (eof)
@@ -347,46 +417,11 @@ extract_all(struct archive * a, const char * dest, int flags)
 			goto err_cleanup;
 		}
 
-		/* Print destination paths at DEBUG level. */
-		path = archive_entry_pathname(entry);
-		hardlink = archive_entry_hardlink(entry);
-		symlink = archive_entry_symlink(entry);
-		if (hardlink)
-			opkg_msg(DEBUG, "Extracting '%s', hardlink to '%s'.\n", path, hardlink);
-		else if (symlink)
-			opkg_msg(DEBUG, "Extracting '%s', symlink to '%s'.\n", path, symlink);
-		else
-			opkg_msg(DEBUG, "Extracting '%s'.\n", path);
+		print_paths(entry);
 
-		retries = 0;
-retry:
-		r = archive_read_extract2(a, entry, disk);
-		switch (r) {
-			case ARCHIVE_OK:
-				break;
-
-			case ARCHIVE_WARN:
-				opkg_msg(NOTICE, "Warning when extracting archive entry: %s\n",
-						archive_error_string(a));
-				break;
-
-			case ARCHIVE_RETRY:
-				opkg_msg(ERROR, "Failed to extract archive entry '%s': %s\n",
-						archive_entry_pathname(entry),
-						archive_error_string(a));
-				if (retries++ < 3) {
-					opkg_msg(NOTICE, "Retrying...\n");
-					goto retry;
-				}
-				else
-					return -1;
-
-			default:
-				opkg_msg(ERROR, "Failed to extract archive entry '%s': %s\n",
-						archive_entry_pathname(entry),
-						archive_error_string(a));
-				return -1;
-		}
+		r = extract_entry(a, entry, disk);
+		if (r < 0)
+			goto err_cleanup;
 	}
 
 	r = ARCHIVE_OK;
