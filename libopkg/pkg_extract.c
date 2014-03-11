@@ -60,35 +60,60 @@ static int
 copy_to_stream(struct archive * a, FILE * stream)
 {
 	void * buffer;
-	size_t sz_in, sz_out;
+	size_t sz_out, sz_in;
+	ssize_t r;
 
 	buffer = xmalloc(EXTRACT_BUFFER_LEN);
 
 	while (1) {
+		int retries = 0;
+retry:
 		/* Read data into buffer. */
-		sz_in = archive_read_data(a, buffer, EXTRACT_BUFFER_LEN);
-		if (sz_in == ARCHIVE_FATAL || sz_in == ARCHIVE_WARN) {
-			opkg_msg(ERROR, "Failed to read data from archive: %s\n", archive_error_string(a));
-			free(buffer);
-			return -1;
-		}
-		else if (sz_in == ARCHIVE_RETRY)
-			continue;
-		else if (sz_in == 0) {
+		r = archive_read_data(a, buffer, EXTRACT_BUFFER_LEN);
+		if (r == 0) {
 			/* We've reached the end of the file. */
 			free(buffer);
 			return 0;
 		}
+		if (r < 0) {
+			switch (r) {
+				case ARCHIVE_WARN:
+					/* We don't know the size read so we
+					 * have to treat this as an error.
+					 */
+					opkg_msg(ERROR, "Warning when reading data from archive: %s\n",
+							archive_error_string(a));
+					goto err_cleanup;
+
+				case ARCHIVE_RETRY:
+					opkg_msg(ERROR, "Failed to read data from archive: %s\n",
+							archive_error_string(a));
+					if (retries++ < 3) {
+						opkg_msg(NOTICE, "Retrying...");
+						goto retry;
+					} else
+						goto err_cleanup;
+
+				default:
+					opkg_msg(ERROR, "Failed to read data from archive: %s\n",
+							archive_error_string(a));
+					goto err_cleanup;
+			}
+		}
+
+		sz_in = r;
 
 		/* Now write data to the output stream. */
 		sz_out = fwrite(buffer, 1, sz_in, stream);
 		if (sz_out < sz_in) {
-			/* An error occurred during writing. */
 			opkg_msg(ERROR, "Failed to write data to stream: %s\n", strerror(errno));
-			free(buffer);
-			return -1;
+			goto err_cleanup;
 		}
 	}
+
+err_cleanup:
+	free(buffer);
+	return -1;
 }
 
 /* Join left and right path components without intervening '/' as left may end
