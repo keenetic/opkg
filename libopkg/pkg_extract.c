@@ -275,18 +275,22 @@ extract_paths_to_stream(struct archive * a, FILE * stream)
 	struct archive_entry * entry;
 	int r;
 	const char * path;
+	int eof;
 
-	while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
-		path = archive_entry_pathname(entry);
-		r = fprintf(stream, "%s\n", path);
-		if (r <= 0)
-			/* Read failed */
+	while (1) {
+		entry = read_header(a, &eof);
+		if (eof)
+			return 0;
+		if (!entry)
 			return -1;
 
-		archive_read_data_skip(a);
+		path = archive_entry_pathname(entry);
+		r = fprintf(stream, "%s\n", path);
+		if (r <= 0) {
+			opkg_msg(ERROR, "Failed to path to stream: %s\n", strerror(errno));
+			return -1;
+		}
 	}
-
-	return 0;
 }
 
 static struct archive *
