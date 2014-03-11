@@ -307,8 +307,9 @@ static struct archive *
 extract_outer(pkg_t * pkg, const char * arname)
 {
 	int r;
-	struct archive * inner;
-	struct archive * outer;
+	int retries = 0;
+	struct archive * inner = NULL;
+	struct archive * outer = NULL;
 	struct archive_entry * entry;
 	struct inner_data * data;
 	const char * path;
@@ -317,13 +318,40 @@ extract_outer(pkg_t * pkg, const char * arname)
 	data->buffer = xmalloc(EXTRACT_BUFFER_LEN);
 
 	outer = archive_read_new();
+	if (!outer) {
+		opkg_msg(ERROR, "Failed to create outer archive object.\n");
+		goto err_cleanup;
+	}
 	/* Outer package is in 'ar' format, uncompressed. */
-	archive_read_support_format_ar(outer);
+	r = archive_read_support_format_ar(outer);
+	if (r != ARCHIVE_OK) {
+		opkg_msg(ERROR, "Ar format not supported: %s\n", archive_error_string(outer));
+		goto err_cleanup;
+	}
 
 	inner = archive_read_new();
+	if (!inner) {
+		opkg_msg(ERROR, "Failed to create inner archive object.\n");
+		goto err_cleanup;
+	}
 	/* Inner package is in 'tar' format, gzip compressed. */
-	archive_read_support_filter_gzip(inner);
-	archive_read_support_format_tar(inner);
+	r = archive_read_support_filter_gzip(inner);
+	if (r != ARCHIVE_OK) {
+		/* libarchive returns ARCHIVE_WARN if the filter is provided by
+		 * an external program.
+		 */
+		if (r == ARCHIVE_WARN) {
+			opkg_msg(INFO, "Gzip support provided by external program.\n");
+		} else {
+			opkg_msg(ERROR, "Gzip format not supported.\n");
+			goto err_cleanup;
+		}
+	}
+	r = archive_read_support_format_tar(inner);
+	if (r != ARCHIVE_OK) {
+		opkg_msg(ERROR, "Tar format not supported: %s\n", archive_error_string(outer));
+		goto err_cleanup;
+	}
 
 	r = archive_read_open_filename(outer, pkg->local_filename, EXTRACT_BUFFER_LEN);
 	if (r != ARCHIVE_OK) {
@@ -331,7 +359,37 @@ extract_outer(pkg_t * pkg, const char * arname)
 		goto err_cleanup;
 	}
 
-	while (archive_read_next_header(outer, &entry) == ARCHIVE_OK) {
+	while (1) {
+		r = archive_read_next_header(outer, &entry);
+		switch (r) {
+			case ARCHIVE_OK:
+				break;
+
+			case ARCHIVE_WARN:
+				opkg_msg(NOTICE, "Warning when reading outer archive header: %s\n",
+						archive_error_string(outer));
+				break;
+
+			case ARCHIVE_EOF:
+				opkg_msg(ERROR, "Could not find the inner archive '%s' in package '%s'\n",
+						arname, pkg->local_filename);
+				goto err_cleanup;
+
+			case ARCHIVE_RETRY:
+				opkg_msg(ERROR, "Error when reading outer archive header: %s\n",
+						archive_error_string(outer));
+				if (retries++ < 3)
+					continue;
+				else
+					goto err_cleanup;
+
+			case ARCHIVE_FATAL:
+			default:
+				opkg_msg(ERROR, "Error when reading outer archive header: %s\n",
+						archive_error_string(outer));
+				goto err_cleanup;
+		}
+
 		path = archive_entry_pathname(entry);
 		if (strcmp(path, arname) == 0) {
 			/* We found the requested file. */
@@ -346,13 +404,13 @@ extract_outer(pkg_t * pkg, const char * arname)
 		}
 	}
 
+
 err_cleanup:
-	opkg_msg(ERROR, "Could not find the inner archive '%s' in package '%s'\n", arname, pkg->local_filename);
-	if (data) {
-		if (data->buffer)
-			free(data->buffer);
-		free(data);
-	}
+	free(data->buffer);
+	free(data);
+
+	if (inner)
+		archive_read_free(inner);
 
 	if (outer)
 		archive_read_free(outer);
