@@ -286,9 +286,9 @@ extract_all(struct archive * a, const char * dest, int flags)
 
 		r = archive_read_extract2(a, entry, disk);
 		if (r != ARCHIVE_OK) {
-			opkg_msg(ERROR, "Failed to extract file '%s' to disk.\n", archive_entry_pathname(entry));
-			opkg_msg(ERROR, "Archive error: %s\n", archive_error_string(a));
-			opkg_msg(ERROR, "Disk error: %s\n", archive_error_string(disk));
+			opkg_msg(ERROR, "Failed to extract file '%s' to disk: %s\n",
+					archive_entry_pathname(entry),
+					archive_error_string(a));
 			goto err_cleanup;
 		}
 	}
