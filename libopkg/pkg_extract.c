@@ -38,6 +38,8 @@ struct inner_data {
 static ssize_t
 inner_read(struct archive *a, void *client_data, const void **buff)
 {
+	(void)a;
+
 	struct inner_data * data = (struct inner_data *)client_data;
 
 	*buff = data->buffer;
@@ -47,6 +49,8 @@ inner_read(struct archive *a, void *client_data, const void **buff)
 static int
 inner_close(struct archive *inner, void *client_data)
 {
+	(void)inner;
+
 	struct inner_data * data = (struct inner_data *)client_data;
 
 	archive_read_free(data->outer);
