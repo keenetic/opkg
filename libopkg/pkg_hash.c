@@ -137,11 +137,19 @@ pkg_hash_add_from_file(const char *file_name,
 			continue;
 		}
 
-		if (!pkg->architecture || !pkg->arch_priority) {
+		if (!pkg->architecture) {
 			char *version_str = pkg_version_str_alloc(pkg);
 			opkg_msg(NOTICE, "Package %s version %s has no "
 					"valid architecture, ignoring.\n",
 					pkg->name, version_str);
+			free(version_str);
+			continue;
+		}
+		if (!pkg->arch_priority) {
+			char *version_str = pkg_version_str_alloc(pkg);
+			opkg_msg(DEBUG, "Package %s version %s is built for architecture %s "
+					"which cannot be installed here, ignoring.\n",
+					pkg->name, version_str, pkg->architecture);
 			free(version_str);
 			continue;
 		}
