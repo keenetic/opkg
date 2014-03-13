@@ -588,6 +588,14 @@ find_inner(struct archive * outer, const char * arname)
 		if (!entry)
 			return -1;
 
+		/* Cleanup the path of the entry incase it starts with './' or
+		 * other prefixes.
+		 *
+		 * We ignore the return value of transform_dest_path as bad
+		 * paths simply won't match the requested path name.
+		 */
+		transform_dest_path(entry, NULL);
+
 		path = archive_entry_pathname(entry);
 		if (strcmp(path, arname) == 0) {
 			/* We found the requested file. */
