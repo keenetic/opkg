@@ -301,7 +301,6 @@ AC_OUTPUT(
     tests/Makefile
     src/Makefile
     utils/Makefile
-    utils/update-alternatives
     libopkg.pc
     man/Makefile
     man/opkg-cl.1

@@ -28,7 +28,6 @@ if [ \( $# -eq 1 \) -a \( "$1" = "--clean" \) ]; then
 	rm -f libopkg/*.la
 	rm -f src/opkg-cl tests/libopkg_test
 	rm -f stamp-h1
-	rm -f utils/update-alternatives
 	rm -rf {libopkg,tests,src}/.libs
 
 	rm -f tests/regress/*.py{c,o}

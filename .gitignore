@@ -45,7 +45,6 @@ depcomp
 
 # opkg stuff
 libopkg.pc
-utils/update-alternatives
 
 autom4te.cache/
 
