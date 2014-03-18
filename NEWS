@@ -58,6 +58,14 @@ opkg-0.2.2 (in development)
 - Fix '--force-reinstall' flag so that it acts as an upgrade rather than
   removing possibly critical packages before reinstall (issue 71)
 
+- Symlinks are now correctly removed during package uninstall (issue 91)
+
+- Fixed help and manual pages to reflect that shell globs not true regexps are
+  accepted by opkg (issue 107)
+
+- The error message "no valid architecture" is no longer given when the
+  architecture of a package is valid but incompatible with the current system.
+
 opkg-0.2.1
 ==========
 
