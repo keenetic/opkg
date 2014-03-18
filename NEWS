@@ -11,12 +11,10 @@ User visible:
 - Added config option `overwrite_no_owner` allowing un-owned files to be
   overwritten during package install (issue 99)
 
+- Added config options `connect_timeout_ms`, `transfer_timeout_ms` and
+  `follow_location` for use with CURL
+
 - Added command line option `--volatile-cache`
-
-- Symlinks are now correctly removed during package uninstall (issue 91)
-
-- Fixed help and manual pages to reflect that shell globs not true regexps are
-  accepted by opkg (issue 107)
 
 - Support implicit and explicit FTP-over-SSL when curl is enabled
 
@@ -29,7 +27,7 @@ User visible:
 
 - Improved detection and handling of package conflicts
 
-- Better handling of hold flag on packages
+- Better handling of package flags (such as hold) and status
 
 - Only install `opkg-key` when gpg support is enabled
 
@@ -46,6 +44,8 @@ Developer visible:
 
 - Added functions `opkg_conf_get_option` and `opkg_conf_set_option`, direct
   access to `options` array is no longer allowed
+
+- Added documentation in `developer-doc` directory
 
 - Use libarchive to extract packages instead of hand-rolled tar, ar and gzip
   handling (adds dependency on libarchive)
