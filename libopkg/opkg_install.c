@@ -1625,6 +1625,18 @@ opkg_install_pkg(pkg_t *pkg, int from_upgrade)
 	  pkg_remove_installed_replacees_unwind(replacees);
 
 pkg_is_hosed:
+	  /* Set the package flags to something consistent which indicates a
+	   * failed install.
+	   */
+	  pkg->state_flag = SF_REINSTREQ;
+	  pkg->state_status = SS_HALF_INSTALLED;
+
+	  /* Print some advice for the user. */
+	  opkg_msg(NOTICE, "To remove package debris, try `opkg remove %s`.\n",
+			  pkg->name);
+	  opkg_msg(NOTICE, "To re-attempt the install, try `opkg install %s`.\n",
+			  pkg->name);
+
 	  sigprocmask(SIG_UNBLOCK, &newset, &oldset);
 
           pkg_vec_free (replacees);
