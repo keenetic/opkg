@@ -634,45 +634,26 @@ err_cleanup:
 	return NULL;
 }
 
-int
-pkg_extract_control_file_to_stream(pkg_t *pkg, FILE *stream)
+/*******************************************************************************
+ * Glue layer.
+ */
+
+struct opkg_ar {
+	struct archive * ar;
+	int extract_flags;
+};
+
+struct opkg_ar *
+ar_open_pkg_control_archive(const char * filename)
 {
-	int err = 0;
-	struct archive * a = extract_outer(pkg->local_filename, "control.tar.gz");
-	if (!a) {
-		opkg_msg(ERROR,
-			 "Failed to extract control.tar.gz from package '%s'.\n",
-			 pkg->local_filename);
-		return -1;
-	}
+	struct opkg_ar * ar;
 
-	err = extract_file_to_stream(a, "control", stream);
-	archive_read_free(a);
-	if (err < 0)
-		opkg_msg(ERROR,
-			 "Failed to extract control file from package '%s'.\n",
-			 pkg->local_filename);
+	ar = (struct opkg_ar *)xmalloc(sizeof(struct opkg_ar));
 
-	return err;
-}
-
-int
-pkg_extract_control_files_to_dir_with_prefix(pkg_t *pkg, const char *dir,
-		const char *prefix)
-{
-	int err;
-	int flags;
-	char *dir_with_prefix;
-
-	sprintf_alloc(&dir_with_prefix, "%s/%s", dir, prefix);
-
-	struct archive * a = extract_outer(pkg->local_filename, "control.tar.gz");
-	if (!a) {
-		free(dir_with_prefix);
-		opkg_msg(ERROR,
-			 "Failed to extract control.tar.gz from package '%s'.\n",
-			 pkg->local_filename);
-		return -1;
+	ar->ar = extract_outer(filename, "control.tar.gz");
+	if (!ar->ar) {
+		free(ar);
+		return NULL;
 	}
 
 	/* We don't want to set ownership and permissions of control files
@@ -680,16 +661,118 @@ pkg_extract_control_files_to_dir_with_prefix(pkg_t *pkg, const char *dir,
 	 * by the user who ran opkg (usually root) and given permissions
 	 * according to the current umask.
 	 */
-	flags = 0;
-	err = extract_all(a, dir_with_prefix, flags);
-	archive_read_free(a);
-	free(dir_with_prefix);
-	if (err < 0)
+	ar->extract_flags = 0;
+
+	return ar;
+}
+
+struct opkg_ar *
+ar_open_pkg_data_archive(const char * filename)
+{
+	struct opkg_ar * ar;
+
+	ar = (struct opkg_ar *)xmalloc(sizeof(struct opkg_ar));
+
+	ar->ar = extract_outer(filename, "data.tar.gz");
+	if (!ar->ar) {
+		free(ar);
+		return NULL;
+	}
+
+	/** Flags:
+	 *
+	 * TODO: Do we want to support ACLs, extended flags and extended
+	 * attributes? (ARCHIVE_EXTRACT_ACL, ARCHIVE_EXTRACT_FFLAGS,
+	 * ARCHIVE_EXTRACT_XATTR).
+	 */
+	ar->extract_flags = ARCHIVE_EXTRACT_OWNER | ARCHIVE_EXTRACT_PERM |
+		ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_UNLINK;
+
+	return ar;
+}
+
+int
+ar_extract_file_to_stream(struct opkg_ar * ar, const char * filename, FILE * stream)
+{
+	return extract_file_to_stream(ar->ar, filename, stream);
+}
+
+int
+ar_extract_paths_to_stream(struct opkg_ar * ar, FILE * stream)
+{
+	return extract_paths_to_stream(ar->ar, stream);
+}
+
+int
+ar_extract_all(struct opkg_ar * ar, const char * prefix)
+{
+	return extract_all(ar->ar, prefix, ar->extract_flags);
+}
+
+void
+ar_close(struct opkg_ar * ar)
+{
+	archive_read_free(ar->ar);
+	free(ar);
+}
+
+/*******************************************************************************
+ * pkg_extract functions.
+ */
+
+int
+pkg_extract_control_file_to_stream(pkg_t *pkg, FILE *stream)
+{
+	int r;
+	struct opkg_ar * ar;
+
+	ar = ar_open_pkg_control_archive(pkg->local_filename);
+	if (!ar) {
+		opkg_msg(ERROR,
+			 "Failed to extract control.tar.gz from package '%s'.\n",
+			 pkg->local_filename);
+		return -1;
+	}
+
+	r = ar_extract_file_to_stream(ar, "control", stream);
+	if (r < 0)
+		opkg_msg(ERROR,
+			 "Failed to extract control file from package '%s'.\n",
+			 pkg->local_filename);
+
+	ar_close(ar);
+	return r;
+}
+
+int
+pkg_extract_control_files_to_dir_with_prefix(pkg_t *pkg, const char *dir,
+		const char *prefix)
+{
+	int r = -1;
+	char *dir_with_prefix;
+	struct opkg_ar * ar;
+
+	sprintf_alloc(&dir_with_prefix, "%s/%s", dir, prefix);
+
+	ar = ar_open_pkg_control_archive(pkg->local_filename);
+	if (!ar) {
+		opkg_msg(ERROR,
+			 "Failed to extract control.tar.gz from package '%s'.\n",
+			 pkg->local_filename);
+		goto cleanup;
+	}
+
+	r = ar_extract_all(ar, dir_with_prefix);
+	if (r < 0)
 		opkg_msg(ERROR,
 			 "Failed to extract all control files from package '%s'.\n",
 			 pkg->local_filename);
 
-	return err;
+cleanup:
+	free(dir_with_prefix);
+	if (ar)
+		ar_close(ar);
+	return r;
 }
 
 int
@@ -701,54 +784,47 @@ pkg_extract_control_files_to_dir(pkg_t *pkg, const char *dir)
 int
 pkg_extract_data_files_to_dir(pkg_t *pkg, const char *dir)
 {
-	int err;
-	int flags;
+	int r;
+	struct opkg_ar * ar;
 
-	struct archive * a = extract_outer(pkg->local_filename, "data.tar.gz");
-	if (!a) {
+	ar = ar_open_pkg_data_archive(pkg->local_filename);
+	if (!ar) {
 		opkg_msg(ERROR,
 			 "Failed to extract data.tar.gz from package '%s'.\n",
 			 pkg->local_filename);
 		return -1;
 	}
 
-	/** Flags:
-	 *
-	 * TODO: Do we want to support ACLs, extended flags and extended
-	 * attributes? (ARCHIVE_EXTRACT_ACL, ARCHIVE_EXTRACT_FFLAGS,
-	 * ARCHIVE_EXTRACT_XATTR).
-	 */
-	flags = ARCHIVE_EXTRACT_OWNER | ARCHIVE_EXTRACT_PERM |
-		ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_UNLINK;
-	err = extract_all(a, dir, flags);
-	archive_read_free(a);
-	if (err < 0)
+	r = ar_extract_all(ar, dir);
+	if (r < 0)
 		opkg_msg(ERROR,
 			 "Failed to extract data files from package '%s'.\n",
 			 pkg->local_filename);
 
-	return err;
+	ar_close(ar);
+	return r;
 }
 
 int
 pkg_extract_data_file_names_to_stream(pkg_t *pkg, FILE *stream)
 {
-	int err;
+	int r;
+	struct opkg_ar * ar;
 
-	struct archive * a = extract_outer(pkg->local_filename, "data.tar.gz");
-	if (!a) {
+	ar = ar_open_pkg_data_archive(pkg->local_filename);
+	if (!ar) {
 		opkg_msg(ERROR,
 			 "Failed to extract data.tar.gz from package '%s'.\n",
 			 pkg->local_filename);
 		return -1;
 	}
 
-	err = extract_paths_to_stream(a, stream);
-	archive_read_free(a);
-	if (err < 0)
+	r = ar_extract_paths_to_stream(ar, stream);
+	if (r < 0)
 		opkg_msg(ERROR,
 			 "Failed to extract data file names from package '%s'.\n",
 			 pkg->local_filename);
 
-	return err;
+	ar_close(ar);
+	return r;
 }
