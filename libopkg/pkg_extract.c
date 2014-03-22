@@ -609,13 +609,13 @@ find_inner(struct archive * outer, const char * arname)
  * return NULL.
  */
 static struct archive *
-extract_outer(pkg_t * pkg, const char * arname)
+extract_outer(const char * filename, const char * arname)
 {
 	int r;
 	struct archive * inner;
 	struct archive * outer;
 
-	outer = open_outer(pkg->local_filename);
+	outer = open_outer(filename);
 	if (!outer)
 		return NULL;
 
@@ -638,7 +638,7 @@ int
 pkg_extract_control_file_to_stream(pkg_t *pkg, FILE *stream)
 {
 	int err = 0;
-	struct archive * a = extract_outer(pkg, "control.tar.gz");
+	struct archive * a = extract_outer(pkg->local_filename, "control.tar.gz");
 	if (!a) {
 		opkg_msg(ERROR,
 			 "Failed to extract control.tar.gz from package '%s'.\n",
@@ -666,7 +666,7 @@ pkg_extract_control_files_to_dir_with_prefix(pkg_t *pkg, const char *dir,
 
 	sprintf_alloc(&dir_with_prefix, "%s/%s", dir, prefix);
 
-	struct archive * a = extract_outer(pkg, "control.tar.gz");
+	struct archive * a = extract_outer(pkg->local_filename, "control.tar.gz");
 	if (!a) {
 		free(dir_with_prefix);
 		opkg_msg(ERROR,
@@ -704,7 +704,7 @@ pkg_extract_data_files_to_dir(pkg_t *pkg, const char *dir)
 	int err;
 	int flags;
 
-	struct archive * a = extract_outer(pkg, "data.tar.gz");
+	struct archive * a = extract_outer(pkg->local_filename, "data.tar.gz");
 	if (!a) {
 		opkg_msg(ERROR,
 			 "Failed to extract data.tar.gz from package '%s'.\n",
@@ -735,7 +735,7 @@ pkg_extract_data_file_names_to_stream(pkg_t *pkg, FILE *stream)
 {
 	int err;
 
-	struct archive * a = extract_outer(pkg, "data.tar.gz");
+	struct archive * a = extract_outer(pkg->local_filename, "data.tar.gz");
 	if (!a) {
 		opkg_msg(ERROR,
 			 "Failed to extract data.tar.gz from package '%s'.\n",
