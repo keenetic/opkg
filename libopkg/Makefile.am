@@ -20,6 +20,7 @@ libopkg_include_HEADERS = $(srcdir)/active_list.h \
 	$(srcdir)/nv_pair.h \
 	$(srcdir)/nv_pair_list.h \
 	$(srcdir)/opkg.h \
+	$(srcdir)/opkg_archive.h \
 	$(srcdir)/opkg_cmd.h \
 	$(srcdir)/opkg_conf.h \
 	$(srcdir)/opkg_configure.h \
@@ -75,7 +76,9 @@ opkg_util_sources = file_util.c file_util.h opkg_message.h opkg_message.c md5.c 
 		    parse_util.c parse_util.h \
 		    cksum_list.c cksum_list.h \
 		    sprintf_alloc.c sprintf_alloc.h \
-		    xregex.c xregex.h xsystem.c xsystem.h xfuncs.c xfuncs.h
+		    xregex.c xregex.h xsystem.c xsystem.h xfuncs.c xfuncs.h \
+		    opkg_archive.c opkg_archive.h
+
 if HAVE_PATHFINDER
 opkg_util_sources += opkg_pathfinder.c opkg_pathfinder.h
 endif
