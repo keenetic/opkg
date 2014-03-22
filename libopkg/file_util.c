@@ -18,7 +18,6 @@
 
 #include "config.h"
 
-#include <archive.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -30,6 +29,7 @@
 #include <string.h>
 
 #include "opkg_message.h"
+#include "opkg_archive.h"
 #include "sprintf_alloc.h"
 #include "file_util.h"
 #include "md5.h"
@@ -482,64 +482,33 @@ rm_r(const char *path)
 int
 file_decompress(const char * in, const char * out)
 {
-	int r = 0;
-	size_t sz;
-	void * buffer = NULL;
-	struct archive * ar = NULL;
-	struct archive_entry * entry;
-	FILE * f = NULL;
+	int r;
+	struct opkg_ar * ar;
+	FILE * f;
 
-	buffer = xmalloc(EXTRACT_BUFFER_LEN);
-	ar = archive_read_new();
-	if (!ar) {
-		r = -1;
-		goto err;
-	}
-
-	/* Support raw data in gzip compression format. */
-	archive_read_support_filter_gzip(ar);
-	archive_read_support_format_raw(ar);
-
-	/* Open input file and prepare for reading. */
-	r = archive_read_open_filename(ar, in, EXTRACT_BUFFER_LEN);
-	if (r != ARCHIVE_OK)
-		goto err;
-
-	r = archive_read_next_header(ar, &entry);
-	if (r != ARCHIVE_OK)
-		goto err;
+	ar = ar_open_compressed_file(in);
+	if (!ar)
+		return -1;
 
 	/* Open output file. */
 	f = fopen(out, "w");
 	if (!f) {
+		opkg_msg(ERROR, "Failed to open output file '%s': %s\n",
+				out, strerror(errno));
 		r = -1;
-		goto err;
+		goto cleanup;
 	}
 
 	/* Copy decompressed data. */
-	while (1) {
-		sz = archive_read_data(ar, buffer, EXTRACT_BUFFER_LEN);
-		if (sz < 0) {
-			r = sz;
-			break;
-		}
-		if (sz == 0) {
-			/* We finished. */
-			r = 0;
-			break;
-		}
+	r = ar_copy_to_stream(ar, f);
+	if (r < 0)
+		goto cleanup;
 
-		r = fwrite(buffer, 1, sz, f);
-		if (r < sz) {
-			break;
-		}
-	}
+	/* Success */
+	r = 0;
 
-err:
-	if (ar)
-		archive_read_free(ar);
-	if (buffer)
-		free(buffer);
+cleanup:
+	ar_close(ar);
 	if (f)
 		fclose(f);
 
