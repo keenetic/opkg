@@ -27,6 +27,8 @@ struct opkg_ar {
 
 struct opkg_ar * ar_open_pkg_control_archive(const char * filename);
 struct opkg_ar * ar_open_pkg_data_archive(const char * filename);
+struct opkg_ar * ar_open_compressed_file(const char * filename);
+int ar_copy_to_stream(struct opkg_ar * ar, FILE * stream);
 int ar_extract_file_to_stream(struct opkg_ar * ar, const char * filename, FILE * stream);
 int ar_extract_paths_to_stream(struct opkg_ar * ar, FILE * stream);
 int ar_extract_all(struct opkg_ar * ar, const char * prefix);

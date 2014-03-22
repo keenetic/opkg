@@ -636,6 +636,54 @@ err_cleanup:
 	return NULL;
 }
 
+static struct archive *
+open_compressed_file(const char * filename)
+{
+	struct archive * ar;
+	int r;
+
+	ar = archive_read_new();
+	if (!ar) {
+		opkg_msg(ERROR, "Failed to create archive object for compressed file.\n");
+		return NULL;
+	}
+
+	/* Support raw data in gzip compression format. */
+	r = archive_read_support_filter_gzip(ar);
+	if (r == ARCHIVE_WARN) {
+		/* libarchive returns ARCHIVE_WARN if the filter is provided by
+		 * an external program.
+		 */
+		opkg_msg(INFO, "Gzip support provided by external program.\n");
+	} else if (r != ARCHIVE_OK) {
+		opkg_msg(ERROR, "Gzip format not supported: %s\n",
+				archive_error_string(ar));
+		goto err_cleanup;
+	}
+
+	r = archive_read_support_format_raw(ar);
+	if (r != ARCHIVE_OK) {
+		opkg_msg(ERROR, "Raw format not supported: %s\n",
+				archive_error_string(ar));
+		goto err_cleanup;
+	}
+
+
+	/* Open input file and prepare for reading. */
+	r = archive_read_open_filename(ar, filename, EXTRACT_BUFFER_LEN);
+	if (r != ARCHIVE_OK) {
+		opkg_msg(ERROR, "Failed to open compressed file '%s': %s\n",
+				filename, archive_error_string(ar));
+		goto err_cleanup;
+	}
+
+	return ar;
+
+err_cleanup:
+	archive_read_free(ar);
+	return NULL;
+}
+
 /*******************************************************************************
  * Glue layer.
  */
@@ -686,6 +734,45 @@ ar_open_pkg_data_archive(const char * filename)
 		ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_UNLINK;
 
 	return ar;
+}
+
+struct opkg_ar *
+ar_open_compressed_file(const char * filename)
+{
+	struct opkg_ar * ar;
+	struct archive_entry * entry;
+
+	ar = (struct opkg_ar *)xmalloc(sizeof(struct opkg_ar));
+
+	ar->ar = open_compressed_file(filename);
+	if (!ar->ar)
+		goto err_cleanup;
+
+	/* Flags aren't used when handling compressed files. */
+	ar->extract_flags = 0;
+
+	/* As ar represents a single compressed file it should just have one
+	 * header. We skip over this header here so that the caller doesn't need
+	 * to know about it.
+	 */
+	entry = read_header(ar->ar, NULL);
+	if (!entry)
+		goto err_cleanup;
+
+	return ar;
+
+err_cleanup:
+	if (ar->ar)
+		archive_read_free(ar->ar);
+	free(ar);
+
+	return NULL;
+}
+
+int
+ar_copy_to_stream(struct opkg_ar * ar, FILE * stream)
+{
+	return copy_to_stream(ar->ar, stream);
 }
 
 int
