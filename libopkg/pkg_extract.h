@@ -1,4 +1,4 @@
-/* pkg_extract.c - the opkg package management system
+/* pkg_extract.h - the opkg package management system
 
    Carl D. Worth
 
