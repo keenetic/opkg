@@ -629,10 +629,11 @@ opkg_list_upgradable_cmd(int argc, char **argv)
 static int
 opkg_info_status_cmd(int argc, char **argv, int installed_only)
 {
-     unsigned int i;
+     unsigned int i,err;
      pkg_vec_t *available;
      pkg_t *pkg;
      char *pkg_name = NULL;
+     char b_match=0;
 
      if (argc > 0) {
 	  pkg_name = argv[0];
@@ -662,8 +663,18 @@ opkg_info_status_cmd(int argc, char **argv, int installed_only)
 				 cf->name, cf->value, modified);
 	       }
 	  }
+	  b_match=1;
      }
      pkg_vec_free(available);
+
+     if (!b_match && pkg_name && file_exists(pkg_name)) {
+	  pkg = pkg_new();
+	  err = pkg_init_from_file(pkg, pkg_name);
+	  if (err)
+	       return err;
+	  hash_insert_pkg(pkg,0);
+	  pkg_formatted_info(stdout,pkg);
+     }
 
      return 0;
 }
