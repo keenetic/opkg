@@ -458,7 +458,10 @@ static void __pkg_hash_fetch_conflictees(pkg_t *pkg, pkg_vec_t *installed_confli
 
     for (i = 0; i < available_pkgs->len; i++) {
         pkg_t *cpkg = available_pkgs->pkgs[i];
-        if (pkg_conflicts(cpkg, pkg) && !is_pkg_a_provides(cpkg, pkg) && !is_pkg_in_pkg_vec(installed_conflicts, cpkg))
+        if (pkg_conflicts(cpkg, pkg)
+                && !is_pkg_a_provides(cpkg, pkg)
+                && !is_pkg_in_pkg_vec(installed_conflicts, cpkg)
+                && !pkg_replaces(pkg, cpkg))
             pkg_vec_insert(installed_conflicts, cpkg);
     }
 

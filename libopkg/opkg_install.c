@@ -427,6 +427,25 @@ pkg_remove_orphan_dependent(pkg_t *pkg, pkg_t *old_pkg)
 	return err;
 }
 
+/* adds the list of providers of the package being replaced */
+static void
+pkg_get_provider_replacees(pkg_t *pkg, abstract_pkg_vec_t *provided_by, pkg_vec_t *replacees)
+{
+     int i,j;
+
+     for (i=0; i<provided_by->len; i++) {
+	  abstract_pkg_t *ap = provided_by->pkgs[i];
+	  if (!ap->pkgs)
+	       continue;
+          for (j=0; j<ap->pkgs->len; j++) {
+              pkg_t *replacee = ap->pkgs->pkgs[j];
+              if (replacee->state_status == SS_INSTALLED ||
+                  replacee->state_status == SS_UNPACKED)
+                      pkg_vec_insert(replacees, replacee);
+          }
+     }
+}
+
 /* returns number of installed replacees */
 static int
 pkg_get_installed_replacees(pkg_t *pkg, pkg_vec_t *installed_replacees)
@@ -437,6 +456,12 @@ pkg_get_installed_replacees(pkg_t *pkg, pkg_vec_t *installed_replacees)
      unsigned int j;
      for (i = 0; i < replaces_count; i++) {
 	  abstract_pkg_t *ab_pkg = replaces[i];
+	  /* If any package listed in the replacement field is a virtual (provided)
+	   * package, check to see if it conflicts with any abstract package that pkg
+	   * provides
+	   */
+	  if (ab_pkg->provided_by && pkg_conflicts_abstract(pkg, ab_pkg))
+	       pkg_get_provider_replacees(pkg, ab_pkg->provided_by, installed_replacees);
 	  pkg_vec_t *pkg_vec = ab_pkg->pkgs;
 	  if (pkg_vec) {
 	       for (j = 0; j < pkg_vec->len; j++) {
