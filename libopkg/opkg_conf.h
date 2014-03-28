@@ -94,6 +94,7 @@ typedef struct opkg_conf {
      int check_pkg_signature;
      char *signature_type;
      int nodeps; /* do not follow dependencies */
+     int no_install_recommends;
      char *offline_root;
      char *overlay_root;
      int query_all;

@@ -23,6 +23,7 @@
 #include <malloc.h>
 
 #include "pkg.h"
+#include "opkg_conf.h"
 #include "opkg_utils.h"
 #include "pkg_hash.h"
 #include "opkg_message.h"
@@ -199,7 +200,7 @@ pkg_hash_fetch_unsatisfied_dependencies(pkg_t * pkg, pkg_vec_t *unsatisfied,
 		    /* user request overrides package recommendation */
 		    if (satisfying_pkg != NULL
 			&& (compound_depend->type == RECOMMEND || compound_depend->type == SUGGEST)
-			&& (satisfying_pkg->state_want == SW_DEINSTALL || satisfying_pkg->state_want == SW_PURGE)) {
+			&& (satisfying_pkg->state_want == SW_DEINSTALL || satisfying_pkg->state_want == SW_PURGE || opkg_config->no_install_recommends)) {
 			 opkg_msg(NOTICE, "%s: ignoring recommendation for "
 					"%s at user request\n",
 					pkg->name, satisfying_pkg->name);

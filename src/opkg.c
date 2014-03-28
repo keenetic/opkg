@@ -55,6 +55,7 @@ enum {
 	ARGS_OPT_AUTOREMOVE,
 	ARGS_OPT_VOLATILE_CACHE,
         ARGS_OPT_COMBINE,
+	ARGS_OPT_NO_INSTALL_RECOMMENDS,
 };
 
 static struct option long_options[] = {
@@ -96,6 +97,7 @@ static struct option long_options[] = {
 	{"noaction", 0, 0, ARGS_OPT_NOACTION},
 	{"download-only", 0, 0, ARGS_OPT_DOWNLOAD_ONLY},
 	{"nodeps", 0, 0, ARGS_OPT_NODEPS},
+	{"no-install-recommends", 0, 0, ARGS_OPT_NO_INSTALL_RECOMMENDS},
 	{"offline", 1, 0, 'o'},
 	{"offline-root", 1, 0, 'o'},
 	{"add-arch", 1, 0, ARGS_OPT_ADD_ARCH},
@@ -212,6 +214,9 @@ args_parse(int argc, char *argv[])
 		case ARGS_OPT_VOLATILE_CACHE:
 			opkg_config->volatile_cache = 1;
 			break;
+		case ARGS_OPT_NO_INSTALL_RECOMMENDS:
+			opkg_config->no_install_recommends = 1;
+			break;
                 case ARGS_OPT_COMBINE:
                         opkg_config->combine = 1;
                         break;
@@ -308,6 +313,8 @@ usage()
 	printf("\t--noaction                      No action -- test only\n");
 	printf("\t--download-only                 No action -- download only\n");
 	printf("\t--nodeps                        Do not follow dependencies\n");
+	printf("\t--no-install-recommends\n");
+	printf("\t                                Do not install any recommended packages\n");
 	printf("\t--force-removal-of-dependent-packages\n");
 	printf("\t                                Remove package and all dependencies\n");
 	printf("\t--autoremove                    Remove packages that were installed\n");
