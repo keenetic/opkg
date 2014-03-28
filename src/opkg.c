@@ -49,6 +49,7 @@ enum {
 	ARGS_OPT_PREFER_ARCH_TO_VERSION,
 	ARGS_OPT_ADD_ARCH,
 	ARGS_OPT_ADD_DEST,
+	ARGS_OPT_ADD_EXCLUDE,
 	ARGS_OPT_NOACTION,
 	ARGS_OPT_DOWNLOAD_ONLY,
 	ARGS_OPT_NODEPS,
@@ -102,6 +103,7 @@ static struct option long_options[] = {
 	{"offline-root", 1, 0, 'o'},
 	{"add-arch", 1, 0, ARGS_OPT_ADD_ARCH},
 	{"add-dest", 1, 0, ARGS_OPT_ADD_DEST},
+	{"add-exclude", 1, 0, ARGS_OPT_ADD_EXCLUDE},
 	{"test", 0, 0, ARGS_OPT_NOACTION},
 	{"tmp-dir", 1, 0, 't'},
 	{"tmp_dir", 1, 0, 't'},
@@ -205,6 +207,9 @@ args_parse(int argc, char *argv[])
 			}
 			free(tuple);
 			break;
+		case ARGS_OPT_ADD_EXCLUDE:
+			str_list_append(&opkg_config->exclude_list, optarg);
+			break;
 		case ARGS_OPT_NOACTION:
 			opkg_config->noaction = 1;
 			break;
@@ -295,6 +300,7 @@ usage()
 	printf("\t--offline-root <dir>            offline installation of packages.\n");
 	printf("\t--add-arch <arch>:<prio>        Register architecture with given priority\n");
 	printf("\t--add-dest <name>:<path>        Register destination with given path\n");
+	printf("\t--add-exclude <name>		  Register package to be excluded from install\n");
 	printf("\t--prefer-arch-to-version        Use the architecture priority package rather\n");
 	printf("\t                                than the higher version one if more\n");
 	printf("\t                                than one candidate is found.\n");

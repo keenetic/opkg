@@ -207,6 +207,14 @@ pkg_hash_fetch_unsatisfied_dependencies(pkg_t * pkg, pkg_vec_t *unsatisfied,
 			 continue;
 		    }
 
+		    /* Check for excluded packages */
+		    if (satisfying_pkg != NULL
+			    && str_list_contains(&opkg_config->exclude_list, satisfying_pkg->name)) {
+			 opkg_msg(NOTICE, "%s: exclude required package %s at users request\n",
+				pkg->name, satisfying_pkg->name);
+			 continue;
+		    }
+
 		    opkg_msg(DEBUG, "satisfying_pkg=%p\n", satisfying_pkg);
 		    if (satisfying_pkg != NULL) {
 			 satisfier_entry_pkg = satisfying_pkg;

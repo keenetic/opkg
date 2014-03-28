@@ -517,6 +517,7 @@ opkg_conf_init(void)
 	pkg_dest_list_init(&opkg_config->pkg_dest_list);
 	pkg_dest_list_init(&opkg_config->tmp_dest_list);
 	nv_pair_list_init(&opkg_config->arch_list);
+	str_list_init(&opkg_config->exclude_list);
 
 	return 0;
 }
@@ -807,6 +808,7 @@ opkg_conf_deinit(void)
 	pkg_src_list_deinit(&opkg_config->dist_src_list);
 	pkg_dest_list_deinit(&opkg_config->pkg_dest_list);
 	nv_pair_list_deinit(&opkg_config->arch_list);
+	str_list_deinit(&opkg_config->exclude_list);
 
 	if (opkg_config->verbosity >= DEBUG) {
 		hash_print_stats(&opkg_config->pkg_hash);

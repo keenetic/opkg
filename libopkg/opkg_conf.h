@@ -30,6 +30,7 @@ extern "C" {
 #include "pkg_src_list.h"
 #include "pkg_dest_list.h"
 #include "nv_pair_list.h"
+#include "str_list.h"
 
 #define OPKG_CONF_DEFAULT_TMP_DIR_BASE "/tmp"
 #define OPKG_CONF_TMP_DIR_SUFFIX "opkg-XXXXXX"
@@ -56,6 +57,7 @@ typedef struct opkg_conf {
      pkg_dest_list_t pkg_dest_list;
      pkg_dest_list_t tmp_dest_list;
      nv_pair_list_t arch_list;
+     str_list_t exclude_list;
 
      int restrict_to_default_dest;
      pkg_dest_t *default_dest;
