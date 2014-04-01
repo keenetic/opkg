@@ -16,16 +16,10 @@
 #ifndef OPKG_DEFINES_H
 #define OPKG_DEFINES_H
 
-#define OPKG_LEGAL_PKG_NAME_CHARS "abcdefghijklmnopqrstuvwxyz0123456789.+-"
-#define OPKG_PKG_VERSION_SEP_CHAR '_'
-
 #define OPKG_STATE_DIR_PREFIX OPKGLIBDIR"/opkg"
-#define OPKG_LISTS_DIR_SUFFIX "lists"
 #define OPKG_INFO_DIR_SUFFIX "info"
 #define OPKG_STATUS_FILE_SUFFIX "status"
 
 #define OPKG_BACKUP_SUFFIX "-opkg.backup"
-
-#define OPKG_LIST_DESCRIPTION_LENGTH 128
 
 #endif /* OPKG_DEFINES_H */
