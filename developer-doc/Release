@@ -22,9 +22,8 @@ http://downloads.yoctoproject.org/releases/opkg/
 
 6)  Sign the generated file using 'gpg -sab opkg-$VERSION.tar.gz'.
 
-7)  Send a release email including the URL at which the new release will be
-    available and a summary of the changes since the last release to
-    'opkg-devel@googlegroups.com'. Save this email as 'opkg-$VERSION.email'.
+7)  Write release notes (probably copy pasta from NEWS) into the file
+    'opkg-$VERSION.release-notes'.
 
 8)  Add these files to the release directory. If a local copy of the release
     directory doesn't exist, clone it from the public URL listed above using
@@ -44,3 +43,5 @@ http://downloads.yoctoproject.org/releases/opkg/
 
 12) Update the opkg project page at 'http://code.google.com/p/opkg/' to link to
     the new release.
+
+13) Announce the release by email to 'opkg-devel@googlegroups.com'.
