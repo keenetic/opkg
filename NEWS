@@ -52,8 +52,8 @@ Developer visible:
 
 - Remove libbb!
 
-opkg-0.2.2 (in development)
-===========================
+opkg-0.2.2
+==========
 
 - Fix '--force-reinstall' flag so that it acts as an upgrade rather than
   removing possibly critical packages before reinstall (issue 71)
