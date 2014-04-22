@@ -25,6 +25,13 @@ AC_SYS_LARGEFILE
 
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
+# The current libopkg API is deprecated so only build it if requested
+AC_ARG_ENABLE(libopkg-api,
+	      AC_HELP_STRING([--enable-libopkg-api], [Enable deprecated libopkg
+			      API. [[default=no]] ]),
+	      [want_libopkg_api="$enableval"], [want_libopkg_api="no"])
+AM_CONDITIONAL(HAVE_LIBOPKG_API, test "x$want_libopkg_api" = "xyes")
+
 # Checks for programs
 AC_PROG_AWK
 AC_PROG_CC
@@ -307,3 +314,8 @@ AC_OUTPUT(
     man/opkg-cl.1
     man/opkg-key.1
     )
+
+# Issue this warning at the end so the user is likely to see it
+if test "x$want_libopkg_api" = "xyes"; then
+  AC_MSG_WARN(libopkg API is deprecated!)
+fi
