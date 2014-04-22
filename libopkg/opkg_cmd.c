@@ -516,34 +516,26 @@ opkg_upgrade_cmd(int argc, char **argv)
      signal(SIGINT, sigint_handler);
 
      if (argc) {
-	  for (i=0; i < argc; i++) {
-	       char *arg = argv[i];
-
-               if (opkg_prepare_url_for_install(arg, &arg))
-                   return -1;
-	  }
 	  pkg_info_preinstall_check();
 
 	  for (i=0; i < argc; i++) {
-	       char *arg = argv[i];
 	       if (opkg_config->restrict_to_default_dest) {
 		    pkg = pkg_hash_fetch_installed_by_name_dest(argv[i],
 							opkg_config->default_dest);
 		    if (pkg == NULL) {
-			 opkg_msg(NOTICE, "Package %s not installed in %s.\n",
+			 opkg_msg(ERROR, "Package %s not installed in %s.\n",
 				      argv[i], opkg_config->default_dest->name);
 			 continue;
 		    }
 	       } else {
 		    pkg = pkg_hash_fetch_installed_by_name(argv[i]);
+		    if (pkg == NULL) {
+			 opkg_msg(ERROR, "Package %s not installed.\n", argv[i]);
+			 continue;
+		    }
 	       }
-	       if (pkg) {
-		    if (opkg_upgrade_pkg(pkg))
-			    err = -1;
-	       } else {
-		    if (opkg_install_by_name(arg))
-			    err = -1;
-               }
+	       if (opkg_upgrade_pkg(pkg))
+		    err = -1;
 	  }
      } else {
 	  pkg_vec_t *installed = pkg_vec_alloc();
