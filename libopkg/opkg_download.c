@@ -887,11 +887,9 @@ opkg_curl_init(curl_progress_func cb, void *data)
 	curl_easy_setopt (curl, CURLOPT_FAILONERROR, 1);
 	if (opkg_config->http_proxy || opkg_config->ftp_proxy || opkg_config->https_proxy)
 	{
-	    char *userpwd;
-	    sprintf_alloc (&userpwd, "%s:%s", opkg_config->proxy_user,
-		    opkg_config->proxy_passwd);
-	    curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, userpwd);
-	    free (userpwd);
+	    curl_easy_setopt(curl, CURLOPT_PROXYUSERNAME, opkg_config->proxy_user);
+	    curl_easy_setopt(curl, CURLOPT_PROXYPASSWORD, opkg_config->proxy_passwd);
+	    curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
 	}
     }
 
