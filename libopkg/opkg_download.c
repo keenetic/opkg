@@ -413,19 +413,6 @@ opkg_download_internal(const char *src, const char *dest,
     }
 #endif /* HAVE_SSLCURL */
 
-    if (opkg_config->connect_timeout_ms > 0) {
-	long timeout_ms = opkg_config->connect_timeout_ms;
-	curl_easy_setopt (curl, CURLOPT_CONNECTTIMEOUT_MS, timeout_ms);
-    }
-
-    if (opkg_config->transfer_timeout_ms > 0) {
-	long timeout_ms = opkg_config->transfer_timeout_ms;
-	curl_easy_setopt (curl, CURLOPT_TIMEOUT_MS, timeout_ms);
-    }
-
-    if (opkg_config->follow_location)
-	curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, 1);
-
     if (use_cache) {
         ret = opkg_validate_cached_file(src, dest);
         if (ret <= 0)
@@ -883,7 +870,19 @@ opkg_curl_init(curl_progress_func cb, void *data)
 	}
 #endif
 
+    if (opkg_config->connect_timeout_ms > 0) {
+	long timeout_ms = opkg_config->connect_timeout_ms;
+	curl_easy_setopt (curl, CURLOPT_CONNECTTIMEOUT_MS, timeout_ms);
+    }
+
+    if (opkg_config->transfer_timeout_ms > 0) {
+	long timeout_ms = opkg_config->transfer_timeout_ms;
+	curl_easy_setopt (curl, CURLOPT_TIMEOUT_MS, timeout_ms);
+    }
+
+    if (opkg_config->follow_location)
 	curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, 1);
+
 	curl_easy_setopt (curl, CURLOPT_FAILONERROR, 1);
 	if (opkg_config->http_proxy || opkg_config->ftp_proxy || opkg_config->https_proxy)
 	{
