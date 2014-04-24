@@ -60,6 +60,7 @@ static opkg_option_t options[] = {
           { "check_signature", OPKG_OPT_TYPE_BOOL, &_conf.check_signature },
 	  { "ftp_proxy", OPKG_OPT_TYPE_STRING, &_conf.ftp_proxy },
 	  { "http_proxy", OPKG_OPT_TYPE_STRING, &_conf.http_proxy },
+	  { "https_proxy", OPKG_OPT_TYPE_STRING, &_conf.https_proxy },
 	  { "no_proxy", OPKG_OPT_TYPE_STRING, &_conf.no_proxy },
 	  { "test", OPKG_OPT_TYPE_BOOL, &_conf.noaction },
 	  { "noaction", OPKG_OPT_TYPE_BOOL, &_conf.noaction },

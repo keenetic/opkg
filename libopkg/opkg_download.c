@@ -365,6 +365,11 @@ opkg_download_internal(const char *src, const char *dest,
 		opkg_config->http_proxy);
 	setenv("http_proxy", opkg_config->http_proxy, 1);
     }
+    if (opkg_config->https_proxy) {
+	opkg_msg(DEBUG, "Setting environment variable: https_proxy = %s.\n",
+		opkg_config->https_proxy);
+	setenv("https_proxy", opkg_config->https_proxy, 1);
+    }
     if (opkg_config->ftp_proxy) {
 	opkg_msg(DEBUG, "Setting environment variable: ftp_proxy = %s.\n",
 		opkg_config->ftp_proxy);
@@ -880,7 +885,7 @@ opkg_curl_init(curl_progress_func cb, void *data)
 
 	curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, 1);
 	curl_easy_setopt (curl, CURLOPT_FAILONERROR, 1);
-	if (opkg_config->http_proxy || opkg_config->ftp_proxy)
+	if (opkg_config->http_proxy || opkg_config->ftp_proxy || opkg_config->https_proxy)
 	{
 	    char *userpwd;
 	    sprintf_alloc (&userpwd, "%s:%s", opkg_config->proxy_user,
