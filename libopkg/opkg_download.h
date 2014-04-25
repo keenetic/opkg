@@ -36,8 +36,6 @@ int opkg_download_pkg(pkg_t *pkg, const char *dir);
  */
 int opkg_prepare_url_for_install(const char *url, char **namep);
 
-int opkg_verify_file (char *text_file, char *sig_file);
-
 /* Curl cleanup function, does nothing unless opkg is configured with
  * '--enable-curl'.
  *

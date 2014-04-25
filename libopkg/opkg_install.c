@@ -33,6 +33,7 @@
 #include "opkg_configure.h"
 #include "opkg_download.h"
 #include "opkg_remove.h"
+#include "opkg_verify.h"
 
 #include "opkg_utils.h"
 #include "opkg_message.h"

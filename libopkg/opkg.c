@@ -31,6 +31,7 @@
 #include "opkg_download.h"
 #include "opkg_remove.h"
 #include "opkg_upgrade.h"
+#include "opkg_verify.h"
 
 #include "pkg_parse.h"
 

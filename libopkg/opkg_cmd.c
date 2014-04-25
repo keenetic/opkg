@@ -43,6 +43,7 @@
 #include "opkg_upgrade.h"
 #include "opkg_remove.h"
 #include "opkg_configure.h"
+#include "opkg_verify.h"
 #include "xsystem.h"
 #include "xfuncs.h"
 

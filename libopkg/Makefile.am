@@ -15,7 +15,7 @@ opkg_headers = active_list.h cksum_list.h conffile.h conffile_list.h \
 	pkg_depends.h pkg_dest.h pkg_dest_list.h pkg_extract.h pkg_hash.h \
 	pkg_parse.h pkg_src.h pkg_src_list.h pkg_vec.h release.h \
 	release_parse.h sha256.h sprintf_alloc.h str_list.h void_list.h \
-	xregex.h xsystem.h
+	xregex.h xsystem.h opkg_verify.h
 
 opkg_sources = opkg_cmd.c opkg_configure.c opkg_download.c \
 	opkg_install.c opkg_upgrade.c opkg_remove.c opkg_conf.c release.c \
@@ -24,7 +24,8 @@ opkg_sources = opkg_cmd.c opkg_configure.c opkg_download.c \
 	conffile_list.c nv_pair.c nv_pair_list.c pkg_dest.c pkg_dest_list.c \
 	pkg_src.c pkg_src_list.c str_list.c void_list.c active_list.c \
 	file_util.c opkg_message.c md5.c parse_util.c cksum_list.c \
-	sprintf_alloc.c xregex.c xsystem.c xfuncs.c opkg_archive.c
+	sprintf_alloc.c xregex.c xsystem.c xfuncs.c opkg_archive.c \
+	opkg_verify.c
 
 if HAVE_SHA256
 opkg_sources += sha256.c

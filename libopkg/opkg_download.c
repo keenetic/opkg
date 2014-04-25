@@ -29,6 +29,7 @@
 
 #include "opkg_download.h"
 #include "opkg_message.h"
+#include "opkg_verify.h"
 
 #include "sprintf_alloc.h"
 #include "xsystem.h"
@@ -38,10 +39,6 @@
 
 #ifdef HAVE_CURL
 #include <curl/curl.h>
-#endif
-
-#ifdef HAVE_GPGME
-#include "opkg_gpg.h"
 #endif
 
 #ifdef HAVE_OPENSSL
@@ -749,21 +746,6 @@ opkg_prepare_url_for_install(const char *url, char **namep)
     /* Can't find anything matching the requested URL. */
     opkg_msg(ERROR, "Couldn't find anything to satisfy '%s'.\n", url);
     return -1;
-}
-
-int
-opkg_verify_file (char *text_file, char *sig_file)
-{
-#if defined HAVE_GPGME
-    return opkg_verify_gpg_signature(text_file, sig_file);
-#elif defined HAVE_OPENSSL
-    return opkg_verify_openssl_signature(text_file, sig_file);
-#else
-    /* mute `unused variable' warnings. */
-    (void) sig_file;
-    (void) text_file;
-    return 0;
-#endif
 }
 
 void opkg_curl_cleanup(void){
