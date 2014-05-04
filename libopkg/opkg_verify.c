@@ -16,6 +16,10 @@
 
 #include "config.h"
 
+#include <malloc.h>
+#include <string.h>
+
+#include "file_util.h"
 #include "opkg_verify.h"
 
 #ifdef HAVE_GPGME
@@ -25,6 +29,25 @@
 #ifdef HAVE_OPENSSL
 #include "opkg_openssl.h"
 #endif
+
+int
+opkg_verify_md5sum(const char *file, const char *md5sum)
+{
+    int r;
+    char *file_md5sum;
+
+    if (!file_exists(file))
+        return -1;
+
+    file_md5sum = file_md5sum_alloc(file);
+    if (!file_md5sum)
+        return -1;
+
+    r = strcmp(file_md5sum, md5sum);
+    free(file_md5sum);
+
+    return r;
+}
 
 int
 opkg_verify_file (char *text_file, char *sig_file)

@@ -20,6 +20,7 @@
 extern "C" {
 #endif
 
+int opkg_verify_md5sum(const char *file, const char *md5sum);
 int opkg_verify_file (char *text_file, char *sig_file);
 
 #ifdef __cplusplus
