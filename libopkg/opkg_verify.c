@@ -20,6 +20,7 @@
 #include <string.h>
 
 #include "file_util.h"
+#include "opkg_message.h"
 #include "opkg_verify.h"
 
 #ifdef HAVE_GPGME
@@ -47,6 +48,32 @@ opkg_verify_md5sum(const char *file, const char *md5sum)
     free(file_md5sum);
 
     return r;
+}
+
+int
+opkg_verify_sha256sum(const char *file, const char *sha256sum)
+{
+#ifdef HAVE_SHA256
+    int r;
+    char *file_sha256sum;
+
+    if (!file_exists(file))
+        return -1;
+
+    file_sha256sum = file_sha256sum_alloc(file);
+    if (!file_sha256sum)
+        return -1;
+
+    r = strcmp(file_sha256sum, sha256sum);
+    free(file_sha256sum);
+
+    return r;
+#else
+    (void) sha256sum;
+
+    opkg_msg(INFO, "Ignoring sha256sum for file '%s'\n", file);
+    return 0;
+#endif
 }
 
 int
