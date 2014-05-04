@@ -87,6 +87,7 @@ opkg_verify_signature(const char *file, const char *sigfile)
     /* mute `unused variable' warnings. */
     (void) sigfile;
     (void) file;
-    return 0;
+    opkg_msg(ERROR, "No signature verification method enabled!\n");
+    return -1;
 #endif
 }
