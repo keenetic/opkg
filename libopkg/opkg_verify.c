@@ -77,16 +77,16 @@ opkg_verify_sha256sum(const char *file, const char *sha256sum)
 }
 
 int
-opkg_verify_file (char *text_file, char *sig_file)
+opkg_verify_file(const char *file, const char *sigfile)
 {
 #if defined HAVE_GPGME
-    return opkg_verify_gpg_signature(text_file, sig_file);
+    return opkg_verify_gpg_signature(file, sigfile);
 #elif defined HAVE_OPENSSL
-    return opkg_verify_openssl_signature(text_file, sig_file);
+    return opkg_verify_openssl_signature(file, sigfile);
 #else
     /* mute `unused variable' warnings. */
-    (void) sig_file;
-    (void) text_file;
+    (void) sigfile;
+    (void) file;
     return 0;
 #endif
 }
