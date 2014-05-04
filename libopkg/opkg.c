@@ -600,7 +600,7 @@ opkg_update_package_lists(opkg_progress_callback_t progress_callback,
 				opkg_msg(ERROR, "Couldn't retrieve %s\n", url);
 			} else {
 				int err;
-				err = opkg_verify_file(list_file_name,
+				err = opkg_verify_signature(list_file_name,
 						     sig_file_name);
 				if (err == 0) {
 					opkg_msg(INFO, "Signature check "

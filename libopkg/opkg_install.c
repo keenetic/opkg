@@ -1345,7 +1345,7 @@ opkg_install_pkg(pkg_t *pkg, int from_upgrade)
 
        if (file_exists (sig_file_name))
        {
-         if (opkg_verify_file (list_file_name, sig_file_name)){
+         if (opkg_verify_signature (list_file_name, sig_file_name)){
            opkg_msg(ERROR, "Failed to verify the signature of %s.\n",
                            list_file_name);
            return -1;

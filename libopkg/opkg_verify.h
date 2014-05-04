@@ -22,7 +22,7 @@ extern "C" {
 
 int opkg_verify_md5sum(const char *file, const char *md5sum);
 int opkg_verify_sha256sum(const char *file, const char *sha256sum);
-int opkg_verify_file(const char *file, const char *sigfile);
+int opkg_verify_signature(const char *file, const char *sigfile);
 
 #ifdef __cplusplus
 }

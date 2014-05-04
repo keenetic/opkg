@@ -77,7 +77,7 @@ opkg_verify_sha256sum(const char *file, const char *sha256sum)
 }
 
 int
-opkg_verify_file(const char *file, const char *sigfile)
+opkg_verify_signature(const char *file, const char *sigfile)
 {
 #if defined HAVE_GPGME
     return opkg_verify_gpg_signature(file, sigfile);
