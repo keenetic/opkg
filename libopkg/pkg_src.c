@@ -19,6 +19,7 @@
 
 #include "file_util.h"
 #include "opkg_conf.h"
+#include "opkg_download.h"
 #include "opkg_message.h"
 #include "opkg_verify.h"
 #include "pkg_src.h"
@@ -43,6 +44,40 @@ void pkg_src_deinit(pkg_src_t *src)
     free (src->value);
     if (src->extra_data)
 	free (src->extra_data);
+}
+
+int
+pkg_src_download_signature(pkg_src_t *src)
+{
+    int err = 0;
+    char *url;
+    char *sigfile;
+    const char *lists_dir;
+
+    lists_dir = opkg_config->restrict_to_default_dest ?
+        opkg_config->default_dest->lists_dir : opkg_config->lists_dir;
+    sprintf_alloc(&sigfile, "%s/%s.sig", lists_dir, src->name);
+
+    /* get the url for the sig file */
+    if (src->extra_data)	/* debian style? */
+        sprintf_alloc(&url, "%s/%s/%s", src->value, src->extra_data,
+                "Packages.sig");
+    else
+        sprintf_alloc(&url, "%s/%s", src->value, "Packages.sig");
+
+    err = opkg_download(url, sigfile, NULL, NULL);
+    if (err) {
+        opkg_msg(ERROR, "Failed to download signature for %s.\n",
+                src->name);
+	goto cleanup;
+    }
+
+    opkg_msg(DEBUG, "Downloaded signature for %s.\n", src->name);
+
+cleanup:
+    free(sigfile);
+    free(url);
+    return err;
 }
 
 int
