@@ -557,7 +557,7 @@ opkg_download(const char *src, const char *dest_file_name,
     return err;
 }
 
-/** \brief opkg_download_pkg: downloads a OPKG package
+/** \brief opkg_download_pkg: download and verify a package
  *
  * \param pkg the package to download
  * \param dir destination directory or NULL to store package in cache
@@ -583,26 +583,22 @@ opkg_download_pkg(pkg_t *pkg, const char *dir)
 
     sprintf_alloc(&url, "%s/%s", pkg->src->value, pkg->filename);
     if (!dir || !opkg_config->volatile_cache) {
-        char *cache_location = get_cache_location(url);
+        pkg->local_filename = get_cache_location(url);
 
-        /* Check if package exists in cache */
-        if (file_exists(cache_location) && pkg->md5sum) {
-            char* file_md5 = file_md5sum_alloc(cache_location);
-            if (file_md5 && !strcmp(file_md5, pkg->md5sum)) {
-                free(file_md5);
-                free(url);
-                pkg->local_filename = cache_location;
-                return 0;
-             }
-             if (file_md5)
-                 free(file_md5);
-        }
-        free(cache_location);
+        /* Check if valid package exists in cache */
+        err = pkg_verify(pkg);
+        if (!err)
+            return 0;
 
         pkg->local_filename = opkg_download_cache(url, NULL, NULL);
         free(url);
         if (pkg->local_filename == NULL)
             return -1;
+
+        /* Ensure downloaded package is valid. */
+        err = pkg_verify(pkg);
+        if (err)
+            return err;
     }
     if (dir)
     {
@@ -610,7 +606,17 @@ opkg_download_pkg(pkg_t *pkg, const char *dir)
         sprintf_alloc(&dest_file_name, "%s/%s", dir, pkg->filename);
         if (opkg_config->volatile_cache) {
             err = opkg_download_direct(url, dest_file_name, NULL, NULL);
-			free(url);
+            free(url);
+            if (err) {
+                free(dest_file_name);
+                return err;
+            }
+
+            /* This is a bit hackish
+             * TODO: Clean this up! */
+            pkg->local_filename = dest_file_name;
+            err = pkg_verify(pkg);
+            pkg->local_filename = NULL;
         }
         else {
             err = file_copy(pkg->local_filename, dest_file_name);
