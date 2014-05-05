@@ -1330,38 +1330,13 @@ opkg_install_pkg(pkg_t *pkg, int from_upgrade)
      }
 
      /* check that the repository is valid */
-     #if defined(HAVE_GPGME) || defined(HAVE_OPENSSL)
-     char *list_file_name, *sig_file_name, *lists_dir;
-
-     /* check to ensure the package has come from a repository */
-     if (opkg_config->check_signature && pkg->src)
+     if (opkg_config->check_signature)
      {
-       sprintf_alloc (&lists_dir, "%s",
-                     (opkg_config->restrict_to_default_dest)
-                      ? opkg_config->default_dest->lists_dir
-                      : opkg_config->lists_dir);
-       sprintf_alloc (&list_file_name, "%s/%s", lists_dir, pkg->src->name);
-       sprintf_alloc (&sig_file_name, "%s/%s.sig", lists_dir, pkg->src->name);
-
-       if (file_exists (sig_file_name))
-       {
-         if (opkg_verify_signature (list_file_name, sig_file_name)){
-           opkg_msg(ERROR, "Failed to verify the signature of %s.\n",
-                           list_file_name);
-           return -1;
-         }
-       }else{
-         opkg_msg(ERROR, "Signature file is missing for %s. "
-                         "Perhaps you need to run 'opkg update'?\n",
-			 pkg->name);
-         return -1;
-       }
-
-       free (lists_dir);
-       free (list_file_name);
-       free (sig_file_name);
+	 /* pkg_src_verify prints an error message so we don't have to. */
+         err = pkg_src_verify(pkg->src);
+	 if (err)
+	      return err;
      }
-     #endif
 
      /* Check for md5 values */
      if (pkg->md5sum)
