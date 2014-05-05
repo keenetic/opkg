@@ -47,6 +47,56 @@ void pkg_src_deinit(pkg_src_t *src)
 }
 
 int
+pkg_src_download(pkg_src_t *src)
+{
+    int err = 0;
+    char *url;
+    char *feed;
+    const char *url_filename;
+    const char *lists_dir;
+
+    lists_dir = opkg_config->restrict_to_default_dest ?
+        opkg_config->default_dest->lists_dir : opkg_config->lists_dir;
+    sprintf_alloc(&feed, "%s/%s", lists_dir, src->name);
+
+    url_filename = src->gzip ? "Packages.gz" : "Packages";
+    if (src->extra_data)	/* debian style? */
+        sprintf_alloc(&url, "%s/%s/%s", src->value, src->extra_data,
+                url_filename);
+    else
+        sprintf_alloc(&url, "%s/%s", src->value, url_filename);
+
+    if (src->gzip) {
+        char *cache_location;
+
+        cache_location = opkg_download_cache(url, NULL, NULL);
+        if (!cache_location) {
+            err = -1;
+            goto cleanup;
+        }
+
+        err = file_decompress(cache_location, feed);
+        free(cache_location);
+        if (err) {
+            opkg_msg(ERROR, "Couldn't decompress feed for source %s.",
+                    src->name);
+            goto cleanup;
+        }
+    } else {
+        err = opkg_download(url, feed, NULL, NULL);
+        if (err)
+            goto cleanup;
+    }
+
+    opkg_msg(DEBUG, "Downloaded package list for %s.\n", src->name);
+
+cleanup:
+    free(feed);
+    free(url);
+    return err;
+}
+
+int
 pkg_src_download_signature(pkg_src_t *src)
 {
     int err = 0;
