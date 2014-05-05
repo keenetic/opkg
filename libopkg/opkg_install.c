@@ -1263,10 +1263,6 @@ opkg_install_pkg(pkg_t *pkg, int from_upgrade)
      pkg_vec_t *replacees;
      abstract_pkg_t *ab_pkg = NULL;
      int old_state_flag;
-     char* file_md5;
-#ifdef HAVE_SHA256
-     char* file_sha256;
-#endif
      sigset_t newset, oldset;
 
      if ( from_upgrade )
@@ -1338,41 +1334,6 @@ opkg_install_pkg(pkg_t *pkg, int from_upgrade)
 	      return err;
      }
 
-     /* Check for md5 values */
-     if (pkg->md5sum)
-     {
-         file_md5 = file_md5sum_alloc(pkg->local_filename);
-         if (file_md5 && strcmp(file_md5, pkg->md5sum))
-         {
-              opkg_msg(ERROR, "Package %s md5sum mismatch. "
-			"Either the opkg or the package index are corrupt. "
-			"Try 'opkg update'.\n",
-			pkg->name);
-              free(file_md5);
-              return -1;
-         }
-	 if (file_md5)
-              free(file_md5);
-     }
-
-#ifdef HAVE_SHA256
-     /* Check for sha256 value */
-     if(pkg->sha256sum)
-     {
-         file_sha256 = file_sha256sum_alloc(pkg->local_filename);
-         if (file_sha256 && strcmp(file_sha256, pkg->sha256sum))
-         {
-              opkg_msg(ERROR, "Package %s sha256sum mismatch. "
-			"Either the opkg or the package index are corrupt. "
-			"Try 'opkg update'.\n",
-			pkg->name);
-              free(file_sha256);
-              return -1;
-         }
-	 if (file_sha256)
-              free(file_sha256);
-     }
-#endif
      if(opkg_config->download_only) {
          if (opkg_config->nodeps == 0) {
              err = satisfy_dependencies_for(pkg);
