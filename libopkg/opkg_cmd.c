@@ -153,83 +153,14 @@ opkg_update_cmd(int argc, char **argv)
      }
 
      for (iter = void_list_first(&opkg_config->pkg_src_list); iter; iter = void_list_next(&opkg_config->pkg_src_list, iter)) {
-	  char *url, *list_file_name;
-
 	  src = (pkg_src_t *)iter->data;
 
 	  if (src->extra_data && !strcmp(src->extra_data, "__dummy__ "))
 	      continue;
 
-	  if (src->extra_data)	/* debian style? */
-	      sprintf_alloc(&url, "%s/%s/%s", src->value, src->extra_data,
-			    src->gzip ? "Packages.gz" : "Packages");
-	  else
-	      sprintf_alloc(&url, "%s/%s", src->value, src->gzip ? "Packages.gz" : "Packages");
-
-	  sprintf_alloc(&list_file_name, "%s/%s", lists_dir, src->name);
-	  if (src->gzip) {
-	      char *cache_location;
-
-	      cache_location = opkg_download_cache(url, NULL, NULL);
-	      if (cache_location) {
-		   err = file_decompress(cache_location, list_file_name);
-		   if (err)
-		        opkg_msg(ERROR, "Couldn't decompress %s", url);
-	      } else
-                   err = 1;
-	      free(cache_location);
-	  } else
-	      err = opkg_download(url, list_file_name, NULL, NULL);
-
-	  if (err) {
-	       failures++;
-	  } else {
-	       opkg_msg(NOTICE, "Updated list of available packages in %s.\n",
-			    list_file_name);
-	  }
-	  free(url);
-#if defined(HAVE_GPGME) || defined(HAVE_OPENSSL)
-          if (opkg_config->check_signature) {
-              /* download detached signitures to verify the package lists */
-              /* get the url for the sig file */
-              if (src->extra_data)	/* debian style? */
-                  sprintf_alloc(&url, "%s/%s/%s", src->value, src->extra_data,
-                          "Packages.sig");
-              else
-                  sprintf_alloc(&url, "%s/%s", src->value, "Packages.sig");
-
-              /* create temporary file for it */
-              char *tmp_file_name;
-
-              /* Put the signature in the right place */
-              sprintf_alloc (&tmp_file_name, "%s/%s.sig", lists_dir, src->name);
-
-              err = opkg_download(url, tmp_file_name, NULL, NULL);
-              if (err) {
-                  failures++;
-                  opkg_msg(NOTICE, "Signature check failed.\n");
-              } else {
-                  err = opkg_verify_signature (list_file_name, tmp_file_name);
-                  if (err == 0)
-                      opkg_msg(NOTICE, "Signature check passed.\n");
-                  else
-                      opkg_msg(NOTICE, "Signature check failed.\n");
-              }
-              if (err) {
-                  /* The signature was wrong so delete it */
-                  opkg_msg(NOTICE, "Remove wrong Signature file.\n");
-                  unlink (tmp_file_name);
-                  unlink (list_file_name);
-              }
-              /* We shouldn't unlink the signature ! */
-              // unlink (tmp_file_name);
-              free (tmp_file_name);
-              free (url);
-          }
-#else
-          // Do nothing
-#endif
-	  free(list_file_name);
+	  err = pkg_src_update(src);
+	  if (err)
+	      failures++;
      }
      rmdir (tmp);
      free (tmp);
