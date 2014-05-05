@@ -171,3 +171,28 @@ cleanup:
     free(feed);
     return err;
 }
+
+int
+pkg_src_update(pkg_src_t *src)
+{
+    int err;
+
+    err = pkg_src_download(src);
+    if (err)
+        return err;
+
+    if (opkg_config->check_signature) {
+        err = pkg_src_download_signature(src);
+        if (err)
+            return err;
+
+        /* pkg_src_verify deletes the downloaded files if they were
+         * incorrect, so we don't have to do that here. */
+        err = pkg_src_verify(src);
+        if (err)
+            return err;
+    }
+
+    opkg_msg(NOTICE, "Updated source '%s'.\n", src->name);
+    return 0;
+}
