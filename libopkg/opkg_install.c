@@ -1315,6 +1315,15 @@ opkg_install_pkg(pkg_t *pkg, int from_upgrade)
      if (err)
 	     return -1;
 
+     /* check that the repository is valid */
+     if (opkg_config->check_signature)
+     {
+	 /* pkg_src_verify prints an error message so we don't have to. */
+         err = pkg_src_verify(pkg->src);
+	 if (err)
+	      return err;
+     }
+
      if (pkg->local_filename == NULL) {
       err = opkg_download_pkg(pkg, NULL);
 	  if (err) {
@@ -1323,15 +1332,6 @@ opkg_install_pkg(pkg_t *pkg, int from_upgrade)
 			    pkg->name);
 	       return -1;
 	  }
-     }
-
-     /* check that the repository is valid */
-     if (opkg_config->check_signature)
-     {
-	 /* pkg_src_verify prints an error message so we don't have to. */
-         err = pkg_src_verify(pkg->src);
-	 if (err)
-	      return err;
      }
 
      if(opkg_config->download_only) {
