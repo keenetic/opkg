@@ -233,6 +233,8 @@ void pkg_info_preinstall_check(void);
 int pkg_write_filelist(pkg_t *pkg);
 int pkg_write_changed_filelists(void);
 
+int pkg_verify(pkg_t *pkg);
+
 #ifdef __cplusplus
 }
 #endif

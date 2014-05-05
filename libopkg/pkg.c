@@ -31,6 +31,7 @@
 #include "pkg_extract.h"
 #include "opkg_message.h"
 #include "opkg_utils.h"
+#include "opkg_verify.h"
 
 #include "xfuncs.h"
 #include "sprintf_alloc.h"
@@ -1437,4 +1438,35 @@ pkg_write_changed_filelists(void)
 	pkg_vec_free (installed_pkgs);
 
 	return ret;
+}
+
+int
+pkg_verify(pkg_t *pkg)
+{
+    int err;
+
+    /* Silently fail verification if the package doesn't exist locally as the
+     * caller may be about to download it. */
+    if (!file_exists(pkg->local_filename))
+        return -1;
+
+    if (pkg->md5sum) {
+        err = opkg_verify_md5sum(pkg->local_filename, pkg->md5sum);
+        if (err)
+            goto fail;
+    }
+
+    if (pkg->sha256sum) {
+        err = opkg_verify_sha256sum(pkg->local_filename, pkg->sha256sum);
+        if (err)
+            goto fail;
+    }
+
+    return 0;
+
+fail:
+    opkg_msg(NOTICE, "Removing corrupt package file %s.\n",
+            pkg->local_filename);
+    unlink(pkg->local_filename);
+    return err;
 }
