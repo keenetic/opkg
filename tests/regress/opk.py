@@ -66,6 +66,15 @@ class Opk:
 		os.unlink("control.tar.gz")
 		os.unlink("data.tar.gz")
 
+import hashlib
+def md5sum_file(fname):
+    f = open(fname, 'rb')
+    md5 = hashlib.md5()
+    chunk_size = 4096
+    for chunk in iter(lambda: f.read(chunk_size), b''):
+        md5.update(chunk)
+    return md5.hexdigest()
+
 class OpkGroup:
 	def __init__(self):
 		self.opk_list = []
@@ -85,8 +94,11 @@ class OpkGroup:
 		for opk in self.opk_list:
 			for k in opk.control.keys():
 				f.write("{}: {}\n".format(k, opk.control[k]))
-			f.write("Filename: {Package}_{Version}_{Architecture}"
-					".opk\n".format(**opk.control))
+			fpattern = "{Package}_{Version}_{Architecture}.opk"
+			fname = fpattern.format(**opk.control)
+			md5sum = md5sum_file(fname)
+			f.write("Filename: {}\n".format(fname))
+			f.write("MD5Sum: {}\n".format(md5sum))
 			f.write("\n")
 		f.close()
 
