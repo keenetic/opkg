@@ -117,9 +117,7 @@ pkg_init(pkg_t *pkg)
      pkg->local_filename = NULL;
      pkg->tmp_unpack_dir = NULL;
      pkg->md5sum = NULL;
-#if defined HAVE_SHA256
      pkg->sha256sum = NULL;
-#endif
      pkg->size = 0;
      pkg->installed_size = 0;
      pkg->priority = NULL;
@@ -249,11 +247,9 @@ pkg_deinit(pkg_t *pkg)
 		free(pkg->md5sum);
 	pkg->md5sum = NULL;
 
-#if defined HAVE_SHA256
 	if (pkg->sha256sum)
 		free(pkg->sha256sum);
 	pkg->sha256sum = NULL;
-#endif
 
 	if (pkg->priority)
 		free(pkg->priority);
