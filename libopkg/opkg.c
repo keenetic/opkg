@@ -529,98 +529,14 @@ opkg_update_package_lists(opkg_progress_callback_t progress_callback,
 	}
 
 	list_for_each_entry(iter, &opkg_config->pkg_src_list.head, node) {
-		char *url, *list_file_name = NULL;
-
 		src = (pkg_src_t *) iter->data;
 
-		if (src->extra_data)	/* debian style? */
-			sprintf_alloc(&url, "%s/%s/%s", src->value,
-				      src->extra_data,
-				      src->gzip ? "Packages.gz" : "Packages");
-		else
-			sprintf_alloc(&url, "%s/%s", src->value,
-				      src->gzip ? "Packages.gz" : "Packages");
+		if (src->extra_data && !strcmp(src->extra_data, "__dummy__ "))
+			continue;
 
-		sprintf_alloc(&list_file_name, "%s/%s", lists_dir, src->name);
-		if (src->gzip) {
-			struct _curl_cb_data cb_data;
-			char *cached_location;
-
-			opkg_msg(INFO, "Downloading %s...\n", url);
-
-			cb_data.cb = progress_callback;
-			cb_data.progress_data = &pdata;
-			cb_data.user_data = user_data;
-			cb_data.start_range =
-			    100 * sources_done / sources_list_count;
-			cb_data.finish_range =
-			    100 * (sources_done + 1) / sources_list_count;
-
-			cached_location = opkg_download_cache(url,
-					  (curl_progress_func) curl_progress_cb,
-					  &cb_data);
-
-			if (cached_location) {
-				err = file_decompress(cached_location, list_file_name);
-				if (err) {
-					opkg_msg(ERROR, "Couldn't decompress %s", url);
-				}
-				free(cached_location);
-			}
-		} else
-			err = opkg_download(url, list_file_name, NULL, NULL);
-
-		if (err) {
-			opkg_msg(ERROR, "Couldn't retrieve %s\n", url);
+		err = pkg_src_update(src);
+		if (err)
 			result = -1;
-		}
-		free(url);
-
-#if defined(HAVE_GPGME) || defined(HAVE_OPENSSL)
-		if (opkg_config->check_signature) {
-			char *sig_file_name;
-			/* download detached signitures to verify the package lists */
-			/* get the url for the sig file */
-			if (src->extra_data)	/* debian style? */
-				sprintf_alloc(&url, "%s/%s/%s", src->value,
-					      src->extra_data, "Packages.sig");
-			else
-				sprintf_alloc(&url, "%s/%s", src->value,
-					      "Packages.sig");
-
-			/* create filename for signature */
-			sprintf_alloc(&sig_file_name, "%s/%s.sig", lists_dir,
-				      src->name);
-
-			/* make sure there is no existing signature file */
-			unlink(sig_file_name);
-
-			err = opkg_download(url, sig_file_name, NULL, NULL);
-			if (err) {
-				opkg_msg(ERROR, "Couldn't retrieve %s\n", url);
-			} else {
-				int err;
-				err = opkg_verify_signature(list_file_name,
-						     sig_file_name);
-				if (err == 0) {
-					opkg_msg(INFO, "Signature check "
-							"passed for %s",
-							list_file_name);
-				} else {
-					opkg_msg(ERROR, "Signature check "
-							"failed for %s",
-							list_file_name);
-				}
-			}
-			free(sig_file_name);
-			free(url);
-		}
-#else
-		opkg_msg(INFO, "Signature check skipped for %s as GPG support"
-				" has not been enabled in this build\n",
-				list_file_name);
-#endif
-		free(list_file_name);
 
 		sources_done++;
 		progress(&pdata, 100 * sources_done / sources_list_count, progress_callback, user_data);
