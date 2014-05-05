@@ -16,6 +16,7 @@
 */
 
 #include <malloc.h>
+#include <unistd.h>
 
 #include "file_util.h"
 #include "opkg_conf.h"
@@ -161,6 +162,11 @@ pkg_src_verify(pkg_src_t *src)
     opkg_msg(DEBUG, "Signature verification passed for %s.\n", src->name);
 
 cleanup:
+    if (err) {
+        /* Remove incorrect files. */
+        unlink(feed);
+        unlink(sigfile);
+    }
     free(sigfile);
     free(feed);
     return err;
