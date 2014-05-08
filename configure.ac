@@ -281,16 +281,6 @@ if test x$opkglockfile = x; then
         opkglockfile=${opkglibdir}/opkg/lock
 fi
 
-dnl Some special cases for the wow64 build
-if test "x$want_gpgme" = "xyes"
-then
-	if test "x$want_openssl" = "xyes"
-	then
-	AC_MSG_ERROR([--enable-gpg and --enable-openssl are mutually exclusive.
-Use --disable-gpg if you want OpenSSL smime signatures])
-	fi
-fi
-
 CLEAN_DATE=`date +"%B %Y" | tr -d '\n'`
 
 AC_ARG_WITH(static-libopkg,
