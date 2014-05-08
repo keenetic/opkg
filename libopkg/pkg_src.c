@@ -106,17 +106,23 @@ pkg_src_download_signature(pkg_src_t *src)
     char *url;
     char *sigfile;
     const char *lists_dir;
+    const char *sigext;
+
+    if (strcmp(opkg_config->signature_type, "gpg-asc") == 0)
+        sigext = "asc";
+    else
+        sigext = "sig";
 
     lists_dir = opkg_config->restrict_to_default_dest ?
         opkg_config->default_dest->lists_dir : opkg_config->lists_dir;
-    sprintf_alloc(&sigfile, "%s/%s.sig", lists_dir, src->name);
+    sprintf_alloc(&sigfile, "%s/%s.%s", lists_dir, src->name, sigext);
 
     /* get the url for the sig file */
     if (src->extra_data)	/* debian style? */
-        sprintf_alloc(&url, "%s/%s/%s", src->value, src->extra_data,
-                "Packages.sig");
+        sprintf_alloc(&url, "%s/%s/Packages.%s", src->value, src->extra_data,
+                sigext);
     else
-        sprintf_alloc(&url, "%s/%s", src->value, "Packages.sig");
+        sprintf_alloc(&url, "%s/Packages.%s", src->value, sigext);
 
     err = opkg_download(url, sigfile, NULL, NULL);
     if (err) {
@@ -140,11 +146,17 @@ pkg_src_verify(pkg_src_t *src)
     char *feed;
     char *sigfile;
     const char *lists_dir;
+    const char *sigext;
+
+    if (strcmp(opkg_config->signature_type, "gpg-asc") == 0)
+        sigext = "asc";
+    else
+        sigext = "sig";
 
     lists_dir = opkg_config->restrict_to_default_dest ?
         opkg_config->default_dest->lists_dir : opkg_config->lists_dir;
     sprintf_alloc(&feed, "%s/%s", lists_dir, src->name);
-    sprintf_alloc(&sigfile, "%s.sig", feed);
+    sprintf_alloc(&sigfile, "%s.%s", feed, sigext);
 
     if (!file_exists(sigfile))
     {
