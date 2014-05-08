@@ -762,7 +762,6 @@ opkg_verify_file (char *text_file, char *sig_file)
     /* mute `unused variable' warnings. */
     (void) sig_file;
     (void) text_file;
-    (void) opkg_config;
     return 0;
 #endif
 }
