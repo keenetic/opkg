@@ -80,6 +80,7 @@ typedef struct opkg_conf {
      int force_remove;
      int prefer_arch_to_version;
      int check_signature;
+     char *signature_type;
      int nodeps; /* do not follow dependencies */
      char *offline_root;
      char *overlay_root;

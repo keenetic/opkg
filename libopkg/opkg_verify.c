@@ -20,15 +20,38 @@
 #include <string.h>
 
 #include "file_util.h"
+#include "opkg_conf.h"
 #include "opkg_message.h"
 #include "opkg_verify.h"
 
 #ifdef HAVE_GPGME
 #include "opkg_gpg.h"
+#else
+/* Dummy gpg signature verification. */
+int
+opkg_verify_gpg_signature(const char *file, const char *sigfile)
+{
+    (void) file;
+    (void) sigfile;
+
+    opkg_msg(ERROR, "GPG signature checking not supported\n");
+    return -1;
+}
 #endif
 
 #ifdef HAVE_OPENSSL
 #include "opkg_openssl.h"
+#else
+/* Dummy openssl signature verification. */
+int
+opkg_verify_openssl_signature(const char *file, const char *sigfile)
+{
+    (void) file;
+    (void) sigfile;
+
+    opkg_msg(ERROR, "OpenSSL signature checking not supported\n");
+    return -1;
+}
 #endif
 
 int
@@ -79,15 +102,12 @@ opkg_verify_sha256sum(const char *file, const char *sha256sum)
 int
 opkg_verify_signature(const char *file, const char *sigfile)
 {
-#if defined HAVE_GPGME
-    return opkg_verify_gpg_signature(file, sigfile);
-#elif defined HAVE_OPENSSL
-    return opkg_verify_openssl_signature(file, sigfile);
-#else
-    /* mute `unused variable' warnings. */
-    (void) sigfile;
-    (void) file;
-    opkg_msg(ERROR, "No signature verification method enabled!\n");
+    if (strcmp(opkg_config->signature_type, "gpg") == 0)
+        return opkg_verify_gpg_signature(file, sigfile);
+    else if (strcmp(opkg_config->signature_type, "openssl") == 0)
+        return opkg_verify_openssl_signature(file, sigfile);
+
+    opkg_msg(ERROR, "signature_type option '%s' not understood.\n",
+            opkg_config->signature_type);
     return -1;
-#endif
 }
