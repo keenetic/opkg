@@ -115,6 +115,11 @@ typedef struct opkg_conf {
      int ssl_dont_verify_peer;
      int ftp_explicit_ssl;
 
+     /* username and password for curl basic http authentication
+      * the format is: [user name]:[password]
+      */
+     char *http_auth;
+
      /* pathfinder options: used only when opkg is configured with
       * '--enable-pathfinder', otherwise always NULL or 0 as above.
       */

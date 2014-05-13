@@ -86,6 +86,7 @@ static opkg_option_t options[] = {
           { "connect_timeout_ms", OPKG_OPT_TYPE_INT, &_conf.connect_timeout_ms},
           { "transfer_timeout_ms", OPKG_OPT_TYPE_INT, &_conf.transfer_timeout_ms},
           { "follow_location", OPKG_OPT_TYPE_BOOL, &_conf.follow_location},
+          { "http_auth", OPKG_OPT_TYPE_STRING, &_conf.http_auth },
 #endif
 #if defined(HAVE_SSLCURL) && defined(HAVE_CURL)
           { "ssl_engine", OPKG_OPT_TYPE_STRING, &_conf.ssl_engine },

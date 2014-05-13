@@ -877,6 +877,11 @@ opkg_curl_init(curl_progress_func cb, void *data)
 	    curl_easy_setopt(curl, CURLOPT_PROXYPASSWORD, opkg_config->proxy_passwd);
 	    curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
 	}
+	if (opkg_config->http_auth)
+	{
+	    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+	    curl_easy_setopt(curl, CURLOPT_USERPWD, opkg_config->http_auth);
+	}
     }
 
     curl_easy_setopt (curl, CURLOPT_NOPROGRESS, (cb == NULL));
