@@ -330,6 +330,51 @@ opkg_validate_cached_file(const char *src,
     return 1;
 }
 
+static int
+opkg_download_set_env()
+{
+    int r;
+
+    if (opkg_config->http_proxy) {
+        opkg_msg(DEBUG, "Setting environment variable: http_proxy = %s.\n",
+                opkg_config->http_proxy);
+        r = setenv("http_proxy", opkg_config->http_proxy, 1);
+        if (r != 0) {
+            opkg_msg(ERROR, "Failed to set environment variable http_proxy");
+            return r;
+        }
+    }
+    if (opkg_config->https_proxy) {
+        opkg_msg(DEBUG, "Setting environment variable: https_proxy = %s.\n",
+                opkg_config->https_proxy);
+        r = setenv("https_proxy", opkg_config->https_proxy, 1);
+        if (r != 0) {
+            opkg_msg(ERROR, "Failed to set environment variable https_proxy");
+            return r;
+        }
+    }
+    if (opkg_config->ftp_proxy) {
+        opkg_msg(DEBUG, "Setting environment variable: ftp_proxy = %s.\n",
+                opkg_config->ftp_proxy);
+        r = setenv("ftp_proxy", opkg_config->ftp_proxy, 1);
+        if (r != 0) {
+            opkg_msg(ERROR, "Failed to set environment variable ftp_proxy");
+            return r;
+        }
+    }
+    if (opkg_config->no_proxy) {
+        opkg_msg(DEBUG,"Setting environment variable: no_proxy = %s.\n",
+                opkg_config->no_proxy);
+        r = setenv("no_proxy", opkg_config->no_proxy, 1);
+        if (r != 0) {
+            opkg_msg(ERROR, "Failed to set environment variable no_proxy");
+            return r;
+        }
+    }
+
+    return 0;
+}
+
 /** \brief opkg_download_internal: downloads file with existence check
  *
  * \param src absolute URI of file to download
@@ -357,25 +402,10 @@ opkg_download_internal(const char *src, const char *dest,
         }
     }
 
-    if (opkg_config->http_proxy) {
-	opkg_msg(DEBUG, "Setting environment variable: http_proxy = %s.\n",
-		opkg_config->http_proxy);
-	setenv("http_proxy", opkg_config->http_proxy, 1);
-    }
-    if (opkg_config->https_proxy) {
-	opkg_msg(DEBUG, "Setting environment variable: https_proxy = %s.\n",
-		opkg_config->https_proxy);
-	setenv("https_proxy", opkg_config->https_proxy, 1);
-    }
-    if (opkg_config->ftp_proxy) {
-	opkg_msg(DEBUG, "Setting environment variable: ftp_proxy = %s.\n",
-		opkg_config->ftp_proxy);
-	setenv("ftp_proxy", opkg_config->ftp_proxy, 1);
-    }
-    if (opkg_config->no_proxy) {
-	opkg_msg(DEBUG,"Setting environment variable: no_proxy = %s.\n",
-		opkg_config->no_proxy);
-	setenv("no_proxy", opkg_config->no_proxy, 1);
+    ret = opkg_download_set_env();
+    if (ret != 0) {
+	/* Error message already printed. */
+	return ret;
     }
 
 #ifdef HAVE_CURL
