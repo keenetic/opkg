@@ -293,6 +293,111 @@ opkg_validate_cached_file(const char *src,
 
     return 1;
 }
+
+/* Download using curl backend. */
+static int
+opkg_download_backend(const char *src, const char *dest,
+	curl_progress_func cb, void *data, int use_cache)
+{
+    CURLcode res;
+    FILE * file;
+    int ret;
+
+    curl = opkg_curl_init (cb, data);
+    if (!curl)
+        return -1;
+
+    curl_easy_setopt(curl, CURLOPT_URL, src);
+
+#ifdef HAVE_SSLCURL
+    if (opkg_config->ftp_explicit_ssl)
+    {
+        /*
+         * This is what enables explicit FTP SSL mode on curl's side As per
+         * the official documentation at
+         * http://curl.haxx.se/libcurl/c/curl_easy_setopt.html : "This
+         * option was known as CURLOPT_FTP_SSL up to 7.16.4, and the
+         * constants were known as CURLFTPSSL_*"
+         */
+        curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
+
+        /*
+	 * If a URL with the ftps:// scheme is passed to curl, then it
+         * considers it's implicit mode. Thus, we need to fix it before
+         * invoking curl.
+         */
+	char *fixed_src = replace_token_in_str(src, "ftps://", "ftp://");
+        curl_easy_setopt(curl, CURLOPT_URL, fixed_src);
+        free(fixed_src);
+    }
+#endif /* HAVE_SSLCURL */
+
+    if (use_cache) {
+        ret = opkg_validate_cached_file(src, dest);
+        if (ret <= 0)
+            return ret;
+    }
+    else {
+        unlink(dest);
+    }
+
+    file = fopen(dest, "ab");
+    if (!file) {
+        opkg_msg(ERROR, "Failed to open destination file %s\n",
+            dest);
+        return -1;
+    }
+
+    res = 0;
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
+    res = curl_easy_perform (curl);
+    fclose (file);
+    if (res) {
+        long error_code;
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &error_code);
+        opkg_msg(ERROR, "Failed to download %s: %s.\n",
+            src, curl_easy_strerror(res));
+        return -1;
+    }
+
+    return 0;
+}
+#else
+/* Download using wget backend. */
+static int
+opkg_download_backend(const char *src, const char *dest,
+	curl_progress_func cb, void *data, int use_cache)
+{
+    int res;
+    const char *argv[8];
+    int i = 0;
+
+    /* Unused arguments. */
+    (void) cb;
+    (void) data;
+    (void) use_cache;
+
+    unlink(dest);
+
+    argv[i++] = "wget";
+    argv[i++] = "-q";
+    if (opkg_config->http_proxy || opkg_config->ftp_proxy) {
+	argv[i++] = "-Y";
+	argv[i++] = "on";
+    }
+    argv[i++] = "-O";
+    argv[i++] = dest;
+    argv[i++] = src;
+    argv[i++] = NULL;
+    res = xsystem(argv);
+
+    if (res) {
+	opkg_msg(ERROR, "Failed to download %s, wget returned %d.\n", src, res);
+	return -1;
+    }
+
+    return 0;
+}
 #endif
 
 static int
@@ -386,89 +491,7 @@ opkg_download_internal(const char *src, const char *dest,
 	return ret;
     }
 
-#ifdef HAVE_CURL
-    curl = opkg_curl_init (cb, data);
-    if (!curl)
-        return -1;
-    CURLcode res;
-    FILE * file;
-
-    curl_easy_setopt(curl, CURLOPT_URL, src);
-
-#ifdef HAVE_SSLCURL
-    if (opkg_config->ftp_explicit_ssl)
-    {
-        /*
-         * This is what enables explicit FTP SSL mode on curl's side As per
-         * the official documentation at
-         * http://curl.haxx.se/libcurl/c/curl_easy_setopt.html : "This
-         * option was known as CURLOPT_FTP_SSL up to 7.16.4, and the
-         * constants were known as CURLFTPSSL_*"
-         */
-        curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
-
-        /*
-	 * If a URL with the ftps:// scheme is passed to curl, then it
-         * considers it's implicit mode. Thus, we need to fix it before
-         * invoking curl.
-         */
-	char *fixed_src = replace_token_in_str(src, "ftps://", "ftp://");
-        curl_easy_setopt(curl, CURLOPT_URL, fixed_src);
-        free(fixed_src);
-    }
-#endif /* HAVE_SSLCURL */
-
-    if (use_cache) {
-        ret = opkg_validate_cached_file(src, dest);
-        if (ret <= 0)
-            return ret;
-    }
-    else {
-        unlink(dest);
-    }
-
-    file = fopen(dest, "ab");
-    if (!file) {
-        opkg_msg(ERROR, "Failed to open destination file %s\n",
-            dest);
-        return -1;
-    }
-
-    res = 0;
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
-    res = curl_easy_perform (curl);
-    fclose (file);
-    if (res) {
-        long error_code;
-        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &error_code);
-        opkg_msg(ERROR, "Failed to download %s: %s.\n",
-            src, curl_easy_strerror(res));
-        return -1;
-    }
-#else
-    unlink(dest);
-    int res;
-    const char *argv[8];
-    int i = 0;
-
-    argv[i++] = "wget";
-    argv[i++] = "-q";
-    if (opkg_config->http_proxy || opkg_config->ftp_proxy) {
-	argv[i++] = "-Y";
-	argv[i++] = "on";
-    }
-    argv[i++] = "-O";
-    argv[i++] = dest;
-    argv[i++] = src;
-    argv[i++] = NULL;
-    res = xsystem(argv);
-
-    if (res) {
-	opkg_msg(ERROR, "Failed to download %s, wget returned %d.\n", src, res);
-	return -1;
-    }
-#endif
-    return 0;
+    return opkg_download_backend(src, dest, cb, data, use_cache);
 }
 
 /** \brief get_cache_location: generate cached file path
