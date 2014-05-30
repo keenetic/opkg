@@ -1,3 +1,4 @@
+/* vi: set expandtab sw=4 sts=4: */
 /* file_util.c - convenience routines for common stat operations
 
    Copyright (C) 2009 Ubiq Technologies <graham.gower@gmail.com>

@@ -1,3 +1,4 @@
+/* vi: set expandtab sw=4 sts=4: */
 /* opkg.c - the opkg  package management system
 
    Thomas Wood <thomas@openedhand.com>

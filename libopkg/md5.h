@@ -1,3 +1,4 @@
+/* vi: set expandtab sw=4 sts=4: */
 /* Declaration of functions and data types used for MD5 sum computing
    library functions.
    Copyright (C) 1995-1997,1999,2000,2001,2004,2005,2006,2008

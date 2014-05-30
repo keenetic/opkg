@@ -1,3 +1,4 @@
+/* vi: set expandtab sw=4 sts=4: */
 /* sprintf_alloc.c -- like sprintf with memory allocation
 
    Copyright (C) 2010 Ubiq Technologies <graham.gower@gmail.com>

@@ -1,3 +1,4 @@
+/* vi: set expandtab sw=4 sts=4: */
 /* opkg_upgrade.c - the opkg package management system
 
    Copyright (C) 2003 Daniele Nicolodi <daniele@grinta.net>

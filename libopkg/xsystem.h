@@ -1,3 +1,4 @@
+/* vi: set expandtab sw=4 sts=4: */
 /* xsystem.h - system(3) with error messages
 
    Carl D. Worth

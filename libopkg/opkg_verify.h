@@ -1,3 +1,4 @@
+/* vi: set expandtab sw=4 sts=4: */
 /* opkg_verify.h - the opkg package management system
 
    Copyright (C) 2014 Paul Barker

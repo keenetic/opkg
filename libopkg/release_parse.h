@@ -1,3 +1,4 @@
+/* vi: set expandtab sw=4 sts=4: */
 /* release_parse.h - the opkg package management system
 
    Copyright (C) 2010,2011 Javier Palacios

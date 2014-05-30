@@ -1,4 +1,4 @@
-/* vi: set noexpandtab sw=4 sts=4: */
+/* vi: set expandtab sw=4 sts=4: */
 /* opkg_download.c - the opkg package management system
 
    Carl D. Worth

@@ -1,3 +1,4 @@
+/* vi: set expandtab sw=4 sts=4: */
 /* xregex.h - regex functions with error messages
 
    Carl D. Worth

@@ -1,3 +1,4 @@
+/* vi: set expandtab sw=4 sts=4: */
 /* active_list.h - the opkg package management system
 
    Tick Chen <tick@openmoko.com>

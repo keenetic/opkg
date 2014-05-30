@@ -1,3 +1,4 @@
+/* vi: set expandtab sw=4 sts=4: */
 /* file_util.h - convenience routines for common file operations
 
    Carl D. Worth

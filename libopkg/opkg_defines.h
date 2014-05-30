@@ -1,3 +1,4 @@
+/* vi: set expandtab sw=4 sts=4: */
 /* opkg_defines.h - the opkg package management system
 
    Copyright (C) 2008 OpenMoko Inc

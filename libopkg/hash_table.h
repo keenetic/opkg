@@ -1,3 +1,4 @@
+/* vi: set expandtab sw=4 sts=4: */
 /* hash.h - hash tables for opkg
 
    Steven M. Ayer, Jamey Hicks

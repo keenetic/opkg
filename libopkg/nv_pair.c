@@ -1,3 +1,4 @@
+/* vi: set expandtab sw=4 sts=4: */
 /* nv_pair.c - the opkg package management system
 
    Carl D. Worth

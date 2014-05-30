@@ -1,3 +1,4 @@
+/* vi: set expandtab sw=4 sts=4: */
 /* pkg_parse.c - the opkg package management system
 
    Copyright (C) 2009 Ubiq Technologies <graham.gower@gmail.com>

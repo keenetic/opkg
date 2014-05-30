@@ -1,3 +1,4 @@
+/* vi: set expandtab sw=4 sts=4: */
 /* opkg-cl.c - the opkg package management system
 
    Florian Boor

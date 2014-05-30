@@ -1,3 +1,4 @@
+/* vi: set expandtab sw=4 sts=4: */
 /* Functions to compute MD5 message digest of files or memory blocks.
    according to the definition of MD5 in RFC 1321 from April 1992.
    Copyright (C) 1995,1996,1997,1999,2000,2001,2005,2006,2008

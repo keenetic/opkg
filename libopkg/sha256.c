@@ -1,3 +1,4 @@
+/* vi: set expandtab sw=4 sts=4: */
 /* sha256.c - Functions to compute SHA256 and SHA224 message digest of files or
    memory blocks according to the NIST specification FIPS-180-2.
 

@@ -1,3 +1,4 @@
+/* vi: set expandtab sw=4 sts=4: */
 /* conffile_list.h - the opkg package management system
 
    Carl D. Worth
