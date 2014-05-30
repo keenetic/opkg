@@ -15,6 +15,8 @@
    GNU General Public License for more details.
 */
 
+#include "config.h"
+
 #include <malloc.h>
 
 #include "opkg_message.h"

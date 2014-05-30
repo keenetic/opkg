@@ -17,6 +17,8 @@
     General Public License for more details.
 */
 
+#include "config.h"
+
 #include <openssl/conf.h>
 #include <openssl/evp.h>
 #include <openssl/err.h>

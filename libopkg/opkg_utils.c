@@ -15,6 +15,8 @@
    General Public License for more details.
 */
 
+#include "config.h"
+
 #include <ctype.h>
 #include <sys/statvfs.h>
 #include <string.h>

@@ -13,6 +13,8 @@
    GNU General Public License for more details.
 */
 
+#include "config.h"
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>

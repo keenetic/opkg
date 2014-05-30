@@ -13,6 +13,8 @@
    General Public License for more details.
 */
 
+#include "config.h"
+
 #include <archive.h>
 #include <archive_entry.h>
 #include <malloc.h>

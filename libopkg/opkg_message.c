@@ -14,6 +14,8 @@
    General Public License for more details.
 */
 
+#include "config.h"
+
 #include <stdio.h>
 #include <malloc.h>
 #include <stdlib.h>
