@@ -362,6 +362,15 @@ opkg_download_backend(const char *src, const char *dest,
 
     return 0;
 }
+
+void
+opkg_download_cleanup(void)
+{
+    if(curl != NULL){
+	curl_easy_cleanup (curl);
+	curl = NULL;
+    }
+}
 #else
 /* Download using wget backend. */
 static int
@@ -397,6 +406,12 @@ opkg_download_backend(const char *src, const char *dest,
     }
 
     return 0;
+}
+
+void
+opkg_download_cleanup(void)
+{
+    /* Nothing to do. */
 }
 #endif
 
@@ -771,15 +786,6 @@ opkg_prepare_url_for_install(const char *url, char **namep)
     return -1;
 }
 
-void opkg_curl_cleanup(void){
-#ifdef HAVE_CURL
-    if(curl != NULL){
-	curl_easy_cleanup (curl);
-	curl = NULL;
-    }
-#endif
-}
-
 #ifdef HAVE_CURL
 static CURL *
 opkg_curl_init(curl_progress_func cb, void *data)
@@ -800,7 +806,7 @@ opkg_curl_init(curl_progress_func cb, void *data)
 		opkg_msg(ERROR, "Can't set crypto engine '%s'.\n",
 			opkg_config->ssl_engine);
 
-		opkg_curl_cleanup();
+		opkg_download_cleanup();
 		return NULL;
 	    }
 	    /* set the crypto engine as default */
@@ -808,7 +814,7 @@ opkg_curl_init(curl_progress_func cb, void *data)
 		opkg_msg(ERROR, "Can't set crypto engine '%s' as default.\n",
 			opkg_config->ssl_engine);
 
-		opkg_curl_cleanup();
+		opkg_download_cleanup();
 		return NULL;
 	    }
 	}

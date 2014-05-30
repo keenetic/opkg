@@ -158,9 +158,7 @@ err0:
 void
 opkg_free(void)
 {
-#ifdef HAVE_CURL
-	opkg_curl_cleanup();
-#endif
+	opkg_download_cleanup();
 	opkg_conf_deinit();
 }
 

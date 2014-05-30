@@ -37,13 +37,13 @@ int opkg_download_pkg(pkg_t *pkg, const char *dir);
  */
 int opkg_prepare_url_for_install(const char *url, char **namep);
 
-/* Curl cleanup function, does nothing unless opkg is configured with
+/* Cleanup function, does nothing unless opkg is configured with
  * '--enable-curl'.
  *
  * This function is callable regardless of whether curl support is enabled in
  * order to present a consistent API.
  */
-void opkg_curl_cleanup(void);
+void opkg_download_cleanup(void);
 
 #ifdef __cplusplus
 }
