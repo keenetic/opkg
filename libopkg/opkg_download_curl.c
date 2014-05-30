@@ -53,6 +53,9 @@ static CURL *opkg_curl_init(curl_progress_func cb, void *data);
 size_t
 dummy_write(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
+    (void) ptr;
+    (void) userdata;
+
     return size * nmemb;
 }
 
@@ -69,7 +72,7 @@ size_t
 header_write(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
     char prefix[5];
-    int i;
+    unsigned long i;
     for (i = 0; (i < 5) && (i < size * nmemb); ++i)
         prefix[i] = tolower(ptr[i]);
     if (str_starts_with(prefix, "etag:")) {
@@ -203,7 +206,7 @@ check_file_stamp(const char *file_name, char *stamp)
     }
     while ((size = fread(stamp_buf, 1, STAMP_BUF_SIZE, file)) && *stamp) {
         if (((size < STAMP_BUF_SIZE) &&
-             (size != strlen(stamp))) ||
+             (size != (int)strlen(stamp))) ||
             ((size == STAMP_BUF_SIZE) &&
              (strlen(stamp) < STAMP_BUF_SIZE)) ||
             memcmp(stamp_buf, stamp, size)) {
