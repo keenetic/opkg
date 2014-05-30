@@ -45,6 +45,13 @@ int opkg_prepare_url_for_install(const char *url, char **namep);
  */
 void opkg_download_cleanup(void);
 
+/* Backend download function, defined in opkg_download_curl.c or
+ * opkg_download_wget.c depending on which backend is enabled. This should only
+ * be called from opkg_download.c.
+ */
+int opkg_download_backend(const char *src, const char *dest,
+	curl_progress_func cb, void *data, int use_cache);
+
 #ifdef __cplusplus
 }
 #endif

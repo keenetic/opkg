@@ -72,6 +72,7 @@ if test "x$want_curl" = "xyes"; then
   PKG_CHECK_MODULES(CURL, [libcurl])
   AC_DEFINE(HAVE_CURL, 1, [Define if you want CURL support])
 fi
+AM_CONDITIONAL(HAVE_CURL, test "x$want_curl" = "xyes")
 
 # check for sha256
 AC_ARG_ENABLE(sha256,

@@ -27,6 +27,11 @@ opkg_sources = opkg_cmd.c opkg_configure.c opkg_download.c \
 	sprintf_alloc.c xregex.c xsystem.c xfuncs.c opkg_archive.c \
 	opkg_verify.c
 
+if HAVE_CURL
+opkg_sources += opkg_download_curl.c
+else
+opkg_sources += opkg_download_wget.c
+endif
 if HAVE_SHA256
 opkg_sources += sha256.c
 opkg_headers += sha256.h
