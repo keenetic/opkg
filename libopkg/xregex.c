@@ -15,6 +15,8 @@
    GNU General Public License for more details.
 */
 
+#include "config.h"
+
 #include "xregex.h"
 #include "libbb/libbb.h"
 

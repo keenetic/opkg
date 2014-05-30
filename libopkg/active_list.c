@@ -15,6 +15,7 @@
    General Public License for more details.
 */
 
+#include "config.h"
 
 #include "active_list.h"
 #include <stdio.h>

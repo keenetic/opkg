@@ -15,6 +15,8 @@
    General Public License for more details.
 */
 
+#include "config.h"
+
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>

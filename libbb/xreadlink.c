@@ -3,6 +3,8 @@
  *  Returns a NULL on failure...
  */
 
+#include "config.h"
+
 #include <stdio.h>
 
 /*

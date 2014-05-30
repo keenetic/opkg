@@ -20,7 +20,7 @@
 
 /* Written by Ulrich Drepper <drepper@gnu.ai.mit.edu>, 1995.  */
 
-#include <config.h>
+#include "config.h"
 
 #include "md5.h"
 

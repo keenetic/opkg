@@ -25,6 +25,8 @@
  * not addition '/' if path name already have '/'
 */
 
+#include "config.h"
+
 #include <string.h>
 #include "libbb.h"
 

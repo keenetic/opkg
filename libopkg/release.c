@@ -13,6 +13,8 @@
    General Public License for more details.
 */
 
+#include "config.h"
+
 #include <unistd.h>
 #include <ctype.h>
 

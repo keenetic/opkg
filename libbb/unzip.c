@@ -40,6 +40,8 @@
  * See the file algorithm.doc for the compression algorithms and file formats.
  */
 
+#include "config.h"
+
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <signal.h>

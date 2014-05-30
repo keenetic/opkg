@@ -15,6 +15,8 @@
    General Public License for more details.
 */
 
+#include "config.h"
+
 #include "nv_pair.h"
 #include "void_list.h"
 #include "nv_pair_list.h"

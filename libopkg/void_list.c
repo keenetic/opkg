@@ -15,6 +15,8 @@
    General Public License for more details.
 */
 
+#include "config.h"
+
 #include "void_list.h"
 #include "libbb/libbb.h"
 
