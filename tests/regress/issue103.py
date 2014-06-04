@@ -4,16 +4,16 @@
 #
 # What steps will reproduce the problem?
 # ======================================
-# 
+#
 # 1. Create packages A and C which both recommend B.
 # 2. Create package B.
 # 3. Install A and C.
-# 4. Remove A with --autoremove 
+# 4. Remove A with --autoremove
 #
 #
 # What is the expected output? What do you see instead?
 # =====================================================
-# 
+#
 # Expect B to remain installed as it is still depended on by C. Instead, B is
 # removed.
 #

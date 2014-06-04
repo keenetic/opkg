@@ -101,7 +101,7 @@ opkg-0.2.0-rc1
 - Added the `--force-postinstall` option
 
 - Added the `list-changed-conffiles` command
- 
+
 - Added the `opkg_compare_versions` function to libopkg
 
 - Allow external gunzip binary to be used to perform decompression if the

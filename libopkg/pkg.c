@@ -916,7 +916,7 @@ static int order(char x)
 		return 0;
 	if (isalpha(x))
 		return x;
-	
+
 	return 256 + (int)x;
 }
 

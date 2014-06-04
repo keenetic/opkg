@@ -4,16 +4,16 @@
 #
 # What steps will reproduce the problem?
 # ======================================
-# 
+#
 # 1. Create package A which recommends B.
 # 2. Create package B.
 # 3. Install A.
-# 4. Remove A with --autoremove 
+# 4. Remove A with --autoremove
 #
 #
 # What is the expected output? What do you see instead?
 # =====================================================
-# 
+#
 # Expect B to be removed with A. Instead only A is removed.
 #
 #

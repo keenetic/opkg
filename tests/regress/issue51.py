@@ -4,7 +4,7 @@
 #
 # What steps will reproduce the problem?
 # ======================================
-# 
+#
 # 1. Create a package containing file /foo
 # 2. Create an identically named/versioned package containing file /foo and /bar
 # 3. Install the first package.
@@ -14,7 +14,7 @@
 #
 # What is the expected output? What do you see instead?
 # =====================================================
-# 
+#
 # The package should show that it owns both /foo and /bar. It only shows
 # ownership of the file(s) that were installed initially.
 #
@@ -31,7 +31,7 @@
 # Also a problem, is when the --force-reinstall'd package contains fewer files.
 # These files are not properly orphaned/deleted.
 #
-# Perhaps --force-reinstall should do a --force-depends remove, then install? 
+# Perhaps --force-reinstall should do a --force-depends remove, then install?
 #
 #
 # Status

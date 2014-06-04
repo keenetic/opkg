@@ -188,7 +188,7 @@ pkg_parse_line(void *ptr, const char *line, uint mask)
 			pkg->md5sum = parse_simple("MD5sum", line);
 			/* The old opkg wrote out status files with the wrong
 			* case for MD5sum, let's parse it either way */
-		else if ((mask & PFM_MD5SUM) && is_field("MD5Sum:", line)) 
+		else if ((mask & PFM_MD5SUM) && is_field("MD5Sum:", line))
 			pkg->md5sum = parse_simple("MD5Sum", line);
 		else if((mask & PFM_MAINTAINER) && is_field("Maintainer", line))
 			pkg->maintainer = parse_simple("Maintainer", line);

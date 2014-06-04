@@ -21,7 +21,7 @@
 extern "C" {
 #endif
 
-typedef struct 
+typedef struct
 {
   char *name;
   char *value;

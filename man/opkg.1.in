@@ -8,7 +8,7 @@ software packages
 .
 .SH DESCRIPTION
 \fBopkg\fP is a simple utility to install, upgrade and uninstall opkg
-software packages. Opkg is a lightweight package management system based 
+software packages. Opkg is a lightweight package management system based
 on Ipkg.
 .
 .SH "OPTIONS AND COMMANDS"
@@ -34,7 +34,7 @@ could be something like 'pkgname*' '*file*' or similar
 Flag \fIpackage(s)\fP. Available flags (one per invocation):
 .TS
 tab(@);
-l. 
+l.
 hold
 noprune
 user
@@ -75,7 +75,7 @@ Download \fIpackage\fP to current directory
 compare versions using following operators :
 .TS
 tab(@);
-c l. 
+c l.
 <<@less than
 <@less than or equal to
 <=@less than or equal to
@@ -99,7 +99,7 @@ List installable package architectures
 \fBwhatreplaces [\fI\-A\fP] <\fIpackage(s)\fP|\fIglob\fP>\fR
 
 .SS OPTIONS
-.TP 
+.TP
 \fB\-A\fR
 Query all packages not just those installed
 .
@@ -125,59 +125,59 @@ Use a package cache
 .TP
 \fB\-d <\fIdest_name\fP>, \fB\--dest <\fIdest_name\fP>\fR
 Use \fIdest_name\fP as the the root directory for
-package installation, removal, upgrading. \fIdest_name\fP should be a 
+package installation, removal, upgrading. \fIdest_name\fP should be a
 defined dest name from the configuration file, (but can also be a
 directory name in a pinch).
-.TP 
+.TP
 \fB\-o <\fIdirectory\fP>, \fB\--offline-root <\fIdirectory\fP>\fR
-Use \fIdirectory\fP as the root directory for offline installation of 
+Use \fIdirectory\fP as the root directory for offline installation of
 packages.
-.TP 
+.TP
 \fB\--add-dest <\fIname\fP>:<\fIpath\fP>\fR
 Register \fIpath\fP as installation target \fIname\fP for use in
 conjunction with \fB\--dest\fP
-.TP 
+.TP
 \fB\--add-arch <\fIarch\fP>:<\fIprio\fP>\fR
 Register the package architecture \fIarch\fP with the numeric
 priority \fIprio\fP. Lower priorities take precedence.
 .SS FORCE OPTIONS
-.TP 
+.TP
 \fB\--force-depends \fR
 Install/remove despite failed dependencies
-.TP 
+.TP
 \fB\--force-maintainer \fR
 Overwrite preexisting config files
-.TP 
+.TP
 \fB\--force-reinstall \fR
 Reinstall package(s)
-.TP 
+.TP
 \fB\--force-overwrite\fR
 Overwrite files from other package(s)
-.TP 
+.TP
 \fB\--force-downgrade\fR
 Allow opkg to downgrade packages
-.TP 
+.TP
 \fB\--force-space \fR
 Disable free space checks
-.TP 
+.TP
 \fB\--force-postinstall \fR
 Execute package postinstall scripts in offline installation mode
-.TP 
+.TP
 \fB\--noaction\fR
 No action \- test only
-.TP 
+.TP
 \fB\--download-only\fR
 No action \- download only
-.TP 
+.TP
 \fB\--nodeps\fR
 Do not follow dependencies
-.TP 
+.TP
 \fB\--force-removal-of-dependent-packages\fR
 Remove package and all dependencies
-.TP 
+.TP
 \fB\--autoremove\fR
 Remove packages that were installed automatically to satisfy dependencies
-.TP 
+.TP
 \fB\-t <\fIdirectory\fP>, \--tmp-dir <\fIdirectory\fP>\fR
 Specify \fIdirectory\fP as temporary directory
 .

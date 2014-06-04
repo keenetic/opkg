@@ -4,7 +4,7 @@
 #
 # What steps will reproduce the problem?
 # ======================================
-# 
+#
 # 1. Given three packages A, B, C
 #	A depends on B
 #	A failed postinst and is in unpacked state
@@ -16,7 +16,7 @@
 #
 # What is the expected output? What do you see instead?
 # =====================================================
-# 
+#
 # B should not be removed, bot opkg uninstall it.
 #
 #

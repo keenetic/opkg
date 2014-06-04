@@ -25,7 +25,7 @@ import opk, cfg, opkgcl
 opk.regress_init()
 
 o = opk.OpkGroup()
-o.add(Package="a", Version="1.0", Provides="b") 
+o.add(Package="a", Version="1.0", Provides="b")
 o.add(Package="x", Depends="a")
 o.add(Package="y", Depends="b")
 o.write_opk()

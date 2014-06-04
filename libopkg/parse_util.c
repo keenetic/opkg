@@ -67,7 +67,7 @@ parse_list(const char *raw, unsigned int *count, const char sep, int skip_field)
 
 	while (*raw) {
 		depends = xrealloc(depends, sizeof(char *) * (line_count + 1));
-	
+
 		while (isspace(*raw))
 			raw++;
 

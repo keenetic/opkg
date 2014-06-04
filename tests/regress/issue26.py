@@ -4,7 +4,7 @@
 #
 # What steps will reproduce the problem?
 # ======================================
-# 
+#
 # Create two packages, with differing versions. Provide the newer package in an
 # accessible repository. For this test I manually created an older
 # abiword_1.6.8-r0.3 package (identical contents except the control file).
@@ -33,7 +33,7 @@
 #
 # What is the expected output? What do you see instead?
 # =====================================================
-# 
+#
 # I expect the installation of the specified package to fail if it is already
 # installed.
 #

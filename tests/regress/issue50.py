@@ -4,7 +4,7 @@
 #
 # What steps will reproduce the problem?
 # ======================================
-# 
+#
 # 1. Create package a version 1, containing file /foo.
 # 2. Create package a version 2, without file /foo, depending on package b.
 # 3. Create package b version 1, containing file /foo.
@@ -15,7 +15,7 @@
 #
 # What is the expected output? What do you see instead?
 # =====================================================
-# 
+#
 # File /foo is expected to exist and be provided by package b_1. This is not the
 # case, file /foo has disappeared.
 #

@@ -85,7 +85,7 @@ const cksum_t *cksum_list_find(cksum_list_t *list, const char *name)
 	  if (strcmp(cksum->name, name) == 0) {
 	       return cksum;
 	  }
-     }    
+     }
      return NULL;
 }
 

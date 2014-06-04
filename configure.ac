@@ -9,7 +9,7 @@ AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS(config.h)
 
 AC_CANONICAL_HOST
-AC_GNU_SOURCE 
+AC_GNU_SOURCE
 
 # Disable C++/Fortran checks
 define([AC_LIBTOOL_LANG_CXX_CONFIG], [:])
@@ -232,9 +232,9 @@ AC_CHECK_FUNCS([memmove memset mkdir regcomp strchr strcspn strdup strerror strn
 opkglibdir=
 AC_ARG_WITH(opkglibdir,
 [  --with-opkglibdir=DIR   specifies directory to put status and info files.
-                          "/opkg" is always added so if you want your files 
+                          "/opkg" is always added so if you want your files
                           to be in /var/lib/opkg instead of /usr/lib/opkg
-                          you should indicate 
+                          you should indicate
                           --with-opkglibdir=/var/lib ],
 [case "${withval}" in
 yes)    AC_MSG_ERROR(bad value ${withval} given for opkg libs directories ) ;;
