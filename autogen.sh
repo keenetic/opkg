@@ -16,7 +16,7 @@ if [ \( $# -eq 1 \) -a \( "$1" = "--clean" \) ]; then
 	rm -f libtool
 	rm -f aclocal.m4
 	rm -f libopkg.pc
-	rm -f man/{opkg-cl.1,opkg-key.1}
+	rm -f man/{opkg.1,opkg-key.1}
 	rm -f Makefile {libopkg,tests,man,utils,src}/Makefile
 	rm -f Makefile.in {libopkg,tests,man,utils,src}/Makefile.in
 	rm -f config.h{,.in}
@@ -26,7 +26,7 @@ if [ \( $# -eq 1 \) -a \( "$1" = "--clean" \) ]; then
 	rm -f {libopkg,tests,src}/*.o
 	rm -f libopkg/*.lo
 	rm -f libopkg/*.la
-	rm -f src/opkg-cl tests/libopkg_test
+	rm -f src/opkg tests/libopkg_test
 	rm -f stamp-h1
 	rm -rf {libopkg,tests,src}/.libs
 

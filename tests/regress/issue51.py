@@ -18,7 +18,7 @@
 # The package should show that it owns both /foo and /bar. It only shows
 # ownership of the file(s) that were installed initially.
 #
-# $ ./opkg-cl -o /tmp/opkg files a
+# $ ./opkg -o /tmp/opkg files a
 # Package a (1) is installed on root and has the following files:
 # /tmp/opkg/foo
 #

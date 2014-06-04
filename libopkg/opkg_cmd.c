@@ -796,7 +796,7 @@ opkg_flag_cmd(int argc, char **argv)
 
 	  /*
 	   * Useful if a package is installed in an offline_root, and
-	   * should be configured by opkg-cl configure at a later date.
+	   * should be configured by opkg configure at a later date.
 	   */
           if (( strcmp(flags,"installed")==0)||( strcmp(flags,"unpacked")==0)){
 	      pkg->state_status = pkg_state_status_from_str(flags);

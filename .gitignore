@@ -55,7 +55,7 @@ autom4te.cache/
 *.so
 .libs/
 .deps/
-src/opkg-cl
+src/opkg
 tests/libopkg_test
 
 # Man pages

@@ -1,13 +1,13 @@
 .TH "@PACKAGE_NAME@" 1 "@CLEAN_DATE@" "@PACKAGE_STRING@" "User Commands"
 .SH NAME
-opkg-cl \- command line utility to install, upgrade and uninstall opkg
+opkg \- command line utility to install, upgrade and uninstall opkg
 software packages
 .
 .SH SYNOPSIS
-.B \fBopkg-cl\fP [\fIOPTIONS...\fP] \fIsub-command\fP [\fIARGUMENTS...\fP]
+.B \fBopkg\fP [\fIOPTIONS...\fP] \fIsub-command\fP [\fIARGUMENTS...\fP]
 .
 .SH DESCRIPTION
-\fBopkg-cl\fP is a simple utility to install, upgrade and uninstall opkg
+\fBopkg\fP is a simple utility to install, upgrade and uninstall opkg
 software packages. Opkg is a lightweight package management system based 
 on Ipkg.
 .
@@ -155,7 +155,7 @@ Reinstall package(s)
 Overwrite files from other package(s)
 .TP 
 \fB\--force-downgrade\fR
-Allow opkg-cl to downgrade packages
+Allow opkg to downgrade packages
 .TP 
 \fB\--force-space \fR
 Disable free space checks

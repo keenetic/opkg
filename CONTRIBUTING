@@ -57,7 +57,7 @@ Examples of good subjects:
 
 	libopkg: changing searching order for packages
 	opkg_conf_init: adding new field 'short_desc'
-	src/opkg-cl.c: fixed return value in function foo
+	src/opkg.c: fixed return value in function foo
 
 The remainder of the commit message should explain in detail what was changed
 and why.

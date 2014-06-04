@@ -9,24 +9,24 @@
 # accessible repository. For this test I manually created an older
 # abiword_1.6.8-r0.3 package (identical contents except the control file).
 #
-# $ ./opkg-cl -o ~/opkg install abiword
+# $ ./opkg -o ~/opkg install abiword
 # Installing abiword (2.6.8-r0.3) to root...
 # Downloading http://10.0.0.13/ipk/mipsel/abiword_2.6.8-r0.3_mipsel.ipk
 # Configuring abiword
 # sh: rm: command not found
 #
-# $ ./opkg-cl -o ~/opkg -force-downgrade install ~/opkg/abiword_1.6.8-r0.3_mipsel.ipk 
+# $ ./opkg -o ~/opkg -force-downgrade install ~/opkg/abiword_1.6.8-r0.3_mipsel.ipk
 # Downgrading abiword on root from 2.6.8-r0.3 to 1.6.8-r0.3...
 # Configuring abiword
 # sh: rm: command not found
 #
-# $ ./opkg-cl -o ~/opkg -force-downgrade install ~/opkg/abiword_1.6.8-r0.3_mipsel.ipk 
+# $ ./opkg -o ~/opkg -force-downgrade install ~/opkg/abiword_1.6.8-r0.3_mipsel.ipk
 # Installing abiword (2.6.8-r0.3) to root...
 # Downloading http://10.0.0.13/ipk/mipsel/abiword_2.6.8-r0.3_mipsel.ipk
 # Configuring abiword
 # sh: rm: command not found
 #
-# Note that it is now impossible to install the older version with opkg-cl. To
+# Note that it is now impossible to install the older version with opkg. To
 # recover from this situation, the package information must be deleted from
 # /usr/lib/opkg/status manually.
 #

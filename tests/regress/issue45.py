@@ -7,7 +7,7 @@
 # 
 # 1. Extract two package package-a, package-b (wich depends on package-a)
 # 2. Under some condition when package are flagged as extracted
-#    opkg-cl configure will configure package-b before package-a 
+#    opkg configure will configure package-b before package-a
 #
 #
 # What is the expected output? What do you see instead?

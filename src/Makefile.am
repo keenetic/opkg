@@ -1,8 +1,8 @@
 AM_CFLAGS = -I${top_srcdir}/libopkg
-bin_PROGRAMS = opkg-cl
+bin_PROGRAMS = opkg
 
-opkg_cl_SOURCES = opkg-cl.c
-opkg_cl_LDADD = $(top_builddir)/libopkg/libopkg.la
+opkg_SOURCES = opkg.c
+opkg_LDADD = $(top_builddir)/libopkg/libopkg.la
 if STATIC_LIBOPKG
-opkg_cl_LDFLAGS = -static
+opkg_LDFLAGS = -static
 endif

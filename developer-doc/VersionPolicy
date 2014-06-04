@@ -11,7 +11,7 @@ Prior to a stable v1.0.0 release, the opkg verison policy shall be:
       compatibility may be broken but only with good reasons which should be
       clearly documented.
 
-For opkg, the public API is the opkg-cl program (and its command line
+For opkg, the public API is the opkg program (and its command line
 arguments), the configuration options, the API of libopkg and the on-disk
 structures of package files, status and control files, etc.
 

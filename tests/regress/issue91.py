@@ -3,9 +3,9 @@
 # Reported by boris.bischoff, Aug 17, 2012
 #
 # What steps will reproduce the problem?
-#   1. Install a package with "opkg-cl install" that contains symlinks to
+#   1. Install a package with "opkg install" that contains symlinks to
 #      directories which will be created.
-#   2. Remove the very same package with "opkg-cl remove".
+#   2. Remove the very same package with "opkg remove".
 #
 # What is the expected output? What do you see instead?
 #   I expect all files/directories to be deleted, even the symlinks.

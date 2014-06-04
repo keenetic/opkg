@@ -7,7 +7,7 @@
 #
 # 1. Create a package, A.opk, with unresolved dependencies.
 # 2. Create another package, B.opk, that depends upon A.
-# 3. opkg-cl install B.opk
+# 3. opkg install B.opk
 #
 #
 # What is the expected output? What do you see instead?

@@ -285,7 +285,7 @@ fi
 CLEAN_DATE=`date +"%B %Y" | tr -d '\n'`
 
 AC_ARG_WITH(static-libopkg,
-[  --with-static-libopkg   Statically link libopkg into opkg-cl.],
+[  --with-static-libopkg   Statically link libopkg into opkg.],
 [static_libopkg="${withval}"])
 AM_CONDITIONAL(STATIC_LIBOPKG, test "x$static_libopkg" = "xyes")
 
@@ -302,7 +302,7 @@ AC_OUTPUT(
     utils/Makefile
     libopkg.pc
     man/Makefile
-    man/opkg-cl.1
+    man/opkg.1
     man/opkg-key.1
     )
 
