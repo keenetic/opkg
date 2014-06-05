@@ -48,6 +48,7 @@ opkg_conf_t *opkg_config = &_conf;
  */
 static opkg_option_t options[] = {
 	  { "cache_dir", OPKG_OPT_TYPE_STRING, &_conf.cache_dir},
+	  { "lists_dir", OPKG_OPT_TYPE_STRING, &_conf.lists_dir},
 	  { "lock_file", OPKG_OPT_TYPE_STRING, &_conf.lock_file},
 	  { "force_defaults", OPKG_OPT_TYPE_BOOL, &_conf.force_defaults },
           { "force_maintainer", OPKG_OPT_TYPE_BOOL, &_conf.force_maintainer },
@@ -385,8 +386,6 @@ opkg_conf_parse_file(const char *filename,
 	       }
 	  } else if (strcmp(type, "dest") == 0) {
 	       nv_pair_list_append(&opkg_config->tmp_dest_list, name, value);
-	  } else if (strcmp(type, "lists_dir") == 0) {
-	       opkg_config->lists_dir = xstrdup(value);
 	  } else if (strcmp(type, "arch") == 0) {
 	       opkg_msg(INFO, "Supported arch %s priority (%s)\n", name, value);
 	       if (!value) {
