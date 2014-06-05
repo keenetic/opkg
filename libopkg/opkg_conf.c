@@ -628,10 +628,10 @@ opkg_conf_load(void)
 	hash_table_init("obs-file-hash", &opkg_config->obs_file_hash, OPKG_CONF_DEFAULT_HASH_LEN/16);
 
 	if (opkg_config->lists_dir == NULL)
-		opkg_config->lists_dir = xstrdup(OPKG_CONF_LISTS_DIR);
+		opkg_config->lists_dir = xstrdup(OPKG_CONF_DEFAULT_LISTS_DIR);
 
 	if (opkg_config->cache_dir == NULL)
-		opkg_config->cache_dir = xstrdup(OPKG_CONF_CACHE_DIR);
+		opkg_config->cache_dir = xstrdup(OPKG_CONF_DEFAULT_CACHE_DIR);
 
 	if (opkg_config->offline_root) {
 		sprintf_alloc(&tmp, "%s/%s", opkg_config->offline_root, opkg_config->lists_dir);
