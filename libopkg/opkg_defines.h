@@ -17,7 +17,7 @@
 #ifndef OPKG_DEFINES_H
 #define OPKG_DEFINES_H
 
-#define OPKG_STATE_DIR_PREFIX OPKGLIBDIR"/opkg"
+#define OPKG_STATE_DIR_PREFIX "/var/lib/opkg"
 #define OPKG_INFO_DIR_SUFFIX "info"
 #define OPKG_STATUS_FILE_SUFFIX "status"
 

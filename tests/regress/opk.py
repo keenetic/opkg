@@ -125,7 +125,7 @@ def regress_init():
 
 	os.system("rm -fr {}".format(cfg.offline_root))
 
-	os.makedirs("{}/usr/lib/opkg".format(cfg.offline_root))
+	os.makedirs("{}/var/lib/opkg".format(cfg.offline_root))
 	os.makedirs("{}/etc/opkg".format(cfg.offline_root))
 	os.makedirs("{}/var/run".format(cfg.offline_root))
 

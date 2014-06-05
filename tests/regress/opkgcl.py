@@ -44,13 +44,13 @@ def is_installed(pkg_name, version=None):
 		return False
 	if version and out.split()[2] != version:
 		return False
-	if not os.path.exists("{}/usr/lib/opkg/info/{}.control"\
+	if not os.path.exists("{}/var/lib/opkg/info/{}.control"\
 				.format(cfg.offline_root, pkg_name)):
 		return False
 	return True
 
 def is_autoinstalled(pkg_name):
-    status_path = "{}/usr/lib/opkg/status".format(cfg.offline_root)
+    status_path = "{}/var/lib/opkg/status".format(cfg.offline_root)
     if not os.path.exists(status_path):
         return False
     status_file = open(status_path, "r")

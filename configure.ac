@@ -229,24 +229,6 @@ AC_FUNC_UTIME_NULL
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([memmove memset mkdir regcomp strchr strcspn strdup strerror strndup strrchr strstr strtol strtoul sysinfo utime])
 
-opkglibdir=
-AC_ARG_WITH(opkglibdir,
-[  --with-opkglibdir=DIR   specifies directory to put status and info files.
-                          "/opkg" is always added so if you want your files
-                          to be in /var/lib/opkg instead of /usr/lib/opkg
-                          you should indicate
-                          --with-opkglibdir=/var/lib ],
-[case "${withval}" in
-yes)    AC_MSG_ERROR(bad value ${withval} given for opkg libs directories ) ;;
-no)     ;;
-*)      opkglibdir=$with_opkglibdir ;;
-esac])
-
-# Default local prefix if it is empty
-if test x$opkglibdir = x; then
-        opkglibdir=/usr/lib
-fi
-
 opkgetcdir=
 AC_ARG_WITH(opkgetcdir,
 [  --with-opkgetcdir=DIR   specifies directory for opkg.conf file,
@@ -272,7 +254,6 @@ AC_ARG_WITH(static-libopkg,
 [static_libopkg="${withval}"])
 AM_CONDITIONAL(STATIC_LIBOPKG, test "x$static_libopkg" = "xyes")
 
-AC_SUBST(opkglibdir)
 AC_SUBST(opkgetcdir)
 AC_SUBST([CLEAN_DATE])
 
