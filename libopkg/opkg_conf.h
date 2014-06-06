@@ -37,6 +37,7 @@ extern "C" {
 #define OPKG_CONF_DEFAULT_LISTS_DIR     OPKG_STATE_DIR_PREFIX "/lists"
 #define OPKG_CONF_DEFAULT_CACHE_DIR     OPKG_STATE_DIR_PREFIX "/cache"
 #define OPKG_CONF_DEFAULT_INFO_DIR      OPKG_STATE_DIR_PREFIX "/info"
+#define OPKG_CONF_DEFAULT_STATUS_FILE   OPKG_STATE_DIR_PREFIX "/status"
 #define OPKG_CONF_DEFAULT_CONF_FILE_DIR "/etc/opkg"
 #define OPKG_CONF_DEFAULT_LOCK_FILE     "/var/run/opkg.lock"
 
@@ -64,6 +65,7 @@ typedef struct opkg_conf {
      char *cache_dir;
      char *lock_file;
      char *info_dir;
+     char *status_file;
 
      unsigned int pfm; /* package field mask */
 
