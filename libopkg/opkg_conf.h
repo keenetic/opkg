@@ -37,6 +37,7 @@ extern "C" {
 #define OPKG_CONF_CACHE_DIR  OPKG_STATE_DIR_PREFIX "/cache"
 
 #define OPKG_CONF_DEFAULT_CONF_FILE_DIR OPKGETCDIR"/opkg"
+#define OPKG_CONF_DEFAULT_LOCK_FILE     "/var/run/opkg.lock"
 
 /* In case the config file defines no dest */
 #define OPKG_CONF_DEFAULT_DEST_NAME "root"
@@ -60,6 +61,7 @@ typedef struct opkg_conf {
      char *tmp_dir;
      char *lists_dir;
      char *cache_dir;
+     char *lock_file;
 
      unsigned int pfm; /* package field mask */
 

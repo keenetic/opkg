@@ -265,23 +265,6 @@ if test x$opkgetcdir = x; then
         opkgetcdir=/etc
 fi
 
-opkglockfile=
-AC_ARG_WITH(opkglockfile,
-[  --with-opkglockfile=FILE specifies the file used to make sure there is only
-                           one instance of opkg runnning.
-                           Defaults to ${opkglibdir}/opkg/lock, i.e.
-                           /usr/lib/opkg/lock ],
-[case "${withval}" in
-yes)    AC_MSG_ERROR(bad value ${withval} given for opkg lock file ) ;;
-no)     ;;
-*)      opkglockfile=$with_opkglockfile ;;
-esac])
-
-# Default if empty
-if test x$opkglockfile = x; then
-        opkglockfile=${opkglibdir}/opkg/lock
-fi
-
 CLEAN_DATE=`date +"%B %Y" | tr -d '\n'`
 
 AC_ARG_WITH(static-libopkg,
@@ -291,7 +274,6 @@ AM_CONDITIONAL(STATIC_LIBOPKG, test "x$static_libopkg" = "xyes")
 
 AC_SUBST(opkglibdir)
 AC_SUBST(opkgetcdir)
-AC_SUBST(opkglockfile)
 AC_SUBST([CLEAN_DATE])
 
 AC_OUTPUT(

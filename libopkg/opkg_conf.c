@@ -39,7 +39,6 @@
 #include "xfuncs.h"
 
 static int lock_fd;
-static char *lock_file = NULL;
 
 static opkg_conf_t _conf;
 opkg_conf_t *opkg_config = &_conf;
@@ -49,6 +48,7 @@ opkg_conf_t *opkg_config = &_conf;
  */
 static opkg_option_t options[] = {
 	  { "cache_dir", OPKG_OPT_TYPE_STRING, &_conf.cache_dir},
+	  { "lock_file", OPKG_OPT_TYPE_STRING, &_conf.lock_file},
 	  { "force_defaults", OPKG_OPT_TYPE_BOOL, &_conf.force_defaults },
           { "force_maintainer", OPKG_OPT_TYPE_BOOL, &_conf.force_maintainer },
 	  { "force_depends", OPKG_OPT_TYPE_BOOL, &_conf.force_depends },
@@ -579,22 +579,30 @@ opkg_conf_load(void)
 		globfree(&globbuf);
 	}
 
-	if (opkg_config->offline_root)
-		sprintf_alloc (&lock_file, "%s/%s", opkg_config->offline_root, OPKGLOCKFILE);
-	else
-		sprintf_alloc (&lock_file, "%s", OPKGLOCKFILE);
+	if (opkg_config->lock_file == NULL)
+		opkg_config->lock_file = xstrdup(OPKG_CONF_DEFAULT_LOCK_FILE);
 
-	lock_fd = creat(lock_file, S_IRUSR | S_IWUSR | S_IRGRP);
+	if (opkg_config->offline_root) {
+		char *tmp;
+
+		sprintf_alloc(&tmp, "%s/%s", opkg_config->offline_root,
+			      opkg_config->lock_file);
+		free(opkg_config->lock_file);
+		opkg_config->lock_file = tmp;
+	}
+
+	lock_fd = creat(opkg_config->lock_file, S_IRUSR | S_IWUSR | S_IRGRP);
 	if (lock_fd == -1) {
-		opkg_perror(ERROR, "Could not create lock file %s", lock_file);
+		opkg_perror(ERROR, "Could not create lock file %s",
+		            opkg_config->lock_file);
 		goto err2;
 	}
 
 	if (lockf(lock_fd, F_TLOCK, (off_t)0) == -1) {
-		opkg_perror(ERROR, "Could not lock %s", lock_file);
+		opkg_perror(ERROR, "Could not lock %s", opkg_config->lock_file);
 		if (close(lock_fd) == -1)
 			opkg_perror(ERROR, "Couldn't close descriptor %d (%s)",
-				lock_fd, lock_file);
+				    lock_fd, opkg_config->lock_file);
 		lock_fd = -1;
 		goto err2;
 	}
@@ -679,18 +687,17 @@ err4:
 		opkg_perror(ERROR, "Couldn't remove dir %s", opkg_config->tmp_dir);
 err3:
 	if (lockf(lock_fd, F_ULOCK, (off_t)0) == -1)
-		opkg_perror(ERROR, "Couldn't unlock %s", lock_file);
+		opkg_perror(ERROR, "Couldn't unlock %s",
+		            opkg_config->lock_file);
 
 	if (close(lock_fd) == -1)
 		opkg_perror(ERROR, "Couldn't close descriptor %d (%s)",
-				lock_fd, lock_file);
-	if (unlink(lock_file) == -1)
-		opkg_perror(ERROR, "Couldn't unlink %s", lock_file);
+				lock_fd, opkg_config->lock_file);
+	if (unlink(opkg_config->lock_file) == -1)
+		opkg_perror(ERROR, "Couldn't unlink %s",
+		            opkg_config->lock_file);
 err2:
-	if (lock_file) {
-		free(lock_file);
-		lock_file = NULL;
-	}
+	free(opkg_config->lock_file);
 err1:
 	pkg_src_list_deinit(&opkg_config->pkg_src_list);
 	pkg_src_list_deinit(&opkg_config->dist_src_list);
@@ -767,18 +774,20 @@ opkg_conf_deinit(void)
 
 	if (lock_fd != -1) {
 		if (lockf(lock_fd, F_ULOCK, (off_t)0) == -1)
-			opkg_perror(ERROR, "Couldn't unlock %s", lock_file);
+			opkg_perror(ERROR, "Couldn't unlock %s",
+			            opkg_config->lock_file);
 
 		if (close(lock_fd) == -1)
 			opkg_perror(ERROR, "Couldn't close descriptor %d (%s)",
-					lock_fd, lock_file);
+					lock_fd, opkg_config->lock_file);
 
 	}
 
-	if (lock_file) {
-		if (unlink(lock_file) == -1)
-			opkg_perror(ERROR, "Couldn't unlink %s", lock_file);
+	if (opkg_config->lock_file) {
+		if (unlink(opkg_config->lock_file) == -1)
+			opkg_perror(ERROR, "Couldn't unlink %s",
+			            opkg_config->lock_file);
 
-		free(lock_file);
+		free(opkg_config->lock_file);
 	}
 }
