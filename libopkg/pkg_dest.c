@@ -32,6 +32,8 @@
 
 int pkg_dest_init(pkg_dest_t *dest, const char *name, const char *root_dir)
 {
+    char *status_file_dir;
+
     dest->name = xstrdup(name);
 
     /* Guarantee that dest->root_dir ends with a '/' */
@@ -52,6 +54,12 @@ int pkg_dest_init(pkg_dest_t *dest, const char *name, const char *root_dir)
 
     sprintf_alloc(&dest->status_file_name, "%s/%s",
 		  dest->root_dir, opkg_config->status_file);
+
+    /* Ensure that the directory in which we will create the status file exists.
+     */
+    status_file_dir = xdirname(dest->status_file_name);
+    file_mkdir_hier(status_file_dir, 0755);
+    free(status_file_dir);
 
     return 0;
 }
