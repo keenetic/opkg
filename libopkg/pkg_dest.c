@@ -73,6 +73,4 @@ void pkg_dest_deinit(pkg_dest_t *dest)
 
     free(dest->status_file_name);
     dest->status_file_name = NULL;
-
-    dest->root_dir = NULL;
 }
