@@ -39,7 +39,7 @@
 #include "opkg_utils.h"
 #include "opkg_message.h"
 #include "opkg_cmd.h"
-#include "opkg_defines.h"
+#include "opkg_conf.h"
 
 #include "sprintf_alloc.h"
 #include "file_util.h"

@@ -38,7 +38,6 @@
 #include "pkg.h"
 #include "file_util.h"
 #include "opkg_utils.h"
-#include "opkg_defines.h"
 #include "opkg_download.h"
 #include "opkg_install.h"
 #include "opkg_upgrade.h"

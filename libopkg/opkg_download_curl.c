@@ -30,7 +30,6 @@
 
 #include "sprintf_alloc.h"
 #include "file_util.h"
-#include "opkg_defines.h"
 #include "xfuncs.h"
 
 #ifdef HAVE_OPENSSL

@@ -27,7 +27,6 @@
 #include "sprintf_alloc.h"
 #include "opkg_conf.h"
 #include "opkg_cmd.h"
-#include "opkg_defines.h"
 #include "xfuncs.h"
 
 int pkg_dest_init(pkg_dest_t *dest, const char *name, const char *root_dir)

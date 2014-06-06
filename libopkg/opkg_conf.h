@@ -33,6 +33,7 @@ extern "C" {
 
 #define OPKG_CONF_DEFAULT_TMP_DIR_BASE "/tmp"
 #define OPKG_CONF_TMP_DIR_SUFFIX "opkg-XXXXXX"
+#define OPKG_BACKUP_SUFFIX "-opkg.backup"
 
 #define OPKG_CONF_DEFAULT_LISTS_DIR     "/var/lib/opkg/lists"
 #define OPKG_CONF_DEFAULT_INFO_DIR      "/var/lib/opkg/info"

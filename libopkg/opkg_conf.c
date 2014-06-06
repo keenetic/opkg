@@ -35,7 +35,6 @@
 #include "sprintf_alloc.h"
 #include "opkg_message.h"
 #include "file_util.h"
-#include "opkg_defines.h"
 #include "xfuncs.h"
 
 static int lock_fd;
