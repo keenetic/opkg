@@ -36,7 +36,7 @@ extern "C" {
 
 #define OPKG_CONF_DEFAULT_LISTS_DIR     OPKG_STATE_DIR_PREFIX "/lists"
 #define OPKG_CONF_DEFAULT_CACHE_DIR     OPKG_STATE_DIR_PREFIX "/cache"
-#define OPKG_CONF_DEFAULT_CONF_FILE_DIR OPKGETCDIR"/opkg"
+#define OPKG_CONF_DEFAULT_CONF_FILE_DIR "/etc/opkg"
 #define OPKG_CONF_DEFAULT_LOCK_FILE     "/var/run/opkg.lock"
 
 /* In case the config file defines no dest */

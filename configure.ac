@@ -229,24 +229,6 @@ AC_FUNC_UTIME_NULL
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([memmove memset mkdir regcomp strchr strcspn strdup strerror strndup strrchr strstr strtol strtoul sysinfo utime])
 
-opkgetcdir=
-AC_ARG_WITH(opkgetcdir,
-[  --with-opkgetcdir=DIR   specifies directory for opkg.conf file,
-                           "/opkg" is always added so if you want your files
-                           to be in /usr/etc/opkg instead of /etc/opkg
-                           you should indicate
-                           --with-opkgetcdir=/usr/etc ],
-[case "${withval}" in
-yes)    AC_MSG_ERROR(bad value ${withval} given for opkg.conf directory ) ;;
-no)     ;;
-*)      opkgetcdir=$with_opkgetcdir ;;
-esac])
-
-# Default local prefix if it is empty
-if test x$opkgetcdir = x; then
-        opkgetcdir=/etc
-fi
-
 CLEAN_DATE=`date +"%B %Y" | tr -d '\n'`
 
 AC_ARG_WITH(static-libopkg,
@@ -254,7 +236,6 @@ AC_ARG_WITH(static-libopkg,
 [static_libopkg="${withval}"])
 AM_CONDITIONAL(STATIC_LIBOPKG, test "x$static_libopkg" = "xyes")
 
-AC_SUBST(opkgetcdir)
 AC_SUBST([CLEAN_DATE])
 
 AC_OUTPUT(

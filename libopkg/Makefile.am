@@ -1,6 +1,5 @@
 
 AM_CFLAGS=-Wall -DHOST_CPU_STR=\"@host_cpu@\" -DLIBDIR=\"@libdir@\" \
-	-DOPKGETCDIR=\"@opkgetcdir@\" \
 	-DDATADIR=\"@datadir@\" \
 	-I$(top_srcdir)	$(LIBARCHIVE_CFLAGS) $(BIGENDIAN_CFLAGS) $(CURL_CFLAGS) \
 	$(GPGME_CFLAGS) $(GPGERR_CFLAGS) $(PATHFINDER_CFLAGS)
