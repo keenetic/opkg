@@ -50,6 +50,7 @@ static opkg_option_t options[] = {
 	  { "cache_dir", OPKG_OPT_TYPE_STRING, &_conf.cache_dir},
 	  { "lists_dir", OPKG_OPT_TYPE_STRING, &_conf.lists_dir},
 	  { "lock_file", OPKG_OPT_TYPE_STRING, &_conf.lock_file},
+	  { "info_dir", OPKG_OPT_TYPE_STRING, &_conf.info_dir},
 	  { "force_defaults", OPKG_OPT_TYPE_BOOL, &_conf.force_defaults },
           { "force_maintainer", OPKG_OPT_TYPE_BOOL, &_conf.force_maintainer },
 	  { "force_depends", OPKG_OPT_TYPE_BOOL, &_conf.force_depends },
@@ -640,6 +641,9 @@ opkg_conf_load(void)
 		free(opkg_config->cache_dir);
 		opkg_config->cache_dir = tmp;
 	}
+
+        if (opkg_config->info_dir == NULL)
+                opkg_config->info_dir = xstrdup(OPKG_CONF_DEFAULT_INFO_DIR);
 
 	/* if no architectures were defined, then default all, noarch, and host architecture */
 	if (nv_pair_list_empty(&opkg_config->arch_list)) {

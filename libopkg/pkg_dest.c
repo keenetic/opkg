@@ -47,7 +47,7 @@ int pkg_dest_init(pkg_dest_t *dest, const char *name, const char *root_dir)
     file_mkdir_hier(dest->opkg_dir, 0755);
 
     sprintf_alloc(&dest->info_dir, "%s/%s",
-		  dest->opkg_dir, OPKG_INFO_DIR_SUFFIX);
+		  dest->root_dir, opkg_config->info_dir);
     file_mkdir_hier(dest->info_dir, 0755);
 
     sprintf_alloc(&dest->status_file_name, "%s/%s",
