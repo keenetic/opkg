@@ -34,9 +34,9 @@ extern "C" {
 #define OPKG_CONF_DEFAULT_TMP_DIR_BASE "/tmp"
 #define OPKG_CONF_TMP_DIR_SUFFIX "opkg-XXXXXX"
 
-#define OPKG_CONF_DEFAULT_LISTS_DIR     OPKG_STATE_DIR_PREFIX "/lists"
-#define OPKG_CONF_DEFAULT_INFO_DIR      OPKG_STATE_DIR_PREFIX "/info"
-#define OPKG_CONF_DEFAULT_STATUS_FILE   OPKG_STATE_DIR_PREFIX "/status"
+#define OPKG_CONF_DEFAULT_LISTS_DIR     "/var/lib/opkg/lists"
+#define OPKG_CONF_DEFAULT_INFO_DIR      "/var/lib/opkg/info"
+#define OPKG_CONF_DEFAULT_STATUS_FILE   "/var/lib/opkg/status"
 #define OPKG_CONF_DEFAULT_CACHE_DIR     "/var/cache/opkg"
 #define OPKG_CONF_DEFAULT_CONF_FILE_DIR "/etc/opkg"
 #define OPKG_CONF_DEFAULT_LOCK_FILE     "/var/run/opkg.lock"

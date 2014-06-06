@@ -17,8 +17,6 @@
 #ifndef OPKG_DEFINES_H
 #define OPKG_DEFINES_H
 
-#define OPKG_STATE_DIR_PREFIX "/var/lib/opkg"
-
 #define OPKG_BACKUP_SUFFIX "-opkg.backup"
 
 #endif /* OPKG_DEFINES_H */
