@@ -30,7 +30,7 @@
 #include "opkg_defines.h"
 #include "xfuncs.h"
 
-int pkg_dest_init(pkg_dest_t *dest, const char *name, const char *root_dir,const char * lists_dir)
+int pkg_dest_init(pkg_dest_t *dest, const char *name, const char *root_dir)
 {
     dest->name = xstrdup(name);
 
@@ -45,13 +45,6 @@ int pkg_dest_init(pkg_dest_t *dest, const char *name, const char *root_dir,const
     sprintf_alloc(&dest->opkg_dir, "%s%s",
 		  dest->root_dir, OPKG_STATE_DIR_PREFIX);
     file_mkdir_hier(dest->opkg_dir, 0755);
-
-    if (lists_dir[0] == '/')
-        sprintf_alloc(&dest->lists_dir, "%s", lists_dir);
-    else
-        sprintf_alloc(&dest->lists_dir, "/%s", lists_dir);
-
-    file_mkdir_hier(dest->lists_dir, 0755);
 
     sprintf_alloc(&dest->info_dir, "%s/%s",
 		  dest->opkg_dir, OPKG_INFO_DIR_SUFFIX);
@@ -73,9 +66,6 @@ void pkg_dest_deinit(pkg_dest_t *dest)
 
     free(dest->opkg_dir);
     dest->opkg_dir = NULL;
-
-    free(dest->lists_dir);
-    dest->lists_dir = NULL;
 
     free(dest->info_dir);
     dest->info_dir = NULL;

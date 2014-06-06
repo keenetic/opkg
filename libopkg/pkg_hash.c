@@ -76,7 +76,7 @@ pkg_hash_deinit(void)
 }
 
 int
-dist_hash_add_from_file(const char *lists_dir, pkg_src_t *dist)
+dist_hash_add_from_file(pkg_src_t *dist)
 {
 	nv_pair_list_elt_t *l;
 	char *list_file, *subname;
@@ -84,7 +84,8 @@ dist_hash_add_from_file(const char *lists_dir, pkg_src_t *dist)
 	list_for_each_entry(l , &opkg_config->arch_list.head, node) {
 		nv_pair_t *nv = (nv_pair_t *)l->data;
 		sprintf_alloc(&subname, "%s-%s", dist->name, nv->name);
-		sprintf_alloc(&list_file, "%s/%s", lists_dir, subname);
+		sprintf_alloc(&list_file, "%s/%s", opkg_config->lists_dir,
+		              subname);
 
 		if (file_exists(list_file)) {
 			if (pkg_hash_add_from_file(list_file, dist, NULL, 0)) {
@@ -176,19 +177,17 @@ pkg_hash_load_feeds(void)
 {
 	pkg_src_list_elt_t *iter;
 	pkg_src_t *src, *subdist;
-	char *list_file, *lists_dir;
+	char *list_file;
 
 	opkg_msg(INFO, "\n");
-
-	lists_dir = opkg_config->restrict_to_default_dest ?
-		opkg_config->default_dest->lists_dir : opkg_config->lists_dir;
 
 	for (iter = void_list_first(&opkg_config->dist_src_list); iter;
 			iter = void_list_next(&opkg_config->dist_src_list, iter)) {
 
 		src = (pkg_src_t *)iter->data;
 
-		sprintf_alloc(&list_file, "%s/%s", lists_dir, src->name);
+		sprintf_alloc(&list_file, "%s/%s", opkg_config->lists_dir,
+		              src->name);
 
 		if (file_exists(list_file)) {
 			unsigned int i;
@@ -206,7 +205,7 @@ pkg_hash_load_feeds(void)
 			for(i = 0; i < ncomp; i++){
 				subdist->name = NULL;
 				sprintf_alloc(&subdist->name, "%s-%s", src->name, comps[i]);
-				if (dist_hash_add_from_file(lists_dir, subdist)) {
+				if (dist_hash_add_from_file(subdist)) {
 					free(subdist->name); free(subdist);
 					free(list_file);
 					return -1;
@@ -222,7 +221,8 @@ pkg_hash_load_feeds(void)
 
 		src = (pkg_src_t *)iter->data;
 
-		sprintf_alloc(&list_file, "%s/%s", lists_dir, src->name);
+		sprintf_alloc(&list_file, "%s/%s", opkg_config->lists_dir,
+		              src->name);
 
 		if (file_exists(list_file)) {
 			if (pkg_hash_add_from_file(list_file, src, NULL, 0)) {

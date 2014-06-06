@@ -482,7 +482,6 @@ opkg_update_package_lists(opkg_progress_callback_t progress_callback,
 {
 	char *tmp;
 	int err, result = 0;
-	char *lists_dir;
 	pkg_src_list_elt_t *iter;
 	pkg_src_t *src;
 	int sources_list_count, sources_done;
@@ -492,21 +491,17 @@ opkg_update_package_lists(opkg_progress_callback_t progress_callback,
 	pdata.pkg = NULL;
 	progress(&pdata, 0, progress_callback, user_data);
 
-	sprintf_alloc(&lists_dir, "%s", (opkg_config->restrict_to_default_dest)
-		? opkg_config->default_dest->lists_dir : opkg_config->lists_dir);
-
-	if (!file_is_dir(lists_dir)) {
-		if (file_exists(lists_dir)) {
-			opkg_msg(ERROR, "%s is not a directory\n", lists_dir);
-			free(lists_dir);
+	if (!file_is_dir(opkg_config->lists_dir)) {
+		if (file_exists(opkg_config->lists_dir)) {
+			opkg_msg(ERROR, "%s is not a directory\n",
+			         opkg_config->lists_dir);
 			return 1;
 		}
 
-		err = file_mkdir_hier(lists_dir, 0755);
+		err = file_mkdir_hier(opkg_config->lists_dir, 0755);
 		if (err) {
 			opkg_msg(ERROR, "Couldn't create lists_dir %s\n",
-					lists_dir);
-			free(lists_dir);
+					opkg_config->lists_dir);
 			return 1;
 		}
 	}
@@ -515,7 +510,6 @@ opkg_update_package_lists(opkg_progress_callback_t progress_callback,
 	if (mkdtemp(tmp) == NULL) {
 		opkg_perror(ERROR, "Coundn't create temporary directory %s",
 				tmp);
-		free(lists_dir);
 		free(tmp);
 		return 1;
 	}
@@ -543,7 +537,6 @@ opkg_update_package_lists(opkg_progress_callback_t progress_callback,
 
 	rmdir(tmp);
 	free(tmp);
-	free(lists_dir);
 
 	/* Now re-read the package lists to update package hash tables. */
 	opkg_re_read_config_files();

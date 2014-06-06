@@ -58,13 +58,13 @@ void pkg_dest_list_deinit(pkg_dest_list_t *list)
 }
 
 pkg_dest_t *pkg_dest_list_append(pkg_dest_list_t *list, const char *name,
-				 const char *root_dir,const char *lists_dir)
+				 const char *root_dir)
 {
     pkg_dest_t *pkg_dest;
 
     /* freed in pkg_dest_list_deinit */
     pkg_dest = xcalloc(1, sizeof(pkg_dest_t));
-    pkg_dest_init(pkg_dest, name, root_dir,lists_dir);
+    pkg_dest_init(pkg_dest, name, root_dir);
     void_list_append((void_list_t *) list, pkg_dest);
 
     return pkg_dest;

@@ -90,25 +90,18 @@ opkg_update_cmd(int argc, char **argv)
      char *tmp;
      int err;
      int failures;
-     char *lists_dir;
      pkg_src_list_elt_t *iter;
      pkg_src_t *src;
 
-
-    sprintf_alloc(&lists_dir, "%s", opkg_config->restrict_to_default_dest ? opkg_config->default_dest->lists_dir : opkg_config->lists_dir);
-
-    if (! file_is_dir(lists_dir)) {
-	  if (file_exists(lists_dir)) {
+     if (!file_is_dir(opkg_config->lists_dir)) {
+	  if (file_exists(opkg_config->lists_dir)) {
 	       opkg_msg(ERROR, "%s exists, but is not a directory.\n",
-			    lists_dir);
-	       free(lists_dir);
+			    opkg_config->lists_dir);
 	       return -1;
 	  }
-	  err = file_mkdir_hier(lists_dir, 0755);
-	  if (err) {
-	       free(lists_dir);
+	  err = file_mkdir_hier(opkg_config->lists_dir, 0755);
+	  if (err)
 	       return -1;
-	  }
      }
 
      failures = 0;
@@ -127,7 +120,8 @@ opkg_update_cmd(int argc, char **argv)
 
 	  sprintf_alloc(&url, "%s/dists/%s/Release", src->value, src->name);
 
-	  sprintf_alloc(&list_file_name, "%s/%s", lists_dir, src->name);
+	  sprintf_alloc(&list_file_name, "%s/%s", opkg_config->lists_dir,
+	                src->name);
 	  err = opkg_download(url, list_file_name, NULL, NULL);
 	  if (!err) {
 	       opkg_msg(NOTICE, "Downloaded release files for dist %s.\n",
@@ -139,7 +133,8 @@ opkg_update_cmd(int argc, char **argv)
 			 err = -1;
 	       }
 	       if (!err) {
-		    err = release_download(release, src, lists_dir, tmp);
+		    err = release_download(release, src, opkg_config->lists_dir,
+		                           tmp);
 	       }
 	       release_deinit(release);
 	       if (err)
@@ -165,7 +160,6 @@ opkg_update_cmd(int argc, char **argv)
      }
      rmdir (tmp);
      free (tmp);
-     free(lists_dir);
 
      return failures;
 }

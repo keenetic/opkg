@@ -124,7 +124,8 @@ resolve_pkg_dest_list(void)
 	       root_dir = xstrdup(nv_pair->value);
 	  }
 
-	  dest = pkg_dest_list_append(&opkg_config->pkg_dest_list, nv_pair->name, root_dir, opkg_config->lists_dir);
+	  dest = pkg_dest_list_append(&opkg_config->pkg_dest_list,
+	                              nv_pair->name, root_dir);
 	  free(root_dir);
 
 	  if (opkg_config->default_dest == NULL)
@@ -404,8 +405,7 @@ opkg_conf_parse_file(const char *filename,
 	  free(type);
 	  free(name);
 	  free(value);
-	  if (extra)
-	       free(extra);
+          free(extra);
 
 NEXT_LINE:
 	  free(line);
@@ -614,8 +614,7 @@ opkg_conf_load(void)
 	sprintf_alloc(&tmp, "%s/%s",
 		tmp_dir_base ? tmp_dir_base : OPKG_CONF_DEFAULT_TMP_DIR_BASE,
 		OPKG_CONF_TMP_DIR_SUFFIX);
-	if (opkg_config->tmp_dir)
-		free(opkg_config->tmp_dir);
+        free(opkg_config->tmp_dir);
 	opkg_config->tmp_dir = mkdtemp(tmp);
 	if (opkg_config->tmp_dir == NULL) {
 		opkg_perror(ERROR, "Creating temp dir %s failed", tmp);
@@ -714,10 +713,8 @@ err1:
 	}
 err0:
 	nv_pair_list_deinit(&opkg_config->tmp_dest_list);
-	if (opkg_config->dest_str)
-		free(opkg_config->dest_str);
-	if (opkg_config->conf_file)
-		free(opkg_config->conf_file);
+        free(opkg_config->dest_str);
+        free(opkg_config->conf_file);
 
 	return -1;
 }
@@ -734,14 +731,9 @@ opkg_conf_deinit(void)
 	if (opkg_config->volatile_cache)
 		rm_r(opkg_config->cache_dir);
 
-	if (opkg_config->lists_dir)
-		free(opkg_config->lists_dir);
-
-	if (opkg_config->dest_str)
-		free(opkg_config->dest_str);
-
-	if (opkg_config->conf_file)
-		free(opkg_config->conf_file);
+        free(opkg_config->lists_dir);
+        free(opkg_config->dest_str);
+        free(opkg_config->conf_file);
 
 	pkg_src_list_deinit(&opkg_config->pkg_src_list);
 	pkg_src_list_deinit(&opkg_config->dist_src_list);
