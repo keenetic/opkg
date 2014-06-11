@@ -1,4 +1,12 @@
 #!/usr/bin/perl -w
+#
+# 'scripts/checkpatch.sh', taken from the Linux kernel v3.15 and merged into
+# opkg. All the Linux-kernel specific checks which are irrelevant to opkg have
+# subsequently been removed.
+#
+# From time-to-time this script should probably be synced against any upstream
+# changes to checkpatch.pl in the kernel.
+#
 # (c) 2001, Dave Jones. (the file handling bit)
 # (c) 2005, Joel Schopp <jschopp@austin.ibm.com> (the ugly bit)
 # (c) 2007,2008, Andy Whitcroft <apw@uk.ibm.com> (new conditions, test suite)
