@@ -16,14 +16,14 @@ my $V = '0.32';
 use Getopt::Long qw(:config no_auto_abbrev);
 
 my $quiet = 0;
-my $tree = 1;
+my $tree = 0;
 my $chk_signoff = 1;
 my $chk_patch = 1;
 my $tst_only;
 my $emacs = 0;
 my $terse = 0;
 my $file = 0;
-my $check = 0;
+my $check = 1;
 my $check_orig = 0;
 my $summary = 1;
 my $mailback = 0;
