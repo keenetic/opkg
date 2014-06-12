@@ -43,6 +43,7 @@ my $configuration_file = ".checkpatch.conf";
 my $max_line_length = 80;
 my $ignore_perl_version = 0;
 my $minimum_perl_version = 5.10.0;
+my $hardtabs = 0;
 
 sub help {
 	my ($exitcode) = @_;
@@ -60,6 +61,7 @@ Options:
   --terse                    one line per report
   -f, --file                 treat FILE as regular source file
   --subjective, --strict     enable more subjective tests
+  --hard-tabs                force hard tabs instead of soft tabs
   --types TYPE(,TYPE2...)    show only these comma separated message types
   --ignore TYPE(,TYPE2...)   ignore various comma separated message types
   --max-line-length=n        set the maximum line length, if exceeded, warn
@@ -126,6 +128,7 @@ GetOptions(
 	'terse!'	=> \$terse,
 	'f|file!'	=> \$file,
 	'subjective!'	=> \$check,
+	'hard-tabs!'	=> \$hardtabs,
 	'strict!'	=> \$check,
 	'ignore=s'	=> \@ignore,
 	'types=s'	=> \@use,
@@ -2194,29 +2197,38 @@ sub process {
 # check we are in a valid source file C or perl if not then ignore this hunk
 		next if ($realfile !~ /\.(h|c|pl)$/);
 
+		if ($hardtabs) {
 # at the beginning of a line any tabs must come first and anything
 # more than 8 must use tabs.
-		if ($rawline =~ /^\+\s* \t\s*\S/ ||
-		    $rawline =~ /^\+\s*        \s*/) {
-			my $herevet = "$here\n" . cat_vet($rawline) . "\n";
-			$rpt_cleaners = 1;
-			if (ERROR("CODE_INDENT",
-				  "code indent should use tabs where possible\n" . $herevet) &&
-			    $fix) {
-				$fixed[$linenr - 1] =~ s/^\+([ \t]+)/"\+" . tabify($1)/e;
+			if ($rawline =~ /^\+\s* \t\s*\S/ ||
+			    $rawline =~ /^\+\s*        \s*/) {
+				my $herevet = "$here\n" . cat_vet($rawline) . "\n";
+				$rpt_cleaners = 1;
+				if (ERROR("CODE_INDENT",
+					  "code indent should use tabs where possible\n" . $herevet) &&
+				    $fix) {
+					$fixed[$linenr - 1] =~ s/^\+([ \t]+)/"\+" . tabify($1)/e;
+				}
 			}
-		}
 
 # check for space before tabs.
-		if ($rawline =~ /^\+/ && $rawline =~ / \t/) {
-			my $herevet = "$here\n" . cat_vet($rawline) . "\n";
-			if (WARN("SPACE_BEFORE_TAB",
-				"please, no space before tabs\n" . $herevet) &&
-			    $fix) {
-				while ($fixed[$linenr - 1] =~
-					   s/(^\+.*) {8,8}+\t/$1\t\t/) {}
-				while ($fixed[$linenr - 1] =~
-					   s/(^\+.*) +\t/$1\t/) {}
+			if ($rawline =~ /^\+/ && $rawline =~ / \t/) {
+				my $herevet = "$here\n" . cat_vet($rawline) . "\n";
+				if (WARN("SPACE_BEFORE_TAB",
+					"please, no space before tabs\n" . $herevet) &&
+				    $fix) {
+					while ($fixed[$linenr - 1] =~
+						   s/(^\+.*) {8,8}+\t/$1\t\t/) {}
+					while ($fixed[$linenr - 1] =~
+						   s/(^\+.*) +\t/$1\t/) {}
+				}
+			}
+		} else {
+# check for tabs at the beginning of a line.
+			if ($rawline =~ /^\+\s*\t/) {
+				my $herevet = "$here\n" . $rawline . "\n";
+				ERROR("CODE_INDENT",
+				      "code indent should use space instead of tabs\n" . $herevet);
 			}
 		}
 
@@ -2325,17 +2337,19 @@ sub process {
 			     "Missing a blank line after declarations\n" . $hereprev);
 		}
 
+		if ($hardtabs) {
 # check for spaces at the beginning of a line.
 # Exceptions:
 #  1) within comments
 #  2) indented preprocessor commands
 #  3) hanging labels
-		if ($rawline =~ /^\+ / && $line !~ /^\+ *(?:$;|#|$Ident:)/)  {
-			my $herevet = "$here\n" . cat_vet($rawline) . "\n";
-			if (WARN("LEADING_SPACE",
-				 "please, no spaces at the start of a line\n" . $herevet) &&
-			    $fix) {
-				$fixed[$linenr - 1] =~ s/^\+([ \t]+)/"\+" . tabify($1)/e;
+			if ($rawline =~ /^\+ / && $line !~ /^\+ *(?:$;|#|$Ident:)/)  {
+				my $herevet = "$here\n" . cat_vet($rawline) . "\n";
+				if (WARN("LEADING_SPACE",
+					 "please, no spaces at the start of a line\n" . $herevet) &&
+				    $fix) {
+					$fixed[$linenr - 1] =~ s/^\+([ \t]+)/"\+" . tabify($1)/e;
+				}
 			}
 		}
 
