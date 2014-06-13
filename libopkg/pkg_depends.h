@@ -82,6 +82,8 @@ int pkg_conflicts_abstract(pkg_t *pkg, abstract_pkg_t *conflicts);
  */
 int pkg_conflicts(pkg_t *pkg, pkg_t *conflicts);
 
+int pkg_breaks_reverse_dep(pkg_t *pkg);
+
 char *pkg_depend_str(pkg_t *pkg, int index);
 void buildDependedUponBy(pkg_t * pkg, abstract_pkg_t * ab_pkg);
 int version_constraints_satisfied(depend_t * depends, pkg_t * pkg);
