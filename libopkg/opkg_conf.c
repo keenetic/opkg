@@ -702,7 +702,6 @@ err3:
 		opkg_perror(ERROR, "Couldn't unlink %s",
 		            opkg_config->lock_file);
 err2:
-	free(opkg_config->lock_file);
 err1:
 	pkg_src_list_deinit(&opkg_config->pkg_src_list);
 	pkg_src_list_deinit(&opkg_config->dist_src_list);
@@ -738,7 +737,6 @@ opkg_conf_deinit(void)
 	if (opkg_config->volatile_cache)
 		rm_r(opkg_config->cache_dir);
 
-        free(opkg_config->lists_dir);
         free(opkg_config->dest_str);
         free(opkg_config->conf_file);
 
@@ -746,19 +744,6 @@ opkg_conf_deinit(void)
 	pkg_src_list_deinit(&opkg_config->dist_src_list);
 	pkg_dest_list_deinit(&opkg_config->pkg_dest_list);
 	nv_pair_list_deinit(&opkg_config->arch_list);
-
-	for (i=0; options[i].name; i++) {
-		if (options[i].type == OPKG_OPT_TYPE_STRING) {
-			tmp = (char **)options[i].value;
-			if (*tmp) {
-				free(*tmp);
-				*tmp = NULL;
-			}
-		} else {
-			int *val = (int *) options[i].value;
-			*val = 0;
-		}
-	}
 
 	if (opkg_config->verbosity >= DEBUG) {
 		hash_print_stats(&opkg_config->pkg_hash);
@@ -785,7 +770,18 @@ opkg_conf_deinit(void)
 		if (unlink(opkg_config->lock_file) == -1)
 			opkg_perror(ERROR, "Couldn't unlink %s",
 			            opkg_config->lock_file);
+	}
 
-		free(opkg_config->lock_file);
+        for (i=0; options[i].name; i++) {
+		if (options[i].type == OPKG_OPT_TYPE_STRING) {
+			tmp = (char **)options[i].value;
+			if (*tmp) {
+				free(*tmp);
+				*tmp = NULL;
+			}
+		} else {
+			int *val = (int *) options[i].value;
+			*val = 0;
+		}
 	}
 }
