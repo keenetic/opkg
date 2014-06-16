@@ -906,7 +906,8 @@ void buildDependedUponBy(pkg_t * pkg, abstract_pkg_t * ab_pkg)
 	for (i = 0; i < count; i++) {
 		depends = &pkg->depends[i];
 		if (depends->type != PREDEPEND
-		    && depends->type != DEPEND)
+		    && depends->type != DEPEND
+                    && depends->type != RECOMMEND)
 			continue;
 		for (j = 0; j < depends->possibility_count; j++) {
 			ab_depend = depends->possibilities[j]->pkg;
