@@ -318,6 +318,9 @@ opkg_conf_parse_file(const char *filename,
 	  } else if (strcmp(type, "dest") == 0) {
 	       nv_pair_list_append(&conf->tmp_dest_list, name, value);
 	  } else if (strcmp(type, "lists_dir") == 0) {
+               /* Ensure we don't leak memory if lists_dir has already been set.
+                */
+               free(conf->lists_dir);
 	       conf->lists_dir = xstrdup(value);
 	  } else if (strcmp(type, "arch") == 0) {
 	       opkg_msg(INFO, "Supported arch %s priority (%s)\n", name, value);
