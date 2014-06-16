@@ -46,6 +46,7 @@ opkg_conf_t *conf = &_conf;
  */
 opkg_option_t options[] = {
 	  { "cache", OPKG_OPT_TYPE_STRING, &_conf.cache},
+	  { "lists_dir", OPKG_OPT_TYPE_STRING, &_conf.lists_dir },
 	  { "force_defaults", OPKG_OPT_TYPE_BOOL, &_conf.force_defaults },
           { "force_maintainer", OPKG_OPT_TYPE_BOOL, &_conf.force_maintainer },
 	  { "force_depends", OPKG_OPT_TYPE_BOOL, &_conf.force_depends },
@@ -580,8 +581,6 @@ opkg_conf_load(void)
 
 
 err4:
-	free(conf->lists_dir);
-
 	pkg_hash_deinit();
 	hash_table_deinit(&conf->file_hash);
 	hash_table_deinit(&conf->obs_file_hash);
@@ -635,9 +634,6 @@ opkg_conf_deinit(void)
 
 	if (conf->tmp_dir)
 		rm_r(conf->tmp_dir);
-
-	if (conf->lists_dir)
-		free(conf->lists_dir);
 
 	if (conf->dest_str)
 		free(conf->dest_str);
