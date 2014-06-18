@@ -303,6 +303,11 @@ pkg_hash_fetch_best_installation_candidate(abstract_pkg_t *apkg,
      /* accumulate all the providers */
      for (i = 0; i < nprovides; i++) {
 	  abstract_pkg_t *provider_apkg = provided_apkgs[i];
+
+          /* Don't double insert packages. */
+          if (abstract_pkg_vec_contains(providers, provider_apkg))
+              continue;
+
 	  opkg_msg(DEBUG, "Adding %s to providers.\n", provider_apkg->name);
 	  abstract_pkg_vec_insert(providers, provider_apkg);
      }
