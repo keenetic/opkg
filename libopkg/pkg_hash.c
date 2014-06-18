@@ -340,9 +340,21 @@ pkg_hash_fetch_best_installation_candidate(abstract_pkg_t *apkg,
 	  }
 
 
-	  /* now check for supported architecture */
 	  for (j=0; j<vec->len; j++) {
 	      pkg_t *maybe = vec->pkgs[j];
+
+	      /* Ensure that installing this package won't break the
+	       * dependencies of packages which are already installed, unless
+	       * force_depends is set.
+	       */
+	      if (pkg_breaks_reverse_dep(maybe) &&
+		      !conf->force_depends) {
+		  opkg_msg(NOTICE, "Not selecting %s %s as installing it would break existing dependencies.\n",
+			   maybe->name, maybe->version);
+		  continue;
+	      }
+
+	      /* now check for supported architecture */
 	      opkg_msg(DEBUG, "%s arch=%s arch_priority=%d version=%s.\n",
 			      maybe->name, maybe->architecture,
 			      maybe->arch_priority, maybe->version);
