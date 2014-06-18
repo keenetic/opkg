@@ -61,7 +61,8 @@ parse_conffiles(pkg_t *pkg, const char *cstr)
 int
 parse_version(pkg_t *pkg, const char *vstr)
 {
-	char *colon;
+	size_t offset;
+	const char *numbers = "0123456789";
 
 	if (strncmp(vstr, "Version:", 8) == 0)
 		vstr += 8;
@@ -69,14 +70,17 @@ parse_version(pkg_t *pkg, const char *vstr)
 	while (*vstr && isspace(*vstr))
 		vstr++;
 
-	colon = strchr(vstr, ':');
-	if (colon) {
+	/* A colon is only the epoch separator if it is the first non-numeric
+	 * character in the string.
+	 */
+	offset = strspn(vstr, numbers);
+	if (vstr[offset] == ':') {
 		errno = 0;
 		pkg->epoch = strtoul(vstr, NULL, 10);
 		if (errno) {
 			opkg_perror(ERROR, "%s: invalid epoch", pkg->name);
 		}
-		vstr = ++colon;
+		vstr += offset + 1;
 	} else {
 		pkg->epoch= 0;
 	}
