@@ -341,27 +341,21 @@ pkg_hash_fetch_best_installation_candidate(abstract_pkg_t *apkg,
 
 
 	  /* now check for supported architecture */
-	  {
-	       int max_count = 0;
-
-	       /* count packages matching max arch priority and keep track of last one */
-	       for (j=0; j<vec->len; j++) {
-		    pkg_t *maybe = vec->pkgs[j];
-		    opkg_msg(DEBUG, "%s arch=%s arch_priority=%d version=%s.\n",
-				 maybe->name, maybe->architecture,
-				 maybe->arch_priority, maybe->version);
-                    /* We make sure not to add the same package twice. Need to search for the reason why
-                       they show up twice sometimes. */
-		    if ((maybe->arch_priority > 0) && (! pkg_vec_contains(matching_pkgs, maybe))) {
-			 max_count++;
-			 abstract_pkg_vec_insert(matching_apkgs, maybe->parent);
-			 pkg_vec_insert(matching_pkgs, maybe);
-		    }
-	       }
-
-		if (vec->len > 0 && matching_pkgs->len < 1)
-			wrong_arch_found = 1;
+	  for (j=0; j<vec->len; j++) {
+	      pkg_t *maybe = vec->pkgs[j];
+	      opkg_msg(DEBUG, "%s arch=%s arch_priority=%d version=%s.\n",
+			      maybe->name, maybe->architecture,
+			      maybe->arch_priority, maybe->version);
+	      /* We make sure not to add the same package twice. Need to search for the reason why
+		  they show up twice sometimes. */
+	      if ((maybe->arch_priority > 0) && (! pkg_vec_contains(matching_pkgs, maybe))) {
+	          abstract_pkg_vec_insert(matching_apkgs, maybe->parent);
+		  pkg_vec_insert(matching_pkgs, maybe);
+	      }
 	  }
+
+	  if (vec->len > 0 && matching_pkgs->len < 1)
+	      wrong_arch_found = 1;
      }
 
      if (matching_pkgs->len < 1) {
