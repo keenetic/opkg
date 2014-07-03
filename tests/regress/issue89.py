@@ -37,4 +37,4 @@ opkgcl.install("b")
 if not opkgcl.is_installed("b"):
 	opk.fail("Package 'b' failed to install.")
 if opkgcl.is_installed("a"):
-	opk.xfail("Package 'a' remains installed despite conflicts.")
+	opk.fail("Package 'a' remains installed despite conflicts.")
