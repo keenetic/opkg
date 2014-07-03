@@ -20,11 +20,6 @@
 # This test case was initially part of issue58.py but the failure was not as
 # described in issue 58 in the bug tracker, so this was split out.
 #
-#
-# Status
-# ======
-#
-# Open
 
 import os
 import opk, cfg, opkgcl
@@ -45,5 +40,5 @@ opkgcl.install("c")
 
 opkgcl.remove("a", "--autoremove")
 if not opkgcl.is_installed("b"):
-	opk.xfail("Pacakge 'b' removed despite remaining "
+	opk.fail("Pacakge 'b' removed despite remaining "
 			"recommending package 'c'.")
