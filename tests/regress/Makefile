@@ -10,8 +10,8 @@ REGRESSION_TESTS := 01_install.py 02_file.py 03_upgrade.py 04_upgrade_file.py \
 			issue26.py issue31.py issue45.py issue46.py \
 			issue50.py issue51.py issue55.py issue58.py \
 			issue72.py issue79.py issue85.py issue89.py \
-			issue89a.py issue91.py issue103.py issue121.py \
-			issue124.py issue127.py \
+			issue91.py issue103.py issue121.py \
+			issue124.py issue127.py issue136.py \
 			filehash.py update_loses_autoinstalled_flag.py
 RUN_TESTS := $(REGRESSION_TESTS:%.py=run-%.py)
 
