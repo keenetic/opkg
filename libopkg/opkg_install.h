@@ -18,12 +18,11 @@
 #ifndef OPKG_INSTALL_H
 #define OPKG_INSTALL_H
 
+#include "pkg.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "pkg.h"
-#include "opkg_conf.h"
 
 int opkg_install_by_name(const char *pkg_name);
 int opkg_install_pkg(pkg_t *pkg, int from_upgrading);
