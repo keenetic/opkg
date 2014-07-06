@@ -25,8 +25,8 @@
 #include "opkg_upgrade.h"
 #include "opkg_message.h"
 
-int
-opkg_upgrade_pkg(pkg_t *old)
+static int
+opkg_prepare_upgrade_pkg(pkg_t *old, pkg_t **pkg)
 {
      pkg_t *new;
      int cmp;
@@ -76,6 +76,23 @@ opkg_upgrade_pkg(pkg_t *old)
     free(old_version);
     free(new_version);
     new->state_flag |= SF_USER;
+
+    *pkg = new;
+    return 1;
+}
+
+int
+opkg_upgrade_pkg(pkg_t *old)
+{
+    pkg_t *new;
+    int r;
+
+    r = opkg_prepare_upgrade_pkg(old, &new);
+    if (r <= 0)
+        return r;
+
+    opkg_msg(DEBUG2,"Calling opkg_install_pkg for %s %s.\n",
+             new->name, new->version);
     return opkg_install_pkg(new,1);
 }
 
