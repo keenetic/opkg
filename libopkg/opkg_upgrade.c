@@ -96,6 +96,46 @@ opkg_upgrade_pkg(pkg_t *old)
     return opkg_install_pkg(new,1);
 }
 
+int
+opkg_upgrade_multiple_pkgs(pkg_vec_t *pkgs_to_upgrade)
+{
+    int r;
+    unsigned int i;
+    pkg_t *pkg;
+    pkg_t *new;
+    pkg_vec_t *pkgs_to_install = pkg_vec_alloc();
+    int errors = 0;
+
+    /* Prepare all packages. */
+    for (i = 0; i < pkgs_to_upgrade->len; i++) {
+        pkg = pkgs_to_upgrade->pkgs[i];
+
+        r = opkg_prepare_upgrade_pkg(pkg, &new);
+        if (r < 0)
+            errors++;
+        if (r <= 0)
+            continue;
+
+        pkg_vec_insert(pkgs_to_install, new);
+    }
+
+    /* Install all new packages. */
+    for (i = 0; i < pkgs_to_install->len; i++) {
+        pkg = pkgs_to_install->pkgs[i];
+
+        opkg_msg(DEBUG2,"Calling opkg_install_pkg for %s %s.\n",
+                 pkg->name, pkg->version);
+        r = opkg_install_pkg(pkg, 1);
+        if (r < 0)
+            errors++;
+    }
+
+    pkg_vec_free(pkgs_to_install);
+    if (errors > 0)
+        return -1;
+
+    return 0;
+}
 
 static void
 pkg_hash_check_installed_pkg_helper(const char *pkg_name, void *entry,
