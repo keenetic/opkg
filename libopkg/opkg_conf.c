@@ -70,6 +70,7 @@ opkg_option_t options[] = {
 	  { "query-all", OPKG_OPT_TYPE_BOOL, &_conf.query_all },
 	  { "tmp_dir", OPKG_OPT_TYPE_STRING, &_conf.tmp_dir },
 	  { "verbosity", OPKG_OPT_TYPE_INT, &_conf.verbosity },
+          { "combine", OPKG_OPT_TYPE_BOOL, &_conf.combine },
 #if defined(HAVE_OPENSSL)
 	  { "signature_ca_file", OPKG_OPT_TYPE_STRING, &_conf.signature_ca_file },
 	  { "signature_ca_path", OPKG_OPT_TYPE_STRING, &_conf.signature_ca_path },

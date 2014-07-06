@@ -89,6 +89,7 @@ struct opkg_conf
      int noaction;
      int download_only;
      char *cache;
+     int combine;
 
      /* ssl-curl options: used only when opkg is configured with
       * '--enable-ssl-curl', otherwise always NULL or 0.
