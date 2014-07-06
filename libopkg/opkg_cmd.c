@@ -480,7 +480,7 @@ opkg_install_cmd(int argc, char **argv)
      int i;
      char *arg;
      int err = 0;
-     str_list_t *pkg_names_to_install;
+     str_list_t *pkg_names_to_install = NULL;
 
      signal(SIGINT, sigint_handler);
 
@@ -532,8 +532,8 @@ opkg_upgrade_cmd(int argc, char **argv)
      int i;
      pkg_t *pkg;
      int err = 0;
-     pkg_vec_t *pkgs_to_upgrade;
-     str_list_t *pkg_names_to_install;
+     pkg_vec_t *pkgs_to_upgrade = NULL;
+     str_list_t *pkg_names_to_install = NULL;
 
      signal(SIGINT, sigint_handler);
 
