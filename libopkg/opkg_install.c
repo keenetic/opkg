@@ -1175,9 +1175,8 @@ resolve_conffiles(pkg_t *pkg)
      return 0;
 }
 
-
-int
-opkg_install_by_name(const char *pkg_name)
+static int
+opkg_prepare_install_by_name(const char * pkg_name, pkg_t **pkg)
 {
      int cmp;
      pkg_t *old, *new;
@@ -1238,8 +1237,23 @@ opkg_install_by_name(const char *pkg_name)
 	  free(new_version);
      }
 
-     opkg_msg(DEBUG2,"Calling opkg_install_pkg.\n");
-     return opkg_install_pkg(new, 0);
+     *pkg = new;
+     return 1;
+}
+
+int
+opkg_install_by_name(const char *pkg_name)
+{
+     pkg_t *pkg;
+     int r;
+
+     r = opkg_prepare_install_by_name(pkg_name, &pkg);
+     if (r <= 0)
+         return r;
+
+     opkg_msg(DEBUG2,"Calling opkg_install_pkg for %s %s.\n",
+              pkg->name, pkg->version);
+     return opkg_install_pkg(pkg, 0);
 }
 
 /**
