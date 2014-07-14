@@ -24,6 +24,12 @@
 #include "opkg_install.h"
 #include "opkg_upgrade.h"
 #include "opkg_message.h"
+#include "libbb/libbb.h"
+
+typedef struct upgrade_pair {
+    pkg_t * old;
+    pkg_t * new;
+} upgrade_pair_t;
 
 static int
 opkg_prepare_upgrade_pkg(pkg_t *old, pkg_t **pkg)
@@ -94,7 +100,16 @@ opkg_upgrade_pkg(pkg_t *old)
 
     opkg_msg(DEBUG2,"Calling opkg_install_pkg for %s %s.\n",
              new->name, new->version);
-    return opkg_install_pkg(new,1);
+    r = opkg_install_pkg(new,1);
+    if (r < 0) {
+        /* The installation failed so we need to reset the appropriate
+         * state_want flags.
+         */
+        new->state_want = SW_UNKNOWN;
+        old->state_want = SW_INSTALL;
+    }
+
+    return r;
 }
 
 int
@@ -104,8 +119,12 @@ opkg_upgrade_multiple_pkgs(pkg_vec_t *pkgs_to_upgrade)
     unsigned int i;
     pkg_t *pkg;
     pkg_t *new;
-    pkg_vec_t *pkgs_to_install = pkg_vec_alloc();
+    upgrade_pair_t *pair;
+    void_list_t upgrade_pairs;
+    void_list_elt_t *iter;
     int errors = 0;
+
+    void_list_init(&upgrade_pairs);
 
     /* Prepare all packages. */
     for (i = 0; i < pkgs_to_upgrade->len; i++) {
@@ -117,21 +136,33 @@ opkg_upgrade_multiple_pkgs(pkg_vec_t *pkgs_to_upgrade)
         if (r <= 0)
             continue;
 
-        pkg_vec_insert(pkgs_to_install, new);
+        pair = (upgrade_pair_t *)xmalloc(sizeof(upgrade_pair_t));
+        pair->old = pkg;
+        pair->new = new;
+        void_list_push(&upgrade_pairs, pair);
     }
 
     /* Install all new packages. */
-    for (i = 0; i < pkgs_to_install->len; i++) {
-        pkg = pkgs_to_install->pkgs[i];
+    list_for_each_entry(iter, &upgrade_pairs.head, node) {
+        pair = iter->data;
+        pkg = pair->new;
 
         opkg_msg(DEBUG2,"Calling opkg_install_pkg for %s %s.\n",
                  pkg->name, pkg->version);
         r = opkg_install_pkg(pkg, 1);
-        if (r < 0)
+        if (r < 0) {
+            /* The installation failed so we need to reset the appropriate
+             * state_want flags.
+             */
+            pkg->state_want = SW_UNKNOWN;
+            pair->old->state_want = SW_INSTALL;
             errors++;
+        }
+
+        free(pair);
     }
 
-    pkg_vec_free(pkgs_to_install);
+    void_list_deinit(&upgrade_pairs);
     if (errors > 0)
         return -1;
 
