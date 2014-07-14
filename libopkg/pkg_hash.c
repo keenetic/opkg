@@ -347,6 +347,13 @@ pkg_hash_fetch_best_installation_candidate(abstract_pkg_t *apkg,
 	  for (j=0; j<vec->len; j++) {
 	      pkg_t *maybe = vec->pkgs[j];
 
+              /* Ensure that the package meets the specified constraint. */
+              if (constraint_fcn && !constraint_fcn(maybe, cdata)) {
+                  opkg_msg(DEBUG, "Not selecting %s %s due to unmatched constraint.\n",
+                           maybe->name, maybe->version);
+                  continue;
+              }
+
 	      /* Ensure that installing this package won't break the
 	       * dependencies of packages which are already installed, unless
 	       * force_depends is set.
@@ -392,26 +399,24 @@ pkg_hash_fetch_best_installation_candidate(abstract_pkg_t *apkg,
 
      for (i = 0; i < matching_pkgs->len; i++) {
 	  pkg_t *matching = matching_pkgs->pkgs[i];
-          if (constraint_fcn(matching, cdata)) {
-             opkg_msg(DEBUG, "Candidate: %s %s.\n",
-			     matching->name, matching->version) ;
-	     /* It has been provided by hand, so it is what user want */
-             if (matching->provided_by_hand == 1) {
-                 good_pkg_by_name = matching;
-                 break;
-             }
-             /* Respect to the arch priorities when given alternatives */
-             if (good_pkg_by_name && conf->prefer_arch_to_version) {
-                 if (matching->arch_priority >= good_pkg_by_name->arch_priority) {
-                     good_pkg_by_name = matching;
-                     opkg_msg(DEBUG, "%s %s wins by priority.\n",
-                         matching->name, matching->version) ;
-                 } else
-                     opkg_msg(DEBUG, "%s %s wins by priority.\n",
-                         good_pkg_by_name->name, good_pkg_by_name->version) ;
-             } else
-                 good_pkg_by_name = matching;
+          opkg_msg(DEBUG, "Candidate: %s %s.\n",
+	           matching->name, matching->version) ;
+	  /* It has been provided by hand, so it is what user want */
+          if (matching->provided_by_hand == 1) {
+              good_pkg_by_name = matching;
+              break;
           }
+          /* Respect to the arch priorities when given alternatives */
+          if (good_pkg_by_name && conf->prefer_arch_to_version) {
+              if (matching->arch_priority >= good_pkg_by_name->arch_priority) {
+                  good_pkg_by_name = matching;
+                  opkg_msg(DEBUG, "%s %s wins by priority.\n",
+                      matching->name, matching->version) ;
+              } else
+                  opkg_msg(DEBUG, "%s %s wins by priority.\n",
+                      good_pkg_by_name->name, good_pkg_by_name->version) ;
+          } else
+              good_pkg_by_name = matching;
      }
 
 
