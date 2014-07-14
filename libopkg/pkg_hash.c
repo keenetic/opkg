@@ -347,6 +347,16 @@ pkg_hash_fetch_best_installation_candidate(abstract_pkg_t *apkg,
 	  for (j=0; j<vec->len; j++) {
 	      pkg_t *maybe = vec->pkgs[j];
 
+              /* If package is installed and held, add it to the matching list
+               * regardless of whether it satisfies our other checks. This
+               * ensures that a held package won't be removed due to edge cases
+               * like the forced installation of a new package with dependency
+               * on a later version of the held package.
+               */
+              if ((maybe->state_status == SS_INSTALLED || maybe->state_status == SS_UNPACKED)
+                      && maybe->state_flag == SF_HOLD)
+                  goto add_matching_pkg;
+
               /* Ensure that the package meets the specified constraint. */
               if (constraint_fcn && !constraint_fcn(maybe, cdata)) {
                   opkg_msg(DEBUG, "Not selecting %s %s due to unmatched constraint.\n",
@@ -375,6 +385,7 @@ pkg_hash_fetch_best_installation_candidate(abstract_pkg_t *apkg,
                   continue;
               }
 
+add_matching_pkg:
 	      /* We make sure not to add the same package twice. Need to search for the reason why
 		  they show up twice sometimes. */
 	      if (! pkg_vec_contains(matching_pkgs, maybe)) {
