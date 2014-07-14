@@ -273,7 +273,6 @@ pkg_hash_fetch_best_installation_candidate(abstract_pkg_t *apkg,
      int i, j;
      int nprovides = 0;
      int nmatching = 0;
-     int wrong_arch_found = 0;
      pkg_vec_t *matching_pkgs;
      abstract_pkg_vec_t *matching_apkgs;
      abstract_pkg_vec_t *provided_apkg_vec;
@@ -363,23 +362,22 @@ pkg_hash_fetch_best_installation_candidate(abstract_pkg_t *apkg,
 	      opkg_msg(DEBUG, "%s arch=%s arch_priority=%d version=%s.\n",
 			      maybe->name, maybe->architecture,
 			      maybe->arch_priority, maybe->version);
+              if (maybe->arch_priority <= 0) {
+                  opkg_msg(NOTICE, "Not selecting %s %s due to incompatible architecture.\n",
+                           maybe->name, maybe->version);
+                  continue;
+              }
+
 	      /* We make sure not to add the same package twice. Need to search for the reason why
 		  they show up twice sometimes. */
-	      if ((maybe->arch_priority > 0) && (! pkg_vec_contains(matching_pkgs, maybe))) {
+	      if (! pkg_vec_contains(matching_pkgs, maybe)) {
 	          abstract_pkg_vec_insert(matching_apkgs, maybe->parent);
 		  pkg_vec_insert(matching_pkgs, maybe);
 	      }
 	  }
-
-	  if (vec->len > 0 && matching_pkgs->len < 1)
-	      wrong_arch_found = 1;
      }
 
      if (matching_pkgs->len < 1) {
-	  if (wrong_arch_found)
-	        opkg_msg(ERROR, "Packages for %s found, but"
-			" incompatible with the architectures configured\n",
-			apkg->name);
           pkg_vec_free(matching_pkgs);
           abstract_pkg_vec_free(matching_apkgs);
           abstract_pkg_vec_free(providers);
