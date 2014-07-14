@@ -1237,6 +1237,8 @@ opkg_prepare_install_by_name(const char * pkg_name, pkg_t **pkg)
 	  free(new_version);
      }
 
+     new->state_want = SW_INSTALL;
+
      *pkg = new;
      return 1;
 }

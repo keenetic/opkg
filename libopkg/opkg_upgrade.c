@@ -76,6 +76,7 @@ opkg_prepare_upgrade_pkg(pkg_t *old, pkg_t **pkg)
     free(old_version);
     free(new_version);
     new->state_flag |= SF_USER;
+    new->state_want = SW_INSTALL;
 
     *pkg = new;
     return 1;
