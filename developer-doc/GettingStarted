@@ -1,0 +1,51 @@
+Getting started with opkg development
+=====================================
+
+This is a brief list of areas where new contributors can help with opkg.
+
+## General tasks
+
+- Test cases
+
+    - opkg has a set of fairly self-explanatory test cases in 'tests/regress'.
+      Each test is a python script which is executed from the Makefile in that
+      directory. Adding test cases should be fairly straightforward if you have
+      experience using opkg on the command line, little or no knowledge of the
+      internals of opkg should be needed.
+
+- Refactor long/complex functions
+
+    - There are still several 100+ line functions within the opkg code base that
+      should be refactored into a sequence of shorter functions which each do
+      just one thing.
+
+## Specific skills needed
+
+If you have any knowledge in these areas, we could really use help!
+
+- Build system
+
+    - opkg currently uses autotools but we don't have anyone regularly involved
+      in the project who knows this system well. If you're good with autotools,
+      the build scripts need some review and probably aren't perfect. If you
+      know another system well, especially cmake, we may be interested in
+      changing the build system to this instead of autotools.
+
+- Man pages
+
+    - Again, no-one involved in opkg at the moment is an expert on man page
+      syntax. If you are, the documentation could use a lot of work!
+
+## Other things to check
+
+- Issue tracker [1]
+
+    - Some of the issues may be suitable for new contributors, have a look and
+      use your judgement.
+
+- Mailing list [2]
+
+    - Just ask :)
+
+[1]: https://code.google.com/p/opkg/issues/list
+[2]: opkg-devel@googlegroups.com
