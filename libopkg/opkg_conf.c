@@ -520,6 +520,20 @@ static int
 opkg_lock()
 {
     int r;
+    char * lock_dir;
+
+    /* Ensure that the dir in which the lock file will be created exists. */
+    lock_dir = xdirname(opkg_config->lock_file);
+    if (!file_exists(lock_dir)) {
+        r = file_mkdir_hier(lock_dir, 0755);
+        if (r == -1) {
+            opkg_perror(ERROR, "Could not create lock file directory %s",
+                        lock_dir);
+            free(lock_dir);
+            return -1;
+        }
+    }
+    free(lock_dir);
 
     lock_fd = creat(opkg_config->lock_file, S_IRUSR | S_IWUSR | S_IRGRP);
     if (lock_fd == -1) {
