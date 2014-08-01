@@ -48,7 +48,7 @@ if not opkgcl.is_installed("a", "1.0"):
 
 # Check 'b' has not been upgraded
 if opkgcl.is_installed("b", "1.1"):
-	opk.xfail("Package 'b' upgraded despite breaking dependency of package 'a'.")
+	opk.fail("Package 'b' upgraded despite breaking dependency of package 'a'.")
 if not opkgcl.is_installed("b", "1.0"):
 	opk.fail("Package 'b' version 1.0 removed.")
 
