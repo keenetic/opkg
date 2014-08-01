@@ -25,9 +25,15 @@
 #include "opkg_install.h"
 #include "opkg_upgrade.h"
 #include "opkg_message.h"
+#include "xfuncs.h"
 
-int
-opkg_upgrade_pkg(pkg_t *old)
+typedef struct upgrade_pair {
+    pkg_t * old;
+    pkg_t * new;
+} upgrade_pair_t;
+
+static int
+opkg_prepare_upgrade_pkg(pkg_t *old, pkg_t **pkg)
 {
      pkg_t *new;
      int cmp;
@@ -84,12 +90,94 @@ opkg_upgrade_pkg(pkg_t *old)
     free(new_version);
 
     new->state_flag = old->state_flag;
+    new->state_want = SW_INSTALL;
     /* maintain the "Auto-Installed: yes" flag */
     new->auto_installed = old->auto_installed;
 
-    return opkg_install_pkg(new,1);
+    *pkg = new;
+    return 1;
 }
 
+int
+opkg_upgrade_pkg(pkg_t *old)
+{
+    pkg_t *new;
+    int r;
+
+    r = opkg_prepare_upgrade_pkg(old, &new);
+    if (r <= 0)
+        return r;
+
+    opkg_msg(DEBUG2,"Calling opkg_install_pkg for %s %s.\n",
+             new->name, new->version);
+    r = opkg_install_pkg(new,1);
+    if (r < 0) {
+        /* The installation failed so we need to reset the appropriate
+         * state_want flags.
+         */
+        new->state_want = SW_UNKNOWN;
+        old->state_want = SW_INSTALL;
+    }
+
+    return r;
+}
+
+int
+opkg_upgrade_multiple_pkgs(pkg_vec_t *pkgs_to_upgrade)
+{
+    int r;
+    unsigned int i;
+    pkg_t *pkg;
+    pkg_t *new;
+    upgrade_pair_t *pair;
+    void_list_t upgrade_pairs;
+    void_list_elt_t *iter;
+    int errors = 0;
+
+    void_list_init(&upgrade_pairs);
+
+    /* Prepare all packages. */
+    for (i = 0; i < pkgs_to_upgrade->len; i++) {
+        pkg = pkgs_to_upgrade->pkgs[i];
+
+        r = opkg_prepare_upgrade_pkg(pkg, &new);
+        if (r < 0)
+            errors++;
+        if (r <= 0)
+            continue;
+
+        pair = (upgrade_pair_t *)xmalloc(sizeof(upgrade_pair_t));
+        pair->old = pkg;
+        pair->new = new;
+        void_list_push(&upgrade_pairs, pair);
+    }
+
+    /* Install all new packages. */
+    list_for_each_entry(iter, &upgrade_pairs.head, node) {
+        pair = iter->data;
+        pkg = pair->new;
+
+        opkg_msg(DEBUG2,"Calling opkg_install_pkg for %s %s.\n",
+                 pkg->name, pkg->version);
+        r = opkg_install_pkg(pkg, 1);
+        if (r < 0) {
+            /* The installation failed so we need to reset the appropriate
+             * state_want flags.
+             */
+            pkg->state_want = SW_UNKNOWN;
+            pair->old->state_want = SW_INSTALL;
+            errors++;
+        }
+
+        free(pair);
+    }
+
+    void_list_deinit(&upgrade_pairs);
+    if (errors > 0)
+        return -1;
+
+    return 0;
+}
 
 static void
 pkg_hash_check_installed_pkg_helper(const char *pkg_name, void *entry,

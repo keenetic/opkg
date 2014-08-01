@@ -52,7 +52,8 @@ enum {
 	ARGS_OPT_DOWNLOAD_ONLY,
 	ARGS_OPT_NODEPS,
 	ARGS_OPT_AUTOREMOVE,
-	ARGS_OPT_VOLATILE_CACHE
+	ARGS_OPT_VOLATILE_CACHE,
+        ARGS_OPT_COMBINE,
 };
 
 static struct option long_options[] = {
@@ -60,6 +61,7 @@ static struct option long_options[] = {
 	{"autoremove", 0, 0, ARGS_OPT_AUTOREMOVE},
 	{"conf-file", 1, 0, 'f'},
 	{"conf", 1, 0, 'f'},
+        {"combine", 0, 0, ARGS_OPT_COMBINE},
 	{"dest", 1, 0, 'd'},
 	{"force-maintainer", 0, 0, ARGS_OPT_FORCE_MAINTAINER},
 	{"force_maintainer", 0, 0, ARGS_OPT_FORCE_MAINTAINER},
@@ -204,6 +206,9 @@ args_parse(int argc, char *argv[])
 		case ARGS_OPT_VOLATILE_CACHE:
 			opkg_config->volatile_cache = 1;
 			break;
+                case ARGS_OPT_COMBINE:
+                        opkg_config->combine = 1;
+                        break;
 		case ':':
 			parse_err = -1;
 			break;
@@ -282,6 +287,8 @@ usage()
 	printf("\t--prefer-arch-to-version        Use the architecture priority package rather\n");
 	printf("\t                                than the higher version one if more\n");
 	printf("\t                                than one candidate is found.\n");
+        printf("\t--combine                       Combine upgrade and install operations, this\n");
+        printf("\t                                may be needed to resolve dependency issues.\n");
 
 	printf("\nForce Options:\n");
 	printf("\t--force-depends                 Install/remove despite failed dependencies\n");

@@ -1210,9 +1210,8 @@ resolve_conffiles(pkg_t *pkg)
      return 0;
 }
 
-
-int
-opkg_install_by_name(const char *pkg_name)
+static int
+opkg_prepare_install_by_name(const char * pkg_name, pkg_t **pkg)
 {
      int cmp;
      pkg_t *old, *new;
@@ -1273,8 +1272,66 @@ opkg_install_by_name(const char *pkg_name)
 	  free(new_version);
      }
 
-     opkg_msg(DEBUG2,"Calling opkg_install_pkg.\n");
-     return opkg_install_pkg(new, 0);
+     new->state_want = SW_INSTALL;
+
+     *pkg = new;
+     return 1;
+}
+
+int
+opkg_install_by_name(const char *pkg_name)
+{
+     pkg_t *pkg;
+     int r;
+
+     r = opkg_prepare_install_by_name(pkg_name, &pkg);
+     if (r <= 0)
+         return r;
+
+     opkg_msg(DEBUG2,"Calling opkg_install_pkg for %s %s.\n",
+              pkg->name, pkg->version);
+     return opkg_install_pkg(pkg, 0);
+}
+
+int
+opkg_install_multiple_by_name(str_list_t *pkg_names)
+{
+     str_list_elt_t *pn;
+     const char * name;
+     pkg_t *pkg;
+     int r;
+     int errors = 0;
+     unsigned int i;
+     pkg_vec_t *pkgs_to_install = pkg_vec_alloc();
+
+     /* Prepare all packages first. */
+     for (pn = str_list_first(pkg_names); pn; pn = str_list_next(pkg_names, pn)) {
+         name = pn->data;
+         r = opkg_prepare_install_by_name(name, &pkg);
+         if (r < 0)
+             errors++;
+         if (r <= 0)
+             continue;
+
+         pkg_vec_insert(pkgs_to_install, pkg);
+     }
+
+     /* Now install all packages. */
+     for (i = 0; i < pkgs_to_install->len; i++) {
+         pkg = pkgs_to_install->pkgs[i];
+
+         opkg_msg(DEBUG2,"Calling opkg_install_pkg for %s %s.\n",
+                  pkg->name, pkg->version);
+         r = opkg_install_pkg(pkg, 0);
+         if (r < 0)
+             errors++;
+     }
+
+     pkg_vec_free(pkgs_to_install);
+     if (errors)
+         return -1;
+
+     return 0;
 }
 
 /**

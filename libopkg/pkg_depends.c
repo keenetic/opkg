@@ -668,6 +668,65 @@ int pkg_conflicts(pkg_t *pkg, pkg_t *conflictee)
      return 0;
 }
 
+/**
+ * pkg_breaks_reverse_dep returns 1 if pkg does not satisfy the version
+ * constraints of the packages which depend upon pkg and otherwise returns 0.
+ */
+int pkg_breaks_reverse_dep(pkg_t *pkg)
+{
+    /* We consider only the abstract_pkg_t to which pkg belongs (ie. that which
+     * shares its name) not the abstract pkgs which it provides as dependence on
+     * a virtual package should never involve a version constraint.
+     */
+    abstract_pkg_t *rev_dep;
+    abstract_pkg_t *apkg = pkg->parent;
+    unsigned int i = 0;
+    unsigned int j, k, m;
+
+    if (apkg->depended_upon_by == NULL)
+        return 0;
+
+    while ((rev_dep = apkg->depended_upon_by[i++])) {
+        unsigned int npkgs = rev_dep->pkgs->len;
+
+        for (j = 0; j < npkgs; j++) {
+            pkg_t *cmp_pkg = rev_dep->pkgs->pkgs[j];
+            compound_depend_t *cdeps = cmp_pkg->depends;
+            unsigned int ncdeps = cmp_pkg->depends_count;
+
+            /* Only check dependencies of a package which either will be
+             * installed or will remain installed.
+             */
+            if (cmp_pkg->state_want != SW_INSTALL)
+                continue;
+
+            /* Find the dependence on apkg. */
+            for (k = 0; k < ncdeps; k++) {
+                depend_t **deps = cdeps[k].possibilities;
+                unsigned int ndeps = cdeps[k].possibility_count;
+
+                /* Skip recommends and suggests. */
+                if (cdeps[k].type != PREDEPEND && cdeps[k].type != DEPEND)
+                    continue;
+
+                for (m = 0; m < ndeps; m++) {
+                    /* Is this the dependence on apkg? */
+                    if (deps[m]->pkg != apkg)
+                        continue;
+
+                    if (!version_constraints_satisfied(deps[m], pkg)) {
+                        opkg_msg(DEBUG, "Installing %s %s would break reverse dependency from %s.\n",
+                                 pkg->name, pkg->version, cmp_pkg->name);
+                        return 1;
+                    }
+                }
+            }
+        }
+    }
+
+    return 0;
+}
+
 static char ** merge_unresolved(char ** oldstuff, char ** newstuff)
 {
     int oldlen = 0, newlen = 0;

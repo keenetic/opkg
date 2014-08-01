@@ -275,7 +275,6 @@ pkg_hash_fetch_best_installation_candidate(abstract_pkg_t *apkg,
      unsigned int i, j;
      unsigned int nprovides = 0;
      unsigned int nmatching = 0;
-     int wrong_arch_found = 0;
      pkg_vec_t *matching_pkgs;
      abstract_pkg_vec_t *matching_apkgs;
      abstract_pkg_vec_t *provided_apkg_vec;
@@ -306,6 +305,11 @@ pkg_hash_fetch_best_installation_candidate(abstract_pkg_t *apkg,
      /* accumulate all the providers */
      for (i = 0; i < nprovides; i++) {
 	  abstract_pkg_t *provider_apkg = provided_apkgs[i];
+
+          /* Don't double insert packages. */
+          if (abstract_pkg_vec_contains(providers, provider_apkg))
+              continue;
+
 	  opkg_msg(DEBUG, "Adding %s to providers.\n", provider_apkg->name);
 	  abstract_pkg_vec_insert(providers, provider_apkg);
      }
@@ -343,35 +347,58 @@ pkg_hash_fetch_best_installation_candidate(abstract_pkg_t *apkg,
 	  }
 
 
-	  /* now check for supported architecture */
-	  {
-	       int max_count = 0;
+	  for (j=0; j<vec->len; j++) {
+	      pkg_t *maybe = vec->pkgs[j];
 
-	       /* count packages matching max arch priority and keep track of last one */
-	       for (j=0; j<vec->len; j++) {
-		    pkg_t *maybe = vec->pkgs[j];
-		    opkg_msg(DEBUG, "%s arch=%s arch_priority=%d version=%s.\n",
-				 maybe->name, maybe->architecture,
-				 maybe->arch_priority, maybe->version);
-                    /* We make sure not to add the same package twice. Need to search for the reason why
-                       they show up twice sometimes. */
-		    if ((maybe->arch_priority > 0) && (! pkg_vec_contains(matching_pkgs, maybe))) {
-			 max_count++;
-			 abstract_pkg_vec_insert(matching_apkgs, maybe->parent);
-			 pkg_vec_insert(matching_pkgs, maybe);
-		    }
-	       }
+              /* If package is installed and held, add it to the matching list
+               * regardless of whether it satisfies our other checks. This
+               * ensures that a held package won't be removed due to edge cases
+               * like the forced installation of a new package with dependency
+               * on a later version of the held package.
+               */
+              if ((maybe->state_status == SS_INSTALLED || maybe->state_status == SS_UNPACKED)
+                      && maybe->state_flag == SF_HOLD)
+                  goto add_matching_pkg;
 
-		if (vec->len > 0 && matching_pkgs->len < 1)
-			wrong_arch_found = 1;
+              /* Ensure that the package meets the specified constraint. */
+              if (constraint_fcn && !constraint_fcn(maybe, cdata)) {
+                  opkg_msg(DEBUG, "Not selecting %s %s due to unmatched constraint.\n",
+                           maybe->name, maybe->version);
+                  continue;
+              }
+
+	      /* Ensure that installing this package won't break the
+	       * dependencies of packages which are already installed, unless
+	       * force_depends is set.
+	       */
+	      if (pkg_breaks_reverse_dep(maybe) &&
+		      !opkg_config->force_depends) {
+		  opkg_msg(NOTICE, "Not selecting %s %s as installing it would break existing dependencies.\n",
+			   maybe->name, maybe->version);
+		  continue;
+	      }
+
+	      /* now check for supported architecture */
+	      opkg_msg(DEBUG, "%s arch=%s arch_priority=%d version=%s.\n",
+			      maybe->name, maybe->architecture,
+			      maybe->arch_priority, maybe->version);
+              if (maybe->arch_priority <= 0) {
+                  opkg_msg(NOTICE, "Not selecting %s %s due to incompatible architecture.\n",
+                           maybe->name, maybe->version);
+                  continue;
+              }
+
+add_matching_pkg:
+	      /* We make sure not to add the same package twice. Need to search for the reason why
+		  they show up twice sometimes. */
+	      if (! pkg_vec_contains(matching_pkgs, maybe)) {
+	          abstract_pkg_vec_insert(matching_apkgs, maybe->parent);
+		  pkg_vec_insert(matching_pkgs, maybe);
+	      }
 	  }
      }
 
      if (matching_pkgs->len < 1) {
-	  if (wrong_arch_found)
-	        opkg_msg(ERROR, "Packages for %s found, but"
-			" incompatible with the architectures configured\n",
-			apkg->name);
           pkg_vec_free(matching_pkgs);
           abstract_pkg_vec_free(matching_apkgs);
           abstract_pkg_vec_free(providers);
@@ -386,26 +413,24 @@ pkg_hash_fetch_best_installation_candidate(abstract_pkg_t *apkg,
 
      for (i = 0; i < matching_pkgs->len; i++) {
 	  pkg_t *matching = matching_pkgs->pkgs[i];
-          if (constraint_fcn(matching, cdata)) {
-             opkg_msg(DEBUG, "Candidate: %s %s.\n",
-			     matching->name, matching->version) ;
-	     /* It has been provided by hand, so it is what user want */
-             if (matching->provided_by_hand == 1) {
-                 good_pkg_by_name = matching;
-                 break;
-             }
-             /* Respect to the arch priorities when given alternatives */
-             if (good_pkg_by_name && opkg_config->prefer_arch_to_version) {
-                 if (matching->arch_priority >= good_pkg_by_name->arch_priority) {
-                     good_pkg_by_name = matching;
-                     opkg_msg(DEBUG, "%s %s wins by priority.\n",
-                         matching->name, matching->version) ;
-                 } else
-                     opkg_msg(DEBUG, "%s %s wins by priority.\n",
-                         good_pkg_by_name->name, good_pkg_by_name->version) ;
-             } else
-                 good_pkg_by_name = matching;
+          opkg_msg(DEBUG, "Candidate: %s %s.\n",
+                          matching->name, matching->version) ;
+          /* It has been provided by hand, so it is what user want */
+          if (matching->provided_by_hand == 1) {
+              good_pkg_by_name = matching;
+              break;
           }
+          /* Respect to the arch priorities when given alternatives */
+          if (good_pkg_by_name && opkg_config->prefer_arch_to_version) {
+              if (matching->arch_priority >= good_pkg_by_name->arch_priority) {
+                  good_pkg_by_name = matching;
+                  opkg_msg(DEBUG, "%s %s wins by priority.\n",
+                      matching->name, matching->version) ;
+              } else
+                  opkg_msg(DEBUG, "%s %s wins by priority.\n",
+                      good_pkg_by_name->name, good_pkg_by_name->version) ;
+          } else
+              good_pkg_by_name = matching;
      }
 
 

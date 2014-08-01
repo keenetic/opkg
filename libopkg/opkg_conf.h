@@ -98,6 +98,7 @@ typedef struct opkg_conf {
      int download_only;
      int overwrite_no_owner;
      int volatile_cache;
+     int combine;
 
      /* ssl options: used only when opkg is configured with '--enable-curl',
       * otherwise always NULL or 0.

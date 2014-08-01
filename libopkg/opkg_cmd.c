@@ -400,6 +400,7 @@ opkg_install_cmd(int argc, char **argv)
      int i;
      char *arg;
      int err = 0;
+     str_list_t *pkg_names_to_install = NULL;
 
      signal(SIGINT, sigint_handler);
 
@@ -415,12 +416,26 @@ opkg_install_cmd(int argc, char **argv)
      }
      pkg_info_preinstall_check();
 
+     if (opkg_config->combine)
+         pkg_names_to_install = str_list_alloc();
+
      for (i=0; i < argc; i++) {
 	  arg = argv[i];
-          if (opkg_install_by_name(arg)) {
-	       opkg_msg(ERROR, "Cannot install package %s.\n", arg);
-	       err = -1;
-	  }
+          if (opkg_config->combine) {
+              str_list_append(pkg_names_to_install, arg);
+          } else {
+              if (opkg_install_by_name(arg)) {
+                  opkg_msg(ERROR, "Cannot install package %s.\n", arg);
+                  err = -1;
+              }
+          }
+     }
+
+     if (opkg_config->combine) {
+         if (opkg_install_multiple_by_name(pkg_names_to_install))
+             err = -1;
+
+         str_list_purge(pkg_names_to_install);
      }
 
      if (opkg_configure_packages(NULL))
@@ -438,11 +453,15 @@ opkg_upgrade_cmd(int argc, char **argv)
      unsigned int j;
      pkg_t *pkg;
      int err = 0;
+     pkg_vec_t *pkgs_to_upgrade = NULL;
 
      signal(SIGINT, sigint_handler);
 
      if (argc) {
 	  pkg_info_preinstall_check();
+
+          if (opkg_config->combine)
+              pkgs_to_upgrade = pkg_vec_alloc();
 
 	  for (i=0; i < argc; i++) {
 	       if (opkg_config->restrict_to_default_dest) {
@@ -460,20 +479,36 @@ opkg_upgrade_cmd(int argc, char **argv)
 			 continue;
 		    }
 	       }
-	       if (opkg_upgrade_pkg(pkg))
-		    err = -1;
+               if (opkg_config->combine) {
+                   pkg_vec_insert(pkgs_to_upgrade, pkg);
+               } else {
+                   if (opkg_upgrade_pkg(pkg))
+                       err = -1;
+               }
 	  }
+
+          if (opkg_config->combine) {
+              if (opkg_upgrade_multiple_pkgs(pkgs_to_upgrade))
+                  err = -1;
+
+              pkg_vec_free(pkgs_to_upgrade);
+          }
      } else {
 	  pkg_vec_t *installed = pkg_vec_alloc();
 
 	  pkg_info_preinstall_check();
 
 	  pkg_hash_fetch_all_installed(installed);
-	  for (j = 0; j < installed->len; j++) {
-	       pkg = installed->pkgs[j];
-	       if (opkg_upgrade_pkg(pkg))
-		       err = -1;
-	  }
+          
+          if (opkg_config->combine) {
+              err = opkg_upgrade_multiple_pkgs(installed);
+          } else {
+              for (j = 0; j < installed->len; j++) {
+                  pkg = installed->pkgs[j];
+                  if (opkg_upgrade_pkg(pkg))
+                          err = -1;
+              }
+          }
 	  pkg_vec_free(installed);
      }
 
