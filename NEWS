@@ -1,3 +1,44 @@
+opkg-0.2.3
+==========
+
+- New, optional syntax for setting lists_dir in config files. This new syntax
+  will be required in v0.3.0 and later, the old syntax is now deprecated. The
+  new syntax is:
+
+    option lists_dir <path>
+
+- New 'opkg-check-config' helper script to check and update config files.
+  Currently this just changes the old lists_dir syntax to the new syntax.
+
+- Add the 'combine' option and '--combine' command line argument. These options
+  combine the installation or upgrade of multiple packages so that dependency
+  evaluation is carried out for the whole transaction rather than separately for
+  each package. This resolves the case of issue 124 where multiple packages
+  depend on a common package with version constraints in such a way that all
+  dependent packages need to be upgraded together.
+
+- Don't select packages for installation which break the dependencies of already
+  installed packages (issue 124).
+
+- Fix epoch:version split so that a colon is only interpreted as the epoch
+  separator in a version string if it is the first non-numeric character.
+
+- Fix package flags after failed upgrade. This ensures that subsequent
+  installs or upgrades do not consider the old package as scheduled for removal.
+
+- Prevent packages listed in RECOMMENDS of an installed package from being
+  removed automatically when autoremove is set.
+
+- Fix 'extern "C"' wrapping in header files.
+
+- Improve check for gpgme in configure script. Now either pkg-config or
+  gpgme-config can be used to find gpgme.
+
+- Fix internal usage of 'config.h', this ensures building opkg and its
+  dependencies with large file support will work correctly.
+
+- Fix internal memory leaks and suboptimal code.
+
 opkg-0.2.2
 ==========
 
