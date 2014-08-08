@@ -141,33 +141,7 @@ if test "x$want_gpgme" = "xyes"; then
 
   # If pkg-config failed, try the old way
   if test "$ok" = "no"; then
-    AC_PATH_PROG(GPGME_CONFIG, gpgme-config, "failed")
-    if test $GPGME_CONFIG != "failed" ; then
-        AC_MSG_CHECKING(for GPGME - version >= $min_gpgme_version)
-        req_major=`echo $min_gpgme_version | \
-                sed 's/\([[0-9]]*\)\.\([[0-9]]*\)\.\([[0-9]]*\)/\1/'`
-        req_minor=`echo $min_gpgme_version | \
-                sed 's/\([[0-9]]*\)\.\([[0-9]]*\)\.\([[0-9]]*\)/\2/'`
-        req_micro=`echo $min_gpgme_version | \
-                sed 's/\([[0-9]]*\)\.\([[0-9]]*\)\.\([[0-9]]*\)/\3/'`
-        gpgme_config_version=`$GPGME_CONFIG --version`
-        major=`echo $gpgme_config_version | \
-                sed 's/\([[0-9]]*\)\.\([[0-9]]*\)\.\([[0-9]]*\).*/\1/'`
-        minor=`echo $gpgme_config_version | \
-                sed 's/\([[0-9]]*\)\.\([[0-9]]*\)\.\([[0-9]]*\).*/\2/'`
-        micro=`echo $gpgme_config_version | \
-                sed 's/\([[0-9]]*\)\.\([[0-9]]*\)\.\([[0-9]]*\).*/\3/'`
-
-        if test "$major" -eq "$req_major"; then
-            if test "$minor" -ge "$req_minor"; then
-            if test "$micro" -ge "$req_micro"; then
-                ok="yes"
-                GPGME_CFLAGS=`$GPGME_CONFIG --cflags`
-                GPGME_LIBS=`$GPGME_CONFIG --libs`
-            fi
-            fi
-        fi
-    fi
+    AM_PATH_GPGME([$min_gpgme_version], [ok="yes"], [ok="no"])
   fi
 
   if test $ok = "yes"; then
