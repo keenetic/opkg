@@ -18,7 +18,6 @@ Makefile.in.in
 
 # The local aclocal.m4 file
 aclocal.m4
-m4/
 shave/lt*
 shave/libtool.m4
 shave/shave
