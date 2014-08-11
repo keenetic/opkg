@@ -18,7 +18,6 @@ Makefile.in.in
 
 # The local aclocal.m4 file
 aclocal.m4
-m4/
 
 # The output of the configure script
 conf/
