@@ -1,3 +1,5 @@
+ACLOCAL_AMFLAGS = -I m4
+
 SUBDIRS = libopkg src tests utils man
 
 pkgconfigdir = $(libdir)/pkgconfig
