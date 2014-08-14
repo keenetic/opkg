@@ -20,7 +20,7 @@ if [ \( $# -eq 1 \) -a \( "$1" = "--clean" \) ]; then
 	rm -f Makefile {libopkg,tests,man,utils,src}/Makefile
 	rm -f Makefile.in {libopkg,tests,man,utils,src}/Makefile.in
 	rm -f config.h{,.in}
-	rm -rf po conf autom4te.cache m4
+	rm -rf po conf autom4te.cache
 	rm -rf {libopkg,src,tests}/.deps
 
 	rm -f {libopkg,tests,src}/*.o
