@@ -659,7 +659,8 @@ int pkg_conflicts(pkg_t *pkg, pkg_t *conflictee)
 	  for (j = 0; j < possibility_count; j++) {
 	       possibility = possibilities[j]->pkg;
 	       for (k = 0; k < conflictee_provides_count; k++) {
-		    if (possibility == conflictee_provides[k]) {
+		    if (possibility == conflictee_provides[k] &&
+                        version_constraints_satisfied(possibilities[j], conflictee)) {
 			 return 1;
 		    }
 	       }
