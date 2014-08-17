@@ -6,7 +6,7 @@ import cfg
 def opkgcl(opkg_args):
 	cmd = "{} -o {} {}".format(cfg.opkgcl, cfg.offline_root, opkg_args)
 	p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
-			stderr=subprocess.PIPE)
+			stderr=subprocess.STDOUT)
 	(stdout_data, stderr_data) = p.communicate()
 	status = p.returncode
 	return (status, stdout_data.decode("utf-8"))
