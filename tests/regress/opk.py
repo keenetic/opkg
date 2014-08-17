@@ -1,5 +1,6 @@
 import tarfile, os, sys
 import cfg
+import errno
 
 __appname = sys.argv[0]
 
@@ -120,7 +121,12 @@ def regress_init():
 	if not os.access(cfg.opkgcl, os.X_OK):
 		fail("Cannot exec {}".format(cfg.opkgcl))
 
-	os.makedirs(cfg.opkdir, exist_ok=True)
+	try:
+		os.makedirs(cfg.opkdir)
+	except OSError as exception:
+		if exception.errno != errno.EEXIST:
+			raise
+
 	os.chdir(cfg.opkdir)
 
 	os.system("rm -fr {}".format(cfg.offline_root))
