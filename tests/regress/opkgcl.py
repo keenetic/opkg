@@ -22,7 +22,7 @@ def update():
 
 def upgrade(params=None):
 	if params:
-		opkgcl("upgrade {}".format(params))[0]
+		return opkgcl("upgrade {}".format(params))[0]
 	else:
 		return opkgcl("upgrade")[0]
 
