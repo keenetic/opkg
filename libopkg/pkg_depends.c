@@ -330,7 +330,7 @@ pkg_hash_fetch_satisfied_dependencies(pkg_t * pkg)
 	       abstract_pkg_t *satisfying_apkg = possible_satisfiers[j]->pkg;
 	       pkg_t *satisfying_pkg =
 		    pkg_hash_fetch_best_installation_candidate(satisfying_apkg,
-							       pkg_installed_and_constraint_satisfied,
+							       pkg_constraint_satisfied,
 							       dependence_to_satisfy, 0);
                /* Being that I can't test constraing in pkg_hash, I will test it here */
 	       if (satisfying_pkg != NULL && satisfying_pkg != pkg) {
