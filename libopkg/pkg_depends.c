@@ -72,9 +72,11 @@ pkg_hash_fetch_unsatisfied_dependencies(pkg_t * pkg, pkg_vec_t *unsatisfied,
 	  return 0;
      }
      if (ab_pkg->dependencies_checked) {    /* avoid duplicate or cyclic checks */
+	  opkg_msg(DEBUG2, "Already checked dependencies for '%s'.\n", ab_pkg->name);
 	  *unresolved = NULL;
 	  return 0;
      } else {
+	  opkg_msg(DEBUG2, "Checking dependencies for '%s'.\n", ab_pkg->name);
 	  ab_pkg->dependencies_checked = 1;  /* mark it for subsequent visits */
      }
      /**/
