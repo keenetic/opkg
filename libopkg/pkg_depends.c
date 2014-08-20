@@ -75,9 +75,11 @@ pkg_hash_fetch_unsatisfied_dependencies(pkg_t * pkg, pkg_vec_t *unsatisfied,
 	  return 0;
      }
      if (ab_pkg->dependencies_checked) {    /* avoid duplicate or cyclic checks */
+	  opkg_msg(DEBUG2, "Already checked dependencies for '%s'.\n", ab_pkg->name);
 	  *unresolved = NULL;
 	  return 0;
      } else {
+	  opkg_msg(DEBUG2, "Checking dependencies for '%s'.\n", ab_pkg->name);
 	  ab_pkg->dependencies_checked = 1;  /* mark it for subsequent visits */
      }
      /**/
@@ -175,12 +177,6 @@ pkg_hash_fetch_unsatisfied_dependencies(pkg_t * pkg, pkg_vec_t *unsatisfied,
 		    pkg_hash_fetch_best_installation_candidate(satisfying_apkg,
 							       pkg_installed_and_constraint_satisfied,
 							       dependence_to_satisfy, 1);
-               /* Being that I can't test constraing in pkg_hash, I will test it here */
-	       if (satisfying_pkg != NULL) {
-                  if (!pkg_installed_and_constraint_satisfied ( satisfying_pkg,dependence_to_satisfy)) {
-	              satisfying_pkg = NULL;
-                  }
-               }
 	       opkg_msg(DEBUG, "satisfying_pkg=%p\n", satisfying_pkg);
 	       if (satisfying_pkg != NULL) {
 		    found = 1;
@@ -199,12 +195,6 @@ pkg_hash_fetch_unsatisfied_dependencies(pkg_t * pkg, pkg_vec_t *unsatisfied,
 			 pkg_hash_fetch_best_installation_candidate(satisfying_apkg,
 								    pkg_constraint_satisfied,
 								    dependence_to_satisfy, 1);
-                    /* Being that I can't test constraing in pkg_hash, I will test it here too */
-	            if (satisfying_pkg != NULL) {
-                         if (!pkg_constraint_satisfied ( satisfying_pkg,dependence_to_satisfy)) {
-                            satisfying_pkg = NULL;
-                         }
-                    }
 
 		    /* user request overrides package recommendation */
 		    if (satisfying_pkg != NULL
@@ -332,14 +322,13 @@ pkg_hash_fetch_satisfied_dependencies(pkg_t * pkg)
 	       abstract_pkg_t *satisfying_apkg = possible_satisfiers[j]->pkg;
 	       pkg_t *satisfying_pkg =
 		    pkg_hash_fetch_best_installation_candidate(satisfying_apkg,
-							       pkg_installed_and_constraint_satisfied,
+							       pkg_constraint_satisfied,
 							       dependence_to_satisfy, 0);
-               /* Being that I can't test constraing in pkg_hash, I will test it here */
-	       if (satisfying_pkg != NULL && satisfying_pkg != pkg) {
-                  if (pkg_constraint_satisfied(satisfying_pkg, dependence_to_satisfy) && (satisfying_pkg->state_want == SW_INSTALL || satisfying_pkg->state_want == SW_UNKNOWN))
-	              pkg_vec_insert(satisfiers, satisfying_pkg);
-               }
-
+	       if (satisfying_pkg != NULL
+                       && satisfying_pkg != pkg
+                       && (satisfying_pkg->state_want == SW_INSTALL
+                                || satisfying_pkg->state_want == SW_UNKNOWN))
+	           pkg_vec_insert(satisfiers, satisfying_pkg);
 	  }
      }
      return satisfiers;
