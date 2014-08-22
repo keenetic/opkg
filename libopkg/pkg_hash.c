@@ -514,17 +514,6 @@ add_matching_pkg:
      return NULL;
 }
 
-static int
-pkg_name_constraint_fcn(pkg_t *pkg, void *cdata)
-{
-	const char *name = (const char *)cdata;
-
-	if (strcmp(pkg->name, name) == 0)
-		return 1;
-	else
-		return 0;
-}
-
 static pkg_vec_t *
 pkg_vec_fetch_by_name(const char *pkg_name)
 {
@@ -557,7 +546,7 @@ pkg_hash_fetch_best_installation_candidate_by_name(const char *name)
 		return NULL;
 
 	return pkg_hash_fetch_best_installation_candidate(apkg,
-				pkg_name_constraint_fcn, apkg->name, 0);
+                NULL, NULL, 0);
 }
 
 
