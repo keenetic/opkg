@@ -410,24 +410,29 @@ add_matching_pkg:
 
      for (i = 0; i < matching_pkgs->len; i++) {
 	  pkg_t *matching = matching_pkgs->pkgs[i];
-          opkg_msg(DEBUG, "Candidate: %s %s.\n",
-	           matching->name, matching->version) ;
-	  /* It has been provided by hand, so it is what user want */
-          if (matching->provided_by_hand == 1) {
-              good_pkg_by_name = matching;
-              break;
-          }
-          /* Respect to the arch priorities when given alternatives */
-          if (good_pkg_by_name && conf->prefer_arch_to_version) {
-              if (matching->arch_priority >= good_pkg_by_name->arch_priority) {
-                  good_pkg_by_name = matching;
-                  opkg_msg(DEBUG, "%s %s wins by priority.\n",
+          /* Set good_pkg_by_name if the package name matches the originally
+           * requested name (which will be the apkg name).
+           */
+          if (strcmp(matching->name, apkg->name) == 0) {
+              opkg_msg(DEBUG, "Candidate: %s %s.\n",
                       matching->name, matching->version) ;
+              /* It has been provided by hand, so it is what user want */
+              if (matching->provided_by_hand == 1) {
+                  good_pkg_by_name = matching;
+                  break;
+              }
+              /* Respect to the arch priorities when given alternatives */
+              if (good_pkg_by_name && conf->prefer_arch_to_version) {
+                  if (matching->arch_priority >= good_pkg_by_name->arch_priority) {
+                      good_pkg_by_name = matching;
+                      opkg_msg(DEBUG, "%s %s wins by priority.\n",
+                          matching->name, matching->version) ;
+                  } else
+                      opkg_msg(DEBUG, "%s %s wins by priority.\n",
+                          good_pkg_by_name->name, good_pkg_by_name->version) ;
               } else
-                  opkg_msg(DEBUG, "%s %s wins by priority.\n",
-                      good_pkg_by_name->name, good_pkg_by_name->version) ;
-          } else
-              good_pkg_by_name = matching;
+                  good_pkg_by_name = matching;
+          }
      }
 
 
