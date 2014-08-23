@@ -413,24 +413,29 @@ add_matching_pkg:
 
      for (i = 0; i < matching_pkgs->len; i++) {
 	  pkg_t *matching = matching_pkgs->pkgs[i];
-          opkg_msg(DEBUG, "Candidate: %s %s.\n",
-                          matching->name, matching->version) ;
-          /* It has been provided by hand, so it is what user want */
-          if (matching->provided_by_hand == 1) {
-              good_pkg_by_name = matching;
-              break;
-          }
-          /* Respect to the arch priorities when given alternatives */
-          if (good_pkg_by_name && opkg_config->prefer_arch_to_version) {
-              if (matching->arch_priority >= good_pkg_by_name->arch_priority) {
-                  good_pkg_by_name = matching;
-                  opkg_msg(DEBUG, "%s %s wins by priority.\n",
+          /* Set good_pkg_by_name if the package name matches the originally
+           * requested name (which will be the apkg name).
+           */
+          if (strcmp(matching->name, apkg->name) == 0) {
+              opkg_msg(DEBUG, "Candidate: %s %s.\n",
                       matching->name, matching->version) ;
+              /* It has been provided by hand, so it is what user want */
+              if (matching->provided_by_hand == 1) {
+                  good_pkg_by_name = matching;
+                  break;
+              }
+              /* Respect to the arch priorities when given alternatives */
+              if (good_pkg_by_name && opkg_config->prefer_arch_to_version) {
+                  if (matching->arch_priority >= good_pkg_by_name->arch_priority) {
+                      good_pkg_by_name = matching;
+                      opkg_msg(DEBUG, "%s %s wins by priority.\n",
+                          matching->name, matching->version) ;
+                  } else
+                      opkg_msg(DEBUG, "%s %s wins by priority.\n",
+                          good_pkg_by_name->name, good_pkg_by_name->version) ;
               } else
-                  opkg_msg(DEBUG, "%s %s wins by priority.\n",
-                      good_pkg_by_name->name, good_pkg_by_name->version) ;
-          } else
-              good_pkg_by_name = matching;
+                  good_pkg_by_name = matching;
+          }
      }
 
 
@@ -534,17 +539,6 @@ add_matching_pkg:
      return NULL;
 }
 
-static int
-pkg_name_constraint_fcn(pkg_t *pkg, void *cdata)
-{
-	const char *name = (const char *)cdata;
-
-	if (strcmp(pkg->name, name) == 0)
-		return 1;
-	else
-		return 0;
-}
-
 static pkg_vec_t *
 pkg_vec_fetch_by_name(const char *pkg_name)
 {
@@ -577,7 +571,7 @@ pkg_hash_fetch_best_installation_candidate_by_name(const char *name)
 		return NULL;
 
 	return pkg_hash_fetch_best_installation_candidate(apkg,
-				pkg_name_constraint_fcn, apkg->name, 0);
+                NULL, NULL, 0);
 }
 
 
