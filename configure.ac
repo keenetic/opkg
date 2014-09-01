@@ -163,12 +163,18 @@ if test "x$want_gpgme" = "xyes"; then
     AC_MSG_ERROR(GPGME $min_gpgme_version or later needed)
   fi
 
-  AC_PATH_PROG(GPGERR_CONFIG, gpg-error-config, "failed")
-  if test $GPGERR_CONFIG != "failed" ; then
-    GPGERR_CFLAGS=`$GPGERR_CONFIG --cflags`
-    GPGERR_LIBS=`$GPGERR_CONFIG --libs`
-  else
-    AC_MSG_ERROR(GPGERR is required to build gpgme support)
+  # Try to find gpg-error using pkg-config
+  PKG_CHECK_MODULES([GPGERR], [gpg-error], [ok="yes"], [ok="no"])
+
+  # If pkg-config failed, try the old way
+  if test "$ok" = "no"; then
+    AC_PATH_PROG(GPGERR_CONFIG, gpg-error-config, "failed")
+    if test $GPGERR_CONFIG != "failed" ; then
+        GPGERR_CFLAGS=`$GPGERR_CONFIG --cflags`
+        GPGERR_LIBS=`$GPGERR_CONFIG --libs`
+    else
+        AC_MSG_ERROR(GPGERR is required to build gpgme support)
+    fi
   fi
 fi
 AM_CONDITIONAL(HAVE_GPGME, test "x$want_gpgme" = "xyes")
