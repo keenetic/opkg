@@ -211,73 +211,98 @@ opkg_download(const char *src, const char *dest_file_name,
     return err;
 }
 
-/** \brief opkg_download_pkg: download and verify a package
- *
- * \param pkg the package to download
- * \param dir destination directory or NULL to store package in cache
- * \return 0 if success, -1 if error occurs
- *
- */
-int
-opkg_download_pkg(pkg_t *pkg, const char *dir)
+static char *
+get_pkg_url(pkg_t *pkg)
 {
     char *url;
-    int err = 0;
 
     if (pkg->src == NULL) {
 	opkg_msg(ERROR, "Package %s is not available from any configured src.\n",
 		pkg->name);
-	return -1;
+	return NULL;
     }
     if (pkg->filename == NULL) {
 	opkg_msg(ERROR, "Package %s does not have a valid filename field.\n",
 		pkg->name);
-	return -1;
+	return NULL;
     }
 
     sprintf_alloc(&url, "%s/%s", pkg->src->value, pkg->filename);
-    if (!dir || !opkg_config->volatile_cache) {
-        pkg->local_filename = get_cache_location(url);
+    return url;
+}
 
-        /* Check if valid package exists in cache */
-        err = pkg_verify(pkg);
-        if (!err)
-            return 0;
+/** \brief opkg_download_pkg: download and verify a package
+ *
+ * \param pkg the package to download
+ * \return 0 if success, -1 if error occurs
+ *
+ */
+int
+opkg_download_pkg(pkg_t *pkg)
+{
+    char *url;
+    int err = 0;
 
-        pkg->local_filename = opkg_download_cache(url, NULL, NULL);
-        free(url);
-        if (pkg->local_filename == NULL)
-            return -1;
+    url = get_pkg_url(pkg);
+    if (!url)
+        return -1;
 
-        /* Ensure downloaded package is valid. */
-        err = pkg_verify(pkg);
+    pkg->local_filename = get_cache_location(url);
+
+    /* Check if valid package exists in cache */
+    err = pkg_verify(pkg);
+    if (!err)
+        goto cleanup;
+
+    pkg->local_filename = opkg_download_cache(url, NULL, NULL);
+    if (pkg->local_filename == NULL) {
+        err = -1;
+        goto cleanup;
+    }
+
+    /* Ensure downloaded package is valid. */
+    err = pkg_verify(pkg);
+
+cleanup:
+    free(url);
+    return err;
+}
+
+int
+opkg_download_pkg_to_dir(pkg_t *pkg, const char *dir)
+{
+    char *dest_file_name;
+    char *url = NULL;
+    int err = 0;
+
+    sprintf_alloc(&dest_file_name, "%s/%s", dir, pkg->filename);
+
+    if (opkg_config->volatile_cache) {
+        url = get_pkg_url(pkg);
+        if (!url)
+            goto cleanup;
+
+        err = opkg_download_direct(url, dest_file_name, NULL, NULL);
         if (err)
-            return err;
-    }
-    if (dir)
-    {
-        char* dest_file_name;
-        sprintf_alloc(&dest_file_name, "%s/%s", dir, pkg->filename);
-        if (opkg_config->volatile_cache) {
-            err = opkg_download_direct(url, dest_file_name, NULL, NULL);
-            free(url);
-            if (err) {
-                free(dest_file_name);
-                return err;
-            }
+            goto cleanup;
 
-            /* This is a bit hackish
-             * TODO: Clean this up! */
-            pkg->local_filename = dest_file_name;
-            err = pkg_verify(pkg);
-            pkg->local_filename = NULL;
-        }
-        else {
-            err = file_copy(pkg->local_filename, dest_file_name);
-        }
-        free(dest_file_name);
+        /* This is a bit hackish
+         * TODO: Clean this up!
+         */
+        pkg->local_filename = dest_file_name;
+        err = pkg_verify(pkg);
+        pkg->local_filename = NULL;
+    } else {
+        err = opkg_download_pkg(pkg);
+        if (err)
+            goto cleanup;
+
+        err = file_copy(pkg->local_filename, dest_file_name);
     }
 
+cleanup:
+    free(url);
+    free(dest_file_name);
     return err;
 }
 
@@ -388,7 +413,7 @@ opkg_prepare_url_for_install(const char *url, char **namep)
                 opkg_msg(ERROR, "Unknown package %s, cannot force reinstall.\n", url);
                 return -1;
             }
-            r = opkg_download_pkg(pkg, NULL);
+            r = opkg_download_pkg(pkg);
             if (r)
                 return r;
 

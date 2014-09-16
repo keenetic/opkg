@@ -537,7 +537,7 @@ opkg_download_cmd(int argc, char **argv)
 	       continue;
 	  }
 
-	  if (opkg_download_pkg(pkg, "."))
+	  if (opkg_download_pkg_to_dir(pkg, "."))
 		  err = -1;
 
 	  if (err) {
