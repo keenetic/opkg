@@ -96,6 +96,9 @@ opkg_download_file(const char *src, const char *dest)
      * added.
      */
 
+    if (!opkg_config->cache_local_files)
+        return file_link(src, dest);
+
     return file_copy(src, dest);
 }
 

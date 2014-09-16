@@ -81,6 +81,7 @@ static opkg_option_t options[] = {
 	  { "verbosity", OPKG_OPT_TYPE_INT, &_conf.verbosity },
 	  { "overwrite_no_owner", OPKG_OPT_TYPE_BOOL, &_conf.overwrite_no_owner },
           { "combine", OPKG_OPT_TYPE_BOOL, &_conf.combine },
+          { "cache_local_files", OPKG_OPT_TYPE_BOOL, &_conf.cache_local_files },
 #if defined(HAVE_OPENSSL)
 	  { "signature_ca_file", OPKG_OPT_TYPE_STRING, &_conf.signature_ca_file },
 	  { "signature_ca_path", OPKG_OPT_TYPE_STRING, &_conf.signature_ca_path },
