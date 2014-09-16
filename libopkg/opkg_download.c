@@ -22,6 +22,7 @@
 #include <malloc.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "opkg_download.h"
 #include "opkg_message.h"
@@ -229,6 +230,32 @@ get_pkg_url(pkg_t *pkg)
 
     sprintf_alloc(&url, "%s/%s", pkg->src->value, pkg->filename);
     return url;
+}
+
+char *
+pkg_download_signature(pkg_t *pkg)
+{
+    char *pkg_url;
+    char *sig_url;
+    char *sig_ext;
+    char *sig_file;
+
+    pkg_url = get_pkg_url(pkg);
+    if (!pkg_url)
+        return NULL;
+
+    if (strcmp(opkg_config->signature_type, "gpg-asc") == 0)
+        sig_ext = "asc";
+    else
+        sig_ext = "sig";
+
+    sprintf_alloc(&sig_url, "%s.%s", pkg_url, sig_ext);
+    free(pkg_url);
+
+    sig_file = opkg_download_cache(sig_url, NULL, NULL);
+    free(sig_url);
+
+    return sig_file;
 }
 
 /** \brief opkg_download_pkg: download and verify a package

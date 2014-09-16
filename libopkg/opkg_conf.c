@@ -61,6 +61,7 @@ static opkg_option_t options[] = {
 	  { "force_postinstall", OPKG_OPT_TYPE_BOOL, &_conf.force_postinstall },
 	  { "autoremove", OPKG_OPT_TYPE_BOOL, &_conf.autoremove },
           { "check_signature", OPKG_OPT_TYPE_BOOL, &_conf.check_signature },
+          { "check_pkg_signature", OPKG_OPT_TYPE_BOOL, &_conf.check_pkg_signature },
 	  { "signature_type", OPKG_OPT_TYPE_STRING, &_conf.signature_type },
 	  { "ftp_proxy", OPKG_OPT_TYPE_STRING, &_conf.ftp_proxy },
 	  { "http_proxy", OPKG_OPT_TYPE_STRING, &_conf.http_proxy },

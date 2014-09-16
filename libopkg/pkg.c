@@ -30,6 +30,7 @@
 
 #include "pkg_parse.h"
 #include "pkg_extract.h"
+#include "opkg_download.h"
 #include "opkg_message.h"
 #include "opkg_utils.h"
 #include "opkg_verify.h"
@@ -1445,6 +1446,7 @@ int
 pkg_verify(pkg_t *pkg)
 {
     int err;
+    char *local_sig_filename = NULL;
 
     /* Silently fail verification if the package doesn't exist locally as the
      * caller may be about to download it. */
@@ -1463,9 +1465,23 @@ pkg_verify(pkg_t *pkg)
             goto fail;
     }
 
+    if (opkg_config->check_pkg_signature) {
+        local_sig_filename = pkg_download_signature(pkg);
+        if (!local_sig_filename) {
+            err = -1;
+            goto fail;
+        }
+
+        err = opkg_verify_signature(pkg->local_filename, local_sig_filename);
+        if (err)
+            goto fail;
+    }
+
+    free(local_sig_filename);
     return 0;
 
 fail:
+    free(local_sig_filename);
     opkg_msg(NOTICE, "Removing corrupt package file %s.\n",
             pkg->local_filename);
     unlink(pkg->local_filename);
