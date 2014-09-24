@@ -165,6 +165,31 @@ copy_file_data(FILE *src_file, FILE *dst_file)
 }
 
 int
+file_link(const char *src, const char *dest)
+{
+    struct stat dest_stat;
+    int r;
+
+    if (stat(dest, &dest_stat) == 0) {
+        if (unlink(dest) < 0) {
+            opkg_perror(ERROR, "unable to remove `%s'", dest);
+            return -1;
+        }
+    } else if (errno != ENOENT) {
+        opkg_perror(ERROR, "unable to stat `%s'", dest);
+        return -1;
+    }
+
+    r = symlink(src, dest);
+    if (r < 0) {
+        opkg_perror(DEBUG, "unable to create symlink '%s', falling back to copy", dest);
+        return file_copy(src, dest);
+    }
+
+    return r;
+}
+
+int
 file_copy(const char *src, const char *dest)
 {
 	struct stat src_stat;
