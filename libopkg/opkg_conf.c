@@ -714,6 +714,9 @@ opkg_conf_load(void)
         if (opkg_config->status_file == NULL)
                 opkg_config->status_file = xstrdup(OPKG_CONF_DEFAULT_STATUS_FILE);
 
+        if (opkg_config->signature_type == NULL)
+                opkg_config->signature_type = xstrdup(OPKG_CONF_DEFAULT_SIGNATURE_TYPE);
+
 	/* if no architectures were defined, then default all, noarch, and host architecture */
 	if (nv_pair_list_empty(&opkg_config->arch_list)) {
 		nv_pair_list_append(&opkg_config->arch_list, "all", "1");

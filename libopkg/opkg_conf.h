@@ -48,6 +48,8 @@ extern "C" {
 
 #define OPKG_CONF_DEFAULT_HASH_LEN 1024
 
+#define OPKG_CONF_DEFAULT_SIGNATURE_TYPE "gpg"
+
 typedef struct opkg_conf {
      pkg_src_list_t pkg_src_list;
      pkg_src_list_t dist_src_list;
