@@ -137,7 +137,7 @@ opkg_remove_dependent_pkgs(pkg_t *pkg, abstract_pkg_t **dependents)
 
     int err=0;
     for (i = 0; i < dependent_pkgs->len; i++) {
-        err = opkg_remove_pkg(dependent_pkgs->pkgs[i],0);
+        err = opkg_remove_pkg(dependent_pkgs->pkgs[i]);
         if (err)
             break;
     }
@@ -205,7 +205,7 @@ remove_autoinstalled(pkg_t *pkg)
 				 opkg_msg(NOTICE, "%s was autoinstalled and is "
 					       "now orphaned, removing.\n",
 					       p->name);
-				if (opkg_remove_pkg(p, 0) != 0) {
+				if (opkg_remove_pkg(p) != 0) {
 					err = -1;
 				}
 			} else
@@ -223,7 +223,7 @@ remove_autoinstalled(pkg_t *pkg)
 }
 
 int
-opkg_remove_pkg(pkg_t *pkg, int from_upgrade)
+opkg_remove_pkg(pkg_t *pkg)
 {
      int err;
      abstract_pkg_t *parent_pkg = NULL;
@@ -232,7 +232,7 @@ opkg_remove_pkg(pkg_t *pkg, int from_upgrade)
  * If called from an upgrade and not from a normal remove,
  * ignore the essential flag.
  */
-     if (pkg->essential && !from_upgrade) {
+     if (pkg->essential) {
 	  if (opkg_config->force_removal_of_essential_packages) {
 	       opkg_msg(NOTICE,
 		       "Removing essential package %s under your coercion.\n"
@@ -292,10 +292,8 @@ opkg_remove_pkg(pkg_t *pkg, int from_upgrade)
               free(dependents);
      }
 
-     if (from_upgrade == 0) {
-         opkg_msg(NOTICE, "Removing package %s from %s...\n",
-			 pkg->name, pkg->dest->name);
-     }
+     opkg_msg(NOTICE, "Removing package %s from %s...\n",
+             pkg->name, pkg->dest->name);
      pkg->state_flag |= SF_FILELIST_CHANGED;
 
      pkg->state_want = SW_DEINSTALL;

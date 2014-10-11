@@ -373,7 +373,7 @@ opkg_remove_package(const char *package_name,
 
 	progress(&pdata, 75, progress_callback, user_data);
 
-	err = opkg_remove_pkg(pkg_to_remove, 0);
+	err = opkg_remove_pkg(pkg_to_remove);
 
 	/* write out status files and file lists */
 	opkg_conf_write_status_files();

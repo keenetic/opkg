@@ -412,7 +412,7 @@ pkg_remove_orphan_dependent(pkg_t *pkg, pkg_t *old_pkg)
 				 * which we need to ignore during removal. */
 				p->state_flag |= SF_REPLACE;
 
-				r = opkg_remove_pkg(p, 0);
+				r = opkg_remove_pkg(p);
 				if (!err)
 					err = r;
 			} else
@@ -486,7 +486,7 @@ pkg_remove_installed_replacees(pkg_vec_t *replacees)
 	  pkg_t *replacee = replacees->pkgs[i];
 	  int err;
 	  replacee->state_flag |= SF_REPLACE; /* flag it so remove won't complain */
-	  err = opkg_remove_pkg(replacee, 0);
+	  err = opkg_remove_pkg(replacee);
 	  if (err)
 	       return err;
      }

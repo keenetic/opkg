@@ -791,7 +791,7 @@ opkg_remove_cmd(int argc, char **argv)
                  continue;
             }
 
-            if (opkg_remove_pkg(pkg_to_remove, 0))
+            if (opkg_remove_pkg(pkg_to_remove))
 	         err = -1;
 	    else
                  done = 1;
