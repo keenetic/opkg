@@ -36,6 +36,7 @@
 
 enum {
 	ARGS_OPT_FORCE_MAINTAINER = 129,
+	ARGS_OPT_IGNORE_MAINTAINER,
 	ARGS_OPT_FORCE_DEPENDS,
 	ARGS_OPT_FORCE_OVERWRITE,
 	ARGS_OPT_FORCE_DOWNGRADE,
@@ -65,6 +66,8 @@ static struct option long_options[] = {
 	{"dest", 1, 0, 'd'},
 	{"force-maintainer", 0, 0, ARGS_OPT_FORCE_MAINTAINER},
 	{"force_maintainer", 0, 0, ARGS_OPT_FORCE_MAINTAINER},
+	{"ignore-maintainer", 0, 0, ARGS_OPT_IGNORE_MAINTAINER},
+	{"ignore_maintainer", 0, 0, ARGS_OPT_IGNORE_MAINTAINER},
 	{"force-depends", 0, 0, ARGS_OPT_FORCE_DEPENDS},
 	{"force_depends", 0, 0, ARGS_OPT_FORCE_DEPENDS},
 	{"force-overwrite", 0, 0, ARGS_OPT_FORCE_OVERWRITE},
@@ -149,6 +152,9 @@ args_parse(int argc, char *argv[])
 			break;
 		case ARGS_OPT_FORCE_MAINTAINER:
 			opkg_config->force_maintainer = 1;
+			break;
+		case ARGS_OPT_IGNORE_MAINTAINER:
+			opkg_config->ignore_maintainer = 1;
 			break;
 		case ARGS_OPT_FORCE_DEPENDS:
 			opkg_config->force_depends = 1;

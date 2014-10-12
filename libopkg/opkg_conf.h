@@ -80,6 +80,7 @@ typedef struct opkg_conf {
      int force_depends;
      int force_defaults;
      int force_maintainer;
+     int ignore_maintainer;
      int force_overwrite;
      int force_downgrade;
      int force_reinstall;

@@ -1186,6 +1186,10 @@ resolve_conffiles(pkg_t *pkg)
                   if (opkg_config->force_maintainer) {
                       opkg_msg(NOTICE, "Conffile %s using maintainer's setting.\n",
 				      cf_backup);
+                  } else if (opkg_config->ignore_maintainer) {
+                      opkg_msg(NOTICE, "Conffile %s ignoring maintainer's changes.\n",
+                                      root_filename);
+                      rename(cf_backup, root_filename);
                   } else {
                       char *new_conffile;
                       sprintf_alloc(&new_conffile, "%s-opkg", root_filename);
