@@ -10,12 +10,17 @@ usage() {
     echo
     echo "Manage opkg's list of trusted keys"
     echo
-    echo "  opkg-key add <file>          - add the key contained in <file> ('-' for stdin)"
-    echo "  opkg-key del <keyid>         - remove the key <keyid>"
-    echo "  opkg-key list                - list keys"
+    echo "Commands and arguments:"
+    echo "  add <file>          - Add the key contained in <file> ('-' for stdin)"
+    echo "  del <keyid>         - Remove the key <keyid>"
+    echo "  list                - List keys"
+    echo "  fingerprint         - List keys with fingerprints"
+    echo "  reset               - Remove all keys, resetting the keyring"
+    echo "  populate            - Import keys from /usr/share/opkg/keyrings"
+    echo "  help                - Print this usage message and exit"
     echo
     echo "Options:"
-    echo "  -o <root>  Use <root> as the offline root directory"
+    echo "  -o <root>           - Use <root> as the offline root directory"
     echo
 }
 
