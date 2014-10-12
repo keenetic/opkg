@@ -70,6 +70,13 @@ case "$command" in
         rm -f $ROOT/etc/opkg/trustdb.gpg $ROOT/etc/opkg/trustdb.gpg~
         echo "OK"
         ;;
+    populate)
+        for f in $ROOT/usr/share/opkg/keyrings/*.gpg; do
+            echo "Importing keys from '`basename $f`'..."
+            $GPG --quiet --batch --import "$f"
+        done
+        echo "OK"
+        ;;
     help)
         usage
         ;;
