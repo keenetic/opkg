@@ -64,6 +64,12 @@ case "$command" in
         echo "Executing: $GPG $*"
         $GPG $*
         ;;
+    reset)
+        rm -f $ROOT/etc/opkg/trusted.gpg $ROOT/etc/opkg/trusted.gpg~
+        rm -f $ROOT/etc/opkg/secring.gpg $ROOT/etc/opkg/secring.gpg~
+        rm -f $ROOT/etc/opkg/trustdb.gpg $ROOT/etc/opkg/trustdb.gpg~
+        echo "OK"
+        ;;
     help)
         usage
         ;;
