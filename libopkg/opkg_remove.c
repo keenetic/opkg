@@ -251,6 +251,14 @@ opkg_remove_pkg(pkg_t *pkg, int from_upgrade)
      if ((parent_pkg = pkg->parent) == NULL)
 	  return 0;
 
+     /* While remove pkg with '--force-removal-of-dependent-packages',
+        pkg may be added to remove list multiple times, add status
+        check to make sure pkg only be removed once. */
+     if (opkg_config->force_removal_of_dependent_packages &&
+             pkg->state_flag & SF_FILELIST_CHANGED &&
+             pkg->state_status == SS_NOT_INSTALLED)
+         return 0;
+
      /* only attempt to remove dependent installed packages if
       * force_depends is not specified or the package is being
       * replaced.
