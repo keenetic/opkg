@@ -601,7 +601,25 @@ prerm_upgrade_old_pkg(pkg_t *pkg, pkg_t *old_pkg)
 	   Error unwind, for both the above cases:
 	   old-postinst abort-upgrade new-version
      */
-     return 0;
+    int err;
+    char *script_args;
+    char *new_version;
+
+    if (!old_pkg || !pkg)
+        return 0;
+
+    new_version = pkg_version_str_alloc(pkg);
+
+    sprintf_alloc(&script_args, "upgrade %s", new_version);
+    free(new_version);
+    err = pkg_run_script(old_pkg, "prerm", script_args);
+    free(script_args);
+    if (err != 0) {
+        opkg_msg(ERROR, "prerm script for package \"%s\" failed\n",
+                 old_pkg->name);
+        return -1;
+    }
+    return 0;
 }
 
 static int
@@ -1001,7 +1019,25 @@ postrm_upgrade_old_pkg(pkg_t *pkg, pkg_t *old_pkg)
 	   new-postrm failed-upgrade old-version
 	Error unwind, for both cases:
 	   old-preinst abort-upgrade new-version    */
-     return 0;
+    int err;
+    char *script_args;
+    char *new_version;
+
+    if (!old_pkg || !pkg)
+        return 0;
+
+    new_version = pkg_version_str_alloc(pkg);
+
+    sprintf_alloc(&script_args, "upgrade %s", new_version);
+    free(new_version);
+    err = pkg_run_script(old_pkg, "postrm", script_args);
+    free(script_args);
+    if (err != 0) {
+        opkg_msg(ERROR, "postrm script for package \"%s\" failed\n",
+                 old_pkg->name);
+        return -1;
+    }
+    return 0;
 }
 
 static int
