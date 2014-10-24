@@ -591,16 +591,6 @@ opkg_install_check_downgrade(pkg_t *pkg, pkg_t *old_pkg, int message)
 static int
 prerm_upgrade_old_pkg(pkg_t *pkg, pkg_t *old_pkg)
 {
-     /* DPKG_INCOMPATIBILITY:
-	dpkg does some things here that we don't do yet. Do we care?
-
-	1. If a version of the package is already installed, call
-	   old-prerm upgrade new-version
-	2. If the script runs but exits with a non-zero exit status
-	   new-prerm failed-upgrade old-version
-	   Error unwind, for both the above cases:
-	   old-postinst abort-upgrade new-version
-     */
     int err;
     char *script_args;
     char *new_version;
@@ -627,7 +617,10 @@ prerm_upgrade_old_pkg_unwind(pkg_t *pkg, pkg_t *old_pkg)
 {
      /* DPKG_INCOMPATIBILITY:
 	dpkg does some things here that we don't do yet. Do we care?
-	(See prerm_upgrade_old_package for details)
+	If prerm_upgrade_old_pkg fails, attempt:
+	   new-prerm failed-upgrade old-version
+	Error unwind:
+	   old-postinst abort-upgrade new-version
      */
      return 0;
 }
@@ -1012,13 +1005,6 @@ check_data_file_clashes_unwind(pkg_t *pkg, pkg_t *old_pkg)
 static int
 postrm_upgrade_old_pkg(pkg_t *pkg, pkg_t *old_pkg)
 {
-     /* DPKG_INCOMPATIBILITY: dpkg does the following here, should we?
-	1. If the package is being upgraded, call
-	   old-postrm upgrade new-version
-	2. If this fails, attempt:
-	   new-postrm failed-upgrade old-version
-	Error unwind, for both cases:
-	   old-preinst abort-upgrade new-version    */
     int err;
     char *script_args;
     char *new_version;
@@ -1045,7 +1031,10 @@ postrm_upgrade_old_pkg_unwind(pkg_t *pkg, pkg_t *old_pkg)
 {
      /* DPKG_INCOMPATIBILITY:
 	dpkg does some things here that we don't do yet. Do we care?
-	(See postrm_upgrade_old_pkg for details)
+	If postrm_upgrade_old_pkg fails, attempt:
+	   new-postrm failed-upgrade old-version
+	Error unwind:
+	   old-preinst abort-upgrade new-version
      */
     return 0;
 }
