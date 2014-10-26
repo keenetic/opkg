@@ -354,7 +354,7 @@ pkg_hash_fetch_best_installation_candidate(abstract_pkg_t *apkg,
                * on a later version of the held package.
                */
               if ((maybe->state_status == SS_INSTALLED || maybe->state_status == SS_UNPACKED)
-                      && maybe->state_flag == SF_HOLD)
+                      && (maybe->state_flag & SF_HOLD))
                   goto add_matching_pkg;
 
               /* Ensure that the package meets the specified constraint. */

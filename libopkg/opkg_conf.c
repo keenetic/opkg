@@ -392,7 +392,7 @@ opkg_conf_write_status_files(void)
 	  if (pkg->state_status == SS_NOT_INSTALLED
 	      && (pkg->state_want == SW_UNKNOWN
 		  || (pkg->state_want == SW_DEINSTALL
-			  && pkg->state_flag != SF_HOLD)
+			  && !(pkg->state_flag & SF_HOLD))
 		  || pkg->state_want == SW_PURGE)) {
 	       continue;
 	  }
