@@ -49,6 +49,8 @@ str_list_elt_t *str_list_last(str_list_t *list);
 
 void str_list_purge(str_list_t *list);
 
+int str_list_contains(str_list_t *list, const char *s);
+
 #ifdef __cplusplus
 }
 #endif

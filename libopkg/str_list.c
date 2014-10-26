@@ -116,3 +116,17 @@ void str_list_purge(str_list_t *list) {
     str_list_deinit(list);
     free(list);
 }
+
+int str_list_contains(str_list_t *list, const char *s)
+{
+    str_list_elt_t *elt;
+    const char *candidate;
+
+    for (elt = str_list_first(list); elt; elt = str_list_next(list, elt)) {
+        candidate = elt->data;
+        if (strcmp(candidate, s) == 0)
+            return 1;
+    }
+
+    return 0;
+}
