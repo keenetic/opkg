@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/sh
 #
 #   opkg config checker and upgrade script
 #
@@ -16,11 +16,11 @@
 
 set -e
 
-if [[ "$#" -eq 2 ]]; then
+if [ "$#" -eq 2 ]; then
     file_in=$1
     file_out=$2
     inplace=0
-elif [[ "$#" -eq 1 ]]; then
+elif [ "$#" -eq 1 ]; then
     file_in=$1
     file_out=`mktemp`
     inplace=1
@@ -53,6 +53,6 @@ awk_script="$awk_lists_dir 1"
 # Run awk_script
 awk "$awk_script" < $file_in > $file_out
 
-if [[ "$inplace" -eq 1 ]]; then
+if [ "$inplace" -eq 1 ]; then
     mv $file_out $file_in
 fi
