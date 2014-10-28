@@ -960,7 +960,8 @@ void buildDependedUponBy(pkg_t * pkg, abstract_pkg_t * ab_pkg)
 			continue;
 		for (j = 0; j < depends->possibility_count; j++) {
 			ab_depend = depends->possibilities[j]->pkg;
-			abstract_pkg_vec_insert(ab_depend->depended_upon_by, ab_pkg);
+			if (!abstract_pkg_vec_contains(ab_depend->depended_upon_by, ab_pkg))
+				abstract_pkg_vec_insert(ab_depend->depended_upon_by, ab_pkg);
 		}
 	}
 }
