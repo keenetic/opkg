@@ -38,14 +38,15 @@ pkg_has_installed_dependents(pkg_t *pkg, abstract_pkg_t *** pdependents)
      int nprovides = pkg->provides_count;
      abstract_pkg_t **provides = pkg->provides;
      unsigned int n_installed_dependents = 0;
-     int i;
+     unsigned int n_deps;
+     int i, j;
      for (i = 0; i < nprovides; i++) {
 	  abstract_pkg_t *providee = provides[i];
-	  abstract_pkg_t **dependers = providee->depended_upon_by;
 	  abstract_pkg_t *dep_ab_pkg;
-	  if (dependers == NULL)
-	       continue;
-	  while ((dep_ab_pkg = *dependers++) != NULL) {
+
+	  n_deps = providee->depended_upon_by->len;
+	  for (j = 0; j < n_deps; j++) {
+	       dep_ab_pkg = providee->depended_upon_by->pkgs[j];
 	       if (dep_ab_pkg->state_status == SS_INSTALLED || dep_ab_pkg->state_status == SS_UNPACKED){
 		    n_installed_dependents++;
                }
@@ -60,11 +61,11 @@ pkg_has_installed_dependents(pkg_t *pkg, abstract_pkg_t *** pdependents)
 	  *pdependents = dependents;
 	  for (i = 0; i < nprovides; i++) {
 	       abstract_pkg_t *providee = provides[i];
-	       abstract_pkg_t **dependers = providee->depended_upon_by;
 	       abstract_pkg_t *dep_ab_pkg;
-	       if (dependers == NULL)
-		    continue;
-	       while ((dep_ab_pkg = *dependers++) != NULL) {
+
+	       n_deps = providee->depended_upon_by->len;
+	       for (j = 0; j < n_deps; j++) {
+		    dep_ab_pkg = providee->depended_upon_by->pkgs[j];
 		    if (dep_ab_pkg->state_status == SS_INSTALLED && !(dep_ab_pkg->state_flag & SF_MARKED)) {
 			 dependents[p++] = dep_ab_pkg;
 			 dep_ab_pkg->state_flag |= SF_MARKED;
