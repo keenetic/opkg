@@ -8,7 +8,7 @@ REGRESSION_TESTS := 01_install.py 02_file.py 03_upgrade.py 04_upgrade_file.py \
 			13_virtual_upgrade.py 14_upgrade_by_uri.py \
 			15_reinstall_by_uri.py 16_upgrade_dependency.py \
 			17_upgrade_conflicts.py 18_upgrade_recommends.py \
-			19_no_recommends.py \
+			19_no_recommends.py 20_exclude.py \
 			issue26.py issue31.py issue45.py issue46.py \
 			issue50.py issue51.py issue55.py issue58.py \
 			issue72.py issue79.py issue85.py issue89.py \
