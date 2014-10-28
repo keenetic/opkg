@@ -672,11 +672,11 @@ int pkg_breaks_reverse_dep(pkg_t *pkg)
     abstract_pkg_t *apkg = pkg->parent;
     unsigned int i = 0;
     unsigned int j, k, m;
+    unsigned int n_rev_deps;
 
-    if (apkg->depended_upon_by == NULL)
-        return 0;
-
-    while ((rev_dep = apkg->depended_upon_by[i++])) {
+    n_rev_deps = apkg->depended_upon_by->len;
+    for (i = 0; i < n_rev_deps; i++) {
+        rev_dep = apkg->depended_upon_by->pkgs[i];
         unsigned int npkgs = rev_dep->pkgs->len;
 
         for (j = 0; j < npkgs; j++) {
@@ -994,10 +994,9 @@ pkg_depend_str(pkg_t *pkg, int idx)
 void buildDependedUponBy(pkg_t * pkg, abstract_pkg_t * ab_pkg)
 {
 	compound_depend_t * depends;
-	int count, othercount;
+	int count;
 	int i, j;
 	abstract_pkg_t * ab_depend;
-	abstract_pkg_t ** temp;
 
 	count = pkg->pre_depends_count +
 			pkg->depends_count +
@@ -1012,26 +1011,8 @@ void buildDependedUponBy(pkg_t * pkg, abstract_pkg_t * ab_pkg)
 			continue;
 		for (j = 0; j < depends->possibility_count; j++) {
 			ab_depend = depends->possibilities[j]->pkg;
-			if (!ab_depend->depended_upon_by) {
-				ab_depend->depended_upon_by =
-					xcalloc(1, sizeof(abstract_pkg_t *));
-			}
-
-			temp = ab_depend->depended_upon_by;
-			othercount = 1;
-			while (*temp) {
-			    temp++;
-			    othercount++;
-			}
-			*temp = ab_pkg;
-
-			ab_depend->depended_upon_by =
-				xrealloc(ab_depend->depended_upon_by,
-				(othercount + 1) * sizeof(abstract_pkg_t *));
-
-			/* the array may have been moved by realloc */
-			temp = ab_depend->depended_upon_by + othercount;
-			*temp = NULL;
+			if (!abstract_pkg_vec_contains(ab_depend->depended_upon_by, ab_pkg))
+				abstract_pkg_vec_insert(ab_depend->depended_upon_by, ab_pkg);
 		}
 	}
 }

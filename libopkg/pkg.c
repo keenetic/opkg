@@ -442,6 +442,7 @@ static void
 abstract_pkg_init(abstract_pkg_t *ab_pkg)
 {
      ab_pkg->provided_by = abstract_pkg_vec_alloc();
+     ab_pkg->depended_upon_by = abstract_pkg_vec_alloc();
      ab_pkg->dependencies_checked = 0;
      ab_pkg->state_status = SS_NOT_INSTALLED;
 }

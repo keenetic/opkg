@@ -89,9 +89,7 @@ struct abstract_pkg{
     pkg_state_status_t state_status;
     pkg_state_flag_t state_flag;
 
-    /* XXX: This should be abstract_pkg_vec_t for consistency. */
-    struct abstract_pkg ** depended_upon_by;
-
+    abstract_pkg_vec_t * depended_upon_by;
     abstract_pkg_vec_t * provided_by;
     abstract_pkg_vec_t * replaced_by;
 };

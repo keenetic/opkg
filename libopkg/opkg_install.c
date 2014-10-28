@@ -363,7 +363,7 @@ pkg_remove_orphan_dependent(pkg_t *pkg, pkg_t *old_pkg)
 
 	for (i=0; i<count0; i++) {
 		cd0 = &old_pkg->depends[i];
-		if (cd0->type != DEPEND)
+		if (cd0->type != DEPEND && cd0->type != RECOMMEND)
 			continue;
 		for (j=0; j<cd0->possibility_count; j++) {
 
@@ -374,9 +374,7 @@ pkg_remove_orphan_dependent(pkg_t *pkg, pkg_t *old_pkg)
 				if (cd1->type != DEPEND && cd1->type != RECOMMEND)
 					continue;
 				for (l=0; l<cd1->possibility_count; l++) {
-					if ( (cd0->type == cd1->type && cd0->possibilities[j] == cd1->possibilities[l]) ||
-					     (cd0->type != cd1->type && !strcmp(cd0->possibilities[j]->pkg->name, cd1->possibilities[l]->pkg->name) )
-					   ) {
+					if (cd0->possibilities[j]->pkg == cd1->possibilities[l]->pkg) {
 						found = 1;
 						break;
 					}
