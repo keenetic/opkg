@@ -5,6 +5,8 @@
 # of A and B available. Do upgrade with --autoremove option and ensure
 # that A gets uninstalled correctly instead of being upgraded.
 #
+# This test case matches issue 144.
+#
 
 import os
 import opk, cfg, opkgcl
