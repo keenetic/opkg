@@ -274,7 +274,6 @@ pkg_hash_fetch_best_installation_candidate(abstract_pkg_t *apkg,
 {
      unsigned int i, j;
      unsigned int nprovides = 0;
-     unsigned int nmatching = 0;
      pkg_vec_t *matching_pkgs;
      abstract_pkg_vec_t *matching_apkgs;
      abstract_pkg_vec_t *provided_apkg_vec;
@@ -489,8 +488,6 @@ add_matching_pkg:
 	  }
      }
 
-     nmatching = matching_apkgs->len;
-
      pkg_vec_free(matching_pkgs);
      abstract_pkg_vec_free(matching_apkgs);
      abstract_pkg_vec_free(providers);
@@ -525,17 +522,13 @@ add_matching_pkg:
 			priorized_matching->architecture);
 	  return priorized_matching;
      }
-     if (nmatching > 1) {
-	  opkg_msg(INFO, "No matching pkg out of %d matching_apkgs.\n",
-			nmatching);
-	  return NULL;
-     }
      if (latest_matching) {
 	  opkg_msg(INFO, "Using latest matching %s %s %s.\n",
 			latest_matching->name, latest_matching->version,
 			latest_matching->architecture);
 	  return latest_matching;
      }
+     opkg_msg(INFO, "No matching pkg for '%s'.\n", apkg->name);
      return NULL;
 }
 
