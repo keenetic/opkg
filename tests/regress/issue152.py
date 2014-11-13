@@ -30,6 +30,6 @@ opkgcl.update()
 
 opkgcl.install("a")
 if not opkgcl.is_installed("a"):
-    opk.xfail("Package 'a' failed to install.")
+    opk.fail("Package 'a' failed to install.")
 if not (opkgcl.is_installed("b") or opkgcl.is_installed("c")):
     opk.fail("No provider of 'p' was installed.")
