@@ -52,6 +52,35 @@ Developer visible:
 
 - Remove libbb!
 
+opkg-0.2.4
+==========
+
+- Improve handling of failed installs. Package status is now set to 'install
+  reinst-required half-installed' and advice on how to rectify the situation is
+  now given.
+
+- Improve handling of upgrades, and fix detection of orphan packages. Orphan
+  RECOMMENDS will now be removed during an upgrade, as well as orphan DEPENDS,
+  if autoremove is enabled. However, packages which move from DEPENDS to
+  RECOMMENDS will now be kept. (issue 144)
+
+- Improve handling of package flags.
+
+- Fix 'opkg whatconflicts'.
+
+- Fix handling of '--force-removal-of-dependent-packages'. (issue 140)
+
+- Fix selection between multiple providers of the same abstract package. (issue
+  152)
+
+- Fix uname and gname caching during package extraction.
+
+- Fix verification of release metadata files.
+
+- Fix possible segfault in 'pkg_hash_fetch_conflicts()'.
+
+- Use 'sh' instead of 'bash' as the interpreter for 'opkg-check-config'.
+
 opkg-0.2.3
 ==========
 
