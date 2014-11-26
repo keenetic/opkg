@@ -29,146 +29,143 @@
 
 #include "parse_util.h"
 
-int
-is_field(const char *type, const char *line)
+int is_field(const char *type, const char *line)
 {
-	if (!strncmp(line, type, strlen(type)))
-		return 1;
-	return 0;
+    if (!strncmp(line, type, strlen(type)))
+        return 1;
+    return 0;
 }
 
-char *
-parse_simple(const char *type, const char *line)
+char *parse_simple(const char *type, const char *line)
 {
-	return trim_xstrdup(line + strlen(type) + 1);
+    return trim_xstrdup(line + strlen(type) + 1);
 }
 
 /*
  * Parse a comma separated string into an array.
  */
-char **
-parse_list(const char *raw, unsigned int *count, const char sep, int skip_field)
+char **parse_list(const char *raw, unsigned int *count, const char sep,
+                  int skip_field)
 {
-	char **depends = NULL;
-	const char *start, *end;
-	int line_count = 0;
+    char **depends = NULL;
+    const char *start, *end;
+    int line_count = 0;
 
-	/* skip past the "Field:" marker */
-	if (!skip_field) {
-	while (*raw && *raw != ':')
-		raw++;
-	raw++;
-	}
+    /* skip past the "Field:" marker */
+    if (!skip_field) {
+        while (*raw && *raw != ':')
+            raw++;
+        raw++;
+    }
 
-	if (line_is_blank(raw)) {
-		*count = line_count;
-		return NULL;
-	}
+    if (line_is_blank(raw)) {
+        *count = line_count;
+        return NULL;
+    }
 
-	while (*raw) {
-		depends = xrealloc(depends, sizeof(char *) * (line_count + 1));
+    while (*raw) {
+        depends = xrealloc(depends, sizeof(char *) * (line_count + 1));
 
-		while (isspace(*raw))
-			raw++;
+        while (isspace(*raw))
+            raw++;
 
-		start = raw;
-		while (*raw != sep && *raw)
-			raw++;
-		end = raw;
+        start = raw;
+        while (*raw != sep && *raw)
+            raw++;
+        end = raw;
 
-		while (end > start && isspace(*end))
-			end--;
+        while (end > start && isspace(*end))
+            end--;
 
-		if (sep == ' ')
-			end++;
+        if (sep == ' ')
+            end++;
 
-		depends[line_count] = xstrndup(start, end-start);
+        depends[line_count] = xstrndup(start, end - start);
 
-        	line_count++;
-		if (*raw == sep)
-		    raw++;
-	}
+        line_count++;
+        if (*raw == sep)
+            raw++;
+    }
 
-	*count = line_count;
-	return depends;
+    *count = line_count;
+    return depends;
 }
 
-int
-parse_from_stream_nomalloc(parse_line_t parse_line, void *ptr, FILE *fp, uint mask,
-						char **buf0, size_t buf0len)
+int parse_from_stream_nomalloc(parse_line_t parse_line, void *ptr, FILE * fp,
+                               uint mask, char **buf0, size_t buf0len)
 {
-	int ret, lineno;
-	char *buf, *nl;
-	size_t buflen;
+    int ret, lineno;
+    char *buf, *nl;
+    size_t buflen;
 
-	lineno = 1;
-	ret = 0;
+    lineno = 1;
+    ret = 0;
 
-	buflen = buf0len;
-	buf = *buf0;
-	buf[0] = '\0';
+    buflen = buf0len;
+    buf = *buf0;
+    buf[0] = '\0';
 
-	while (1) {
-		if (fgets(buf, (int)buflen, fp) == NULL) {
-			if (ferror(fp)) {
-				opkg_perror(ERROR, "fgets");
-				ret = -1;
-			} else if (strlen(*buf0) == buf0len-1) {
-				opkg_msg(ERROR, "Missing new line character"
-						" at end of file!\n");
-				parse_line(ptr, *buf0, mask);
-			}
-			break;
-		}
+    while (1) {
+        if (fgets(buf, (int)buflen, fp) == NULL) {
+            if (ferror(fp)) {
+                opkg_perror(ERROR, "fgets");
+                ret = -1;
+            } else if (strlen(*buf0) == buf0len - 1) {
+                opkg_msg(ERROR,
+                         "Missing new line character" " at end of file!\n");
+                parse_line(ptr, *buf0, mask);
+            }
+            break;
+        }
 
-		nl = strchr(buf, '\n');
-		if (nl == NULL) {
-			if (strlen(buf) < buflen-1) {
-				/*
-				 * Line could be exactly buflen-1 long and
-				 * missing a newline, but we won't know until
-				 * fgets fails to read more data.
-				 */
-				opkg_msg(ERROR, "Missing new line character"
-						" at end of file!\n");
-				parse_line(ptr, *buf0, mask);
-				break;
-			}
-			if (buf0len >= EXCESSIVE_LINE_LEN) {
-				opkg_msg(ERROR, "Excessively long line at "
-					"%d. Corrupt file?\n",
-					lineno);
-				ret = -1;
-				break;
-			}
+        nl = strchr(buf, '\n');
+        if (nl == NULL) {
+            if (strlen(buf) < buflen - 1) {
+                /*
+                 * Line could be exactly buflen-1 long and
+                 * missing a newline, but we won't know until
+                 * fgets fails to read more data.
+                 */
+                opkg_msg(ERROR,
+                         "Missing new line character" " at end of file!\n");
+                parse_line(ptr, *buf0, mask);
+                break;
+            }
+            if (buf0len >= EXCESSIVE_LINE_LEN) {
+                opkg_msg(ERROR,
+                         "Excessively long line at " "%d. Corrupt file?\n",
+                         lineno);
+                ret = -1;
+                break;
+            }
 
-			/*
-			 * Realloc and point buf past the data already read,
-			 * at the NULL terminator inserted by fgets.
-			 * |<--------------- buf0len ----------------->|
-			 * |                     |<------- buflen ---->|
-			 * |---------------------|---------------------|
-			 * buf0                   buf
-			 */
-			buflen = buf0len +1;
-			buf0len *= 2;
-			*buf0 = xrealloc(*buf0, buf0len);
-			buf = *buf0 + buflen -2;
+            /*
+             * Realloc and point buf past the data already read,
+             * at the NULL terminator inserted by fgets.
+             * |<--------------- buf0len ----------------->|
+             * |                     |<------- buflen ---->|
+             * |---------------------|---------------------|
+             * buf0                   buf
+             */
+            buflen = buf0len + 1;
+            buf0len *= 2;
+            *buf0 = xrealloc(*buf0, buf0len);
+            buf = *buf0 + buflen - 2;
 
-			continue;
-		}
+            continue;
+        }
 
-		*nl = '\0';
+        *nl = '\0';
 
-		lineno++;
+        lineno++;
 
-		if (parse_line(ptr, *buf0, mask))
-			break;
+        if (parse_line(ptr, *buf0, mask))
+            break;
 
-		buf = *buf0;
-		buflen = buf0len;
-		buf[0] = '\0';
-	}
+        buf = *buf0;
+        buflen = buf0len;
+        buf[0] = '\0';
+    }
 
-	return ret;
+    return ret;
 }

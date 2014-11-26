@@ -22,11 +22,11 @@
 
 #include <stddef.h>
 
-extern void *xmalloc (size_t size);
+extern void *xmalloc(size_t size);
 extern void *xrealloc(void *old, size_t size);
 extern void *xcalloc(size_t nmemb, size_t size);
-extern char *xstrdup (const char *s);
-extern char *xstrndup (const char *s, int n);
+extern char *xstrdup(const char *s);
+extern char *xstrndup(const char *s, int n);
 extern char *xdirname(const char *path);
 
-#endif /* XFUNCS_H */
+#endif                          /* XFUNCS_H */

@@ -30,28 +30,28 @@
 #include "sprintf_alloc.h"
 #include "xfuncs.h"
 
-int pkg_src_init(pkg_src_t *src, const char *name, const char *base_url, const char *extra_data, int gzip)
+int pkg_src_init(pkg_src_t * src, const char *name, const char *base_url,
+                 const char *extra_data, int gzip)
 {
     src->gzip = gzip;
     src->name = xstrdup(name);
     src->value = xstrdup(base_url);
     if (extra_data)
-	src->extra_data = xstrdup(extra_data);
+        src->extra_data = xstrdup(extra_data);
     else
-	src->extra_data = NULL;
+        src->extra_data = NULL;
     return 0;
 }
 
-void pkg_src_deinit(pkg_src_t *src)
+void pkg_src_deinit(pkg_src_t * src)
 {
-    free (src->name);
-    free (src->value);
+    free(src->name);
+    free(src->value);
     if (src->extra_data)
-	free (src->extra_data);
+        free(src->extra_data);
 }
 
-int
-pkg_src_download(pkg_src_t *src)
+int pkg_src_download(pkg_src_t * src)
 {
     int err = 0;
     char *url;
@@ -61,9 +61,9 @@ pkg_src_download(pkg_src_t *src)
     sprintf_alloc(&feed, "%s/%s", opkg_config->lists_dir, src->name);
 
     url_filename = src->gzip ? "Packages.gz" : "Packages";
-    if (src->extra_data)	/* debian style? */
+    if (src->extra_data)        /* debian style? */
         sprintf_alloc(&url, "%s/%s/%s", src->value, src->extra_data,
-                url_filename);
+                      url_filename);
     else
         sprintf_alloc(&url, "%s/%s", src->value, url_filename);
 
@@ -80,7 +80,7 @@ pkg_src_download(pkg_src_t *src)
         free(cache_location);
         if (err) {
             opkg_msg(ERROR, "Couldn't decompress feed for source %s.",
-                    src->name);
+                     src->name);
             goto cleanup;
         }
     } else {
@@ -91,14 +91,13 @@ pkg_src_download(pkg_src_t *src)
 
     opkg_msg(DEBUG, "Downloaded package list for %s.\n", src->name);
 
-cleanup:
+ cleanup:
     free(feed);
     free(url);
     return err;
 }
 
-int
-pkg_src_download_signature(pkg_src_t *src)
+int pkg_src_download_signature(pkg_src_t * src)
 {
     int err = 0;
     char *url;
@@ -114,29 +113,27 @@ pkg_src_download_signature(pkg_src_t *src)
                   sigext);
 
     /* get the url for the sig file */
-    if (src->extra_data)	/* debian style? */
+    if (src->extra_data)        /* debian style? */
         sprintf_alloc(&url, "%s/%s/Packages.%s", src->value, src->extra_data,
-                sigext);
+                      sigext);
     else
         sprintf_alloc(&url, "%s/Packages.%s", src->value, sigext);
 
     err = opkg_download(url, sigfile, NULL, NULL);
     if (err) {
-        opkg_msg(ERROR, "Failed to download signature for %s.\n",
-                src->name);
-	goto cleanup;
+        opkg_msg(ERROR, "Failed to download signature for %s.\n", src->name);
+        goto cleanup;
     }
 
     opkg_msg(DEBUG, "Downloaded signature for %s.\n", src->name);
 
-cleanup:
+ cleanup:
     free(sigfile);
     free(url);
     return err;
 }
 
-int
-pkg_src_verify(pkg_src_t *src)
+int pkg_src_verify(pkg_src_t * src)
 {
     int err = 0;
     char *feed;
@@ -151,24 +148,23 @@ pkg_src_verify(pkg_src_t *src)
     sprintf_alloc(&feed, "%s/%s", opkg_config->lists_dir, src->name);
     sprintf_alloc(&sigfile, "%s.%s", feed, sigext);
 
-    if (!file_exists(sigfile))
-    {
-	opkg_msg(ERROR, "Signature file is missing for %s. "
-		"Perhaps you need to run 'opkg update'?\n",
-		src->name);
-	err = -1;
-	goto cleanup;
+    if (!file_exists(sigfile)) {
+        opkg_msg(ERROR,
+                 "Signature file is missing for %s. "
+                 "Perhaps you need to run 'opkg update'?\n", src->name);
+        err = -1;
+        goto cleanup;
     }
 
     err = opkg_verify_signature(feed, sigfile);
     if (err) {
         opkg_msg(ERROR, "Signature verification failed for %s.\n", src->name);
-	goto cleanup;
+        goto cleanup;
     }
 
     opkg_msg(DEBUG, "Signature verification passed for %s.\n", src->name);
 
-cleanup:
+ cleanup:
     if (err) {
         /* Remove incorrect files. */
         unlink(feed);
@@ -179,8 +175,7 @@ cleanup:
     return err;
 }
 
-int
-pkg_src_update(pkg_src_t *src)
+int pkg_src_update(pkg_src_t * src)
 {
     int err;
 

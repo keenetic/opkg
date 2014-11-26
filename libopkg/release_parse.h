@@ -21,10 +21,9 @@
 extern "C" {
 #endif
 
-int release_parse_from_stream(release_t *release, FILE *fp);
+    int release_parse_from_stream(release_t * release, FILE * fp);
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* RELEASE_PARSE_H */
+#endif                          /* RELEASE_PARSE_H */

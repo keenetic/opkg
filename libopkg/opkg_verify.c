@@ -28,11 +28,10 @@
 #include "opkg_gpg.h"
 #else
 /* Dummy gpg signature verification. */
-int
-opkg_verify_gpg_signature(const char *file, const char *sigfile)
+int opkg_verify_gpg_signature(const char *file, const char *sigfile)
 {
-    (void) file;
-    (void) sigfile;
+    (void)file;
+    (void)sigfile;
 
     opkg_msg(ERROR, "GPG signature checking not supported\n");
     return -1;
@@ -43,19 +42,17 @@ opkg_verify_gpg_signature(const char *file, const char *sigfile)
 #include "opkg_openssl.h"
 #else
 /* Dummy openssl signature verification. */
-int
-opkg_verify_openssl_signature(const char *file, const char *sigfile)
+int opkg_verify_openssl_signature(const char *file, const char *sigfile)
 {
-    (void) file;
-    (void) sigfile;
+    (void)file;
+    (void)sigfile;
 
     opkg_msg(ERROR, "OpenSSL signature checking not supported\n");
     return -1;
 }
 #endif
 
-int
-opkg_verify_md5sum(const char *file, const char *md5sum)
+int opkg_verify_md5sum(const char *file, const char *md5sum)
 {
     int r;
     char *file_md5sum;
@@ -73,8 +70,7 @@ opkg_verify_md5sum(const char *file, const char *md5sum)
     return r;
 }
 
-int
-opkg_verify_sha256sum(const char *file, const char *sha256sum)
+int opkg_verify_sha256sum(const char *file, const char *sha256sum)
 {
 #ifdef HAVE_SHA256
     int r;
@@ -92,23 +88,22 @@ opkg_verify_sha256sum(const char *file, const char *sha256sum)
 
     return r;
 #else
-    (void) sha256sum;
+    (void)sha256sum;
 
     opkg_msg(INFO, "Ignoring sha256sum for file '%s'\n", file);
     return 0;
 #endif
 }
 
-int
-opkg_verify_signature(const char *file, const char *sigfile)
+int opkg_verify_signature(const char *file, const char *sigfile)
 {
-    if ((strcmp(opkg_config->signature_type, "gpg") == 0) ||
-            (strcmp(opkg_config->signature_type, "gpg-asc") == 0))
+    if ((strcmp(opkg_config->signature_type, "gpg") == 0)
+        || (strcmp(opkg_config->signature_type, "gpg-asc") == 0))
         return opkg_verify_gpg_signature(file, sigfile);
     else if (strcmp(opkg_config->signature_type, "openssl") == 0)
         return opkg_verify_openssl_signature(file, sigfile);
 
     opkg_msg(ERROR, "signature_type option '%s' not understood.\n",
-            opkg_config->signature_type);
+             opkg_config->signature_type);
     return -1;
 }

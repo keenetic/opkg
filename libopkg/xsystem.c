@@ -33,44 +33,44 @@
    Otherwise, the 8-bit return value of the program ala WEXITSTATUS
    as defined in <sys/wait.h>.
 */
-int
-xsystem(const char *argv[])
+int xsystem(const char *argv[])
 {
-	int status;
-	pid_t pid;
+    int status;
+    pid_t pid;
 
-	pid = vfork();
+    pid = vfork();
 
-	switch (pid) {
-	case -1:
-		opkg_perror(ERROR, "%s: vfork", argv[0]);
-		return -1;
-	case 0:
-		/* child */
-		execvp(argv[0], (char*const*)argv);
-		_exit(-1);
-	default:
-		/* parent */
-		break;
-	}
+    switch (pid) {
+    case -1:
+        opkg_perror(ERROR, "%s: vfork", argv[0]);
+        return -1;
+    case 0:
+        /* child */
+        execvp(argv[0], (char *const *)argv);
+        _exit(-1);
+    default:
+        /* parent */
+        break;
+    }
 
-	if (waitpid(pid, &status, 0) == -1) {
-		opkg_perror(ERROR, "%s: waitpid", argv[0]);
-		return -1;
-	}
+    if (waitpid(pid, &status, 0) == -1) {
+        opkg_perror(ERROR, "%s: waitpid", argv[0]);
+        return -1;
+    }
 
-	if (WIFSIGNALED(status)) {
-		opkg_msg(ERROR, "%s: Child killed by signal %d.\n",
-			argv[0], WTERMSIG(status));
-		return -1;
-	}
+    if (WIFSIGNALED(status)) {
+        opkg_msg(ERROR, "%s: Child killed by signal %d.\n", argv[0],
+                 WTERMSIG(status));
+        return -1;
+    }
 
-	if (!WIFEXITED(status)) {
-		/* shouldn't happen */
-		opkg_msg(ERROR, "%s: Your system is broken: got status %d "
-			"from waitpid.\n", argv[0], status);
-		return -1;
-	}
+    if (!WIFEXITED(status)) {
+        /* shouldn't happen */
+        opkg_msg(ERROR,
+                 "%s: Your system is broken: got status %d " "from waitpid.\n",
+                 argv[0], status);
+        return -1;
+    }
 
-	return WEXITSTATUS(status);
+    return WEXITSTATUS(status);
 }

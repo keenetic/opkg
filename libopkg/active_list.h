@@ -27,19 +27,25 @@ struct active_list {
     struct active_list *depended;
 };
 
-
-struct active_list * active_list_head_new(void);
+struct active_list *active_list_head_new(void);
 void active_list_head_delete(struct active_list *);
 void active_list_init(struct active_list *ptr);
 void active_list_clear(struct active_list *head);
-void active_list_add_depend(struct active_list *node, struct active_list *depend);
+void active_list_add_depend(struct active_list *node,
+                            struct active_list *depend);
 void active_list_add(struct active_list *head, struct active_list *node);
-struct active_list *active_list_move_node(struct active_list *old_head, struct active_list *new_head, struct active_list *node);
+struct active_list *active_list_move_node(struct active_list *old_head,
+                                          struct active_list *new_head,
+                                          struct active_list *node);
 
-struct active_list * active_list_sort(struct active_list *head, int (*compare_fcn_t)(const void *, const void *));
+struct active_list *active_list_sort(struct active_list *head,
+                                     int (*compare_fcn_t) (const void *,
+                                                           const void *));
 
-struct active_list * active_list_next(struct active_list *head, struct active_list *ptr);
+struct active_list *active_list_next(struct active_list *head,
+                                     struct active_list *ptr);
 
-struct active_list * active_list_prev(struct active_list *head, struct active_list *ptr);
+struct active_list *active_list_prev(struct active_list *head,
+                                     struct active_list *ptr);
 
 #endif

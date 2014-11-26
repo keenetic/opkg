@@ -24,30 +24,30 @@
 #include "void_list.h"
 #include "xfuncs.h"
 
-void pkg_src_list_init(pkg_src_list_t *list)
+void pkg_src_list_init(pkg_src_list_t * list)
 {
     void_list_init((void_list_t *) list);
 }
 
-void pkg_src_list_deinit(pkg_src_list_t *list)
+void pkg_src_list_deinit(pkg_src_list_t * list)
 {
     pkg_src_list_elt_t *iter, *n;
     pkg_src_t *pkg_src;
 
     list_for_each_entry_safe(iter, n, &list->head, node) {
-      pkg_src = (pkg_src_t *)iter->data;
-      pkg_src_deinit(pkg_src);
+        pkg_src = (pkg_src_t *) iter->data;
+        pkg_src_deinit(pkg_src);
 
-      /* malloced in pkg_src_list_append */
-      free(pkg_src);
-      iter->data = NULL;
+        /* malloced in pkg_src_list_append */
+        free(pkg_src);
+        iter->data = NULL;
     }
     void_list_deinit((void_list_t *) list);
 }
 
-pkg_src_t *pkg_src_list_append(pkg_src_list_t *list,
-			       const char *name, const char *base_url, const char *extra_data,
-			       int gzip)
+pkg_src_t *pkg_src_list_append(pkg_src_list_t * list, const char *name,
+                               const char *base_url, const char *extra_data,
+                               int gzip)
 {
     /* freed in pkg_src_list_deinit */
     pkg_src_t *pkg_src = xcalloc(1, sizeof(pkg_src_t));
@@ -58,12 +58,12 @@ pkg_src_t *pkg_src_list_append(pkg_src_list_t *list,
     return pkg_src;
 }
 
-void pkg_src_list_push(pkg_src_list_t *list, pkg_src_t *data)
+void pkg_src_list_push(pkg_src_list_t * list, pkg_src_t * data)
 {
     void_list_push((void_list_t *) list, data);
 }
 
-pkg_src_list_elt_t *pkg_src_list_pop(pkg_src_list_t *list)
+pkg_src_list_elt_t *pkg_src_list_pop(pkg_src_list_t * list)
 {
     return (pkg_src_list_elt_t *) void_list_pop((void_list_t *) list);
 }

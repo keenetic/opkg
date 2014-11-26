@@ -25,26 +25,26 @@
 #include "opkg_message.h"
 #include "opkg_cmd.h"
 
-int
-opkg_configure(pkg_t *pkg)
+int opkg_configure(pkg_t * pkg)
 {
     int err;
 
     /* DPKG_INCOMPATIBILITY:
-       dpkg actually does some conffile handling here, rather than at the
-       end of opkg_install(). Do we care? */
+     * dpkg actually does some conffile handling here, rather than at the
+     * end of opkg_install(). Do we care? */
     /* DPKG_INCOMPATIBILITY:
-       dpkg actually includes a version number to this script call */
+     * dpkg actually includes a version number to this script call */
 
     err = pkg_run_script(pkg, "postinst", "configure");
     if (err) {
         if (!opkg_config->offline_root)
-	     opkg_msg(ERROR, "%s.postinst returned %d.\n", pkg->name, err);
+            opkg_msg(ERROR, "%s.postinst returned %d.\n", pkg->name, err);
         else
-	     opkg_msg(NOTICE, "%s.postinst returned %d, marking as unpacked only, configuration required on target.\n", pkg->name, err);
-	return err;
+            opkg_msg(NOTICE,
+                     "%s.postinst returned %d, marking as unpacked only, configuration required on target.\n",
+                     pkg->name, err);
+        return err;
     }
 
     return 0;
 }
-

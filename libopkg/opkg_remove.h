@@ -26,13 +26,13 @@ extern "C" {
 #include "pkg.h"
 #include "opkg_conf.h"
 
-int opkg_remove_pkg(pkg_t *pkg);
-int pkg_has_installed_dependents(pkg_t *pkg, abstract_pkg_t *** pdependents);
-void remove_data_files_and_list(pkg_t *pkg);
-void remove_maintainer_scripts(pkg_t *pkg);
+    int opkg_remove_pkg(pkg_t * pkg);
+    int pkg_has_installed_dependents(pkg_t * pkg,
+                                     abstract_pkg_t *** pdependents);
+    void remove_data_files_and_list(pkg_t * pkg);
+    void remove_maintainer_scripts(pkg_t * pkg);
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OPKG_REMOVE_H */
+#endif                          /* OPKG_REMOVE_H */

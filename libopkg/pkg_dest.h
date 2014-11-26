@@ -25,21 +25,20 @@
 extern "C" {
 #endif
 
-typedef struct pkg_dest pkg_dest_t;
-struct pkg_dest
-{
-    char *name;
-    char *root_dir;
-    char *info_dir;
-    char *status_file_name;
-    FILE *status_fp;
-};
+    typedef struct pkg_dest pkg_dest_t;
+    struct pkg_dest {
+        char *name;
+        char *root_dir;
+        char *info_dir;
+        char *status_file_name;
+        FILE *status_fp;
+    };
 
-int pkg_dest_init(pkg_dest_t *dest, const char *name, const char *root_dir);
-void pkg_dest_deinit(pkg_dest_t *dest);
+    int pkg_dest_init(pkg_dest_t * dest, const char *name,
+                      const char *root_dir);
+    void pkg_dest_deinit(pkg_dest_t * dest);
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* PKG_DEST_H */
+#endif                          /* PKG_DEST_H */

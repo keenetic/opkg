@@ -24,20 +24,20 @@
 #include "xregex.h"
 #include "xfuncs.h"
 
-static void print_regcomp_err(const regex_t *preg, int err);
+static void print_regcomp_err(const regex_t * preg, int err);
 
-int xregcomp(regex_t *preg, const char *regex, int cflags)
+int xregcomp(regex_t * preg, const char *regex, int cflags)
 {
     int err;
     err = regcomp(preg, regex, cflags);
     if (err) {
-	print_regcomp_err(preg, err);
+        print_regcomp_err(preg, err);
     }
 
     return err;
 }
 
-static void print_regcomp_err(const regex_t *preg, int err)
+static void print_regcomp_err(const regex_t * preg, int err)
 {
     unsigned int size;
     char *error;

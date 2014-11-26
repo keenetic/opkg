@@ -27,17 +27,18 @@
 #include "sprintf_alloc.h"
 #include "opkg_conf.h"
 
-int conffile_init(conffile_t *conffile, const char *file_name, const char *md5sum)
+int conffile_init(conffile_t * conffile, const char *file_name,
+                  const char *md5sum)
 {
     return nv_pair_init(conffile, file_name, md5sum);
 }
 
-void conffile_deinit(conffile_t *conffile)
+void conffile_deinit(conffile_t * conffile)
 {
     nv_pair_deinit(conffile);
 }
 
-int conffile_has_been_modified(conffile_t *conffile)
+int conffile_has_been_modified(conffile_t * conffile)
 {
     char *md5sum;
     char *filename = conffile->name;
@@ -45,8 +46,8 @@ int conffile_has_been_modified(conffile_t *conffile)
     int ret = 1;
 
     if (conffile->value == NULL) {
-	 opkg_msg(NOTICE, "Conffile %s has no md5sum.\n", conffile->name);
-	 return 1;
+        opkg_msg(NOTICE, "Conffile %s has no md5sum.\n", conffile->name);
+        return 1;
     }
 
     root_filename = root_filename_alloc(filename);
@@ -55,7 +56,7 @@ int conffile_has_been_modified(conffile_t *conffile)
 
     if (md5sum && (ret = strcmp(md5sum, conffile->value))) {
         opkg_msg(INFO, "Conffile %s:\n\told md5=%s\n\tnew md5=%s\n",
-		conffile->name, md5sum, conffile->value);
+                 conffile->name, md5sum, conffile->value);
     }
 
     free(root_filename);

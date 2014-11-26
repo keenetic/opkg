@@ -21,10 +21,9 @@
 extern "C" {
 #endif
 
-int opkg_verify_gpg_signature(const char * file, const char * sigfile);
+    int opkg_verify_gpg_signature(const char *file, const char *sigfile);
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif

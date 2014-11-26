@@ -32,80 +32,82 @@
 
 extern void *xmalloc(size_t size)
 {
-	void *ptr = malloc(size);
-	if (ptr == NULL && size != 0) {
-		opkg_perror(ERROR, "malloc");
-		exit(EXIT_FAILURE);
-	}
-	return ptr;
+    void *ptr = malloc(size);
+    if (ptr == NULL && size != 0) {
+        opkg_perror(ERROR, "malloc");
+        exit(EXIT_FAILURE);
+    }
+    return ptr;
 }
 
 extern void *xrealloc(void *ptr, size_t size)
 {
-	ptr = realloc(ptr, size);
-	if (ptr == NULL && size != 0) {
-		opkg_perror(ERROR, "realloc");
-		exit(EXIT_FAILURE);
-	}
-	return ptr;
+    ptr = realloc(ptr, size);
+    if (ptr == NULL && size != 0) {
+        opkg_perror(ERROR, "realloc");
+        exit(EXIT_FAILURE);
+    }
+    return ptr;
 }
 
 extern void *xcalloc(size_t nmemb, size_t size)
 {
-	void *ptr = calloc(nmemb, size);
-	if (ptr == NULL && nmemb != 0 && size != 0) {
-		opkg_perror(ERROR, "calloc");
-		exit(EXIT_FAILURE);
-	}
-	return ptr;
+    void *ptr = calloc(nmemb, size);
+    if (ptr == NULL && nmemb != 0 && size != 0) {
+        opkg_perror(ERROR, "calloc");
+        exit(EXIT_FAILURE);
+    }
+    return ptr;
 }
 
-extern char * xstrdup (const char *s) {
-	char *t;
+extern char *xstrdup(const char *s)
+{
+    char *t;
 
-	if (s == NULL)
-		return NULL;
+    if (s == NULL)
+        return NULL;
 
-	t = strdup (s);
+    t = strdup(s);
 
-	if (t == NULL) {
-		opkg_perror(ERROR, "strdup");
-		exit(EXIT_FAILURE);
-	}
+    if (t == NULL) {
+        opkg_perror(ERROR, "strdup");
+        exit(EXIT_FAILURE);
+    }
 
-	return t;
+    return t;
 }
 
-extern char * xstrndup (const char *s, int n) {
-	char *t;
+extern char *xstrndup(const char *s, int n)
+{
+    char *t;
 
-	if (s == NULL)
-		return NULL;
+    if (s == NULL)
+        return NULL;
 
-	t = strndup (s, n);
+    t = strndup(s, n);
 
-	if (t == NULL) {
-		opkg_perror(ERROR, "strdup");
-		exit(EXIT_FAILURE);
-	}
+    if (t == NULL) {
+        opkg_perror(ERROR, "strdup");
+        exit(EXIT_FAILURE);
+    }
 
-	return t;
+    return t;
 }
 
 /* Sane dirname. */
-extern char * xdirname (const char *path)
+extern char *xdirname(const char *path)
 {
-	char *pathcopy, *parent, *tmp;
+    char *pathcopy, *parent, *tmp;
 
-	/* dirname is unsafe, it may both modify the memory of the path argument
-	 * and may return a pointer to static memory, which can then be modified
-	 * by consequtive calls to dirname.
-	 */
-	pathcopy = xstrdup(path);
-	tmp = dirname(pathcopy);
-	parent = xstrdup(tmp);
-	free(pathcopy);
-	return parent;
+    /* dirname is unsafe, it may both modify the memory of the path argument
+     * and may return a pointer to static memory, which can then be modified
+     * by consequtive calls to dirname.
+     */
+    pathcopy = xstrdup(path);
+    tmp = dirname(pathcopy);
+    parent = xstrdup(tmp);
+    free(pathcopy);
+    return parent;
 }
 
 /* END CODE */

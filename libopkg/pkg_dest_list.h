@@ -25,23 +25,22 @@ extern "C" {
 
 #include "pkg_dest.h"
 
-typedef struct void_list_elt pkg_dest_list_elt_t;
+    typedef struct void_list_elt pkg_dest_list_elt_t;
 
-typedef struct void_list pkg_dest_list_t;
+    typedef struct void_list pkg_dest_list_t;
 
-void pkg_dest_list_elt_init(pkg_dest_list_elt_t *elt, pkg_dest_t *data);
-void pkg_dest_list_elt_deinit(pkg_dest_list_elt_t *elt);
+    void pkg_dest_list_elt_init(pkg_dest_list_elt_t * elt, pkg_dest_t * data);
+    void pkg_dest_list_elt_deinit(pkg_dest_list_elt_t * elt);
 
-void pkg_dest_list_init(pkg_dest_list_t *list);
-void pkg_dest_list_deinit(pkg_dest_list_t *list);
+    void pkg_dest_list_init(pkg_dest_list_t * list);
+    void pkg_dest_list_deinit(pkg_dest_list_t * list);
 
-pkg_dest_t *pkg_dest_list_append(pkg_dest_list_t *list, const char *name,
-				 const char *root_dir);
-void pkg_dest_list_push(pkg_dest_list_t *list, pkg_dest_t *data);
-pkg_dest_list_elt_t *pkg_dest_list_pop(pkg_dest_list_t *list);
+    pkg_dest_t *pkg_dest_list_append(pkg_dest_list_t * list, const char *name,
+                                     const char *root_dir);
+    void pkg_dest_list_push(pkg_dest_list_t * list, pkg_dest_t * data);
+    pkg_dest_list_elt_t *pkg_dest_list_pop(pkg_dest_list_t * list);
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* PKG_DEST_LIST_H */
+#endif                          /* PKG_DEST_LIST_H */

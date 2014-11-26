@@ -23,10 +23,9 @@
 extern "C" {
 #endif
 
-void sprintf_alloc(char **str, const char *fmt, ...);
+    void sprintf_alloc(char **str, const char *fmt, ...);
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* SPRINTF_ALLOC_H */
+#endif                          /* SPRINTF_ALLOC_H */

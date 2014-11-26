@@ -23,7 +23,7 @@
 #include "nv_pair.h"
 #include "xfuncs.h"
 
-int nv_pair_init(nv_pair_t *nv_pair, const char *name, const char *value)
+int nv_pair_init(nv_pair_t * nv_pair, const char *name, const char *value)
 {
 
     nv_pair->name = xstrdup(name);
@@ -32,7 +32,7 @@ int nv_pair_init(nv_pair_t *nv_pair, const char *name, const char *value)
     return 0;
 }
 
-void nv_pair_deinit(nv_pair_t *nv_pair)
+void nv_pair_deinit(nv_pair_t * nv_pair)
 {
     free(nv_pair->name);
     nv_pair->name = NULL;
@@ -40,5 +40,3 @@ void nv_pair_deinit(nv_pair_t *nv_pair)
     free(nv_pair->value);
     nv_pair->value = NULL;
 }
-
-

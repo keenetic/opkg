@@ -32,20 +32,18 @@
 #include "file_util.h"
 #include "xfuncs.h"
 
-static int
-str_starts_with(const char *str, const char *prefix)
+static int str_starts_with(const char *str, const char *prefix)
 {
     return (strncmp(str, prefix, strlen(prefix)) == 0);
 }
 
-static int
-opkg_download_set_env()
+static int opkg_download_set_env()
 {
     int r;
 
     if (opkg_config->http_proxy) {
         opkg_msg(DEBUG, "Setting environment variable: http_proxy = %s.\n",
-                opkg_config->http_proxy);
+                 opkg_config->http_proxy);
         r = setenv("http_proxy", opkg_config->http_proxy, 1);
         if (r != 0) {
             opkg_msg(ERROR, "Failed to set environment variable http_proxy");
@@ -54,7 +52,7 @@ opkg_download_set_env()
     }
     if (opkg_config->https_proxy) {
         opkg_msg(DEBUG, "Setting environment variable: https_proxy = %s.\n",
-                opkg_config->https_proxy);
+                 opkg_config->https_proxy);
         r = setenv("https_proxy", opkg_config->https_proxy, 1);
         if (r != 0) {
             opkg_msg(ERROR, "Failed to set environment variable https_proxy");
@@ -63,7 +61,7 @@ opkg_download_set_env()
     }
     if (opkg_config->ftp_proxy) {
         opkg_msg(DEBUG, "Setting environment variable: ftp_proxy = %s.\n",
-                opkg_config->ftp_proxy);
+                 opkg_config->ftp_proxy);
         r = setenv("ftp_proxy", opkg_config->ftp_proxy, 1);
         if (r != 0) {
             opkg_msg(ERROR, "Failed to set environment variable ftp_proxy");
@@ -71,8 +69,8 @@ opkg_download_set_env()
         }
     }
     if (opkg_config->no_proxy) {
-        opkg_msg(DEBUG,"Setting environment variable: no_proxy = %s.\n",
-                opkg_config->no_proxy);
+        opkg_msg(DEBUG, "Setting environment variable: no_proxy = %s.\n",
+                 opkg_config->no_proxy);
         r = setenv("no_proxy", opkg_config->no_proxy, 1);
         if (r != 0) {
             opkg_msg(ERROR, "Failed to set environment variable no_proxy");
@@ -83,12 +81,11 @@ opkg_download_set_env()
     return 0;
 }
 
-static int
-opkg_download_file(const char *src, const char *dest)
+static int opkg_download_file(const char *src, const char *dest)
 {
     if (!file_exists(src)) {
-	opkg_msg(ERROR, "%s: No such file.\n", src);
-	return -1;
+        opkg_msg(ERROR, "%s: No such file.\n", src);
+        return -1;
     }
 
     /* Currently there is no attempt to check whether the destination file
@@ -112,24 +109,23 @@ opkg_download_file(const char *src, const char *dest)
  * \return 0 if success, -1 if error occurs
  *
  */
-int
-opkg_download_internal(const char *src, const char *dest,
-	curl_progress_func cb, void *data, int use_cache)
+int opkg_download_internal(const char *src, const char *dest,
+                           curl_progress_func cb, void *data, int use_cache)
 {
     int ret;
 
-    opkg_msg(NOTICE,"Downloading %s.\n", src);
+    opkg_msg(NOTICE, "Downloading %s.\n", src);
 
     if (str_starts_with(src, "file:")) {
         const char *file_src = src + 5;
 
-	return opkg_download_file(file_src, dest);
+        return opkg_download_file(file_src, dest);
     }
 
     ret = opkg_download_set_env();
     if (ret != 0) {
-	/* Error message already printed. */
-	return ret;
+        /* Error message already printed. */
+        return ret;
     }
 
     return opkg_download_backend(src, dest, cb, data, use_cache);
@@ -141,8 +137,7 @@ opkg_download_internal(const char *src, const char *dest,
  * \return generated file path
  *
  */
-char *
-get_cache_location(const char *src)
+char *get_cache_location(const char *src)
 {
     char *cache_name = xstrdup(src);
     char *cache_location, *p;
@@ -164,9 +159,7 @@ get_cache_location(const char *src)
  * \return path of downloaded file in cache or NULL if error occurs
  *
  */
-char *
-opkg_download_cache(const char *src,
-	curl_progress_func cb, void *data)
+char *opkg_download_cache(const char *src, curl_progress_func cb, void *data)
 {
     char *cache_location;
     int err;
@@ -189,16 +182,14 @@ opkg_download_cache(const char *src,
  * \return 0 on success, <0 on failure
  *
  */
-int
-opkg_download_direct(const char *src, const char *dest,
-	curl_progress_func cb, void *data)
+int opkg_download_direct(const char *src, const char *dest,
+                         curl_progress_func cb, void *data)
 {
     return opkg_download_internal(src, dest, cb, data, 0);
 }
 
-int
-opkg_download(const char *src, const char *dest_file_name,
-	curl_progress_func cb, void *data)
+int opkg_download(const char *src, const char *dest_file_name,
+                  curl_progress_func cb, void *data)
 {
     int err = -1;
 
@@ -208,35 +199,33 @@ opkg_download(const char *src, const char *dest_file_name,
             err = file_copy(cache_location, dest_file_name);
             free(cache_location);
         }
-    }
-    else {
+    } else {
         err = opkg_download_direct(src, dest_file_name, NULL, NULL);
     }
     return err;
 }
 
-static char *
-get_pkg_url(pkg_t *pkg)
+static char *get_pkg_url(pkg_t * pkg)
 {
     char *url;
 
     if (pkg->src == NULL) {
-	opkg_msg(ERROR, "Package %s is not available from any configured src.\n",
-		pkg->name);
-	return NULL;
+        opkg_msg(ERROR,
+                 "Package %s is not available from any configured src.\n",
+                 pkg->name);
+        return NULL;
     }
     if (pkg->filename == NULL) {
-	opkg_msg(ERROR, "Package %s does not have a valid filename field.\n",
-		pkg->name);
-	return NULL;
+        opkg_msg(ERROR, "Package %s does not have a valid filename field.\n",
+                 pkg->name);
+        return NULL;
     }
 
     sprintf_alloc(&url, "%s/%s", pkg->src->value, pkg->filename);
     return url;
 }
 
-char *
-pkg_download_signature(pkg_t *pkg)
+char *pkg_download_signature(pkg_t * pkg)
 {
     char *pkg_url;
     char *sig_url;
@@ -267,8 +256,7 @@ pkg_download_signature(pkg_t *pkg)
  * \return 0 if success, -1 if error occurs
  *
  */
-int
-opkg_download_pkg(pkg_t *pkg)
+int opkg_download_pkg(pkg_t * pkg)
 {
     char *url;
     int err = 0;
@@ -293,13 +281,12 @@ opkg_download_pkg(pkg_t *pkg)
     /* Ensure downloaded package is valid. */
     err = pkg_verify(pkg);
 
-cleanup:
+ cleanup:
     free(url);
     return err;
 }
 
-int
-opkg_download_pkg_to_dir(pkg_t *pkg, const char *dir)
+int opkg_download_pkg_to_dir(pkg_t * pkg, const char *dir)
 {
     char *dest_file_name;
     char *url = NULL;
@@ -330,7 +317,7 @@ opkg_download_pkg_to_dir(pkg_t *pkg, const char *dir)
         err = file_copy(pkg->local_filename, dest_file_name);
     }
 
-cleanup:
+ cleanup:
     free(url);
     free(dest_file_name);
     return err;
@@ -339,40 +326,37 @@ cleanup:
 /*
  * Returns 1 if URL "url" is prefixed by a remote protocol, 0 otherwise.
  */
-static int
-url_has_remote_protocol(const char* url)
+static int url_has_remote_protocol(const char *url)
 {
-  static const char* remote_protos[] = {
-    "http://",
-    "ftp://",
-    "https://",
-    "ftps://"
-  };
-  static const size_t nb_remote_protos =  sizeof(remote_protos) /
-                                          sizeof(char*);
+    static const char *remote_protos[] = {
+        "http://",
+        "ftp://",
+        "https://",
+        "ftps://"
+    };
+    static const size_t nb_remote_protos =
+        sizeof(remote_protos) / sizeof(char *);
 
-  unsigned int i = 0;
-  for (i = 0; i < nb_remote_protos; ++i)
-  {
-    if (str_starts_with(url, remote_protos[i]))
-      return 1;
-  }
+    unsigned int i = 0;
+    for (i = 0; i < nb_remote_protos; ++i) {
+        if (str_starts_with(url, remote_protos[i]))
+            return 1;
+    }
 
-  return 0;
+    return 0;
 }
 
-static int
-opkg_prepare_file_for_install(const char * path, char **namep)
+static int opkg_prepare_file_for_install(const char *path, char **namep)
 {
     int r;
-    pkg_t * pkg = pkg_new();
+    pkg_t *pkg = pkg_new();
 
     r = pkg_init_from_file(pkg, path);
     if (r)
         return r;
 
-    opkg_msg(DEBUG2, "Package %s provided by file '%s'.\n",
-            pkg->name, pkg->local_filename);
+    opkg_msg(DEBUG2, "Package %s provided by file '%s'.\n", pkg->name,
+             pkg->local_filename);
     pkg->provided_by_hand = 1;
 
     pkg->dest = opkg_config->default_dest;
@@ -386,11 +370,12 @@ opkg_prepare_file_for_install(const char * path, char **namep)
          * is not set. This is because in this case orphaned files may be left
          * behind.
          */
-        pkg_t * old_pkg = pkg_hash_fetch_installed_by_name(pkg->name);
+        pkg_t *old_pkg = pkg_hash_fetch_installed_by_name(pkg->name);
         if (old_pkg && (pkg_compare_versions(pkg, old_pkg) == 0)) {
-            char * version = pkg_version_str_alloc(old_pkg);
-            opkg_msg(ERROR, "Refusing to load file '%s' as it matches the installed version of %s (%s).\n",
-                    path, old_pkg->name, version);
+            char *version = pkg_version_str_alloc(old_pkg);
+            opkg_msg(ERROR,
+                     "Refusing to load file '%s' as it matches the installed version of %s (%s).\n",
+                     path, old_pkg->name, version);
             free(version);
             pkg_deinit(pkg);
             free(pkg);
@@ -408,8 +393,7 @@ opkg_prepare_file_for_install(const char * path, char **namep)
 /* Prepare a given URL for installation. We use a few simple heuristics to
  * determine whether this is a remote URL, file name or abstract package name.
  */
-int
-opkg_prepare_url_for_install(const char *url, char **namep)
+int opkg_prepare_url_for_install(const char *url, char **namep)
 {
     int r;
 
@@ -437,10 +421,11 @@ opkg_prepare_url_for_install(const char *url, char **namep)
              * object. This new object can then be marked as force_reinstall and
              * the reinstall should go ahead like an upgrade.
              */
-            pkg_t * pkg;
+            pkg_t *pkg;
             pkg = pkg_hash_fetch_best_installation_candidate_by_name(url);
             if (!pkg) {
-                opkg_msg(ERROR, "Unknown package %s, cannot force reinstall.\n", url);
+                opkg_msg(ERROR, "Unknown package %s, cannot force reinstall.\n",
+                         url);
                 return -1;
             }
             r = opkg_download_pkg(pkg);

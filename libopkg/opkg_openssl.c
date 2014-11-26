@@ -44,8 +44,7 @@
  *      validation on a certificate using pathfinder.
  *
  */
-int
-pathfinder_verify_callback(X509_STORE_CTX *ctx, void *arg)
+int pathfinder_verify_callback(X509_STORE_CTX * ctx, void *arg)
 {
     char *errmsg;
     const char *hex = "0123456789ABCDEF";
@@ -56,8 +55,7 @@ pathfinder_verify_callback(X509_STORE_CTX *ctx, void *arg)
     char *certdata_str = xmalloc(size * 2 + 1);
     unsigned char *cp = keybuf;
     char *certdata_str_i = certdata_str;
-    while (cp < iend)
-    {
+    while (cp < iend) {
         unsigned char ch = *cp++;
         *certdata_str_i++ = hex[(ch >> 4) & 0xf];
         *certdata_str_i++ = hex[ch & 0xf];
@@ -77,24 +75,23 @@ pathfinder_verify_callback(X509_STORE_CTX *ctx, void *arg)
     return validated;
 }
 
-int
-pkcs7_pathfinder_verify_signers(PKCS7* p7)
+int pkcs7_pathfinder_verify_signers(PKCS7 * p7)
 {
-    STACK_OF(X509) *signers;
-    int i, ret = 1; /* signers are verified by default */
+    STACK_OF(X509) * signers;
+    int i, ret = 1;             /* signers are verified by default */
 
     signers = PKCS7_get0_signers(p7, NULL, 0);
 
-    for(i = 0; i < sk_X509_num(signers); i++){
-	X509_STORE_CTX ctx = {
-	    .cert = sk_X509_value(signers, i),
-	};
+    for (i = 0; i < sk_X509_num(signers); i++) {
+        X509_STORE_CTX ctx = {
+            .cert = sk_X509_value(signers, i),
+        };
 
-	if(!pathfinder_verify_callback(&ctx, NULL)){
-	    /* Signer isn't verified ! goto jail; */
-	    ret = 0;
-	    break;
-	}
+        if (!pathfinder_verify_callback(&ctx, NULL)) {
+            /* Signer isn't verified ! goto jail; */
+            ret = 0;
+            break;
+        }
     }
 
     sk_X509_free(signers);
@@ -102,90 +99,83 @@ pkcs7_pathfinder_verify_signers(PKCS7* p7)
 }
 #else
 /* Dummy functions */
-int
-pathfinder_verify_callback(X509_STORE_CTX *ctx, void *arg)
+int pathfinder_verify_callback(X509_STORE_CTX * ctx, void *arg)
 {
     opkg_msg(ERROR, "Pathfinder support not enabled.\n");
     return 0;
 }
 
-int
-pkcs7_pathfinder_verify_signers(PKCS7* p7)
+int pkcs7_pathfinder_verify_signers(PKCS7 * p7)
 {
     opkg_msg(ERROR, "Pathfinder support not enabled.\n");
     return 0;
 }
-#endif /* HAVE_PATHFINDER */
+#endif                          /* HAVE_PATHFINDER */
 
-static X509_STORE *
-setup_verify(char *CAfile, char *CApath)
+static X509_STORE *setup_verify(char *CAfile, char *CApath)
 {
     X509_STORE *store = NULL;
     X509_LOOKUP *lookup = NULL;
 
-    if(!(store = X509_STORE_new())){
+    if (!(store = X509_STORE_new())) {
         // Something bad is happening...
         goto end;
     }
-
     // adds the X509 file lookup method
-    lookup = X509_STORE_add_lookup(store,X509_LOOKUP_file());
-    if (lookup == NULL){
+    lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file());
+    if (lookup == NULL) {
         goto end;
     }
-
     // Autenticating against one CA file
     if (CAfile) {
-        if(!X509_LOOKUP_load_file(lookup,CAfile,X509_FILETYPE_PEM)) {
+        if (!X509_LOOKUP_load_file(lookup, CAfile, X509_FILETYPE_PEM)) {
             // Invalid CA => Bye bye
             opkg_msg(ERROR, "Error loading file %s.\n", CAfile);
             goto end;
         }
     } else {
-        X509_LOOKUP_load_file(lookup,NULL,X509_FILETYPE_DEFAULT);
+        X509_LOOKUP_load_file(lookup, NULL, X509_FILETYPE_DEFAULT);
     }
 
     // Now look into CApath directory if supplied
-    lookup = X509_STORE_add_lookup(store,X509_LOOKUP_hash_dir());
-    if (lookup == NULL){
+    lookup = X509_STORE_add_lookup(store, X509_LOOKUP_hash_dir());
+    if (lookup == NULL) {
         goto end;
     }
 
     if (CApath) {
-        if(!X509_LOOKUP_add_dir(lookup,CApath,X509_FILETYPE_PEM)) {
+        if (!X509_LOOKUP_add_dir(lookup, CApath, X509_FILETYPE_PEM)) {
             opkg_msg(ERROR, "Error loading directory %s.\n", CApath);
             goto end;
         }
     } else {
-        X509_LOOKUP_add_dir(lookup,NULL,X509_FILETYPE_DEFAULT);
+        X509_LOOKUP_add_dir(lookup, NULL, X509_FILETYPE_DEFAULT);
     }
 
     // All right !
     ERR_clear_error();
     return store;
 
-end:
+ end:
 
     X509_STORE_free(store);
     return NULL;
 
 }
 
-void
-openssl_init(void)
+void openssl_init(void)
 {
     static int init = 0;
 
-    if(!init){
-	OPENSSL_config(NULL);
+    if (!init) {
+        OPENSSL_config(NULL);
         OpenSSL_add_all_algorithms();
         ERR_load_crypto_strings();
         init = 1;
     }
 }
 
-int
-opkg_verify_openssl_signature(const char * file, const char * sigfile)
+int opkg_verify_openssl_signature(const char *file, const char *sigfile)
 {
     X509_STORE *store = NULL;
     PKCS7 *p7 = NULL;
@@ -197,48 +187,48 @@ opkg_verify_openssl_signature(const char * file, const char * sigfile)
     openssl_init();
 
     // Set-up the key store
-    if(!(store = setup_verify(opkg_config->signature_ca_file, opkg_config->signature_ca_path))){
+    if (!
+        (store =
+         setup_verify(opkg_config->signature_ca_file,
+                      opkg_config->signature_ca_path))) {
         opkg_msg(ERROR, "Can't open CA certificates.\n");
         goto verify_file_end;
     }
-
     // Open a BIO to read the sig file
-    if (!(in = BIO_new_file(sigfile, "rb"))){
+    if (!(in = BIO_new_file(sigfile, "rb"))) {
         opkg_msg(ERROR, "Can't open signature file %s.\n", sigfile);
         goto verify_file_end;
     }
-
     // Read the PKCS7 block contained in the sig file
     p7 = PEM_read_bio_PKCS7(in, NULL, NULL, NULL);
-    if(!p7){
+    if (!p7) {
         opkg_msg(ERROR, "Can't read signature file %s (Corrupted ?).\n",
-		sigfile);
+                 sigfile);
         goto verify_file_end;
     }
-    if(opkg_config->check_x509_path){
-	if(!pkcs7_pathfinder_verify_signers(p7)){
-	    opkg_msg(ERROR, "pkcs7_pathfinder_verify_signers: "
-		    "Path verification failed.\n");
-	    goto verify_file_end;
-	}
+    if (opkg_config->check_x509_path) {
+        if (!pkcs7_pathfinder_verify_signers(p7)) {
+            opkg_msg(ERROR,
+                     "pkcs7_pathfinder_verify_signers: "
+                     "Path verification failed.\n");
+            goto verify_file_end;
+        }
     }
-
     // Open the Package file to authenticate
-    if (!(indata = BIO_new_file(file, "rb"))){
+    if (!(indata = BIO_new_file(file, "rb"))) {
         opkg_msg(ERROR, "Can't open file %s.\n", file);
         goto verify_file_end;
     }
-
     // Let's verify the autenticity !
-    if (PKCS7_verify(p7, NULL, store, indata, NULL, PKCS7_BINARY) != 1){
+    if (PKCS7_verify(p7, NULL, store, indata, NULL, PKCS7_BINARY) != 1) {
         // Get Off My Lawn!
         opkg_msg(ERROR, "Verification failure.\n");
-    }else{
+    } else {
         // Victory !
         status = 0;
     }
 
-verify_file_end:
+ verify_file_end:
     BIO_free(in);
     BIO_free(indata);
     PKCS7_free(p7);

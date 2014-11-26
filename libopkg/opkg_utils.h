@@ -23,12 +23,11 @@
 extern "C" {
 #endif
 
-unsigned long get_available_kbytes(char * filesystem);
-char *trim_xstrdup(const char *line);
-int line_is_blank(const char *line);
+    unsigned long get_available_kbytes(char *filesystem);
+    char *trim_xstrdup(const char *line);
+    int line_is_blank(const char *line);
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OPKG_UTILS_H */
+#endif                          /* OPKG_UTILS_H */

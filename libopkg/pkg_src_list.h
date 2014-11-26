@@ -26,31 +26,26 @@ extern "C" {
 #include "pkg_src.h"
 #include "void_list.h"
 
-typedef struct void_list_elt pkg_src_list_elt_t;
+    typedef struct void_list_elt pkg_src_list_elt_t;
 
-typedef struct void_list pkg_src_list_t;
+    typedef struct void_list pkg_src_list_t;
 
-static inline int pkg_src_list_empty(pkg_src_list_t *list)
-{
-    return void_list_empty((void_list_t *)list);
-}
+    static inline int pkg_src_list_empty(pkg_src_list_t * list) {
+        return void_list_empty((void_list_t *) list);
+    } void pkg_src_list_elt_init(pkg_src_list_elt_t * elt, nv_pair_t * data);
+    void pkg_src_list_elt_deinit(pkg_src_list_elt_t * elt);
 
-void pkg_src_list_elt_init(pkg_src_list_elt_t *elt, nv_pair_t *data);
-void pkg_src_list_elt_deinit(pkg_src_list_elt_t *elt);
+    void pkg_src_list_init(pkg_src_list_t * list);
+    void pkg_src_list_deinit(pkg_src_list_t * list);
 
-void pkg_src_list_init(pkg_src_list_t *list);
-void pkg_src_list_deinit(pkg_src_list_t *list);
-
-pkg_src_t *pkg_src_list_append(pkg_src_list_t *list,
-                               const char *name,
-                               const char *root_dir,
-                               const char *extra_data,
-                               int gzip);
-void pkg_src_list_push(pkg_src_list_t *list, pkg_src_t *data);
-pkg_src_list_elt_t *pkg_src_list_pop(pkg_src_list_t *list);
+    pkg_src_t *pkg_src_list_append(pkg_src_list_t * list, const char *name,
+                                   const char *root_dir, const char *extra_data,
+                                   int gzip);
+    void pkg_src_list_push(pkg_src_list_t * list, pkg_src_t * data);
+    pkg_src_list_elt_t *pkg_src_list_pop(pkg_src_list_t * list);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* PKG_SRC_LIST_H */
+#endif                          /* PKG_SRC_LIST_H */

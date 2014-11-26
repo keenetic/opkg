@@ -25,16 +25,15 @@ extern "C" {
 
 #include "pkg.h"
 
-int pkg_extract_control_file_to_stream(pkg_t *pkg, FILE *stream);
-int pkg_extract_control_files_to_dir(pkg_t *pkg, const char *dir);
-int pkg_extract_control_files_to_dir_with_prefix(pkg_t *pkg,
-						 const char *dir,
-						 const char *prefix);
-int pkg_extract_data_files_to_dir(pkg_t *pkg, const char *dir);
-int pkg_extract_data_file_names_to_stream(pkg_t *pkg, FILE *file);
+    int pkg_extract_control_file_to_stream(pkg_t * pkg, FILE * stream);
+    int pkg_extract_control_files_to_dir(pkg_t * pkg, const char *dir);
+    int pkg_extract_control_files_to_dir_with_prefix(pkg_t * pkg,
+                                                     const char *dir,
+                                                     const char *prefix);
+    int pkg_extract_data_files_to_dir(pkg_t * pkg, const char *dir);
+    int pkg_extract_data_file_names_to_stream(pkg_t * pkg, FILE * file);
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* PKG_EXTRACT_H */
+#endif                          /* PKG_EXTRACT_H */

@@ -24,8 +24,7 @@
 #include "cksum_list.h"
 #include "xfuncs.h"
 
-
-int cksum_init(cksum_t *cksum, char **itemlist)
+int cksum_init(cksum_t * cksum, char **itemlist)
 {
     cksum->value = xstrdup(*itemlist++);
     cksum->size = atoi(*itemlist++);
@@ -34,37 +33,37 @@ int cksum_init(cksum_t *cksum, char **itemlist)
     return 0;
 }
 
-void cksum_deinit(cksum_t *cksum)
+void cksum_deinit(cksum_t * cksum)
 {
-    free (cksum->name);
+    free(cksum->name);
     cksum->name = NULL;
 
-    free (cksum->value);
+    free(cksum->value);
     cksum->value = NULL;
 }
 
-void cksum_list_init(cksum_list_t *list)
+void cksum_list_init(cksum_list_t * list)
 {
     void_list_init((void_list_t *) list);
 }
 
-void cksum_list_deinit(cksum_list_t *list)
+void cksum_list_deinit(cksum_list_t * list)
 {
     cksum_list_elt_t *iter, *n;
     cksum_t *cksum;
 
     list_for_each_entry_safe(iter, n, &list->head, node) {
-      cksum = (cksum_t *)iter->data;
-      cksum_deinit(cksum);
+        cksum = (cksum_t *) iter->data;
+        cksum_deinit(cksum);
 
-      /* malloced in cksum_list_append */
-      free(cksum);
-      iter->data = NULL;
+        /* malloced in cksum_list_append */
+        free(cksum);
+        iter->data = NULL;
     }
     void_list_deinit((void_list_t *) list);
 }
 
-cksum_t *cksum_list_append(cksum_list_t *list, char **itemlist)
+cksum_t *cksum_list_append(cksum_list_t * list, char **itemlist)
 {
     /* freed in cksum_list_deinit */
     cksum_t *cksum = xcalloc(1, sizeof(cksum_t));
@@ -75,17 +74,16 @@ cksum_t *cksum_list_append(cksum_list_t *list, char **itemlist)
     return cksum;
 }
 
-const cksum_t *cksum_list_find(cksum_list_t *list, const char *name)
+const cksum_t *cksum_list_find(cksum_list_t * list, const char *name)
 {
-     cksum_list_elt_t *iter;
-     cksum_t *cksum;
+    cksum_list_elt_t *iter;
+    cksum_t *cksum;
 
-     list_for_each_entry(iter, &list->head, node) {
-	  cksum = (cksum_t *)iter->data;
-	  if (strcmp(cksum->name, name) == 0) {
-	       return cksum;
-	  }
-     }
-     return NULL;
+    list_for_each_entry(iter, &list->head, node) {
+        cksum = (cksum_t *) iter->data;
+        if (strcmp(cksum->name, name) == 0) {
+            return cksum;
+        }
+    }
+    return NULL;
 }
-

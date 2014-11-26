@@ -36,8 +36,7 @@
 #include "opkg_openssl.h"
 #endif
 
-static int
-str_starts_with(const char *str, const char *prefix)
+static int str_starts_with(const char *str, const char *prefix)
 {
     return (strncmp(str, prefix, strlen(prefix)) == 0);
 }
@@ -49,11 +48,10 @@ str_starts_with(const char *str, const char *prefix)
 static CURL *curl = NULL;
 static CURL *opkg_curl_init(curl_progress_func cb, void *data);
 
-size_t
-dummy_write(char *ptr, size_t size, size_t nmemb, void *userdata)
+size_t dummy_write(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
-    (void) ptr;
-    (void) userdata;
+    (void)ptr;
+    (void)userdata;
 
     return size * nmemb;
 }
@@ -67,17 +65,16 @@ dummy_write(char *ptr, size_t size, size_t nmemb, void *userdata)
  * \return number of processed bytes
  *
  */
-size_t
-header_write(char *ptr, size_t size, size_t nmemb, void *userdata)
+size_t header_write(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
     char prefix[5];
     unsigned long i;
     for (i = 0; (i < 5) && (i < size * nmemb); ++i)
         prefix[i] = tolower(ptr[i]);
     if (str_starts_with(prefix, "etag:")) {
-        char** out = userdata;
-        char* start = strchr(ptr, '"') + 1;
-        char* end = strrchr(ptr, '"');
+        char **out = userdata;
+        char *start = strchr(ptr, '"') + 1;
+        char *end = strrchr(ptr, '"');
         if (end > start)
             *out = strndup(start, end - start);
     }
@@ -93,32 +90,32 @@ header_write(char *ptr, size_t size, size_t nmemb, void *userdata)
  * or if token is the empty string, it returns a newly allocated string
  * that is identical to "str".
  */
-static char *
-replace_token_in_str(const char *str, const char *token, const char *replacement)
+static char *replace_token_in_str(const char *str, const char *token,
+                                  const char *replacement)
 {
     /*
      * There's nothing to replace, just clone the string to be consistent with
      * the fact that the user gets a newly allocated string back
      */
     if (!token || *token == '\0')
-	return xstrdup(str);
+        return xstrdup(str);
 
     char *found_token = strstr(str, token);
     if (!found_token)
-	/*
-	 * There's nothing to replace, just clone the string to be consistent
-	 * with the fact that the user gets a newly allocated string back
-	 */
-	return xstrdup(str);
+        /*
+         * There's nothing to replace, just clone the string to be consistent
+         * with the fact that the user gets a newly allocated string back
+         */
+        return xstrdup(str);
 
-    size_t str_len          = strlen(str);
-    size_t replacement_len  = strlen(replacement);
+    size_t str_len = strlen(str);
+    size_t replacement_len = strlen(replacement);
 
-    size_t token_len        = strlen(token);
-    unsigned int token_idx  = found_token - str;
+    size_t token_len = strlen(token);
+    unsigned int token_idx = found_token - str;
 
     size_t replaced_str_len = str_len - (strlen(token) - strlen(replacement));
-    char *replaced_str      = xmalloc(replaced_str_len * sizeof(char));
+    char *replaced_str = xmalloc(replaced_str_len * sizeof(char));
 
     /* first copy the string part *before* the substring to replace */
     strncpy(replaced_str, str, token_idx);
@@ -129,8 +126,7 @@ replace_token_in_str(const char *str, const char *token, const char *replacement
      * replace
      */
     strncpy(replaced_str + token_idx + replacement_len,
-	    str + token_idx + token_len,
-	    strlen(str + token_idx + token_len));
+            str + token_idx + token_len, strlen(str + token_idx + token_len));
 
     replaced_str[replaced_str_len] = '\0';
 
@@ -138,16 +134,15 @@ replace_token_in_str(const char *str, const char *token, const char *replacement
 }
 
 #if defined(HAVE_PATHFINDER) && defined(HAVE_OPENSSL)
-static CURLcode
-curl_ssl_ctx_function(CURL * curl, void * sslctx, void * parm)
+static CURLcode curl_ssl_ctx_function(CURL * curl, void *sslctx, void *parm)
 {
-  SSL_CTX * ctx = (SSL_CTX *) sslctx;
-  SSL_CTX_set_cert_verify_callback(ctx, pathfinder_verify_callback, parm);
+    SSL_CTX *ctx = (SSL_CTX *) sslctx;
+    SSL_CTX_set_cert_verify_callback(ctx, pathfinder_verify_callback, parm);
 
-  return CURLE_OK ;
+    return CURLE_OK;
 }
-#endif /* HAVE_PATHFINDER && HAVE_OPENSSL */
-#endif /* HAVE_SSLCURL */
+#endif                          /* HAVE_PATHFINDER && HAVE_OPENSSL */
+#endif                          /* HAVE_SSLCURL */
 
 /** \brief create_file_stamp: creates stamp for file
  *
@@ -156,10 +151,9 @@ curl_ssl_ctx_function(CURL * curl, void * sslctx, void * parm)
  * \return 0 if success, -1 if error occurs
  *
  */
-int
-create_file_stamp(const char *file_name, char *stamp)
+int create_file_stamp(const char *file_name, char *stamp)
 {
-    FILE * file;
+    FILE *file;
     char *file_path;
 
     sprintf_alloc(&file_path, "%s.@stamp", file_name);
@@ -183,10 +177,9 @@ create_file_stamp(const char *file_name, char *stamp)
  * \return 0 if both stamps are equal or -1 otherwise
  *
  */
-int
-check_file_stamp(const char *file_name, char *stamp)
+int check_file_stamp(const char *file_name, char *stamp)
 {
-    FILE * file;
+    FILE *file;
     char stamp_buf[STAMP_BUF_SIZE];
     char *file_path;
     int size;
@@ -204,13 +197,11 @@ check_file_stamp(const char *file_name, char *stamp)
         return -1;
     }
     while ((size = fread(stamp_buf, 1, STAMP_BUF_SIZE, file)) && *stamp) {
-        if (((size < STAMP_BUF_SIZE) &&
-             (size != (int)strlen(stamp))) ||
-            ((size == STAMP_BUF_SIZE) &&
-             (strlen(stamp) < STAMP_BUF_SIZE)) ||
-            memcmp(stamp_buf, stamp, size)) {
-                diff = 1;
-                break;
+        if (((size < STAMP_BUF_SIZE) && (size != (int)strlen(stamp)))
+            || ((size == STAMP_BUF_SIZE) && (strlen(stamp) < STAMP_BUF_SIZE))
+            || memcmp(stamp_buf, stamp, size)) {
+            diff = 1;
+            break;
         }
         stamp += STAMP_BUF_SIZE;
     }
@@ -227,39 +218,35 @@ check_file_stamp(const char *file_name, char *stamp)
  *         1 if file needs further downloading.
  *         -1 if error occurs.
  */
-int
-opkg_validate_cached_file(const char *src,
-		const char *cache_location)
+int opkg_validate_cached_file(const char *src, const char *cache_location)
 {
     CURLcode res;
-    FILE * file;
+    FILE *file;
     long resume_from = 0;
-    char* etag = NULL;
+    char *etag = NULL;
     double src_size = -1;
 
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &dummy_write);
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, &header_write);
     curl_easy_setopt(curl, CURLOPT_WRITEHEADER, &etag);
     curl_easy_setopt(curl, CURLOPT_HEADER, 1);
-    curl_easy_setopt(curl, CURLOPT_NOBODY, 1); // remove body
+    curl_easy_setopt(curl, CURLOPT_NOBODY, 1);  // remove body
 
     res = curl_easy_perform(curl);
     if (res) {
-	long error_code;
-	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &error_code);
-	opkg_msg(ERROR, "Failed to download %s headers: %s.\n",
-	    src, curl_easy_strerror(res));
-	return -1;
+        long error_code;
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &error_code);
+        opkg_msg(ERROR, "Failed to download %s headers: %s.\n", src,
+                 curl_easy_strerror(res));
+        return -1;
     }
     curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &src_size);
 
-    if (!file_exists(cache_location) ||
-	!etag ||
-	check_file_stamp(cache_location, etag)) {
-	    unlink(cache_location);
-	    if (etag && create_file_stamp(cache_location, etag))
-		opkg_msg(ERROR, "Failed to create stamp for %s.\n",
-		    cache_location);
+    if (!file_exists(cache_location) || !etag
+        || check_file_stamp(cache_location, etag)) {
+        unlink(cache_location);
+        if (etag && create_file_stamp(cache_location, etag))
+            opkg_msg(ERROR, "Failed to create stamp for %s.\n", cache_location);
     }
     free(etag);
 
@@ -271,16 +258,15 @@ opkg_validate_cached_file(const char *src,
 
     file = fopen(cache_location, "ab");
     if (!file) {
-        opkg_msg(ERROR, "Failed to open cache file %s\n",
-            cache_location);
+        opkg_msg(ERROR, "Failed to open cache file %s\n", cache_location);
         return -1;
     }
     fseek(file, 0, SEEK_END);
     resume_from = ftell(file);
-    fclose (file);
+    fclose(file);
 
     if (resume_from < src_size)
-	curl_easy_setopt(curl, CURLOPT_RESUME_FROM, resume_from);
+        curl_easy_setopt(curl, CURLOPT_RESUME_FROM, resume_from);
     else
         return 0;
 
@@ -288,23 +274,21 @@ opkg_validate_cached_file(const char *src,
 }
 
 /* Download using curl backend. */
-int
-opkg_download_backend(const char *src, const char *dest,
-	curl_progress_func cb, void *data, int use_cache)
+int opkg_download_backend(const char *src, const char *dest,
+                          curl_progress_func cb, void *data, int use_cache)
 {
     CURLcode res;
-    FILE * file;
+    FILE *file;
     int ret;
 
-    curl = opkg_curl_init (cb, data);
+    curl = opkg_curl_init(cb, data);
     if (!curl)
         return -1;
 
     curl_easy_setopt(curl, CURLOPT_URL, src);
 
 #ifdef HAVE_SSLCURL
-    if (opkg_config->ftp_explicit_ssl)
-    {
+    if (opkg_config->ftp_explicit_ssl) {
         /*
          * This is what enables explicit FTP SSL mode on curl's side As per
          * the official documentation at
@@ -315,181 +299,186 @@ opkg_download_backend(const char *src, const char *dest,
         curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
 
         /*
-	 * If a URL with the ftps:// scheme is passed to curl, then it
+         * If a URL with the ftps:// scheme is passed to curl, then it
          * considers it's implicit mode. Thus, we need to fix it before
          * invoking curl.
          */
-	char *fixed_src = replace_token_in_str(src, "ftps://", "ftp://");
+        char *fixed_src = replace_token_in_str(src, "ftps://", "ftp://");
         curl_easy_setopt(curl, CURLOPT_URL, fixed_src);
         free(fixed_src);
     }
-#endif /* HAVE_SSLCURL */
+#endif                          /* HAVE_SSLCURL */
 
     if (use_cache) {
         ret = opkg_validate_cached_file(src, dest);
         if (ret <= 0)
             return ret;
-    }
-    else {
+    } else {
         unlink(dest);
     }
 
     file = fopen(dest, "ab");
     if (!file) {
-        opkg_msg(ERROR, "Failed to open destination file %s\n",
-            dest);
+        opkg_msg(ERROR, "Failed to open destination file %s\n", dest);
         return -1;
     }
 
     res = 0;
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
-    res = curl_easy_perform (curl);
-    fclose (file);
+    res = curl_easy_perform(curl);
+    fclose(file);
     if (res) {
         long error_code;
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &error_code);
-        opkg_msg(ERROR, "Failed to download %s: %s.\n",
-            src, curl_easy_strerror(res));
+        opkg_msg(ERROR, "Failed to download %s: %s.\n", src,
+                 curl_easy_strerror(res));
         return -1;
     }
 
     return 0;
 }
 
-void
-opkg_download_cleanup(void)
+void opkg_download_cleanup(void)
 {
-    if(curl != NULL){
-	curl_easy_cleanup (curl);
-	curl = NULL;
+    if (curl != NULL) {
+        curl_easy_cleanup(curl);
+        curl = NULL;
     }
 }
 
-static CURL *
-opkg_curl_init(curl_progress_func cb, void *data)
+static CURL *opkg_curl_init(curl_progress_func cb, void *data)
 {
 
-    if(curl == NULL){
-	curl = curl_easy_init();
+    if (curl == NULL) {
+        curl = curl_easy_init();
 
 #ifdef HAVE_SSLCURL
 #ifdef HAVE_OPENSSL
-	openssl_init();
-#endif /* HAVE_OPENSSL */
+        openssl_init();
+#endif                          /* HAVE_OPENSSL */
 
-	if (opkg_config->ssl_engine) {
+        if (opkg_config->ssl_engine) {
 
-	    /* use crypto engine */
-	    if (curl_easy_setopt(curl, CURLOPT_SSLENGINE, opkg_config->ssl_engine) != CURLE_OK){
-		opkg_msg(ERROR, "Can't set crypto engine '%s'.\n",
-			opkg_config->ssl_engine);
+            /* use crypto engine */
+            if (curl_easy_setopt
+                (curl, CURLOPT_SSLENGINE,
+                 opkg_config->ssl_engine) != CURLE_OK) {
+                opkg_msg(ERROR, "Can't set crypto engine '%s'.\n",
+                         opkg_config->ssl_engine);
 
-		opkg_download_cleanup();
-		return NULL;
-	    }
-	    /* set the crypto engine as default */
-	    if (curl_easy_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1L) != CURLE_OK){
-		opkg_msg(ERROR, "Can't set crypto engine '%s' as default.\n",
-			opkg_config->ssl_engine);
+                opkg_download_cleanup();
+                return NULL;
+            }
+            /* set the crypto engine as default */
+            if (curl_easy_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1L) !=
+                CURLE_OK) {
+                opkg_msg(ERROR, "Can't set crypto engine '%s' as default.\n",
+                         opkg_config->ssl_engine);
 
-		opkg_download_cleanup();
-		return NULL;
-	    }
-	}
+                opkg_download_cleanup();
+                return NULL;
+            }
+        }
 
-	/* cert & key can only be in PEM case in the same file */
-	if(opkg_config->ssl_key_passwd){
-	    if (curl_easy_setopt(curl, CURLOPT_SSLKEYPASSWD, opkg_config->ssl_key_passwd) != CURLE_OK)
-	    {
-	        opkg_msg(DEBUG, "Failed to set key password.\n");
-	    }
-	}
+        /* cert & key can only be in PEM case in the same file */
+        if (opkg_config->ssl_key_passwd) {
+            if (curl_easy_setopt
+                (curl, CURLOPT_SSLKEYPASSWD,
+                 opkg_config->ssl_key_passwd) != CURLE_OK) {
+                opkg_msg(DEBUG, "Failed to set key password.\n");
+            }
+        }
 
-	/* sets the client certificate and its type */
-	if(opkg_config->ssl_cert_type){
-	    if (curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, opkg_config->ssl_cert_type) != CURLE_OK)
-	    {
-	        opkg_msg(DEBUG, "Failed to set certificate format.\n");
-	    }
-	}
-	/* SSL cert name isn't mandatory */
-	if(opkg_config->ssl_cert){
-	        curl_easy_setopt(curl, CURLOPT_SSLCERT, opkg_config->ssl_cert);
-	}
+        /* sets the client certificate and its type */
+        if (opkg_config->ssl_cert_type) {
+            if (curl_easy_setopt
+                (curl, CURLOPT_SSLCERTTYPE,
+                 opkg_config->ssl_cert_type) != CURLE_OK) {
+                opkg_msg(DEBUG, "Failed to set certificate format.\n");
+            }
+        }
+        /* SSL cert name isn't mandatory */
+        if (opkg_config->ssl_cert) {
+            curl_easy_setopt(curl, CURLOPT_SSLCERT, opkg_config->ssl_cert);
+        }
 
-	/* sets the client key and its type */
-	if(opkg_config->ssl_key_type){
-	    if (curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, opkg_config->ssl_key_type) != CURLE_OK)
-	    {
-	        opkg_msg(DEBUG, "Failed to set key format.\n");
-	    }
-	}
-	if(opkg_config->ssl_key){
-	    if (curl_easy_setopt(curl, CURLOPT_SSLKEY, opkg_config->ssl_key) != CURLE_OK)
-	    {
-	        opkg_msg(DEBUG, "Failed to set key.\n");
-	    }
-	}
+        /* sets the client key and its type */
+        if (opkg_config->ssl_key_type) {
+            if (curl_easy_setopt
+                (curl, CURLOPT_SSLKEYTYPE,
+                 opkg_config->ssl_key_type) != CURLE_OK) {
+                opkg_msg(DEBUG, "Failed to set key format.\n");
+            }
+        }
+        if (opkg_config->ssl_key) {
+            if (curl_easy_setopt(curl, CURLOPT_SSLKEY, opkg_config->ssl_key) !=
+                CURLE_OK) {
+                opkg_msg(DEBUG, "Failed to set key.\n");
+            }
+        }
 
-	/* Should we verify the peer certificate ? */
-	if(opkg_config->ssl_dont_verify_peer){
-	    /*
-	     * CURLOPT_SSL_VERIFYPEER default is nonzero (curl => 7.10)
-	     */
-	    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
-	}else{
+        /* Should we verify the peer certificate ? */
+        if (opkg_config->ssl_dont_verify_peer) {
+            /*
+             * CURLOPT_SSL_VERIFYPEER default is nonzero (curl => 7.10)
+             */
+            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
+        } else {
 #if defined(HAVE_PATHFINDER) && defined(HAVE_OPENSSL)
-	    if(opkg_config->check_x509_path){
-    	        if (curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, curl_ssl_ctx_function) != CURLE_OK){
-		    opkg_msg(DEBUG, "Failed to set ssl path verification callback.\n");
-		}else{
-		    curl_easy_setopt(curl, CURLOPT_SSL_CTX_DATA, NULL);
-		}
-	    }
+            if (opkg_config->check_x509_path) {
+                if (curl_easy_setopt
+                    (curl, CURLOPT_SSL_CTX_FUNCTION,
+                     curl_ssl_ctx_function) != CURLE_OK) {
+                    opkg_msg(DEBUG,
+                             "Failed to set ssl path verification callback.\n");
+                } else {
+                    curl_easy_setopt(curl, CURLOPT_SSL_CTX_DATA, NULL);
+                }
+            }
 #endif
-	}
+        }
 
-	/* certification authority file and/or path */
-	if(opkg_config->ssl_ca_file){
-	    curl_easy_setopt(curl, CURLOPT_CAINFO, opkg_config->ssl_ca_file);
-	}
-	if(opkg_config->ssl_ca_path){
-	    curl_easy_setopt(curl, CURLOPT_CAPATH, opkg_config->ssl_ca_path);
-	}
+        /* certification authority file and/or path */
+        if (opkg_config->ssl_ca_file) {
+            curl_easy_setopt(curl, CURLOPT_CAINFO, opkg_config->ssl_ca_file);
+        }
+        if (opkg_config->ssl_ca_path) {
+            curl_easy_setopt(curl, CURLOPT_CAPATH, opkg_config->ssl_ca_path);
+        }
 #endif
 
-	if (opkg_config->connect_timeout_ms > 0) {
-	    long timeout_ms = opkg_config->connect_timeout_ms;
-	    curl_easy_setopt (curl, CURLOPT_CONNECTTIMEOUT_MS, timeout_ms);
-	}
+        if (opkg_config->connect_timeout_ms > 0) {
+            long timeout_ms = opkg_config->connect_timeout_ms;
+            curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, timeout_ms);
+        }
 
-	if (opkg_config->transfer_timeout_ms > 0) {
-	    long timeout_ms = opkg_config->transfer_timeout_ms;
-	    curl_easy_setopt (curl, CURLOPT_TIMEOUT_MS, timeout_ms);
-	}
+        if (opkg_config->transfer_timeout_ms > 0) {
+            long timeout_ms = opkg_config->transfer_timeout_ms;
+            curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, timeout_ms);
+        }
 
-	if (opkg_config->follow_location)
-	    curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, 1);
+        if (opkg_config->follow_location)
+            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
 
-	curl_easy_setopt (curl, CURLOPT_FAILONERROR, 1);
-	if (opkg_config->http_proxy || opkg_config->ftp_proxy || opkg_config->https_proxy)
-	{
-	    curl_easy_setopt(curl, CURLOPT_PROXYUSERNAME, opkg_config->proxy_user);
-	    curl_easy_setopt(curl, CURLOPT_PROXYPASSWORD, opkg_config->proxy_passwd);
-	    curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
-	}
-	if (opkg_config->http_auth)
-	{
-	    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-	    curl_easy_setopt(curl, CURLOPT_USERPWD, opkg_config->http_auth);
-	}
+        curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
+        if (opkg_config->http_proxy || opkg_config->ftp_proxy
+            || opkg_config->https_proxy) {
+            curl_easy_setopt(curl, CURLOPT_PROXYUSERNAME,
+                             opkg_config->proxy_user);
+            curl_easy_setopt(curl, CURLOPT_PROXYPASSWORD,
+                             opkg_config->proxy_passwd);
+            curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
+        }
+        if (opkg_config->http_auth) {
+            curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+            curl_easy_setopt(curl, CURLOPT_USERPWD, opkg_config->http_auth);
+        }
     }
 
-    curl_easy_setopt (curl, CURLOPT_NOPROGRESS, (cb == NULL));
-    if (cb)
-    {
-	curl_easy_setopt (curl, CURLOPT_PROGRESSDATA, data);
-	curl_easy_setopt (curl, CURLOPT_PROGRESSFUNCTION, cb);
+    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, (cb == NULL));
+    if (cb) {
+        curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, data);
+        curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, cb);
     }
 
     return curl;
