@@ -296,7 +296,7 @@ static void usage()
     printf("\t--offline-root <dir>            offline installation of packages.\n");
     printf("\t--add-arch <arch>:<prio>        Register architecture with given priority\n");
     printf("\t--add-dest <name>:<path>        Register destination with given path\n");
-    printf("\t--add-exclude <name>		  Register package to be excluded from install\n");
+    printf("\t--add-exclude <name>            Register package to be excluded from install\n");
     printf("\t--prefer-arch-to-version        Use the architecture priority package rather\n");
     printf("\t                                than the higher version one if more\n");
     printf("\t                                than one candidate is found.\n");
@@ -315,8 +315,7 @@ static void usage()
     printf("\t--noaction                      No action -- test only\n");
     printf("\t--download-only                 No action -- download only\n");
     printf("\t--nodeps                        Do not follow dependencies\n");
-    printf("\t--no-install-recommends\n");
-    printf("\t                                Do not install any recommended packages\n");
+    printf("\t--no-install-recommends         Do not install any recommended packages\n");
     printf("\t--force-removal-of-dependent-packages\n");
     printf("\t                                Remove package and all dependencies\n");
     printf("\t--autoremove                    Remove packages that were installed\n");
