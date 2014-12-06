@@ -346,8 +346,18 @@ void opkg_download_cleanup(void)
     }
 }
 
+/* This must be a macro as the third argument to curl_easy_setup has no
+ * specified type.
+ */
+#define setopt(opt, value) do {                                     \
+    int __r = curl_easy_setopt(curl, opt, value);                   \
+    if (__r != CURLE_OK)                                            \
+        opkg_msg(DEBUG, "Cannot set CURL option '%s'.\n", #opt);    \
+} while (0)
+
 static CURL *opkg_curl_init(curl_progress_func cb, void *data)
 {
+    int r;
 
     if (curl == NULL) {
         curl = curl_easy_init();
@@ -359,8 +369,9 @@ static CURL *opkg_curl_init(curl_progress_func cb, void *data)
 
         if (opkg_config->ssl_engine) {
             /* use crypto engine */
-            if (curl_easy_setopt(curl, CURLOPT_SSLENGINE,
-                        opkg_config->ssl_engine) != CURLE_OK) {
+            r = curl_easy_setopt(curl, CURLOPT_SSLENGINE,
+                    opkg_config->ssl_engine);
+            if (r != CURLE_OK) {
                 opkg_msg(ERROR, "Can't set crypto engine '%s'.\n",
                          opkg_config->ssl_engine);
 
@@ -368,7 +379,8 @@ static CURL *opkg_curl_init(curl_progress_func cb, void *data)
                 return NULL;
             }
             /* set the crypto engine as default */
-            if (curl_easy_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1L) != CURLE_OK) {
+            r = curl_easy_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1L);
+            if (r != CURLE_OK) {
                 opkg_msg(ERROR, "Can't set crypto engine '%s' as default.\n",
                          opkg_config->ssl_engine);
 
@@ -378,95 +390,73 @@ static CURL *opkg_curl_init(curl_progress_func cb, void *data)
         }
 
         /* cert & key can only be in PEM case in the same file */
-        if (opkg_config->ssl_key_passwd) {
-            if (curl_easy_setopt (curl, CURLOPT_SSLKEYPASSWD, opkg_config->ssl_key_passwd) != CURLE_OK) {
-                opkg_msg(DEBUG, "Failed to set key password.\n");
-            }
-        }
+        if (opkg_config->ssl_key_passwd)
+            setopt(CURLOPT_SSLKEYPASSWD, opkg_config->ssl_key_passwd);
 
         /* sets the client certificate and its type */
-        if (opkg_config->ssl_cert_type) {
-            if (curl_easy_setopt (curl, CURLOPT_SSLCERTTYPE, opkg_config->ssl_cert_type) != CURLE_OK) {
-                opkg_msg(DEBUG, "Failed to set certificate format.\n");
-            }
-        }
+        if (opkg_config->ssl_cert_type)
+            setopt(CURLOPT_SSLCERTTYPE, opkg_config->ssl_cert_type);
+
         /* SSL cert name isn't mandatory */
-        if (opkg_config->ssl_cert) {
-            curl_easy_setopt(curl, CURLOPT_SSLCERT, opkg_config->ssl_cert);
-        }
+        if (opkg_config->ssl_cert)
+            setopt(CURLOPT_SSLCERT, opkg_config->ssl_cert);
 
         /* sets the client key and its type */
-        if (opkg_config->ssl_key_type) {
-            if (curl_easy_setopt (curl, CURLOPT_SSLKEYTYPE, opkg_config->ssl_key_type) != CURLE_OK) {
-                opkg_msg(DEBUG, "Failed to set key format.\n");
-            }
-        }
-        if (opkg_config->ssl_key) {
-            if (curl_easy_setopt(curl, CURLOPT_SSLKEY, opkg_config->ssl_key) != CURLE_OK) {
-                opkg_msg(DEBUG, "Failed to set key.\n");
-            }
-        }
+        if (opkg_config->ssl_key_type)
+            setopt(CURLOPT_SSLKEYTYPE, opkg_config->ssl_key_type);
+        if (opkg_config->ssl_key)
+            setopt(CURLOPT_SSLKEY, opkg_config->ssl_key);
 
         /* Should we verify the peer certificate ? */
-        if (opkg_config->ssl_dont_verify_peer) {
+        if (opkg_config->ssl_dont_verify_peer)
             /*
              * CURLOPT_SSL_VERIFYPEER default is nonzero (curl => 7.10)
              */
-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
-        } else {
+            setopt(CURLOPT_SSL_VERIFYPEER, 0);
 #if defined(HAVE_PATHFINDER) && defined(HAVE_OPENSSL)
-            if (opkg_config->check_x509_path) {
-                if (curl_easy_setopt (curl, CURLOPT_SSL_CTX_FUNCTION, curl_ssl_ctx_function) != CURLE_OK) {
-                    opkg_msg(DEBUG,
-                             "Failed to set ssl path verification callback.\n");
-                } else {
-                    curl_easy_setopt(curl, CURLOPT_SSL_CTX_DATA, NULL);
-                }
-            }
-#endif
+        else if (opkg_config->check_x509_path) {
+                setopt(CURLOPT_SSL_CTX_FUNCTION, curl_ssl_ctx_function);
+                setopt(CURLOPT_SSL_CTX_DATA, NULL);
         }
+#endif
 
         /* certification authority file and/or path */
-        if (opkg_config->ssl_ca_file) {
-            curl_easy_setopt(curl, CURLOPT_CAINFO, opkg_config->ssl_ca_file);
-        }
-        if (opkg_config->ssl_ca_path) {
-            curl_easy_setopt(curl, CURLOPT_CAPATH, opkg_config->ssl_ca_path);
-        }
+        if (opkg_config->ssl_ca_file)
+            setopt(CURLOPT_CAINFO, opkg_config->ssl_ca_file);
+        if (opkg_config->ssl_ca_path)
+            setopt(CURLOPT_CAPATH, opkg_config->ssl_ca_path);
 #endif
 
         if (opkg_config->connect_timeout_ms > 0) {
             long timeout_ms = opkg_config->connect_timeout_ms;
-            curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, timeout_ms);
+            setopt(CURLOPT_CONNECTTIMEOUT_MS, timeout_ms);
         }
 
         if (opkg_config->transfer_timeout_ms > 0) {
             long timeout_ms = opkg_config->transfer_timeout_ms;
-            curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, timeout_ms);
+            setopt(CURLOPT_TIMEOUT_MS, timeout_ms);
         }
 
         if (opkg_config->follow_location)
-            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
+            setopt(CURLOPT_FOLLOWLOCATION, 1);
 
-        curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
+        setopt(CURLOPT_FAILONERROR, 1);
         if (opkg_config->http_proxy || opkg_config->ftp_proxy
             || opkg_config->https_proxy) {
-            curl_easy_setopt(curl, CURLOPT_PROXYUSERNAME,
-                             opkg_config->proxy_user);
-            curl_easy_setopt(curl, CURLOPT_PROXYPASSWORD,
-                             opkg_config->proxy_passwd);
-            curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
+            setopt(CURLOPT_PROXYUSERNAME, opkg_config->proxy_user);
+            setopt(CURLOPT_PROXYPASSWORD, opkg_config->proxy_passwd);
+            setopt(CURLOPT_PROXYAUTH, CURLAUTH_ANY);
         }
         if (opkg_config->http_auth) {
-            curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-            curl_easy_setopt(curl, CURLOPT_USERPWD, opkg_config->http_auth);
+            setopt(CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+            setopt(CURLOPT_USERPWD, opkg_config->http_auth);
         }
     }
 
-    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, (cb == NULL));
+    setopt(CURLOPT_NOPROGRESS, (cb == NULL));
     if (cb) {
-        curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, data);
-        curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, cb);
+        setopt(CURLOPT_PROGRESSDATA, data);
+        setopt(CURLOPT_PROGRESSFUNCTION, cb);
     }
 
     return curl;
