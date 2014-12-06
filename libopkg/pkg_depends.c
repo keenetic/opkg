@@ -86,9 +86,8 @@ int pkg_hash_fetch_unsatisfied_dependencies(pkg_t * pkg,
         opkg_msg(DEBUG2, "Checking dependencies for '%s'.\n", ab_pkg->name);
         ab_pkg->dependencies_checked = 1;       /* mark it for subsequent visits */
     }
-     /**/ count =
-        pkg->pre_depends_count + pkg->depends_count + pkg->recommends_count +
-        pkg->suggests_count;
+    count = pkg->pre_depends_count + pkg->depends_count + pkg->recommends_count
+        + pkg->suggests_count;
     if (!count) {
         *unresolved = NULL;
         return 0;
@@ -115,7 +114,8 @@ int pkg_hash_fetch_unsatisfied_dependencies(pkg_t * pkg,
                 for (l = 0; l < nposs; l++) {
                     pkg_vec_t *test_vec = ab_providers[l]->pkgs;
                     /* if no depends on this one, try the first package that Provides this one */
-                    if (!test_vec) {    /* no pkg_vec hooked up to the abstract_pkg!  (need another feed?) */
+                    if (!test_vec) {
+                        /* no pkg_vec hooked up to the abstract_pkg! (need another feed?) */
                         continue;
                     }
 
@@ -130,8 +130,8 @@ int pkg_hash_fetch_unsatisfied_dependencies(pkg_t * pkg,
                             int rc;
                             pkg_vec_t *tmp_vec = pkg_vec_alloc();
                             /* check for not-already-installed dependencies */
-                            rc = pkg_hash_fetch_unsatisfied_dependencies
-                                (pkg_scout, tmp_vec, &newstuff);
+                            rc = pkg_hash_fetch_unsatisfied_dependencies(pkg_scout,
+                                    tmp_vec, &newstuff);
                             if (newstuff == NULL) {
                                 int m;
                                 int ok = 1;
@@ -174,8 +174,7 @@ int pkg_hash_fetch_unsatisfied_dependencies(pkg_t * pkg,
             /* foreach provided_by, which includes the abstract_pkg itself */
             depend_t *dependence_to_satisfy = possible_satisfiers[j];
             abstract_pkg_t *satisfying_apkg = possible_satisfiers[j]->pkg;
-            pkg_t *satisfying_pkg =
-                pkg_hash_fetch_best_installation_candidate(satisfying_apkg,
+            pkg_t *satisfying_pkg = pkg_hash_fetch_best_installation_candidate(satisfying_apkg,
                                                            pkg_installed_and_constraint_satisfied,
                                                            dependence_to_satisfy,
                                                            1);
@@ -184,7 +183,6 @@ int pkg_hash_fetch_unsatisfied_dependencies(pkg_t * pkg,
                 found = 1;
                 break;
             }
-
         }
         /* if nothing installed matches, then look for uninstalled satisfier */
         if (!found) {
@@ -193,8 +191,7 @@ int pkg_hash_fetch_unsatisfied_dependencies(pkg_t * pkg,
                 /* foreach provided_by, which includes the abstract_pkg itself */
                 depend_t *dependence_to_satisfy = possible_satisfiers[j];
                 abstract_pkg_t *satisfying_apkg = possible_satisfiers[j]->pkg;
-                pkg_t *satisfying_pkg =
-                    pkg_hash_fetch_best_installation_candidate(satisfying_apkg,
+                pkg_t *satisfying_pkg = pkg_hash_fetch_best_installation_candidate(satisfying_apkg,
                                                                pkg_constraint_satisfied,
                                                                dependence_to_satisfy,
                                                                1);
@@ -254,8 +251,7 @@ int pkg_hash_fetch_unsatisfied_dependencies(pkg_t * pkg,
                         && !is_pkg_in_pkg_vec(unsatisfied,
                                               satisfier_entry_pkg)) {
                         pkg_vec_insert(unsatisfied, satisfier_entry_pkg);
-                        pkg_hash_fetch_unsatisfied_dependencies
-                            (satisfier_entry_pkg, unsatisfied, &newstuff);
+                        pkg_hash_fetch_unsatisfied_dependencies(satisfier_entry_pkg, unsatisfied, &newstuff);
                         the_lost = merge_unresolved(the_lost, newstuff);
                         if (newstuff)
                             free(newstuff);
@@ -288,9 +284,8 @@ pkg_vec_t *pkg_hash_fetch_satisfied_dependencies(pkg_t * pkg)
         return satisfiers;
     }
 
-    count =
-        pkg->pre_depends_count + pkg->depends_count + pkg->recommends_count +
-        pkg->suggests_count;
+    count = pkg->pre_depends_count + pkg->depends_count + pkg->recommends_count
+        + pkg->suggests_count;
     if (!count)
         return satisfiers;
 
@@ -315,7 +310,8 @@ pkg_vec_t *pkg_hash_fetch_satisfied_dependencies(pkg_t * pkg)
                 for (l = 0; l < nposs; l++) {
                     pkg_vec_t *test_vec = ab_providers[l]->pkgs;
                     /* if no depends on this one, try the first package that Provides this one */
-                    if (!test_vec) {    /* no pkg_vec hooked up to the abstract_pkg!  (need another feed?) */
+                    if (!test_vec) {
+                        /* no pkg_vec hooked up to the abstract_pkg! (need another feed?) */
                         continue;
                     }
 
@@ -338,8 +334,7 @@ pkg_vec_t *pkg_hash_fetch_satisfied_dependencies(pkg_t * pkg)
             /* foreach provided_by, which includes the abstract_pkg itself */
             depend_t *dependence_to_satisfy = possible_satisfiers[j];
             abstract_pkg_t *satisfying_apkg = possible_satisfiers[j]->pkg;
-            pkg_t *satisfying_pkg =
-                pkg_hash_fetch_best_installation_candidate(satisfying_apkg,
+            pkg_t *satisfying_pkg = pkg_hash_fetch_best_installation_candidate(satisfying_apkg,
                                                            pkg_constraint_satisfied,
                                                            dependence_to_satisfy,
                                                            0);
@@ -791,8 +786,7 @@ void buildProvides(abstract_pkg_t * ab_pkg, pkg_t * pkg)
     pkg->provides[0] = ab_pkg;
 
     for (i = 1; i < pkg->provides_count; i++) {
-        abstract_pkg_t *provided_abpkg =
-            ensure_abstract_pkg_by_name(pkg->provides_str[i - 1]);
+        abstract_pkg_t *provided_abpkg = ensure_abstract_pkg_by_name(pkg->provides_str[i - 1]);
         free(pkg->provides_str[i - 1]);
 
         pkg->provides[i] = provided_abpkg;
@@ -811,8 +805,8 @@ void buildConflicts(pkg_t * pkg)
     if (!pkg->conflicts_count)
         return;
 
-    conflicts = pkg->conflicts =
-        xcalloc(pkg->conflicts_count, sizeof(compound_depend_t));
+    conflicts = pkg->conflicts = xcalloc(pkg->conflicts_count,
+            sizeof(compound_depend_t));
     for (i = 0; i < pkg->conflicts_count; i++) {
         parseDepends(conflicts, pkg->conflicts_str[i]);
         conflicts->type = CONFLICTS;
@@ -833,8 +827,7 @@ void buildReplaces(abstract_pkg_t * ab_pkg, pkg_t * pkg)
     pkg->replaces = xcalloc(pkg->replaces_count, sizeof(abstract_pkg_t *));
 
     for (i = 0; i < pkg->replaces_count; i++) {
-        abstract_pkg_t *old_abpkg =
-            ensure_abstract_pkg_by_name(pkg->replaces_str[i]);
+        abstract_pkg_t *old_abpkg = ensure_abstract_pkg_by_name(pkg->replaces_str[i]);
 
         pkg->replaces[i] = old_abpkg;
         free(pkg->replaces_str[i]);
@@ -858,10 +851,9 @@ void buildDepends(pkg_t * pkg)
     unsigned int i;
     compound_depend_t *depends;
 
-    if (!
-        (count =
-         pkg->pre_depends_count + pkg->depends_count + pkg->recommends_count +
-         pkg->suggests_count))
+    count = pkg->pre_depends_count + pkg->depends_count + pkg->recommends_count
+        + pkg->suggests_count;
+    if (!count)
         return;
 
     depends = pkg->depends = xcalloc(count, sizeof(compound_depend_t));
@@ -1017,9 +1009,8 @@ void buildDependedUponBy(pkg_t * pkg, abstract_pkg_t * ab_pkg)
     int i, j;
     abstract_pkg_t *ab_depend;
 
-    count =
-        pkg->pre_depends_count + pkg->depends_count + pkg->recommends_count +
-        pkg->suggests_count;
+    count = pkg->pre_depends_count + pkg->depends_count + pkg->recommends_count
+        + pkg->suggests_count;
 
     for (i = 0; i < count; i++) {
         depends = &pkg->depends[i];

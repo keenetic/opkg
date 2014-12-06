@@ -65,8 +65,8 @@ void hash_print_stats(hash_table_t * hash)
            hash->n_buckets * (int)sizeof(hash_entry_t), hash->n_buckets,
            hash->n_elements, hash->n_collisions, hash->max_bucket_len,
            hash->n_used_buckets,
-           (hash->n_used_buckets ? ((float)hash->n_elements) /
-            hash->n_used_buckets : 0.0f), hash->n_hits, hash->n_misses);
+           (hash->n_used_buckets ? ((float)hash->n_elements) / hash->n_used_buckets : 0.0f),
+           hash->n_hits, hash->n_misses);
 }
 
 void hash_table_deinit(hash_table_t * hash)

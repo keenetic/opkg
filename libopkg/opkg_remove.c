@@ -174,9 +174,8 @@ static int remove_autoinstalled(pkg_t * pkg)
     struct compound_depend *cdep;
     abstract_pkg_t **dependents;
 
-    int count =
-        pkg->pre_depends_count + pkg->depends_count + pkg->recommends_count +
-        pkg->suggests_count;
+    int count = pkg->pre_depends_count + pkg->depends_count
+        + pkg->recommends_count + pkg->suggests_count;
 
     for (i = 0; i < count; i++) {
         cdep = &pkg->depends[i];
@@ -202,9 +201,8 @@ static int remove_autoinstalled(pkg_t * pkg)
                 opkg_msg(NOTICE,
                          "%s was autoinstalled and is "
                          "now orphaned, removing.\n", p->name);
-                if (opkg_remove_pkg(p) != 0) {
+                if (opkg_remove_pkg(p) != 0)
                     err = -1;
-                }
             } else
                 opkg_msg(INFO,
                          "%s was autoinstalled and is " "still required by %d "
@@ -261,8 +259,8 @@ int opkg_remove_pkg(pkg_t * pkg)
      */
     if (!opkg_config->force_depends && !(pkg->state_flag & SF_REPLACE)) {
         abstract_pkg_t **dependents;
-        int has_installed_dependents =
-            pkg_has_installed_dependents(pkg, &dependents);
+        int has_installed_dependents = pkg_has_installed_dependents(pkg,
+                &dependents);
 
         if (has_installed_dependents) {
             /*
@@ -356,7 +354,7 @@ void remove_data_files_and_list(pkg_t * pkg)
         rootdirlen = strlen(opkg_config->offline_root);
 
     for (iter = str_list_first(installed_files); iter;
-         iter = str_list_next(installed_files, iter)) {
+            iter = str_list_next(installed_files, iter)) {
         file_name = (char *)iter->data;
 
         owner = file_hash_get_file_owner(file_name);
@@ -392,7 +390,7 @@ void remove_data_files_and_list(pkg_t * pkg)
         do {
             removed_a_dir = 0;
             for (iter = str_list_first(&installed_dirs); iter;
-                 iter = str_list_next(&installed_dirs, iter)) {
+                    iter = str_list_next(&installed_dirs, iter)) {
                 file_name = (char *)iter->data;
 
                 if (rmdir(file_name) == 0) {
@@ -409,7 +407,7 @@ void remove_data_files_and_list(pkg_t * pkg)
 
     /* Don't print warning for dirs that are provided by other packages */
     for (iter = str_list_first(&installed_dirs); iter;
-         iter = str_list_next(&installed_dirs, iter)) {
+            iter = str_list_next(&installed_dirs, iter)) {
         file_name = (char *)iter->data;
 
         owner = file_hash_get_file_owner(file_name);

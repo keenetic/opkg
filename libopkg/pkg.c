@@ -203,9 +203,8 @@ void pkg_deinit(pkg_t * pkg)
     pkg->replaces = NULL;
 
     if (pkg->depends) {
-        unsigned int count =
-            pkg->pre_depends_count + pkg->depends_count +
-            pkg->recommends_count + pkg->suggests_count;
+        unsigned int count = pkg->pre_depends_count + pkg->depends_count
+            + pkg->recommends_count + pkg->suggests_count;
 
         for (i = 0; i < count; i++)
             compound_depend_deinit(&pkg->depends[i]);
@@ -592,9 +591,8 @@ void pkg_formatted_field(FILE * fp, pkg_t * pkg, const char *field)
 {
     unsigned int i, j;
     char *str;
-    unsigned int depends_count =
-        pkg->pre_depends_count + pkg->depends_count + pkg->recommends_count +
-        pkg->suggests_count;
+    unsigned int depends_count = pkg->pre_depends_count + pkg->depends_count
+        + pkg->recommends_count + pkg->suggests_count;
 
     if (strlen(field) < PKG_MINIMUM_FIELD_NAME_LEN) {
         goto UNKNOWN_FMT_FIELD;
@@ -624,7 +622,7 @@ void pkg_formatted_field(FILE * fp, pkg_t * pkg, const char *field)
 
             fprintf(fp, "Conffiles:\n");
             for (iter = nv_pair_list_first(&pkg->conffiles); iter;
-                 iter = nv_pair_list_next(&pkg->conffiles, iter)) {
+                    iter = nv_pair_list_next(&pkg->conffiles, iter)) {
                 if (((conffile_t *) iter->data)->name
                     && ((conffile_t *) iter->data)->value) {
                     fprintf(fp, " %s %s\n", ((conffile_t *) iter->data)->name,
@@ -1219,7 +1217,7 @@ conffile_t *pkg_get_conffile(pkg_t * pkg, const char *file_name)
     }
 
     for (iter = nv_pair_list_first(&pkg->conffiles); iter;
-         iter = nv_pair_list_next(&pkg->conffiles, iter)) {
+            iter = nv_pair_list_next(&pkg->conffiles, iter)) {
         conffile = (conffile_t *) iter->data;
 
         if (strcmp(conffile->name, file_name) == 0) {
@@ -1266,8 +1264,8 @@ int pkg_run_script(pkg_t * pkg, const char *script, const char *args)
     opkg_msg(INFO, "Running script %s.\n", path);
 
     setenv("PKG_ROOT",
-           pkg->dest ? pkg->dest->root_dir : opkg_config->default_dest->
-           root_dir, 1);
+           pkg->dest ? pkg->dest->root_dir : opkg_config->default_dest->root_dir,
+           1);
 
     if (!file_exists(path)) {
         free(path);
@@ -1331,9 +1329,9 @@ void pkg_info_preinstall_check(void)
                      pkg->name);
             break;
         }
-        for (iter = str_list_first(installed_files), niter =
-             str_list_next(installed_files, iter); iter;
-             iter = niter, niter = str_list_next(installed_files, iter)) {
+        for (iter = str_list_first(installed_files), niter = str_list_next(installed_files, iter);
+                iter;
+                iter = niter, niter = str_list_next(installed_files, iter)) {
             char *installed_file = (char *)iter->data;
             file_hash_set_file_owner(installed_file, pkg);
         }

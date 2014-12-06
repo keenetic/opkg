@@ -40,8 +40,8 @@ static int release_parse_line(void *ptr, const char *line, uint mask)
     switch (*line) {
     case 'A':
         if (is_field("Architectures", line)) {
-            release->architectures =
-                parse_list(line, &release->architectures_count, ' ', 0);
+            release->architectures = parse_list(line, &release->architectures_count,
+                    ' ', 0);
         }
         break;
 
@@ -49,8 +49,8 @@ static int release_parse_line(void *ptr, const char *line, uint mask)
         if (is_field("Codename", line)) {
             release->name = parse_simple("Codename", line);
         } else if (is_field("Components", line)) {
-            release->components =
-                parse_list(line, &release->components_count, ' ', 0);
+            release->components = parse_list(line, &release->components_count,
+                    ' ', 0);
         }
         break;
 
@@ -120,9 +120,8 @@ int release_parse_from_stream(release_t * release, FILE * fp)
     const size_t len = 4096;
 
     buf = xmalloc(len);
-    ret =
-        parse_from_stream_nomalloc(release_parse_line, release, fp, 0, &buf,
-                                   len);
+    ret = parse_from_stream_nomalloc(release_parse_line, release, fp, 0, &buf,
+                                     len);
     free(buf);
 
     return ret;

@@ -175,7 +175,7 @@ int pkg_hash_load_feeds(void)
     opkg_msg(INFO, "\n");
 
     for (iter = void_list_first(&opkg_config->dist_src_list); iter;
-         iter = void_list_next(&opkg_config->dist_src_list, iter)) {
+            iter = void_list_next(&opkg_config->dist_src_list, iter)) {
 
         src = (pkg_src_t *) iter->data;
 
@@ -211,7 +211,7 @@ int pkg_hash_load_feeds(void)
     }
 
     for (iter = void_list_first(&opkg_config->pkg_src_list); iter;
-         iter = void_list_next(&opkg_config->pkg_src_list, iter)) {
+            iter = void_list_next(&opkg_config->pkg_src_list, iter)) {
 
         src = (pkg_src_t *) iter->data;
 
@@ -240,7 +240,7 @@ int pkg_hash_load_status_files(void)
     opkg_msg(INFO, "\n");
 
     for (iter = void_list_first(&opkg_config->pkg_dest_list); iter;
-         iter = void_list_next(&opkg_config->pkg_dest_list, iter)) {
+            iter = void_list_next(&opkg_config->pkg_dest_list, iter)) {
 
         dest = (pkg_dest_t *) iter->data;
 
@@ -259,10 +259,7 @@ abstract_pkg_t *abstract_pkg_fetch_by_name(const char *pkg_name)
 }
 
 pkg_t *pkg_hash_fetch_best_installation_candidate(abstract_pkg_t * apkg,
-                                                  int (*constraint_fcn) (pkg_t *
-                                                                         pkg,
-                                                                         void
-                                                                         *cdata),
+                                                  int (*constraint_fcn) (pkg_t * pkg, void *cdata),
                                                   void *cdata, int quiet)
 {
     unsigned int i, j;
@@ -471,7 +468,6 @@ pkg_t *pkg_hash_fetch_best_installation_candidate(abstract_pkg_t * apkg,
                          prio);
             }
         }
-
     }
 
     if (opkg_config->verbosity >= INFO && matching_apkgs->len > 1) {

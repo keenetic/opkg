@@ -358,11 +358,9 @@ static CURL *opkg_curl_init(curl_progress_func cb, void *data)
 #endif                          /* HAVE_OPENSSL */
 
         if (opkg_config->ssl_engine) {
-
             /* use crypto engine */
-            if (curl_easy_setopt
-                (curl, CURLOPT_SSLENGINE,
-                 opkg_config->ssl_engine) != CURLE_OK) {
+            if (curl_easy_setopt(curl, CURLOPT_SSLENGINE,
+                        opkg_config->ssl_engine) != CURLE_OK) {
                 opkg_msg(ERROR, "Can't set crypto engine '%s'.\n",
                          opkg_config->ssl_engine);
 
@@ -370,8 +368,7 @@ static CURL *opkg_curl_init(curl_progress_func cb, void *data)
                 return NULL;
             }
             /* set the crypto engine as default */
-            if (curl_easy_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1L) !=
-                CURLE_OK) {
+            if (curl_easy_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1L) != CURLE_OK) {
                 opkg_msg(ERROR, "Can't set crypto engine '%s' as default.\n",
                          opkg_config->ssl_engine);
 
@@ -382,18 +379,14 @@ static CURL *opkg_curl_init(curl_progress_func cb, void *data)
 
         /* cert & key can only be in PEM case in the same file */
         if (opkg_config->ssl_key_passwd) {
-            if (curl_easy_setopt
-                (curl, CURLOPT_SSLKEYPASSWD,
-                 opkg_config->ssl_key_passwd) != CURLE_OK) {
+            if (curl_easy_setopt (curl, CURLOPT_SSLKEYPASSWD, opkg_config->ssl_key_passwd) != CURLE_OK) {
                 opkg_msg(DEBUG, "Failed to set key password.\n");
             }
         }
 
         /* sets the client certificate and its type */
         if (opkg_config->ssl_cert_type) {
-            if (curl_easy_setopt
-                (curl, CURLOPT_SSLCERTTYPE,
-                 opkg_config->ssl_cert_type) != CURLE_OK) {
+            if (curl_easy_setopt (curl, CURLOPT_SSLCERTTYPE, opkg_config->ssl_cert_type) != CURLE_OK) {
                 opkg_msg(DEBUG, "Failed to set certificate format.\n");
             }
         }
@@ -404,15 +397,12 @@ static CURL *opkg_curl_init(curl_progress_func cb, void *data)
 
         /* sets the client key and its type */
         if (opkg_config->ssl_key_type) {
-            if (curl_easy_setopt
-                (curl, CURLOPT_SSLKEYTYPE,
-                 opkg_config->ssl_key_type) != CURLE_OK) {
+            if (curl_easy_setopt (curl, CURLOPT_SSLKEYTYPE, opkg_config->ssl_key_type) != CURLE_OK) {
                 opkg_msg(DEBUG, "Failed to set key format.\n");
             }
         }
         if (opkg_config->ssl_key) {
-            if (curl_easy_setopt(curl, CURLOPT_SSLKEY, opkg_config->ssl_key) !=
-                CURLE_OK) {
+            if (curl_easy_setopt(curl, CURLOPT_SSLKEY, opkg_config->ssl_key) != CURLE_OK) {
                 opkg_msg(DEBUG, "Failed to set key.\n");
             }
         }
@@ -426,9 +416,7 @@ static CURL *opkg_curl_init(curl_progress_func cb, void *data)
         } else {
 #if defined(HAVE_PATHFINDER) && defined(HAVE_OPENSSL)
             if (opkg_config->check_x509_path) {
-                if (curl_easy_setopt
-                    (curl, CURLOPT_SSL_CTX_FUNCTION,
-                     curl_ssl_ctx_function) != CURLE_OK) {
+                if (curl_easy_setopt (curl, CURLOPT_SSL_CTX_FUNCTION, curl_ssl_ctx_function) != CURLE_OK) {
                     opkg_msg(DEBUG,
                              "Failed to set ssl path verification callback.\n");
                 } else {

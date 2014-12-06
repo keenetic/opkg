@@ -209,7 +209,7 @@ struct active_list *prepare_upgrade_list(void)
     hash_table_foreach(&opkg_config->pkg_hash,
                        pkg_hash_check_installed_pkg_helper, all);
     for (node = active_list_next(all, all); node;
-         node = active_list_next(all, node)) {
+            node = active_list_next(all, node)) {
         pkg_t *old, *new;
         int cmp;
 

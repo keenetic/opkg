@@ -39,10 +39,8 @@
 #include <malloc.h>
 #include "xfuncs.h"
 
-/*
- *      This callback is called instead of X509_verify_cert to perform path
- *      validation on a certificate using pathfinder.
- *
+/* This callback is called instead of X509_verify_cert to perform path
+ * validation on a certificate using pathfinder.
  */
 int pathfinder_verify_callback(X509_STORE_CTX * ctx, void *arg)
 {
@@ -187,15 +185,14 @@ int opkg_verify_openssl_signature(const char *file, const char *sigfile)
     openssl_init();
 
     // Set-up the key store
-    if (!
-        (store =
-         setup_verify(opkg_config->signature_ca_file,
-                      opkg_config->signature_ca_path))) {
+    store = setup_verify(opkg_config->signature_ca_file, opkg_config->signature_ca_path);
+    if (!store) {
         opkg_msg(ERROR, "Can't open CA certificates.\n");
         goto verify_file_end;
     }
     // Open a BIO to read the sig file
-    if (!(in = BIO_new_file(sigfile, "rb"))) {
+    in = BIO_new_file(sigfile, "rb");
+    if (!in) {
         opkg_msg(ERROR, "Can't open signature file %s.\n", sigfile);
         goto verify_file_end;
     }
@@ -215,7 +212,8 @@ int opkg_verify_openssl_signature(const char *file, const char *sigfile)
         }
     }
     // Open the Package file to authenticate
-    if (!(indata = BIO_new_file(file, "rb"))) {
+    indata = BIO_new_file(file, "rb");
+    if (!indata) {
         opkg_msg(ERROR, "Can't open file %s.\n", file);
         goto verify_file_end;
     }

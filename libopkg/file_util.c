@@ -174,8 +174,7 @@ int file_link(const char *src, const char *dest)
 
     r = symlink(src, dest);
     if (r < 0) {
-        opkg_perror(DEBUG,
-                    "unable to create symlink '%s', falling back to copy",
+        opkg_perror(DEBUG, "unable to create symlink '%s', falling back to copy",
                     dest);
         return file_copy(src, dest);
     }

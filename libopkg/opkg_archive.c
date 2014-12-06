@@ -707,15 +707,14 @@ struct opkg_ar *ar_open_pkg_data_archive(const char *filename)
         return NULL;
     }
 
-        /** Flags:
-	 *
-	 * TODO: Do we want to support ACLs, extended flags and extended
-	 * attributes? (ARCHIVE_EXTRACT_ACL, ARCHIVE_EXTRACT_FFLAGS,
-	 * ARCHIVE_EXTRACT_XATTR).
-	 */
-    ar->extract_flags =
-        ARCHIVE_EXTRACT_OWNER | ARCHIVE_EXTRACT_PERM | ARCHIVE_EXTRACT_TIME |
-        ARCHIVE_EXTRACT_UNLINK;
+    /** Flags:
+     *
+     * TODO: Do we want to support ACLs, extended flags and extended
+     * attributes? (ARCHIVE_EXTRACT_ACL, ARCHIVE_EXTRACT_FFLAGS,
+     * ARCHIVE_EXTRACT_XATTR).
+     */
+    ar->extract_flags = ARCHIVE_EXTRACT_OWNER | ARCHIVE_EXTRACT_PERM |
+        ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_UNLINK;
 
     return ar;
 }

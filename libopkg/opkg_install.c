@@ -186,7 +186,7 @@ static int update_file_ownership(pkg_t * new_pkg, pkg_t * old_pkg)
         return -1;
 
     for (iter = str_list_first(new_list), niter = str_list_next(new_list, iter);
-         iter; iter = niter, niter = str_list_next(new_list, niter)) {
+            iter; iter = niter, niter = str_list_next(new_list, niter)) {
         char *new_file = (char *)iter->data;
         pkg_t *owner = file_hash_get_file_owner(new_file);
         pkg_t *obs = hash_table_get(&opkg_config->obs_file_hash, new_file);
@@ -206,9 +206,8 @@ static int update_file_ownership(pkg_t * new_pkg, pkg_t * old_pkg)
             return -1;
         }
 
-        for (iter = str_list_first(old_list), niter =
-             str_list_next(old_list, iter); iter;
-             iter = niter, niter = str_list_next(old_list, niter)) {
+        for (iter = str_list_first(old_list), niter = str_list_next(old_list, iter);
+                iter; iter = niter, niter = str_list_next(old_list, niter)) {
             char *old_file = (char *)iter->data;
             pkg_t *owner = file_hash_get_file_owner(old_file);
             if (!owner || (owner == old_pkg)) {
@@ -309,12 +308,10 @@ static int unpack_pkg_control_files(pkg_t * pkg)
         char *cf_name_in_dest;
 
         cf_name = file_read_line_alloc(conffiles_file);
-        if (cf_name == NULL) {
+        if (cf_name == NULL)
             break;
-        }
-        if (cf_name[0] == '\0') {
+        if (cf_name[0] == '\0')
             continue;
-        }
 
         /* Prepend dest->root_dir to conffile name.
          * Take pains to avoid multiple slashes. */
@@ -350,19 +347,16 @@ static int pkg_remove_orphan_dependent(pkg_t * pkg, pkg_t * old_pkg)
     struct compound_depend *cd0, *cd1;
     abstract_pkg_t **dependents;
 
-    int count0 =
-        old_pkg->pre_depends_count + old_pkg->depends_count +
-        old_pkg->recommends_count + old_pkg->suggests_count;
-    int count1 =
-        pkg->pre_depends_count + pkg->depends_count + pkg->recommends_count +
-        pkg->suggests_count;
+    int count0 = old_pkg->pre_depends_count + old_pkg->depends_count
+        + old_pkg->recommends_count + old_pkg->suggests_count;
+    int count1 = pkg->pre_depends_count + pkg->depends_count
+        + pkg->recommends_count + pkg->suggests_count;
 
     for (i = 0; i < count0; i++) {
         cd0 = &old_pkg->depends[i];
         if (cd0->type != DEPEND && cd0->type != RECOMMEND)
             continue;
         for (j = 0; j < cd0->possibility_count; j++) {
-
             found = 0;
 
             for (k = 0; k < count1; k++) {
@@ -370,8 +364,7 @@ static int pkg_remove_orphan_dependent(pkg_t * pkg, pkg_t * old_pkg)
                 if (cd1->type != DEPEND && cd1->type != RECOMMEND)
                     continue;
                 for (l = 0; l < cd1->possibility_count; l++) {
-                    if (cd0->possibilities[j]->pkg ==
-                        cd1->possibilities[l]->pkg) {
+                    if (cd0->possibilities[j]->pkg == cd1->possibilities[l]->pkg) {
                         found = 1;
                         break;
                     }
@@ -532,8 +525,7 @@ static int opkg_install_check_downgrade(pkg_t * pkg, pkg_t * old_pkg,
                 /* Compare versions without force_reinstall flag to see if this
                  * is really an upgrade or a reinstall.
                  */
-                int is_upgrade =
-                    pkg_compare_versions_no_reinstall(pkg, old_pkg);
+                int is_upgrade = pkg_compare_versions_no_reinstall(pkg, old_pkg);
                 if (is_upgrade) {
                     s = "Upgrading";
                     opkg_msg(NOTICE, "%s %s from %s to %s on %s.\n", s,
@@ -755,7 +747,7 @@ static int backup_modified_conffiles(pkg_t * pkg, pkg_t * old_pkg)
     /* Backup all modified conffiles */
     if (old_pkg) {
         for (iter = nv_pair_list_first(&old_pkg->conffiles); iter;
-             iter = nv_pair_list_next(&old_pkg->conffiles, iter)) {
+                iter = nv_pair_list_next(&old_pkg->conffiles, iter)) {
             char *cf_name;
 
             cf = iter->data;
@@ -774,7 +766,7 @@ static int backup_modified_conffiles(pkg_t * pkg, pkg_t * old_pkg)
 
     /* Backup all conffiles that were not conffiles in old_pkg */
     for (iter = nv_pair_list_first(&pkg->conffiles); iter;
-         iter = nv_pair_list_next(&pkg->conffiles, iter)) {
+            iter = nv_pair_list_next(&pkg->conffiles, iter)) {
         char *cf_name;
         cf = (conffile_t *) iter->data;
         cf_name = root_filename_alloc(cf->name);
@@ -801,13 +793,13 @@ static int backup_modified_conffiles_unwind(pkg_t * pkg, pkg_t * old_pkg)
 
     if (old_pkg) {
         for (iter = nv_pair_list_first(&old_pkg->conffiles); iter;
-             iter = nv_pair_list_next(&old_pkg->conffiles, iter)) {
+                iter = nv_pair_list_next(&old_pkg->conffiles, iter)) {
             backup_remove(((nv_pair_t *) iter->data)->name);
         }
     }
 
     for (iter = nv_pair_list_first(&pkg->conffiles); iter;
-         iter = nv_pair_list_next(&pkg->conffiles, iter)) {
+            iter = nv_pair_list_next(&pkg->conffiles, iter)) {
         backup_remove(((nv_pair_t *) iter->data)->name);
     }
 
@@ -838,9 +830,8 @@ static int check_data_file_clashes(pkg_t * pkg, pkg_t * old_pkg)
     if (files_list == NULL)
         return -1;
 
-    for (iter = str_list_first(files_list), niter =
-         str_list_next(files_list, iter); iter;
-         iter = niter, niter = str_list_next(files_list, iter)) {
+    for (iter = str_list_first(files_list), niter = str_list_next(files_list, iter);
+            iter; iter = niter, niter = str_list_next(files_list, iter)) {
         filename = (char *)iter->data;
         if (file_exists(filename) && (!file_is_dir(filename))) {
             pkg_t *owner;
@@ -876,8 +867,10 @@ static int check_data_file_clashes(pkg_t * pkg, pkg_t * old_pkg)
                 if (pkg_replaces(pkg, owner)) {
                     continue;
                 }
-/* If the file that would be installed is owned by the same package, ( as per a reinstall or similar )
-   then it's ok to overwrite. */
+                /* If the file that would be installed is owned by the same
+                 * package, ( as per a reinstall or similar ) then it's ok to
+                 * overwrite.
+                 */
                 if (strcmp(owner->name, pkg->name) == 0) {
                     opkg_msg(INFO,
                              "Replacing pre-existing file %s"
@@ -937,9 +930,8 @@ static int check_data_file_clashes_change(pkg_t * pkg, pkg_t * old_pkg)
     if (files_list == NULL)
         return -1;
 
-    for (iter = str_list_first(files_list), niter =
-         str_list_next(files_list, iter); iter;
-         iter = niter, niter = str_list_next(files_list, niter)) {
+    for (iter = str_list_first(files_list), niter = str_list_next(files_list, iter);
+            iter; iter = niter, niter = str_list_next(files_list, niter)) {
         char *filename = (char *)iter->data;
         if (root_filename) {
             free(root_filename);
@@ -960,8 +952,10 @@ static int check_data_file_clashes_change(pkg_t * pkg, pkg_t * old_pkg)
             /* Pre-existing files are OK if owned by a package replaced by new pkg. */
             if (owner) {
                 if (pkg_replaces(pkg, owner)) {
-/* It's now time to change the owner of that file.
-   It has been "replaced" from the new "Replaces", then I need to inform lists file about that.  */
+                    /* It's now time to change the owner of that file.
+                     * It has been "replaced" from the new "Replaces", then I
+                     * need to inform lists file about that.
+                     */
                     opkg_msg(INFO,
                              "Replacing pre-existing file %s "
                              "owned by package %s\n", filename, owner->name);
@@ -1088,9 +1082,8 @@ static int install_maintainer_scripts(pkg_t * pkg, pkg_t * old_pkg)
     char *prefix;
 
     sprintf_alloc(&prefix, "%s.", pkg->name);
-    ret =
-        pkg_extract_control_files_to_dir_with_prefix(pkg, pkg->dest->info_dir,
-                                                     prefix);
+    ret = pkg_extract_control_files_to_dir_with_prefix(pkg, pkg->dest->info_dir,
+                                                       prefix);
     free(prefix);
     return ret;
 }
@@ -1167,7 +1160,7 @@ static int resolve_conffiles(pkg_t * pkg)
         return 0;
 
     for (iter = nv_pair_list_first(&pkg->conffiles); iter;
-         iter = nv_pair_list_next(&pkg->conffiles, iter)) {
+            iter = nv_pair_list_next(&pkg->conffiles, iter)) {
         char *root_filename;
         cf = (conffile_t *) iter->data;
         root_filename = root_filename_alloc(cf->name);
@@ -1250,7 +1243,8 @@ static int opkg_prepare_install_by_name(const char *pkg_name, pkg_t ** pkg)
         new_version = pkg_version_str_alloc(new);
 
         cmp = pkg_compare_versions(old, new);
-        if ((opkg_config->force_downgrade == 1) && (cmp > 0)) { /* We've been asked to allow downgrade  and version is precedent */
+        if ((opkg_config->force_downgrade == 1) && (cmp > 0)) {
+            /* We've been asked to allow downgrade and version is precedent */
             opkg_msg(DEBUG, "Forcing downgrade\n");
             cmp = -1;           /* then we force opkg to downgrade */
             /* We need to use a value < 0 because in the 0 case we are asking to */
@@ -1355,7 +1349,8 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
     sigset_t newset, oldset;
 
     if (from_upgrade)
-        message = 1;            /* Coming from an upgrade, and should change the output message */
+        /* Coming from an upgrade, and should change the output message */
+        message = 1;
 
     opkg_msg(DEBUG2, "Calling pkg_arch_supported.\n");
 

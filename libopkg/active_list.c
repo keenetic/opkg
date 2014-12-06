@@ -33,8 +33,6 @@ void active_list_init(struct active_list *ptr)
     ptr->depended = NULL;
 }
 
-/**
- */
 struct active_list *active_list_next(struct active_list *head,
                                      struct active_list *ptr)
 {
@@ -163,12 +161,12 @@ struct active_list *active_list_sort(struct active_list *head,
         return NULL;
     active_list_init(&tmphead);
     for (node = active_list_next(head, NULL); node;
-         node = active_list_next(head, NULL)) {
+            node = active_list_next(head, NULL)) {
         if (tmphead.node.next == &tmphead.node) {
             active_list_move_node(head, &tmphead, node);
         } else {
             for (ptr = active_list_next(&tmphead, NULL); ptr;
-                 ptr = active_list_next(&tmphead, ptr)) {
+                    ptr = active_list_next(&tmphead, ptr)) {
                 if (compare(ptr, node) <= 0) {
                     break;
                 }
@@ -182,7 +180,7 @@ struct active_list *active_list_sort(struct active_list *head,
         node->depended = &tmphead;
     }
     for (ptr = active_list_prev(&tmphead, NULL); ptr;
-         ptr = active_list_prev(&tmphead, NULL)) {
+            ptr = active_list_prev(&tmphead, NULL)) {
         active_list_move_node(&tmphead, head, ptr);
     }
     return head;

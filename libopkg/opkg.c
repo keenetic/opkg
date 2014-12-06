@@ -115,8 +115,7 @@ static int curl_progress_cb(struct _curl_cb_data *cb_data, double t,    /* dltot
     if (t < 1)
         return 0;
 
-    progress =
-        cb_data->start_range +
+    progress = cb_data->start_range +
         (d / t * ((cb_data->finish_range - cb_data->start_range)));
     cb_data->progress_data->percentage = progress;
 
@@ -282,8 +281,8 @@ int opkg_install_package(const char *package_url,
         cb_data.start_range = 75 * i / deps->len;
         cb_data.finish_range = 75 * (i + 1) / deps->len;
 
-        pkg->local_filename =
-            opkg_download_cache(url, (curl_progress_func) curl_progress_cb,
+        pkg->local_filename = opkg_download_cache(url,
+                                (curl_progress_func) curl_progress_cb,
                                 &cb_data);
         free(url);
 
@@ -356,9 +355,8 @@ int opkg_remove_package(const char *package_name,
     progress(&pdata, 0, progress_callback, user_data);
 
     if (opkg_config->restrict_to_default_dest) {
-        pkg_to_remove =
-            pkg_hash_fetch_installed_by_name_dest(pkg->name,
-                                                  opkg_config->default_dest);
+        pkg_to_remove = pkg_hash_fetch_installed_by_name_dest(pkg->name,
+                                                              opkg_config->default_dest);
     } else {
         pkg_to_remove = pkg_hash_fetch_installed_by_name(pkg->name);
     }
@@ -388,9 +386,8 @@ int opkg_upgrade_package(const char *package_name,
     pkg_info_preinstall_check();
 
     if (opkg_config->restrict_to_default_dest) {
-        pkg =
-            pkg_hash_fetch_installed_by_name_dest(package_name,
-                                                  opkg_config->default_dest);
+        pkg = pkg_hash_fetch_installed_by_name_dest(package_name,
+                                                    opkg_config->default_dest);
     } else {
         pkg = pkg_hash_fetch_installed_by_name(package_name);
     }
@@ -586,7 +583,7 @@ int opkg_list_upgradable_packages(opkg_package_callback_t callback,
 
     head = prepare_upgrade_list();
     for (node = active_list_next(head, head); node;
-         node = active_list_next(head, node)) {
+            node = active_list_next(head, node)) {
         old = list_entry(node, pkg_t, list);
         new = pkg_hash_fetch_best_installation_candidate_by_name(old->name);
         if (new == NULL)
@@ -674,14 +671,13 @@ int opkg_repository_accessibility_check(void)
         host = strstr(((pkg_src_t *) iter->data)->value, "://") + 3;
         end = index(host, '/');
         if (strstr(((pkg_src_t *) iter->data)->value, "://") && end)
-            stmp =
-                xstrndup(((pkg_src_t *) iter->data)->value,
-                         end - ((pkg_src_t *) iter->data)->value);
+            stmp = xstrndup(((pkg_src_t *) iter->data)->value,
+                            end - ((pkg_src_t *) iter->data)->value);
         else
             stmp = xstrdup(((pkg_src_t *) iter->data)->value);
 
         for (iter1 = str_list_first(src); iter1;
-             iter1 = str_list_next(src, iter1)) {
+                iter1 = str_list_next(src, iter1)) {
             if (strstr(iter1->data, stmp))
                 break;
         }

@@ -68,8 +68,7 @@ void pkg_vec_insert_merge(pkg_vec_t * vec, pkg_t * pkg, int set_status)
         if ((!strcmp(pkg->name, vec->pkgs[i]->name))
             && ((pkg->state_want == SW_DEINSTALL && (pkg->state_flag & SF_HOLD))
                 || ((pkg_compare_versions(pkg, vec->pkgs[i]) == 0)
-                    &&
-                    (!strcmp(pkg->architecture, vec->pkgs[i]->architecture)))))
+                    && (!strcmp(pkg->architecture, vec->pkgs[i]->architecture)))))
         {
             found = 1;
             opkg_msg(DEBUG2, "Duplicate for pkg=%s version=%s arch=%s.\n",

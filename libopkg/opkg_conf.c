@@ -120,7 +120,7 @@ static int resolve_pkg_dest_list(void)
     char *root_dir;
 
     for (iter = nv_pair_list_first(&opkg_config->tmp_dest_list); iter;
-         iter = nv_pair_list_next(&opkg_config->tmp_dest_list, iter)) {
+            iter = nv_pair_list_next(&opkg_config->tmp_dest_list, iter)) {
         nv_pair = (nv_pair_t *) iter->data;
 
         if (opkg_config->offline_root) {
@@ -130,9 +130,8 @@ static int resolve_pkg_dest_list(void)
             root_dir = xstrdup(nv_pair->value);
         }
 
-        dest =
-            pkg_dest_list_append(&opkg_config->pkg_dest_list, nv_pair->name,
-                                 root_dir);
+        dest = pkg_dest_list_append(&opkg_config->pkg_dest_list, nv_pair->name,
+                                    root_dir);
         free(root_dir);
 
         if (opkg_config->default_dest == NULL)
@@ -278,13 +277,12 @@ static int opkg_conf_parse_file(const char *filename,
 
     opkg_msg(INFO, "Loading conf file %s.\n", filename);
 
-    err =
-        xregcomp(&comment_re, "^[[:space:]]*(#.*|[[:space:]]*)$", REG_EXTENDED);
+    err = xregcomp(&comment_re, "^[[:space:]]*(#.*|[[:space:]]*)$",
+            REG_EXTENDED);
     if (err)
         goto err1;
 
-    err =
-        xregcomp(&valid_line_re,
+    err = xregcomp(&valid_line_re,
                  "^[[:space:]]*(\"([^\"]*)\"|([^[:space:]]*))"
                  "[[:space:]]*(\"([^\"]*)\"|([^[:space:]]*))"
                  "[[:space:]]*(\"([^\"]*)\"|([^[:space:]]*))"
@@ -306,8 +304,7 @@ static int opkg_conf_parse_file(const char *filename,
         if (regexec(&comment_re, line, 0, 0, 0) == 0)
             goto NEXT_LINE;
 
-        if (regexec(&valid_line_re, line, regmatch_size, regmatch, 0) ==
-            REG_NOMATCH) {
+        if (regexec(&valid_line_re, line, regmatch_size, regmatch, 0) == REG_NOMATCH) {
             opkg_msg(ERROR, "%s:%d: Ignoring invalid line: `%s'\n", filename,
                      line_num, line);
             goto NEXT_LINE;
@@ -315,55 +312,44 @@ static int opkg_conf_parse_file(const char *filename,
 
         /* This has to be so ugly to deal with optional quotation marks */
         if (regmatch[2].rm_so > 0) {
-            type =
-                xstrndup(line + regmatch[2].rm_so,
+            type = xstrndup(line + regmatch[2].rm_so,
                          regmatch[2].rm_eo - regmatch[2].rm_so);
         } else {
-            type =
-                xstrndup(line + regmatch[3].rm_so,
+            type = xstrndup(line + regmatch[3].rm_so,
                          regmatch[3].rm_eo - regmatch[3].rm_so);
         }
 
         if (regmatch[5].rm_so > 0) {
-            name =
-                xstrndup(line + regmatch[5].rm_so,
+            name = xstrndup(line + regmatch[5].rm_so,
                          regmatch[5].rm_eo - regmatch[5].rm_so);
         } else {
-            name =
-                xstrndup(line + regmatch[6].rm_so,
+            name = xstrndup(line + regmatch[6].rm_so,
                          regmatch[6].rm_eo - regmatch[6].rm_so);
         }
 
         if (regmatch[8].rm_so > 0) {
-            value =
-                xstrndup(line + regmatch[8].rm_so,
+            value = xstrndup(line + regmatch[8].rm_so,
                          regmatch[8].rm_eo - regmatch[8].rm_so);
         } else {
-            value =
-                xstrndup(line + regmatch[9].rm_so,
+            value = xstrndup(line + regmatch[9].rm_so,
                          regmatch[9].rm_eo - regmatch[9].rm_so);
         }
 
         extra = NULL;
         if (regmatch[11].rm_so > 0) {
-            if (regmatch[13].rm_so > 0
-                && regmatch[13].rm_so != regmatch[13].rm_eo)
-                extra =
-                    xstrndup(line + regmatch[11].rm_so,
+            if (regmatch[13].rm_so > 0 && regmatch[13].rm_so != regmatch[13].rm_eo)
+                extra = xstrndup(line + regmatch[11].rm_so,
                              regmatch[13].rm_eo - regmatch[11].rm_so);
             else
-                extra =
-                    xstrndup(line + regmatch[11].rm_so,
+                extra = xstrndup(line + regmatch[11].rm_so,
                              regmatch[11].rm_eo - regmatch[11].rm_so);
         }
 
-        if (regmatch[13].rm_so != regmatch[13].rm_eo
-            && strncmp(type, "dist", 4) != 0) {
+        if (regmatch[13].rm_so != regmatch[13].rm_eo && strncmp(type, "dist", 4) != 0) {
             opkg_msg(ERROR,
                      "%s:%d: Ignoring config line with trailing garbage: `%s'\n",
                      filename, line_num, line);
         } else {
-
             /* We use the opkg_config->tmp_dest_list below instead of
              * opkg_config->pkg_dest_list because we might encounter an
              * offline_root option later and that would invalidate the
@@ -627,9 +613,9 @@ int opkg_conf_load(void)
             opkg_perror(ERROR, "Couldn't stat %s", opkg_config->conf_file);
             goto err0;
         }
-        if (opkg_conf_parse_file
-            (opkg_config->conf_file, &opkg_config->pkg_src_list,
-             &opkg_config->dist_src_list))
+        if (opkg_conf_parse_file(opkg_config->conf_file,
+                    &opkg_config->pkg_src_list,
+                    &opkg_config->dist_src_list))
             goto err1;
     } else {
         if (opkg_config->offline_root)
@@ -657,9 +643,9 @@ int opkg_conf_load(void)
                 if (opkg_config->conf_file
                     && !strcmp(opkg_config->conf_file, globbuf.gl_pathv[i]))
                     continue;
-            if (opkg_conf_parse_file
-                (globbuf.gl_pathv[i], &opkg_config->pkg_src_list,
-                 &opkg_config->dist_src_list) < 0) {
+            if (opkg_conf_parse_file (globbuf.gl_pathv[i],
+                        &opkg_config->pkg_src_list,
+                        &opkg_config->dist_src_list) < 0) {
                 globfree(&globbuf);
                 goto err1;
             }
