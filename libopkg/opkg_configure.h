@@ -25,7 +25,7 @@ extern "C" {
 
 #include "pkg.h"
 
-    int opkg_configure(pkg_t * pkg);
+int opkg_configure(pkg_t * pkg);
 
 #ifdef __cplusplus
 }

@@ -25,29 +25,29 @@
 extern "C" {
 #endif
 
-    typedef enum {
-        ERROR,                  /* error conditions */
-        NOTICE,                 /* normal but significant condition */
-        INFO,                   /* informational message */
-        DEBUG,                  /* debug level message */
-        DEBUG2,                 /* more debug level message */
-    } message_level_t;
+typedef enum {
+    ERROR,                  /* error conditions */
+    NOTICE,                 /* normal but significant condition */
+    INFO,                   /* informational message */
+    DEBUG,                  /* debug level message */
+    DEBUG2,                 /* more debug level message */
+} message_level_t;
 
-    void free_error_list(void);
-    void print_error_list(void);
-    void opkg_message(message_level_t level, const char *fmt, ...)
-        __attribute__ ((format(printf, 2, 3)));
+void free_error_list(void);
+void print_error_list(void);
+void opkg_message(message_level_t level, const char *fmt, ...)
+    __attribute__ ((format(printf, 2, 3)));
 
 #define opkg_msg(l, fmt, args...) \
-	do { \
-		if (l == NOTICE) \
-			opkg_message(l, fmt, ##args); \
-		else \
-			opkg_message(l, "%s: "fmt, __FUNCTION__, ##args); \
-	} while (0)
+    do { \
+        if (l == NOTICE) \
+            opkg_message(l, fmt, ##args); \
+        else \
+            opkg_message(l, "%s: "fmt, __FUNCTION__, ##args); \
+    } while (0)
 
 #define opkg_perror(l, fmt, args...) \
-	opkg_msg(l, fmt": %s.\n", ##args, strerror(errno))
+    opkg_msg(l, fmt": %s.\n", ##args, strerror(errno))
 
 #ifdef __cplusplus
 }

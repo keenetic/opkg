@@ -24,12 +24,12 @@
 extern "C" {
 #endif
 
-    void openssl_init(void);
-    int opkg_verify_openssl_signature(const char *file, const char *sigfile);
+void openssl_init(void);
+int opkg_verify_openssl_signature(const char *file, const char *sigfile);
 
 /* Pathfinder functions. */
-    int pkcs7_pathfinder_verify_signers(PKCS7 * p7);
-    int pathfinder_verify_callback(X509_STORE_CTX * ctx, void *arg);
+int pkcs7_pathfinder_verify_signers(PKCS7 * p7);
+int pathfinder_verify_callback(X509_STORE_CTX * ctx, void *arg);
 
 #ifdef __cplusplus
 }

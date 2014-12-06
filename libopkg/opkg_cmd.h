@@ -23,20 +23,20 @@
 extern "C" {
 #endif
 
-    typedef int (*opkg_cmd_fun_t) (int argc, const char **argv);
+typedef int (*opkg_cmd_fun_t) (int argc, const char **argv);
 
-    struct opkg_cmd {
-        const char *name;
-        int requires_args;
-        opkg_cmd_fun_t fun;
-        unsigned int pfm;       /* package field mask */
-    };
-    typedef struct opkg_cmd opkg_cmd_t;
+struct opkg_cmd {
+    const char *name;
+    int requires_args;
+    opkg_cmd_fun_t fun;
+    unsigned int pfm;       /* package field mask */
+};
+typedef struct opkg_cmd opkg_cmd_t;
 
-    opkg_cmd_t *opkg_cmd_find(const char *name);
-    int opkg_cmd_exec(opkg_cmd_t * cmd, int argc, const char **argv);
+opkg_cmd_t *opkg_cmd_find(const char *name);
+int opkg_cmd_exec(opkg_cmd_t * cmd, int argc, const char **argv);
 
-    extern int opkg_state_changed;
+extern int opkg_state_changed;
 
 #ifdef __cplusplus
 }

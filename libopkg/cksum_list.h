@@ -17,32 +17,35 @@
 #ifndef CKSUM_LIST_H
 #define CKSUM_LIST_H
 
+#include "void_list.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-    typedef struct {
-        char *name;
-        char *value;
-        int size;
-    } cksum_t;
+typedef struct {
+    char *name;
+    char *value;
+    int size;
+} cksum_t;
 
-    int cksum_init(cksum_t * cksum, char **itemlist);
-    void cksum_deinit(cksum_t * cksum);
+int cksum_init(cksum_t * cksum, char **itemlist);
+void cksum_deinit(cksum_t * cksum);
 
-#include "void_list.h"
+typedef struct void_list_elt cksum_list_elt_t;
 
-    typedef struct void_list_elt cksum_list_elt_t;
+typedef struct void_list cksum_list_t;
 
-    typedef struct void_list cksum_list_t;
+static inline int cksum_list_empty(cksum_list_t * list)
+{
+    return void_list_empty((void_list_t *) list);
+}
 
-    static inline int cksum_list_empty(cksum_list_t * list) {
-        return void_list_empty((void_list_t *) list);
-    } void cksum_list_init(cksum_list_t * list);
-    void cksum_list_deinit(cksum_list_t * list);
+void cksum_list_init(cksum_list_t * list);
+void cksum_list_deinit(cksum_list_t * list);
 
-    cksum_t *cksum_list_append(cksum_list_t * list, char **itemlist);
-    const cksum_t *cksum_list_find(cksum_list_t * list, const char *name);
+cksum_t *cksum_list_append(cksum_list_t * list, char **itemlist);
+const cksum_t *cksum_list_find(cksum_list_t * list, const char *name);
 
 #ifdef __cplusplus
 }

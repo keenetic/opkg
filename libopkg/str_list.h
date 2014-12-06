@@ -25,31 +25,31 @@ extern "C" {
 
 #include "void_list.h"
 
-    typedef struct void_list_elt str_list_elt_t;
+typedef struct void_list_elt str_list_elt_t;
 
-    typedef struct void_list str_list_t;
+typedef struct void_list str_list_t;
 
-    void str_list_elt_init(str_list_elt_t * elt, char *data);
-    void str_list_elt_deinit(str_list_elt_t * elt);
+void str_list_elt_init(str_list_elt_t * elt, char *data);
+void str_list_elt_deinit(str_list_elt_t * elt);
 
-    str_list_t *str_list_alloc(void);
-    void str_list_init(str_list_t * list);
-    void str_list_deinit(str_list_t * list);
+str_list_t *str_list_alloc(void);
+void str_list_init(str_list_t * list);
+void str_list_deinit(str_list_t * list);
 
-    void str_list_append(str_list_t * list, char *data);
-    void str_list_push(str_list_t * list, char *data);
-    str_list_elt_t *str_list_pop(str_list_t * list);
-    void str_list_remove(str_list_t * list, str_list_elt_t ** iter);
-    void str_list_remove_elt(str_list_t * list, const char *target_str);
+void str_list_append(str_list_t * list, char *data);
+void str_list_push(str_list_t * list, char *data);
+str_list_elt_t *str_list_pop(str_list_t * list);
+void str_list_remove(str_list_t * list, str_list_elt_t ** iter);
+void str_list_remove_elt(str_list_t * list, const char *target_str);
 
-    str_list_elt_t *str_list_first(str_list_t * list);
-    str_list_elt_t *str_list_prev(str_list_t * list, str_list_elt_t * node);
-    str_list_elt_t *str_list_next(str_list_t * list, str_list_elt_t * node);
-    str_list_elt_t *str_list_last(str_list_t * list);
+str_list_elt_t *str_list_first(str_list_t * list);
+str_list_elt_t *str_list_prev(str_list_t * list, str_list_elt_t * node);
+str_list_elt_t *str_list_next(str_list_t * list, str_list_elt_t * node);
+str_list_elt_t *str_list_last(str_list_t * list);
 
-    void str_list_purge(str_list_t * list);
+void str_list_purge(str_list_t * list);
 
-    int str_list_contains(str_list_t * list, const char *s);
+int str_list_contains(str_list_t * list, const char *s);
 
 #ifdef __cplusplus
 }

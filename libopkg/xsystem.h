@@ -31,7 +31,7 @@ extern "C" {
    Otherwise, the 8-bit return value of the program ala WEXITSTATUS
    as defined in <sys/wait.h>.
 */
-    int xsystem(const char *argv[]);
+int xsystem(const char *argv[]);
 
 #ifdef __cplusplus
 }

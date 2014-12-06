@@ -23,18 +23,18 @@
 extern "C" {
 #endif
 
-    int file_exists(const char *file_name);
-    int file_is_dir(const char *file_name);
-    int file_is_symlink(const char *file_name);
-    char *file_read_line_alloc(FILE * file);
-    int file_move(const char *src, const char *dest);
-    int file_link(const char *src, const char *dest);
-    int file_copy(const char *src, const char *dest);
-    int file_mkdir_hier(const char *path, long mode);
-    char *file_md5sum_alloc(const char *file_name);
-    char *file_sha256sum_alloc(const char *file_name);
-    int rm_r(const char *path);
-    int file_decompress(const char *in, const char *out);
+int file_exists(const char *file_name);
+int file_is_dir(const char *file_name);
+int file_is_symlink(const char *file_name);
+char *file_read_line_alloc(FILE * file);
+int file_move(const char *src, const char *dest);
+int file_link(const char *src, const char *dest);
+int file_copy(const char *src, const char *dest);
+int file_mkdir_hier(const char *path, long mode);
+char *file_md5sum_alloc(const char *file_name);
+char *file_sha256sum_alloc(const char *file_name);
+int rm_r(const char *path);
+int file_decompress(const char *in, const char *out);
 
 /* Buffer size used for extracting files from archives. */
 #define EXTRACT_BUFFER_LEN 0x8000

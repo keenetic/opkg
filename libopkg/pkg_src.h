@@ -19,27 +19,27 @@
 #ifndef PKG_SRC_H
 #define PKG_SRC_H
 
+#include "nv_pair.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "nv_pair.h"
+typedef struct {
+    char *name;
+    char *value;
+    char *extra_data;
+    int gzip;
+} pkg_src_t;
 
-    typedef struct {
-        char *name;
-        char *value;
-        char *extra_data;
-        int gzip;
-    } pkg_src_t;
+int pkg_src_init(pkg_src_t * src, const char *name, const char *base_url,
+                 const char *extra_data, int gzip);
+void pkg_src_deinit(pkg_src_t * src);
 
-    int pkg_src_init(pkg_src_t * src, const char *name, const char *base_url,
-                     const char *extra_data, int gzip);
-    void pkg_src_deinit(pkg_src_t * src);
-
-    int pkg_src_download(pkg_src_t * src);
-    int pkg_src_download_signature(pkg_src_t * src);
-    int pkg_src_verify(pkg_src_t * src);
-    int pkg_src_update(pkg_src_t * src);
+int pkg_src_download(pkg_src_t * src);
+int pkg_src_download_signature(pkg_src_t * src);
+int pkg_src_verify(pkg_src_t * src);
+int pkg_src_update(pkg_src_t * src);
 
 #ifdef __cplusplus
 }

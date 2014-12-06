@@ -39,8 +39,7 @@ struct active_list *active_list_move_node(struct active_list *old_head,
                                           struct active_list *node);
 
 struct active_list *active_list_sort(struct active_list *head,
-                                     int (*compare_fcn_t) (const void *,
-                                                           const void *));
+                                     int (*compare_fcn_t)(const void *, const void *));
 
 struct active_list *active_list_next(struct active_list *head,
                                      struct active_list *ptr);

@@ -21,7 +21,7 @@
 extern "C" {
 #endif
 
-    int release_parse_from_stream(release_t * release, FILE * fp);
+int release_parse_from_stream(release_t * release, FILE * fp);
 
 #ifdef __cplusplus
 }
