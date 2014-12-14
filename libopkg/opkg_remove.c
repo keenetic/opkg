@@ -232,7 +232,6 @@ static int remove_autoinstalled(pkg_t * pkg)
 int opkg_remove_pkg(pkg_t * pkg)
 {
     int err;
-    abstract_pkg_t *parent_pkg = NULL;
     int r;
 
     /*
@@ -256,7 +255,7 @@ int opkg_remove_pkg(pkg_t * pkg)
         }
     }
 
-    if ((parent_pkg = pkg->parent) == NULL)
+    if (pkg->parent == NULL)
         return 0;
 
     /* While remove pkg with '--force-removal-of-dependent-packages',
@@ -330,8 +329,7 @@ int opkg_remove_pkg(pkg_t * pkg)
     remove_maintainer_scripts(pkg);
     pkg->state_status = SS_NOT_INSTALLED;
 
-    if (parent_pkg)
-        parent_pkg->state_status = SS_NOT_INSTALLED;
+    pkg->parent->state_status = SS_NOT_INSTALLED;
 
     /* remove autoinstalled packages that are orphaned by the removal of this one */
     if (opkg_config->autoremove) {
