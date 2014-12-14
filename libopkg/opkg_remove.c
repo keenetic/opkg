@@ -185,6 +185,11 @@ static int remove_autoinstalled(pkg_t * pkg)
 
     for (i = 0; i < count; i++) {
         cdep = &pkg->depends[i];
+        /* Only remove dependency types which would normally be autoinstalled,
+         * namely the types PREDEPEND, DEPEND and RECOMMEND. We don't consider
+         * SUGGEST which are not normally autoinstalled and we don't consider
+         * CONFLICTS or GREEDY_DEPEND either.
+         */
         int uninteresting = cdep->type != PREDEPEND
                 && cdep->type != DEPEND
                 && cdep->type != RECOMMEND;
