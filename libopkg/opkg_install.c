@@ -153,25 +153,20 @@ static int satisfy_dependencies_for(pkg_t * pkg)
 static int check_conflicts_for(pkg_t * pkg)
 {
     unsigned int i;
-    pkg_vec_t *conflicts = NULL;
-    message_level_t level;
+    pkg_vec_t *conflicts;
 
-    if (opkg_config->force_depends) {
-        level = NOTICE;
-    } else {
-        level = ERROR;
-    }
+    if (opkg_config->force_depends)
+        return 0;
 
-    if (!opkg_config->force_depends)
-        conflicts = pkg_hash_fetch_conflicts(pkg);
+    conflicts = pkg_hash_fetch_conflicts(pkg);
 
     if (conflicts) {
-        opkg_msg(level, "The following packages conflict with %s:\n",
+        opkg_msg(ERROR, "The following packages conflict with %s:\n",
                  pkg->name);
         i = 0;
         while (i < conflicts->len)
-            opkg_msg(level, "\t%s", conflicts->pkgs[i++]->name);
-        opkg_message(level, "\n");
+            opkg_msg(ERROR, "\t%s", conflicts->pkgs[i++]->name);
+        opkg_message(ERROR, "\n");
         pkg_vec_free(conflicts);
         return -1;
     }
