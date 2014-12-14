@@ -211,12 +211,13 @@ int file_copy(const char *src, const char *dest)
             return -1;
         }
         dest_exists = 0;
-    }
-
-    if (dest_exists && src_stat.st_rdev == dest_stat.st_rdev
-        && src_stat.st_ino == dest_stat.st_ino) {
-        opkg_msg(ERROR, "`%s' and `%s' are the same file.\n", src, dest);
-        return -1;
+    } else {
+        int is_same_file = (src_stat.st_rdev == dest_stat.st_rdev
+                && src_stat.st_ino == dest_stat.st_ino);
+        if (is_same_file) {
+            opkg_msg(ERROR, "`%s' and `%s' are the same file.\n", src, dest);
+            return -1;
+        }
     }
 
     if (S_ISREG(src_stat.st_mode)) {
