@@ -1431,7 +1431,8 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
     }
 
     if (pkg->tmp_unpack_dir == NULL) {
-        if (unpack_pkg_control_files(pkg) == -1) {
+        err = unpack_pkg_control_files(pkg);
+        if (err == -1) {
             opkg_msg(ERROR, "Failed to unpack control files from %s.\n",
                      pkg->local_filename);
             return -1;
@@ -1510,7 +1511,8 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
                      "package %s marked noprune.\n", old_pkg->name);
         } else {
             opkg_msg(INFO, "Removing obsolesced files for %s\n", old_pkg->name);
-            if (remove_obsolesced_files(pkg, old_pkg)) {
+            err = remove_obsolesced_files(pkg, old_pkg);
+            if (err) {
                 opkg_msg(ERROR,
                          "Failed to determine "
                          "obsolete files from previously " "installed %s\n",
@@ -1527,7 +1529,8 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
     }
 
     opkg_msg(INFO, "Installing maintainer scripts.\n");
-    if (install_maintainer_scripts(pkg, old_pkg)) {
+    err = install_maintainer_scripts(pkg, old_pkg);
+    if (err) {
         opkg_msg(ERROR,
                  "Failed to extract maintainer scripts for %s."
                  " Package debris may remain!\n", pkg->name);
@@ -1539,7 +1542,8 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
 
     opkg_msg(INFO, "Installing data files for %s.\n", pkg->name);
 
-    if (install_data_files(pkg)) {
+    err = install_data_files(pkg);
+    if (err) {
         opkg_msg(ERROR,
                  "Failed to extract data files for %s. "
                  "Package debris may remain!\n", pkg->name);

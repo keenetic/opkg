@@ -109,7 +109,9 @@ void opkg_message(message_level_t level, const char *fmt, ...)
         }
         push_error_list(msg);
     } else {
-        if (vprintf(fmt, ap) < 0) {
+        int ret;
+        ret = vprintf(fmt, ap);
+        if (ret < 0) {
             fprintf(stderr,
                     "%s: encountered an output or encoding"
                     " error during vprintf.\n", __FUNCTION__);

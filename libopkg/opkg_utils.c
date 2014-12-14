@@ -28,8 +28,10 @@
 unsigned long get_available_kbytes(char *filesystem)
 {
     struct statvfs f;
+    int r;
 
-    if (statvfs(filesystem, &f) == -1) {
+    r = statvfs(filesystem, &f);
+    if (r == -1) {
         opkg_perror(ERROR, "Failed to statvfs for %s", filesystem);
         return 0;
     }

@@ -184,6 +184,7 @@ int check_file_stamp(const char *file_name, char *stamp)
     char *file_path;
     int size;
     int diff = 0;
+    int r;
 
     sprintf_alloc(&file_path, "%s.@stamp", file_name);
     if (!file_exists(file_path)) {
@@ -205,7 +206,10 @@ int check_file_stamp(const char *file_name, char *stamp)
         }
         stamp += STAMP_BUF_SIZE;
     }
-    fclose(file);
+
+    r = fclose(file);
+    if (r != 0)
+        opkg_msg(ERROR, "Failed to close file %s\n", file_path);
     free(file_path);
     return diff;
 }

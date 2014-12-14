@@ -82,7 +82,7 @@ static void sigint_handler(int sig)
 
 static int opkg_update_cmd(int argc, char **argv)
 {
-    char *tmp;
+    char *tmp, *dtemp;
     int err;
     int failures;
     pkg_src_list_elt_t *iter;
@@ -102,7 +102,8 @@ static int opkg_update_cmd(int argc, char **argv)
     failures = 0;
 
     sprintf_alloc(&tmp, "%s/update-XXXXXX", opkg_config->tmp_dir);
-    if (mkdtemp(tmp) == NULL) {
+    dtemp = mkdtemp(tmp);
+    if (dtemp == NULL) {
         opkg_perror(ERROR, "Failed to make temp dir %s", opkg_config->tmp_dir);
         return -1;
     }
@@ -170,6 +171,7 @@ static opkg_intercept_t opkg_prep_intercepts(void)
 {
     opkg_intercept_t ctx;
     char *newpath;
+    char *dtemp;
 
     ctx = xcalloc(1, sizeof(*ctx));
     ctx->oldpath = xstrdup(getenv("PATH"));
@@ -177,7 +179,8 @@ static opkg_intercept_t opkg_prep_intercepts(void)
     sprintf_alloc(&ctx->statedir, "%s/opkg-intercept-XXXXXX",
                   opkg_config->tmp_dir);
 
-    if (mkdtemp(ctx->statedir) == NULL) {
+    dtemp = mkdtemp(ctx->statedir);
+    if (dtemp == NULL) {
         opkg_perror(ERROR, "Failed to make temp dir %s", ctx->statedir);
         free(ctx->oldpath);
         free(ctx->statedir);
@@ -372,7 +375,8 @@ static int opkg_configure_packages(char *pkg_name)
         }
     }
 
-    if (opkg_finalize_intercepts(ic))
+    r = opkg_finalize_intercepts(ic);
+    if (r != 0)
         err = -1;
 
  error:
@@ -391,6 +395,7 @@ static int opkg_install_cmd(int argc, char **argv)
     char *arg;
     int err = 0;
     str_list_t *pkg_names_to_install = NULL;
+    int r;
 
     signal(SIGINT, sigint_handler);
 
@@ -401,7 +406,8 @@ static int opkg_install_cmd(int argc, char **argv)
         arg = argv[i];
 
         opkg_msg(DEBUG2, "%s\n", arg);
-        if (opkg_prepare_url_for_install(arg, &argv[i]))
+        r = opkg_prepare_url_for_install(arg, &argv[i]);
+        if (r != 0)
             return -1;
     }
     pkg_info_preinstall_check();
@@ -414,7 +420,8 @@ static int opkg_install_cmd(int argc, char **argv)
         if (opkg_config->combine) {
             str_list_append(pkg_names_to_install, arg);
         } else {
-            if (opkg_install_by_name(arg)) {
+            r = opkg_install_by_name(arg);
+            if (r != 0) {
                 opkg_msg(ERROR, "Cannot install package %s.\n", arg);
                 err = -1;
             }
@@ -422,13 +429,15 @@ static int opkg_install_cmd(int argc, char **argv)
     }
 
     if (opkg_config->combine) {
-        if (opkg_install_multiple_by_name(pkg_names_to_install))
+        r = opkg_install_multiple_by_name(pkg_names_to_install);
+        if (r != 0)
             err = -1;
 
         str_list_purge(pkg_names_to_install);
     }
 
-    if (opkg_configure_packages(NULL))
+    r = opkg_configure_packages(NULL);
+    if (r != 0)
         err = -1;
 
     write_status_files_if_changed();
@@ -443,6 +452,7 @@ static int opkg_upgrade_cmd(int argc, char **argv)
     pkg_t *pkg;
     int err = 0;
     pkg_vec_t *pkgs_to_upgrade = NULL;
+    int r;
 
     signal(SIGINT, sigint_handler);
 
@@ -471,13 +481,15 @@ static int opkg_upgrade_cmd(int argc, char **argv)
             if (opkg_config->combine) {
                 pkg_vec_insert(pkgs_to_upgrade, pkg);
             } else {
-                if (opkg_upgrade_pkg(pkg))
+                r = opkg_upgrade_pkg(pkg);
+                if (r != 0)
                     err = -1;
             }
         }
 
         if (opkg_config->combine) {
-            if (opkg_upgrade_multiple_pkgs(pkgs_to_upgrade))
+            r = opkg_upgrade_multiple_pkgs(pkgs_to_upgrade);
+            if (r != 0)
                 err = -1;
 
             pkg_vec_free(pkgs_to_upgrade);
@@ -494,14 +506,16 @@ static int opkg_upgrade_cmd(int argc, char **argv)
         } else {
             for (j = 0; j < installed->len; j++) {
                 pkg = installed->pkgs[j];
-                if (opkg_upgrade_pkg(pkg))
+                r = opkg_upgrade_pkg(pkg);
+                if (r != 0)
                     err = -1;
             }
         }
         pkg_vec_free(installed);
     }
 
-    if (opkg_configure_packages(NULL))
+    r = opkg_configure_packages(NULL);
+    if (r != 0)
         err = -1;
 
     write_status_files_if_changed();
@@ -514,6 +528,7 @@ static int opkg_download_cmd(int argc, char **argv)
     int i, err = 0;
     char *arg;
     pkg_t *pkg;
+    int r;
 
     pkg_info_preinstall_check();
     for (i = 0; i < argc; i++) {
@@ -525,10 +540,9 @@ static int opkg_download_cmd(int argc, char **argv)
             continue;
         }
 
-        if (opkg_download_pkg_to_dir(pkg, "."))
+        r = opkg_download_pkg_to_dir(pkg, ".");
+        if (r != 0) {
             err = -1;
-
-        if (err) {
             opkg_msg(ERROR, "Failed to download %s.\n", pkg->name);
         } else {
             opkg_msg(NOTICE, "Downloaded %s as %s.\n", pkg->name,
@@ -737,6 +751,7 @@ static int opkg_remove_cmd(int argc, char **argv)
     pkg_t *pkg;
     pkg_t *pkg_to_remove;
     pkg_vec_t *available;
+    int r;
 
     done = 0;
 
@@ -769,7 +784,8 @@ static int opkg_remove_cmd(int argc, char **argv)
                 continue;
             }
 
-            if (opkg_remove_pkg(pkg_to_remove))
+            r = opkg_remove_pkg(pkg_to_remove);
+            if (r != 0)
                 err = -1;
             else
                 done = 1;

@@ -37,6 +37,7 @@ int xsystem(const char *argv[])
 {
     int status;
     pid_t pid;
+    int r;
 
     pid = vfork();
 
@@ -53,7 +54,8 @@ int xsystem(const char *argv[])
         break;
     }
 
-    if (waitpid(pid, &status, 0) == -1) {
+    r = waitpid(pid, &status, 0);
+    if (r == -1) {
         opkg_perror(ERROR, "%s: waitpid", argv[0]);
         return -1;
     }

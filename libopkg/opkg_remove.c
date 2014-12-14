@@ -175,6 +175,7 @@ static int remove_autoinstalled(pkg_t * pkg)
     pkg_t *p;
     struct compound_depend *cdep;
     abstract_pkg_t **dependents;
+    int r;
 
     int count = pkg->pre_depends_count + pkg->depends_count
         + pkg->recommends_count + pkg->suggests_count;
@@ -205,7 +206,8 @@ static int remove_autoinstalled(pkg_t * pkg)
                 opkg_msg(NOTICE,
                          "%s was autoinstalled and is "
                          "now orphaned, removing.\n", p->name);
-                if (opkg_remove_pkg(p) != 0)
+                r = opkg_remove_pkg(p);
+                if (r != 0)
                     err = -1;
             } else
                 opkg_msg(INFO,
@@ -224,6 +226,7 @@ int opkg_remove_pkg(pkg_t * pkg)
 {
     int err;
     abstract_pkg_t *parent_pkg = NULL;
+    int r;
 
 /*
  * If called from an upgrade and not from a normal remove,
@@ -296,7 +299,8 @@ int opkg_remove_pkg(pkg_t * pkg)
     pkg->state_want = SW_DEINSTALL;
     opkg_state_changed++;
 
-    if (pkg_run_script(pkg, "prerm", "remove") != 0) {
+    r = pkg_run_script(pkg, "prerm", "remove");
+    if (r != 0) {
         if (!opkg_config->force_remove) {
             opkg_msg(ERROR,
                      "not removing package \"%s\", " "prerm script failed\n",
@@ -325,9 +329,9 @@ int opkg_remove_pkg(pkg_t * pkg)
 
     /* remove autoinstalled packages that are orphaned by the removal of this one */
     if (opkg_config->autoremove) {
-        if (remove_autoinstalled(pkg) != 0) {
+        r = remove_autoinstalled(pkg);
+        if (r != 0)
             err = -1;
-        }
     }
     return err;
 }
@@ -342,6 +346,7 @@ void remove_data_files_and_list(pkg_t * pkg)
     int removed_a_dir;
     pkg_t *owner;
     int rootdirlen = 0;
+    int r;
 
     installed_files = pkg_get_installed_files(pkg);
     if (installed_files == NULL) {
@@ -397,7 +402,8 @@ void remove_data_files_and_list(pkg_t * pkg)
                     iter = str_list_next(&installed_dirs, iter)) {
                 file_name = (char *)iter->data;
 
-                if (rmdir(file_name) == 0) {
+                r = rmdir(file_name);
+                if (r == 0) {
                     opkg_msg(INFO, "Deleting %s.\n", file_name);
                     removed_a_dir = 1;
                     str_list_remove(&installed_dirs, &iter);

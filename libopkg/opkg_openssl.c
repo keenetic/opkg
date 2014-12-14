@@ -112,6 +112,7 @@ int pkcs7_pathfinder_verify_signers(PKCS7 * p7)
 
 static X509_STORE *setup_verify(char *CAfile, char *CApath)
 {
+    int r;
     X509_STORE *store = NULL;
     X509_LOOKUP *lookup = NULL;
 
@@ -126,7 +127,8 @@ static X509_STORE *setup_verify(char *CAfile, char *CApath)
     }
     // Autenticating against one CA file
     if (CAfile) {
-        if (!X509_LOOKUP_load_file(lookup, CAfile, X509_FILETYPE_PEM)) {
+        r = X509_LOOKUP_load_file(lookup, CAfile, X509_FILETYPE_PEM);
+        if (!r) {
             // Invalid CA => Bye bye
             opkg_msg(ERROR, "Error loading file %s.\n", CAfile);
             goto end;
@@ -142,7 +144,8 @@ static X509_STORE *setup_verify(char *CAfile, char *CApath)
     }
 
     if (CApath) {
-        if (!X509_LOOKUP_add_dir(lookup, CApath, X509_FILETYPE_PEM)) {
+        r = X509_LOOKUP_add_dir(lookup, CApath, X509_FILETYPE_PEM);
+        if (!r) {
             opkg_msg(ERROR, "Error loading directory %s.\n", CApath);
             goto end;
         }
@@ -178,6 +181,7 @@ int opkg_verify_openssl_signature(const char *file, const char *sigfile)
     X509_STORE *store = NULL;
     PKCS7 *p7 = NULL;
     BIO *in = NULL, *indata = NULL;
+    int r;
 
     // Sig check failed by default !
     int status = -1;
@@ -204,7 +208,8 @@ int opkg_verify_openssl_signature(const char *file, const char *sigfile)
         goto verify_file_end;
     }
     if (opkg_config->check_x509_path) {
-        if (!pkcs7_pathfinder_verify_signers(p7)) {
+        r = pkcs7_pathfinder_verify_signers(p7);
+        if (!r) {
             opkg_msg(ERROR,
                      "pkcs7_pathfinder_verify_signers: "
                      "Path verification failed.\n");
@@ -218,7 +223,8 @@ int opkg_verify_openssl_signature(const char *file, const char *sigfile)
         goto verify_file_end;
     }
     // Let's verify the autenticity !
-    if (PKCS7_verify(p7, NULL, store, indata, NULL, PKCS7_BINARY) != 1) {
+    r = PKCS7_verify(p7, NULL, store, indata, NULL, PKCS7_BINARY);
+    if (r != 1) {
         // Get Off My Lawn!
         opkg_msg(ERROR, "Verification failure.\n");
     } else {

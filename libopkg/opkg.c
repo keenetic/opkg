@@ -129,18 +129,23 @@ static opkg_conf_t saved_conf;
 
 int opkg_new()
 {
+    int r;
     saved_conf = *opkg_config;
 
-    if (opkg_conf_init())
+    r = opkg_conf_init();
+    if (r != 0)
         goto err0;
 
-    if (opkg_conf_load())
+    r = opkg_conf_load();
+    if (r != 0)
         goto err0;
 
-    if (pkg_hash_load_feeds())
+    r = pkg_hash_load_feeds();
+    if (r != 0)
         goto err1;
 
-    if (pkg_hash_load_status_files())
+    r = pkg_hash_load_status_files();
+    if (r != 0)
         goto err1;
 
     return 0;
@@ -473,6 +478,7 @@ int opkg_update_package_lists(opkg_progress_callback_t progress_callback,
     pkg_src_t *src;
     int sources_list_count, sources_done;
     opkg_progress_data_t pdata;
+    char *dtemp;
 
     pdata.action = OPKG_DOWNLOAD;
     pdata.pkg = NULL;
@@ -493,7 +499,8 @@ int opkg_update_package_lists(opkg_progress_callback_t progress_callback,
     }
 
     sprintf_alloc(&tmp, "%s/update-XXXXXX", opkg_config->tmp_dir);
-    if (mkdtemp(tmp) == NULL) {
+    dtemp = mkdtemp(tmp);
+    if (dtemp == NULL) {
         opkg_perror(ERROR, "Coundn't create temporary directory %s", tmp);
         free(tmp);
         return 1;

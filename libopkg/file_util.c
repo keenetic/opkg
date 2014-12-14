@@ -43,8 +43,10 @@
 int file_exists(const char *file_name)
 {
     struct stat st;
+    int r;
 
-    if (stat(file_name, &st) == -1)
+    r = stat(file_name, &st);
+    if (r == -1)
         return 0;
 
     return 1;
@@ -53,8 +55,10 @@ int file_exists(const char *file_name)
 int file_is_dir(const char *file_name)
 {
     struct stat st;
+    int r;
 
-    if (stat(file_name, &st) == -1)
+    r = stat(file_name, &st);
+    if (r == -1)
         return 0;
 
     return S_ISDIR(st.st_mode);
@@ -63,8 +67,10 @@ int file_is_dir(const char *file_name)
 int file_is_symlink(const char *file_name)
 {
     struct stat st;
+    int r;
 
-    if (lstat(file_name, &st) == -1)
+    r = lstat(file_name, &st);
+    if (r == -1)
         return 0;
 
     return S_ISLNK(st.st_mode);
@@ -162,8 +168,10 @@ int file_link(const char *src, const char *dest)
     struct stat dest_stat;
     int r;
 
-    if (stat(dest, &dest_stat) == 0) {
-        if (unlink(dest) < 0) {
+    r = stat(dest, &dest_stat);
+    if (r == 0) {
+        r = unlink(dest);
+        if (r < 0) {
             opkg_perror(ERROR, "unable to remove `%s'", dest);
             return -1;
         }
@@ -188,13 +196,16 @@ int file_copy(const char *src, const char *dest)
     struct stat dest_stat;
     int dest_exists = 1;
     int status = 0;
+    int r;
 
-    if (stat(src, &src_stat) < 0) {
+    r = stat(src, &src_stat);
+    if (r < 0) {
         opkg_perror(ERROR, "%s", src);
         return -1;
     }
 
-    if (stat(dest, &dest_stat) < 0) {
+    r = stat(dest, &dest_stat);
+    if (r < 0) {
         if (errno != ENOENT) {
             opkg_perror(ERROR, "unable to stat `%s'", dest);
             return -1;
@@ -215,7 +226,8 @@ int file_copy(const char *src, const char *dest)
         if (dest_exists) {
             dfp = fopen(dest, "w");
             if (dfp == NULL) {
-                if (unlink(dest) < 0) {
+                r = unlink(dest);
+                if (r < 0) {
                     opkg_perror(ERROR, "unable to remove `%s'", dest);
                     return -1;
                 }
@@ -239,10 +251,12 @@ int file_copy(const char *src, const char *dest)
 
         sfp = fopen(src, "r");
         if (sfp) {
-            if (copy_file_data(sfp, dfp) < 0)
+            r = copy_file_data(sfp, dfp);
+            if (r < 0)
                 status = -1;
 
-            if (fclose(sfp) < 0) {
+            r = fclose(sfp);
+            if (r < 0) {
                 opkg_perror(ERROR, "unable to close `%s'", src);
                 status = -1;
             }
@@ -251,31 +265,39 @@ int file_copy(const char *src, const char *dest)
             status = -1;
         }
 
-        if (fclose(dfp) < 0) {
+        r = fclose(dfp);
+        if (r < 0) {
             opkg_perror(ERROR, "unable to close `%s'", dest);
             status = -1;
         }
 
         times.actime = src_stat.st_atime;
         times.modtime = src_stat.st_mtime;
-        if (utime(dest, &times) < 0)
+        r = utime(dest, &times);
+        if (r < 0)
             opkg_perror(ERROR, "unable to preserve times of `%s'", dest);
-        if (chown(dest, src_stat.st_uid, src_stat.st_gid) < 0) {
+
+        r = chown(dest, src_stat.st_uid, src_stat.st_gid);
+        if (r < 0) {
             src_stat.st_mode &= ~(S_ISUID | S_ISGID);
             opkg_perror(ERROR, "unable to preserve ownership of `%s'", dest);
         }
-        if (chmod(dest, src_stat.st_mode) < 0)
+
+        r = chmod(dest, src_stat.st_mode);
+        if (r < 0)
             opkg_perror(ERROR, "unable to preserve permissions of `%s'", dest);
 
         return status;
     } else if (S_ISBLK(src_stat.st_mode) || S_ISCHR(src_stat.st_mode)
                || S_ISSOCK(src_stat.st_mode)) {
-        if (mknod(dest, src_stat.st_mode, src_stat.st_rdev) < 0) {
+        r = mknod(dest, src_stat.st_mode, src_stat.st_rdev);
+        if (r < 0) {
             opkg_perror(ERROR, "unable to create `%s'", dest);
             return -1;
         }
     } else if (S_ISFIFO(src_stat.st_mode)) {
-        if (mkfifo(dest, src_stat.st_mode) < 0) {
+        r = mkfifo(dest, src_stat.st_mode);
+        if (r < 0) {
             opkg_perror(ERROR, "cannot create fifo `%s'", dest);
             return -1;
         }
@@ -291,8 +313,10 @@ int file_copy(const char *src, const char *dest)
 int file_mkdir_hier(const char *path, long mode)
 {
     struct stat st;
+    int r;
 
-    if (stat(path, &st) < 0 && errno == ENOENT) {
+    r = stat(path, &st);
+    if (r < 0 && errno == ENOENT) {
         int status;
         char *parent;
 
@@ -303,15 +327,19 @@ int file_mkdir_hier(const char *path, long mode)
         if (status < 0)
             return -1;
 
-        if (mkdir(path, 0777) < 0) {
+        r = mkdir(path, 0777);
+        if (r < 0) {
             opkg_perror(ERROR, "Cannot create directory `%s'", path);
             return -1;
         }
 
-        if (mode != -1 && chmod(path, mode) < 0) {
-            opkg_perror(ERROR, "Cannot set permissions of directory `%s'",
-                        path);
-            return -1;
+        if (mode != -1) {
+            r = chmod(path, mode);
+            if (r < 0) {
+                opkg_perror(ERROR, "Cannot set permissions of directory `%s'",
+                            path);
+                return -1;
+            }
         }
     }
 
@@ -418,6 +446,7 @@ int rm_r(const char *path)
     int ret = 0;
     DIR *dir;
     struct dirent *dent;
+    int r;
 
     if (path == NULL) {
         opkg_perror(ERROR, "Missing directory parameter");
@@ -430,7 +459,8 @@ int rm_r(const char *path)
         return -1;
     }
 
-    if (fchdir(dirfd(dir)) == -1) {
+    r = fchdir(dirfd(dir));
+    if (r == -1) {
         opkg_perror(ERROR, "Failed to change to dir %s", path);
         closedir(dir);
         return -1;
@@ -475,17 +505,20 @@ int rm_r(const char *path)
         }
     }
 
-    if (chdir("..") == -1) {
+    r = chdir("..");
+    if (r == -1) {
         ret = -1;
         opkg_perror(ERROR, "Failed to change to dir %s/..", path);
     }
 
-    if (rmdir(path) == -1) {
+    r = rmdir(path);
+    if (r == -1) {
         ret = -1;
         opkg_perror(ERROR, "Failed to remove dir %s", path);
     }
 
-    if (closedir(dir) == -1) {
+    r = closedir(dir);
+    if (r == -1) {
         ret = -1;
         opkg_perror(ERROR, "Failed to close dir %s", path);
     }

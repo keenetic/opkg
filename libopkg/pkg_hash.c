@@ -76,6 +76,7 @@ int dist_hash_add_from_file(pkg_src_t * dist)
 {
     nv_pair_list_elt_t *l;
     char *list_file, *subname;
+    int r;
 
     list_for_each_entry(l, &opkg_config->arch_list.head, node) {
         nv_pair_t *nv = (nv_pair_t *) l->data;
@@ -83,7 +84,8 @@ int dist_hash_add_from_file(pkg_src_t * dist)
         sprintf_alloc(&list_file, "%s/%s", opkg_config->lists_dir, subname);
 
         if (file_exists(list_file)) {
-            if (pkg_hash_add_from_file(list_file, dist, NULL, 0)) {
+            r = pkg_hash_add_from_file(list_file, dist, NULL, 0);
+            if (r != 0) {
                 free(list_file);
                 return -1;
             }
@@ -171,6 +173,7 @@ int pkg_hash_load_feeds(void)
     pkg_src_list_elt_t *iter;
     pkg_src_t *src, *subdist;
     char *list_file;
+    int r;
 
     opkg_msg(INFO, "\n");
 
@@ -184,7 +187,8 @@ int pkg_hash_load_feeds(void)
         if (file_exists(list_file)) {
             unsigned int i;
             release_t *release = release_new();
-            if (release_init_from_file(release, list_file)) {
+            r = release_init_from_file(release, list_file);
+            if (r != 0) {
                 free(list_file);
                 return -1;
             }
@@ -197,7 +201,8 @@ int pkg_hash_load_feeds(void)
             for (i = 0; i < ncomp; i++) {
                 subdist->name = NULL;
                 sprintf_alloc(&subdist->name, "%s-%s", src->name, comps[i]);
-                if (dist_hash_add_from_file(subdist)) {
+                r = dist_hash_add_from_file(subdist);
+                if (r != 0) {
                     free(subdist->name);
                     free(subdist);
                     free(list_file);
@@ -218,7 +223,8 @@ int pkg_hash_load_feeds(void)
         sprintf_alloc(&list_file, "%s/%s", opkg_config->lists_dir, src->name);
 
         if (file_exists(list_file)) {
-            if (pkg_hash_add_from_file(list_file, src, NULL, 0)) {
+            r = pkg_hash_add_from_file(list_file, src, NULL, 0);
+            if (r != 0) {
                 free(list_file);
                 return -1;
             }
@@ -245,7 +251,9 @@ int pkg_hash_load_status_files(void)
         dest = (pkg_dest_t *) iter->data;
 
         if (file_exists(dest->status_file_name)) {
-            if (pkg_hash_add_from_file(dest->status_file_name, NULL, dest, 1))
+            int r = pkg_hash_add_from_file(dest->status_file_name, NULL, dest,
+                                           1);
+            if (r != 0)
                 return -1;
         }
     }

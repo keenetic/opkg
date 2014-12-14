@@ -263,6 +263,7 @@ static int opkg_conf_parse_file(const char *filename,
 {
     int line_num = 0;
     int err = 0;
+    int r;
     FILE *file;
     regex_t valid_line_re, comment_re;
 #define regmatch_size 14
@@ -301,10 +302,12 @@ static int opkg_conf_parse_file(const char *filename,
         if (line == NULL)
             break;
 
-        if (regexec(&comment_re, line, 0, 0, 0) == 0)
+        r = regexec(&comment_re, line, 0, 0, 0);
+        if (r == 0)
             goto NEXT_LINE;
 
-        if (regexec(&valid_line_re, line, regmatch_size, regmatch, 0) == REG_NOMATCH) {
+        r = regexec(&valid_line_re, line, regmatch_size, regmatch, 0);
+        if (r == REG_NOMATCH) {
             opkg_msg(ERROR, "%s:%d: Ignoring invalid line: `%s'\n", filename,
                      line_num, line);
             goto NEXT_LINE;
@@ -422,7 +425,8 @@ static int opkg_conf_parse_file(const char *filename,
  err2:
     regfree(&comment_re);
  err1:
-    if (fclose(file) == EOF) {
+    r = fclose(file);
+    if (r == EOF) {
         opkg_perror(ERROR, "Couldn't close %s", filename);
         err = -1;
     }
@@ -438,6 +442,7 @@ int opkg_conf_write_status_files(void)
     pkg_t *pkg;
     unsigned int i;
     int ret = 0;
+    int r;
 
     if (opkg_config->noaction)
         return 0;
@@ -480,9 +485,12 @@ int opkg_conf_write_status_files(void)
 
     list_for_each_entry(iter, &opkg_config->pkg_dest_list.head, node) {
         dest = (pkg_dest_t *) iter->data;
-        if (dest->status_fp && fclose(dest->status_fp) == EOF) {
-            opkg_perror(ERROR, "Couldn't close %s", dest->status_file_name);
-            ret = -1;
+        if (dest->status_fp) {
+            r = fclose(dest->status_fp);
+            if (r == EOF) {
+                opkg_perror(ERROR, "Couldn't close %s", dest->status_file_name);
+                ret = -1;
+            }
         }
     }
 
@@ -610,13 +618,14 @@ int opkg_conf_load(void)
 
     if (opkg_config->conf_file) {
         struct stat st;
-        if (stat(opkg_config->conf_file, &st) == -1) {
+        r = stat(opkg_config->conf_file, &st);
+        if (r == -1) {
             opkg_perror(ERROR, "Couldn't stat %s", opkg_config->conf_file);
             goto err0;
         }
-        if (opkg_conf_parse_file(opkg_config->conf_file,
-                    &opkg_config->pkg_src_list,
-                    &opkg_config->dist_src_list))
+        r = opkg_conf_parse_file(opkg_config->conf_file,
+                &opkg_config->pkg_src_list, &opkg_config->dist_src_list);
+        if (r != 0)
             goto err1;
     } else {
         if (opkg_config->offline_root)
@@ -644,9 +653,10 @@ int opkg_conf_load(void)
                     && !strcmp(opkg_config->conf_file, globbuf.gl_pathv[i]);
             if (mismatch)
                 continue;
-            if (opkg_conf_parse_file (globbuf.gl_pathv[i],
+            r = opkg_conf_parse_file (globbuf.gl_pathv[i],
                         &opkg_config->pkg_src_list,
-                        &opkg_config->dist_src_list) < 0) {
+                        &opkg_config->dist_src_list);
+            if (r < 0) {
                 globfree(&globbuf);
                 goto err1;
             }
@@ -739,13 +749,15 @@ int opkg_conf_load(void)
         opkg_config->cache_dir = tmp;
     }
 
-    if (file_mkdir_hier(opkg_config->cache_dir, 0755)) {
+    r = file_mkdir_hier(opkg_config->cache_dir, 0755);
+    if (r != 0) {
         opkg_perror(ERROR, "Creating cache dir %s failed",
                     opkg_config->cache_dir);
         goto err4;
     }
 
-    if (resolve_pkg_dest_list())
+    r = resolve_pkg_dest_list();
+    if (r != 0)
         goto err4;
 
     nv_pair_list_deinit(&opkg_config->tmp_dest_list);
@@ -759,7 +771,8 @@ int opkg_conf_load(void)
     hash_table_deinit(&opkg_config->file_hash);
     hash_table_deinit(&opkg_config->obs_file_hash);
 
-    if (rmdir(opkg_config->tmp_dir) == -1)
+    r = rmdir(opkg_config->tmp_dir);
+    if (r == -1)
         opkg_perror(ERROR, "Couldn't remove dir %s", opkg_config->tmp_dir);
  err3:
     opkg_unlock();

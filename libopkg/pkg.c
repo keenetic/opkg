@@ -448,6 +448,7 @@ void set_flags_from_control(pkg_t * pkg)
 {
     char *file_name;
     FILE *fp;
+    int r;
 
     sprintf_alloc(&file_name, "%s/%s.control", pkg->dest->info_dir, pkg->name);
 
@@ -460,7 +461,8 @@ void set_flags_from_control(pkg_t * pkg)
 
     free(file_name);
 
-    if (pkg_parse_from_stream(pkg, fp, PFM_ALL ^ PFM_ESSENTIAL)) {
+    r = pkg_parse_from_stream(pkg, fp, PFM_ALL ^ PFM_ESSENTIAL);
+    if (r != 0) {
         opkg_msg(DEBUG, "Unable to read control file for %s. May be empty.\n",
                  pkg->name);
     }

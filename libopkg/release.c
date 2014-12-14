@@ -298,9 +298,10 @@ int release_verify_file(release_t * release, const char *file_name,
     const char *sha256 = release_get_sha256(release, pathname);
 #endif
     int ret = 0;
+    int r;
 
-    if (stat(file_name, &f_info)
-        || (f_info.st_size != release_get_size(release, pathname))) {
+    r = stat(file_name, &f_info);
+    if ((r != 0) || (f_info.st_size != release_get_size(release, pathname))) {
         opkg_msg(ERROR, "Size verification failed for %s - %s.\n",
                  release->name, pathname);
         ret = 1;

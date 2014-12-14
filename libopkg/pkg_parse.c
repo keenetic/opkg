@@ -36,8 +36,10 @@
 static void parse_status(pkg_t * pkg, const char *sstr)
 {
     char sw_str[64], sf_str[64], ss_str[64];
+    int r;
 
-    if (sscanf(sstr, "Status: %63s %63s %63s", sw_str, sf_str, ss_str) != 3) {
+    r = sscanf(sstr, "Status: %63s %63s %63s", sw_str, sf_str, ss_str);
+    if (r != 3) {
         opkg_msg(ERROR, "Failed to parse Status line for %s\n", pkg->name);
         return;
     }
@@ -50,8 +52,10 @@ static void parse_status(pkg_t * pkg, const char *sstr)
 static void parse_conffiles(pkg_t * pkg, const char *cstr)
 {
     char file_name[1024], md5sum[35];
+    int r;
 
-    if (sscanf(cstr, "%1023s %34s", file_name, md5sum) != 2) {
+    r = sscanf(cstr, "%1023s %34s", file_name, md5sum);
+    if (r != 2) {
         opkg_msg(ERROR, "Failed to parse Conffiles line for %s\n", pkg->name);
         return;
     }

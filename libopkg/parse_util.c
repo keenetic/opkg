@@ -97,6 +97,8 @@ int parse_from_stream_nomalloc(parse_line_t parse_line, void *ptr, FILE * fp,
     int ret, lineno;
     char *buf, *nl;
     size_t buflen;
+    char *s;
+    int r;
 
     lineno = 1;
     ret = 0;
@@ -106,7 +108,8 @@ int parse_from_stream_nomalloc(parse_line_t parse_line, void *ptr, FILE * fp,
     buf[0] = '\0';
 
     while (1) {
-        if (fgets(buf, (int)buflen, fp) == NULL) {
+        s = fgets(buf, (int)buflen, fp);
+        if (s == NULL) {
             if (ferror(fp)) {
                 opkg_perror(ERROR, "fgets");
                 ret = -1;
@@ -159,7 +162,8 @@ int parse_from_stream_nomalloc(parse_line_t parse_line, void *ptr, FILE * fp,
 
         lineno++;
 
-        if (parse_line(ptr, *buf0, mask))
+        r = parse_line(ptr, *buf0, mask);
+        if (r != 0)
             break;
 
         buf = *buf0;
