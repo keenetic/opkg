@@ -468,7 +468,8 @@ int rm_r(const char *path)
 
     while (1) {
         errno = 0;
-        if ((dent = readdir(dir)) == NULL) {
+        dent = readdir(dir);
+        if (dent == NULL) {
             if (errno) {
                 opkg_perror(ERROR, "Failed to read dir %s", path);
                 ret = -1;
@@ -481,25 +482,29 @@ int rm_r(const char *path)
 
 #ifdef _BSD_SOURCE
         if (dent->d_type == DT_DIR) {
-            if ((ret = rm_r(dent->d_name)) == -1)
+            ret = rm_r(dent->d_name);
+            if (ret == -1)
                 break;
             continue;
         } else if (dent->d_type == DT_UNKNOWN)
 #endif
         {
             struct stat st;
-            if ((ret = lstat(dent->d_name, &st)) == -1) {
+            ret = lstat(dent->d_name, &st);
+            if (ret == -1) {
                 opkg_perror(ERROR, "Failed to lstat %s", dent->d_name);
                 break;
             }
             if (S_ISDIR(st.st_mode)) {
-                if ((ret = rm_r(dent->d_name)) == -1)
+                ret = rm_r(dent->d_name);
+                if (ret == -1)
                     break;
                 continue;
             }
         }
 
-        if ((ret = unlink(dent->d_name)) == -1) {
+        ret = unlink(dent->d_name);
+        if (ret == -1) {
             opkg_perror(ERROR, "Failed to unlink %s", dent->d_name);
             break;
         }

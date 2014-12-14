@@ -116,7 +116,8 @@ static X509_STORE *setup_verify(char *CAfile, char *CApath)
     X509_STORE *store = NULL;
     X509_LOOKUP *lookup = NULL;
 
-    if (!(store = X509_STORE_new())) {
+    store = X509_STORE_new();
+    if (!store) {
         // Something bad is happening...
         goto end;
     }

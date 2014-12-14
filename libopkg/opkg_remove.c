@@ -96,7 +96,8 @@ static int opkg_remove_dependent_pkgs(pkg_t * pkg, abstract_pkg_t ** dependents)
     pkg_vec_t *dependent_pkgs;
     abstract_pkg_t *ab_pkg;
 
-    if ((ab_pkg = pkg->parent) == NULL) {
+    ab_pkg = pkg->parent;
+    if (ab_pkg == NULL) {
         opkg_msg(ERROR, "Internal error: pkg %s isn't in hash table\n",
                  pkg->name);
         return 0;

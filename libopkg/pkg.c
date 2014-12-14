@@ -305,7 +305,8 @@ int pkg_init_from_file(pkg_t * pkg, const char *filename)
 
     rewind(control_file);
 
-    if ((err = pkg_parse_from_stream(pkg, control_file, 0))) {
+    err = pkg_parse_from_stream(pkg, control_file, 0);
+    if (err) {
         if (err == 1) {
             opkg_msg(ERROR, "Malformed package file %s.\n", filename);
         }

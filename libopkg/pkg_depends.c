@@ -72,7 +72,8 @@ int pkg_hash_fetch_unsatisfied_dependencies(pkg_t * pkg,
      * this is a setup to check for redundant/cyclic dependency checks,
      * which are marked at the abstract_pkg level
      */
-    if (!(ab_pkg = pkg->parent)) {
+    ab_pkg = pkg->parent;
+    if (!ab_pkg) {
         opkg_msg(ERROR, "Internal error, with pkg %s.\n", pkg->name);
         *unresolved = NULL;
         return 0;
@@ -282,7 +283,8 @@ pkg_vec_t *pkg_hash_fetch_satisfied_dependencies(pkg_t * pkg)
      * this is a setup to check for redundant/cyclic dependency checks,
      * which are marked at the abstract_pkg level
      */
-    if (!(ab_pkg = pkg->parent)) {
+    ab_pkg = pkg->parent;
+    if (!ab_pkg) {
         opkg_msg(ERROR, "Internal error, with pkg %s.\n", pkg->name);
         return satisfiers;
     }
@@ -492,7 +494,8 @@ pkg_vec_t *pkg_hash_fetch_conflicts(pkg_t * pkg)
      * this is a setup to check for redundant/cyclic dependency checks,
      * which are marked at the abstract_pkg level
      */
-    if (!(ab_pkg = pkg->parent)) {
+    ab_pkg = pkg->parent;
+    if (!ab_pkg) {
         opkg_msg(ERROR, "Internal error: %s not in hash table\n", pkg->name);
         return (pkg_vec_t *) NULL;
     }

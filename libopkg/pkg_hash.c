@@ -339,7 +339,8 @@ pkg_t *pkg_hash_fetch_best_installation_candidate(abstract_pkg_t * apkg,
                 provider_apkg = replacement_apkg;
         }
 
-        if (!(vec = provider_apkg->pkgs)) {
+        vec = provider_apkg->pkgs;
+        if (!vec) {
             opkg_msg(DEBUG, "No pkgs for provider_apkg %s.\n",
                      provider_apkg->name);
             continue;
@@ -539,7 +540,8 @@ static pkg_vec_t *pkg_vec_fetch_by_name(const char *pkg_name)
 {
     abstract_pkg_t *ab_pkg;
 
-    if (!(ab_pkg = abstract_pkg_fetch_by_name(pkg_name)))
+    ab_pkg = abstract_pkg_fetch_by_name(pkg_name);
+    if (!ab_pkg)
         return NULL;
 
     if (ab_pkg->pkgs)
@@ -560,7 +562,8 @@ pkg_t *pkg_hash_fetch_best_installation_candidate_by_name(const char *name)
 {
     abstract_pkg_t *apkg = NULL;
 
-    if (!(apkg = abstract_pkg_fetch_by_name(name)))
+    apkg = abstract_pkg_fetch_by_name(name);
+    if (!apkg)
         return NULL;
 
     return pkg_hash_fetch_best_installation_candidate(apkg, NULL, NULL, 0);
@@ -572,7 +575,8 @@ pkg_t *pkg_hash_fetch_by_name_version(const char *pkg_name, const char *version)
     unsigned int i;
     char *version_str = NULL;
 
-    if (!(vec = pkg_vec_fetch_by_name(pkg_name)))
+    vec = pkg_vec_fetch_by_name(pkg_name);
+    if (!vec)
         return NULL;
 
     for (i = 0; i < vec->len; i++) {
@@ -596,7 +600,8 @@ pkg_t *pkg_hash_fetch_installed_by_name_dest(const char *pkg_name,
     pkg_vec_t *vec;
     unsigned int i;
 
-    if (!(vec = pkg_vec_fetch_by_name(pkg_name))) {
+    vec = pkg_vec_fetch_by_name(pkg_name);
+    if (!vec) {
         return NULL;
     }
 
@@ -616,7 +621,8 @@ pkg_t *pkg_hash_fetch_installed_by_name(const char *pkg_name)
     pkg_vec_t *vec;
     unsigned int i;
 
-    if (!(vec = pkg_vec_fetch_by_name(pkg_name))) {
+    vec = pkg_vec_fetch_by_name(pkg_name);
+    if (!vec) {
         return NULL;
     }
 
@@ -698,7 +704,8 @@ abstract_pkg_t *ensure_abstract_pkg_by_name(const char *pkg_name)
 {
     abstract_pkg_t *ab_pkg;
 
-    if (!(ab_pkg = abstract_pkg_fetch_by_name(pkg_name)))
+    ab_pkg = abstract_pkg_fetch_by_name(pkg_name);
+    if (!ab_pkg)
         ab_pkg = add_new_abstract_pkg_by_name(pkg_name);
 
     return ab_pkg;
