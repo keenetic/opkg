@@ -129,8 +129,7 @@ int pkg_parse_line(void *ptr, const char *line, uint mask)
         if ((mask & PFM_ARCHITECTURE) && is_field("Architecture", line)) {
             pkg->architecture = parse_simple("Architecture", line);
             pkg->arch_priority = get_arch_priority(pkg->architecture);
-        } else if ((mask & PFM_AUTO_INSTALLED)
-                   && is_field("Auto-Installed", line)) {
+        } else if ((mask & PFM_AUTO_INSTALLED) && is_field("Auto-Installed", line)) {
             char *tmp = parse_simple("Auto-Installed", line);
             if (strcmp(tmp, "yes") == 0)
                 pkg->auto_installed = 1;
@@ -177,8 +176,7 @@ int pkg_parse_line(void *ptr, const char *line, uint mask)
             char *tmp = parse_simple("Installed-Size", line);
             pkg->installed_size = strtoul(tmp, NULL, 0);
             free(tmp);
-        } else if ((mask & PFM_INSTALLED_TIME)
-                   && is_field("Installed-Time", line)) {
+        } else if ((mask & PFM_INSTALLED_TIME) && is_field("Installed-Time", line)) {
             char *tmp = parse_simple("Installed-Time", line);
             pkg->installed_time = strtoul(tmp, NULL, 0);
             free(tmp);
