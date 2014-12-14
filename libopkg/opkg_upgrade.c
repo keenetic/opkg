@@ -191,8 +191,9 @@ static void pkg_hash_check_installed_pkg_helper(const char *pkg_name,
 
     for (j = 0; j < pkg_vec->len; j++) {
         pkg_t *pkg = pkg_vec->pkgs[j];
-        if (pkg->state_status == SS_INSTALLED
-            || pkg->state_status == SS_UNPACKED)
+        int is_installed = pkg->state_status == SS_INSTALLED
+                || pkg->state_status == SS_UNPACKED;
+        if (is_installed)
             active_list_add(head, &pkg->list);
     }
 }

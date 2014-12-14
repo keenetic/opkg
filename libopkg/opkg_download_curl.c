@@ -441,8 +441,9 @@ static CURL *opkg_curl_init(curl_progress_func cb, void *data)
             setopt(CURLOPT_FOLLOWLOCATION, 1);
 
         setopt(CURLOPT_FAILONERROR, 1);
-        if (opkg_config->http_proxy || opkg_config->ftp_proxy
-            || opkg_config->https_proxy) {
+        int use_proxy = opkg_config->http_proxy || opkg_config->ftp_proxy
+                || opkg_config->https_proxy;
+        if (use_proxy) {
             setopt(CURLOPT_PROXYUSERNAME, opkg_config->proxy_user);
             setopt(CURLOPT_PROXYPASSWORD, opkg_config->proxy_passwd);
             setopt(CURLOPT_PROXYAUTH, CURLAUTH_ANY);

@@ -123,7 +123,9 @@ int release_arch_supported(release_t * release)
 
     list_for_each_entry(l, &opkg_config->arch_list.head, node) {
         nv_pair_t *nv = (nv_pair_t *) l->data;
-        if (item_in_list(nv->name, release->architectures, release->architectures_count)) {
+        const char *arch = item_in_list(nv->name, release->architectures,
+                release->architectures_count);
+        if (arch) {
             opkg_msg(DEBUG, "Arch %s (priority %s) supported for dist %s.\n",
                      nv->name, nv->value, release->name);
             return 1;
@@ -142,8 +144,10 @@ int release_comps_supported(release_t * release, const char *complist)
         release->complist = parse_list(complist, &release->complist_count,
                 ' ', 1);
         for (i = 0; i < release->complist_count; i++) {
-            if (!item_in_list (release->complist[i], release->components,
-                        release->components_count)) {
+            const char *arch = item_in_list (release->complist[i],
+                    release->components,
+                    release->components_count);
+            if (!arch) {
                 opkg_msg(ERROR, "Component %s not supported for dist %s.\n",
                          release->complist[i], release->name);
                 ret = 0;

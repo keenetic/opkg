@@ -459,11 +459,12 @@ int opkg_conf_write_status_files(void)
     for (i = 0; i < all->len; i++) {
         pkg = all->pkgs[i];
         /* We don't need most uninstalled packages in the status file */
-        if (pkg->state_status == SS_NOT_INSTALLED
-            && (pkg->state_want == SW_UNKNOWN
-                || (pkg->state_want == SW_DEINSTALL
-                    && !(pkg->state_flag & SF_HOLD))
-                || pkg->state_want == SW_PURGE)) {
+        int is_not_wanted = (pkg->state_status == SS_NOT_INSTALLED
+                && (pkg->state_want == SW_UNKNOWN
+                    || (pkg->state_want == SW_DEINSTALL
+                        && !(pkg->state_flag & SF_HOLD))
+                    || pkg->state_want == SW_PURGE));
+        if (is_not_wanted) {
             continue;
         }
         if (pkg->dest == NULL) {
@@ -639,10 +640,10 @@ int opkg_conf_load(void)
         free(etc_opkg_conf_pattern);
 
         for (i = 0; i < globbuf.gl_pathc; i++) {
-            if (globbuf.gl_pathv[i])
-                if (opkg_config->conf_file
-                    && !strcmp(opkg_config->conf_file, globbuf.gl_pathv[i]))
-                    continue;
+            int mismatch = globbuf.gl_pathv[i] && opkg_config->conf_file
+                    && !strcmp(opkg_config->conf_file, globbuf.gl_pathv[i]);
+            if (mismatch)
+                continue;
             if (opkg_conf_parse_file (globbuf.gl_pathv[i],
                         &opkg_config->pkg_src_list,
                         &opkg_config->dist_src_list) < 0) {

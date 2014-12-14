@@ -97,8 +97,9 @@ int opkg_verify_sha256sum(const char *file, const char *sha256sum)
 
 int opkg_verify_signature(const char *file, const char *sigfile)
 {
-    if ((strcmp(opkg_config->signature_type, "gpg") == 0)
-        || (strcmp(opkg_config->signature_type, "gpg-asc") == 0))
+    int use_gpg = (strcmp(opkg_config->signature_type, "gpg") == 0)
+            || (strcmp(opkg_config->signature_type, "gpg-asc") == 0);
+    if (use_gpg)
         return opkg_verify_gpg_signature(file, sigfile);
     else if (strcmp(opkg_config->signature_type, "openssl") == 0)
         return opkg_verify_openssl_signature(file, sigfile);

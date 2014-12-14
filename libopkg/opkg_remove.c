@@ -48,10 +48,10 @@ int pkg_has_installed_dependents(pkg_t * pkg, abstract_pkg_t *** pdependents)
         n_deps = providee->depended_upon_by->len;
         for (j = 0; j < n_deps; j++) {
             dep_ab_pkg = providee->depended_upon_by->pkgs[j];
-            if (dep_ab_pkg->state_status == SS_INSTALLED
-                || dep_ab_pkg->state_status == SS_UNPACKED) {
+            int dep_installed = (dep_ab_pkg->state_status == SS_INSTALLED)
+                    || (dep_ab_pkg->state_status == SS_UNPACKED);
+            if (dep_installed)
                 n_installed_dependents++;
-            }
         }
 
     }
@@ -69,8 +69,10 @@ int pkg_has_installed_dependents(pkg_t * pkg, abstract_pkg_t *** pdependents)
             n_deps = providee->depended_upon_by->len;
             for (j = 0; j < n_deps; j++) {
                 dep_ab_pkg = providee->depended_upon_by->pkgs[j];
-                if (dep_ab_pkg->state_status == SS_INSTALLED
-                    && !(dep_ab_pkg->state_flag & SF_MARKED)) {
+                int installed_not_marked =
+                        (dep_ab_pkg->state_status == SS_INSTALLED
+                         && !(dep_ab_pkg->state_flag & SF_MARKED));
+                if (installed_not_marked) {
                     dependents[p++] = dep_ab_pkg;
                     dep_ab_pkg->state_flag |= SF_MARKED;
                 }
@@ -179,8 +181,10 @@ static int remove_autoinstalled(pkg_t * pkg)
 
     for (i = 0; i < count; i++) {
         cdep = &pkg->depends[i];
-        if (cdep->type != PREDEPEND && cdep->type != DEPEND
-            && cdep->type != RECOMMEND)
+        int uninteresting = cdep->type != PREDEPEND
+                && cdep->type != DEPEND
+                && cdep->type != RECOMMEND;
+        if (uninteresting)
             continue;
         for (j = 0; j < cdep->possibility_count; j++) {
             p = pkg_hash_fetch_installed_by_name(cdep->possibilities[j]->pkg->

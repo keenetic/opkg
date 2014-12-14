@@ -93,8 +93,9 @@ static int satisfy_dependencies_for(pkg_t * pkg)
                          pkg->name, dep->name);
                 continue;
             }
-            if ((dep->state_status != SS_INSTALLED)
-                && (dep->state_status != SS_UNPACKED)) {
+            int needs_install = (dep->state_status != SS_INSTALLED)
+                    && (dep->state_status != SS_UNPACKED);
+            if (needs_install) {
                 opkg_msg(DEBUG2, "Calling opkg_install_pkg.\n");
                 if (!is_pkg_in_pkg_vec(dep->wanted_by, pkg))
                     pkg_vec_insert(dep->wanted_by, pkg);
@@ -129,8 +130,9 @@ static int satisfy_dependencies_for(pkg_t * pkg)
          * it in, so check first. */
         if (!is_pkg_in_pkg_vec(dep->wanted_by, pkg))
             pkg_vec_insert(dep->wanted_by, pkg);
-        if ((dep->state_status != SS_INSTALLED)
-            && (dep->state_status != SS_UNPACKED)) {
+        int needs_install = (dep->state_status != SS_INSTALLED)
+                && (dep->state_status != SS_UNPACKED);
+        if (needs_install) {
             opkg_msg(DEBUG2, "Calling opkg_install_pkg.\n");
             err = opkg_install_pkg(dep, 0);
             /* mark this package as having been automatically installed to
@@ -427,8 +429,9 @@ static void pkg_get_provider_replacees(pkg_t * pkg,
             continue;
         for (j = 0; j < ap->pkgs->len; j++) {
             pkg_t *replacee = ap->pkgs->pkgs[j];
-            if (replacee->state_status == SS_INSTALLED
-                || replacee->state_status == SS_UNPACKED)
+            int installed = (replacee->state_status == SS_INSTALLED)
+                    || (replacee->state_status == SS_UNPACKED);
+            if (installed)
                 pkg_vec_insert(replacees, replacee);
         }
     }

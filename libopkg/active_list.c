@@ -70,8 +70,8 @@ struct active_list *active_list_prev(struct active_list *head,
         prev = list_entry(ptr->depend.prev, struct active_list, node);
         return prev;
     }
-    if (ptr->depended && ptr->depended != head
-        && &ptr->depended->depend == ptr->node.prev) {
+    int non_head_depended = ptr->depended && ptr->depended != head;
+    if (non_head_depended && &ptr->depended->depend == ptr->node.prev) {
         prev = list_entry(ptr->depended->node.prev, struct active_list, node);
     } else
         prev = list_entry(ptr->node.prev, struct active_list, node);

@@ -346,9 +346,10 @@ pkg_t *pkg_hash_fetch_best_installation_candidate(abstract_pkg_t * apkg,
              * like the forced installation of a new package with dependency
              * on a later version of the held package.
              */
-            if ((maybe->state_status == SS_INSTALLED
-                 || maybe->state_status == SS_UNPACKED)
-                && (maybe->state_flag & SF_HOLD))
+            int installed_and_held = (maybe->state_status == SS_INSTALLED
+                        || maybe->state_status == SS_UNPACKED)
+                    && (maybe->state_flag & SF_HOLD);
+            if (installed_and_held)
                 goto add_matching_pkg;
 
             /* Ensure that the package meets the specified constraint. */
@@ -433,8 +434,9 @@ pkg_t *pkg_hash_fetch_best_installation_candidate(abstract_pkg_t * apkg,
     for (i = 0; i < matching_pkgs->len; i++) {
         pkg_t *matching = matching_pkgs->pkgs[i];
         latest_matching = matching;
-        if (matching->parent->state_status == SS_INSTALLED
-            || matching->parent->state_status == SS_UNPACKED)
+        int is_installed = matching->parent->state_status == SS_INSTALLED
+                || matching->parent->state_status == SS_UNPACKED;
+        if (is_installed)
             latest_installed_parent = matching;
         if (matching->state_flag & SF_HOLD) {
             if (held_pkg)
@@ -456,8 +458,8 @@ pkg_t *pkg_hash_fetch_best_installation_candidate(abstract_pkg_t * apkg,
         }
     }
 
-    if (!good_pkg_by_name && !held_pkg && !latest_installed_parent
-        && matching_apkgs->len > 1 && !quiet) {
+    int not_found = !good_pkg_by_name && !held_pkg && !latest_installed_parent;
+    if (not_found && matching_apkgs->len > 1 && !quiet) {
         int prio = 0;
         for (i = 0; i < matching_pkgs->len; i++) {
             pkg_t *matching = matching_pkgs->pkgs[i];
@@ -590,12 +592,13 @@ pkg_t *pkg_hash_fetch_installed_by_name_dest(const char *pkg_name,
         return NULL;
     }
 
-    for (i = 0; i < vec->len; i++)
-        if ((vec->pkgs[i]->state_status == SS_INSTALLED
-             || vec->pkgs[i]->state_status == SS_UNPACKED)
-            && vec->pkgs[i]->dest == dest) {
+    for (i = 0; i < vec->len; i++) {
+        int is_installed = (vec->pkgs[i]->state_status == SS_INSTALLED
+                    || vec->pkgs[i]->state_status == SS_UNPACKED)
+                && vec->pkgs[i]->dest == dest;
+        if (is_installed)
             return vec->pkgs[i];
-        }
+    }
 
     return NULL;
 }
@@ -610,10 +613,10 @@ pkg_t *pkg_hash_fetch_installed_by_name(const char *pkg_name)
     }
 
     for (i = 0; i < vec->len; i++) {
-        if (vec->pkgs[i]->state_status == SS_INSTALLED
-            || vec->pkgs[i]->state_status == SS_UNPACKED) {
+        int is_installed = vec->pkgs[i]->state_status == SS_INSTALLED
+            || vec->pkgs[i]->state_status == SS_UNPACKED;
+        if (is_installed)
             return vec->pkgs[i];
-        }
     }
 
     return NULL;
@@ -655,8 +658,9 @@ static void pkg_hash_fetch_all_installed_helper(const char *pkg_name,
 
     for (j = 0; j < pkg_vec->len; j++) {
         pkg_t *pkg = pkg_vec->pkgs[j];
-        if (pkg->state_status == SS_INSTALLED
-            || pkg->state_status == SS_UNPACKED)
+        int is_installed = pkg->state_status == SS_INSTALLED
+                || pkg->state_status == SS_UNPACKED;
+        if (is_installed)
             pkg_vec_insert(all, pkg);
     }
 }
