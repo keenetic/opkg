@@ -194,6 +194,9 @@ int pkg_hash_fetch_unsatisfied_dependencies(pkg_t * pkg,
                         pkg_constraint_satisfied,
                         dependence_to_satisfy,
                         1);
+                opkg_msg(DEBUG, "satisfying_pkg=%p\n", satisfying_pkg);
+                if (!satisfying_pkg)
+                    continue;
 
                 /* user request overrides package recommendation */
                 int ignore = (compound_depend->type == RECOMMEND
@@ -219,11 +222,8 @@ int pkg_hash_fetch_unsatisfied_dependencies(pkg_t * pkg,
                     continue;
                 }
 
-                opkg_msg(DEBUG, "satisfying_pkg=%p\n", satisfying_pkg);
-                if (satisfying_pkg != NULL) {
-                    satisfier_entry_pkg = satisfying_pkg;
-                    break;
-                }
+                satisfier_entry_pkg = satisfying_pkg;
+                break;
             }
         }
 
