@@ -40,20 +40,14 @@ static char **merge_unresolved(char **oldstuff, char **newstuff);
 static int pkg_installed_and_constraint_satisfied(pkg_t * pkg, void *cdata)
 {
     depend_t *depend = (depend_t *) cdata;
-    if ((pkg->state_status == SS_INSTALLED || pkg->state_status == SS_UNPACKED)
-        && version_constraints_satisfied(depend, pkg))
-        return 1;
-    else
-        return 0;
+    return ((pkg->state_status == SS_INSTALLED || pkg->state_status == SS_UNPACKED)
+        && version_constraints_satisfied(depend, pkg));
 }
 
 static int pkg_constraint_satisfied(pkg_t * pkg, void *cdata)
 {
     depend_t *depend = (depend_t *) cdata;
-    if (version_constraints_satisfied(depend, pkg))
-        return 1;
-    else
-        return 0;
+    return version_constraints_satisfied(depend, pkg);
 }
 
 /* returns ndependencies or negative error value */
