@@ -130,8 +130,10 @@ static int opkg_remove_dependent_pkgs(pkg_t * pkg, abstract_pkg_t ** dependents)
                 }
             }
         }
-        /* 1 - to keep track of visited ab_pkgs when checking for possiblility of a broken removal of pkgs.
-         * 2 - to keep track of pkgs whose deps have been checked alrdy  - Karthik */
+        /* 1 - to keep track of visited ab_pkgs when checking for possiblility
+         * of a broken removal of pkgs.
+         * 2 - to keep track of pkgs whose deps have been checked alrdy  -
+         * Karthik */
     }
 
     if (count == 1) {
@@ -228,10 +230,10 @@ int opkg_remove_pkg(pkg_t * pkg)
     abstract_pkg_t *parent_pkg = NULL;
     int r;
 
-/*
- * If called from an upgrade and not from a normal remove,
- * ignore the essential flag.
- */
+    /*
+     * If called from an upgrade and not from a normal remove,
+     * ignore the essential flag.
+     */
     if (pkg->essential) {
         if (opkg_config->force_removal_of_essential_packages) {
             opkg_msg(NOTICE,

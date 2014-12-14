@@ -108,7 +108,8 @@ int pkg_hash_fetch_unsatisfied_dependencies(pkg_t * pkg,
                 int l;
                 for (l = 0; l < nposs; l++) {
                     pkg_vec_t *test_vec = ab_providers[l]->pkgs;
-                    /* if no depends on this one, try the first package that Provides this one */
+                    /* if no depends on this one, try the first package that
+                     * Provides this one */
                     if (!test_vec) {
                         /* no pkg_vec hooked up to the abstract_pkg! (need another feed?) */
                         continue;
@@ -170,10 +171,11 @@ int pkg_hash_fetch_unsatisfied_dependencies(pkg_t * pkg,
             /* foreach provided_by, which includes the abstract_pkg itself */
             depend_t *dependence_to_satisfy = possible_satisfiers[j];
             abstract_pkg_t *satisfying_apkg = possible_satisfiers[j]->pkg;
-            pkg_t *satisfying_pkg = pkg_hash_fetch_best_installation_candidate(satisfying_apkg,
-                                                           pkg_installed_and_constraint_satisfied,
-                                                           dependence_to_satisfy,
-                                                           1);
+            pkg_t *satisfying_pkg = pkg_hash_fetch_best_installation_candidate(
+                    satisfying_apkg,
+                    pkg_installed_and_constraint_satisfied,
+                    dependence_to_satisfy,
+                    1);
             opkg_msg(DEBUG, "satisfying_pkg=%p\n", satisfying_pkg);
             if (satisfying_pkg != NULL) {
                 found = 1;
@@ -187,10 +189,11 @@ int pkg_hash_fetch_unsatisfied_dependencies(pkg_t * pkg,
                 /* foreach provided_by, which includes the abstract_pkg itself */
                 depend_t *dependence_to_satisfy = possible_satisfiers[j];
                 abstract_pkg_t *satisfying_apkg = possible_satisfiers[j]->pkg;
-                pkg_t *satisfying_pkg = pkg_hash_fetch_best_installation_candidate(satisfying_apkg,
-                                                               pkg_constraint_satisfied,
-                                                               dependence_to_satisfy,
-                                                               1);
+                pkg_t *satisfying_pkg = pkg_hash_fetch_best_installation_candidate(
+                        satisfying_apkg,
+                        pkg_constraint_satisfied,
+                        dependence_to_satisfy,
+                        1);
 
                 /* user request overrides package recommendation */
                 int ignore = (compound_depend->type == RECOMMEND
@@ -249,7 +252,8 @@ int pkg_hash_fetch_unsatisfied_dependencies(pkg_t * pkg,
                                     satisfier_entry_pkg);
                     if (not_seen_before) {
                         pkg_vec_insert(unsatisfied, satisfier_entry_pkg);
-                        pkg_hash_fetch_unsatisfied_dependencies(satisfier_entry_pkg, unsatisfied, &newstuff);
+                        pkg_hash_fetch_unsatisfied_dependencies(satisfier_entry_pkg,
+                                unsatisfied, &newstuff);
                         the_lost = merge_unresolved(the_lost, newstuff);
                         if (newstuff)
                             free(newstuff);
@@ -284,7 +288,7 @@ pkg_vec_t *pkg_hash_fetch_satisfied_dependencies(pkg_t * pkg)
     }
 
     count = pkg->pre_depends_count + pkg->depends_count + pkg->recommends_count
-        + pkg->suggests_count;
+            + pkg->suggests_count;
     if (!count)
         return satisfiers;
 
@@ -309,7 +313,8 @@ pkg_vec_t *pkg_hash_fetch_satisfied_dependencies(pkg_t * pkg)
                 int l;
                 for (l = 0; l < nposs; l++) {
                     pkg_vec_t *test_vec = ab_providers[l]->pkgs;
-                    /* if no depends on this one, try the first package that Provides this one */
+                    /* if no depends on this one, try the first package that
+                     * Provides this one */
                     if (!test_vec) {
                         /* no pkg_vec hooked up to the abstract_pkg! (need another feed?) */
                         continue;
@@ -351,8 +356,8 @@ pkg_vec_t *pkg_hash_fetch_satisfied_dependencies(pkg_t * pkg)
 }
 
 /*checking for conflicts !in replaces
-  If a packages conflicts with another but is also replacing it, I should not consider it a
-  really conflicts
+  If a packages conflicts with another but is also replacing it, I should not
+  consider it a really conflicts
   returns 0 if conflicts <> replaces or 1 if conflicts == replaces
 */
 static int is_pkg_a_replaces(pkg_t * pkg_scout, pkg_t * pkg)
@@ -859,7 +864,7 @@ void buildDepends(pkg_t * pkg)
     compound_depend_t *depends;
 
     count = pkg->pre_depends_count + pkg->depends_count + pkg->recommends_count
-        + pkg->suggests_count;
+            + pkg->suggests_count;
     if (!count)
         return;
 
@@ -939,12 +944,14 @@ enum version_constraint str_to_constraint(const char **str)
     else if (strncmp(*str, "<", 1) == 0) {
         *str += 1;
         opkg_msg(NOTICE,
-                 "Deprecated version constraint '<' was used with the same meaning as '<='. Use '<<' for EARLIER constraint.\n");
+                 "Deprecated version constraint '<' was used with the same "
+                 "meaning as '<='. Use '<<' for EARLIER constraint.\n");
         return EARLIER_EQUAL;
     } else if (strncmp(*str, ">", 1) == 0) {
         *str += 1;
         opkg_msg(NOTICE,
-                 "Deprecated version constraint '>' was used with the same meaning as '>='. Use '>>' for LATER constraint.\n");
+                 "Deprecated version constraint '>' was used with the same "
+                 "meaning as '>='. Use '>>' for LATER constraint.\n");
         return LATER_EQUAL;
     } else {
         return NONE;

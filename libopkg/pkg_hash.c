@@ -284,8 +284,7 @@ pkg_t *pkg_hash_fetch_best_installation_candidate(abstract_pkg_t * apkg,
     pkg_t *prefer_pkg = NULL;
     pkg_t *good_pkg_by_name = NULL;
 
-    if (apkg == NULL || apkg->provided_by == NULL
-        || (apkg->provided_by->len == 0))
+    if (!apkg || !apkg->provided_by || !apkg->provided_by->len)
         return NULL;
 
     matching_pkgs = pkg_vec_alloc();
@@ -375,7 +374,8 @@ pkg_t *pkg_hash_fetch_best_installation_candidate(abstract_pkg_t * apkg,
              */
             if (pkg_breaks_reverse_dep(maybe) && !opkg_config->force_depends) {
                 opkg_msg(NOTICE,
-                         "Not selecting %s %s as installing it would break existing dependencies.\n",
+                         "Not selecting %s %s as installing it would break "
+                         "existing dependencies.\n",
                          maybe->name, maybe->version);
                 continue;
             }
@@ -392,8 +392,8 @@ pkg_t *pkg_hash_fetch_best_installation_candidate(abstract_pkg_t * apkg,
             }
 
  add_matching_pkg:
-            /* We make sure not to add the same package twice. Need to search for the reason why
-             * they show up twice sometimes. */
+            /* We make sure not to add the same package twice. Need to search
+             * for the reason why they show up twice sometimes. */
             if (!pkg_vec_contains(matching_pkgs, maybe)) {
                 abstract_pkg_vec_insert(matching_apkgs, maybe->parent);
                 pkg_vec_insert(matching_pkgs, maybe);

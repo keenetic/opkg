@@ -71,9 +71,9 @@ static int satisfy_dependencies_for(pkg_t * pkg)
         opkg_message(ERROR, "\n");
         if (!opkg_config->force_depends) {
             opkg_msg(INFO,
-                     "This could mean that your package list is out of date or that the packages\n"
-                     "mentioned above do not yet exist (try 'opkg update'). To proceed in spite\n"
-                     "of this problem try again with the '-force-depends' option.\n");
+                "This could mean that your package list is out of date or that the packages\n"
+                "mentioned above do not yet exist (try 'opkg update'). To proceed in spite\n"
+                "of this problem try again with the '-force-depends' option.\n");
             pkg_vec_free(depends);
             return -1;
         }
@@ -501,7 +501,8 @@ static int pkg_remove_installed_replacees_unwind(pkg_vec_t * replacees)
     return 0;
 }
 
-/* compares versions of pkg and old_pkg, returns 0 if OK to proceed with installation of pkg, 1 otherwise */
+/* compares versions of pkg and old_pkg, returns 0 if OK to proceed with
+ * installation of pkg, 1 otherwise */
 static int opkg_install_check_downgrade(pkg_t * pkg, pkg_t * old_pkg,
                                         int message)
 {
@@ -704,9 +705,8 @@ static int backup_make_backup(const char *file_name)
 
     backup = backup_filename_alloc(file_name);
     err = file_copy(file_name, backup);
-    if (err) {
+    if (err)
         opkg_msg(ERROR, "Failed to copy %s to %s\n", file_name, backup);
-    }
 
     free(backup);
 
@@ -916,12 +916,13 @@ static int check_data_file_clashes(pkg_t * pkg, pkg_t * old_pkg)
  */
 static int check_data_file_clashes_change(pkg_t * pkg, pkg_t * old_pkg)
 {
-    /* Basically that's the worst hack I could do to be able to change ownership of
-     * file list, but, being that we have no way to unwind the mods, due to structure
-     * of hash table, probably is the quickest hack too, whishing it would not slow-up thing too much.
-     * What we do here is change the ownership of file in hash if a replace ( or similar events
-     * happens )
-     * Only the action that are needed to change name should be considered.
+    /* Basically that's the worst hack I could do to be able to change ownership
+     * of file list, but, being that we have no way to unwind the mods, due to
+     * structure of hash table, probably is the quickest hack too, whishing it
+     * would not slow-up thing too much.  What we do here is change the
+     * ownership of file in hash if a replace ( or similar events happens ) Only
+     * the action that are needed to change name should be considered.
+     *
      * @@@ To change after 1.0 release.
      */
     str_list_t *files_list;
@@ -952,7 +953,8 @@ static int check_data_file_clashes_change(pkg_t * pkg, pkg_t * old_pkg)
                 continue;
             }
 
-            /* Pre-existing files are OK if owned by a package replaced by new pkg. */
+            /* Pre-existing files are OK if owned by a package replaced by new
+             * pkg. */
             if (owner) {
                 if (pkg_replaces(pkg, owner)) {
                     /* It's now time to change the owner of that file.
@@ -1385,7 +1387,8 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
 
     pkg->state_want = SW_INSTALL;
     if (old_pkg) {
-        old_pkg->state_want = SW_DEINSTALL;     /* needed for check_data_file_clashes of dependencies */
+        old_pkg->state_want = SW_DEINSTALL;
+        /* needed for check_data_file_clashes of dependencies */
     }
 
     err = check_conflicts_for(pkg);
@@ -1455,7 +1458,8 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
     replacees = pkg_vec_alloc();
     pkg_get_installed_replacees(pkg, replacees);
 
-    /* this next section we do with SIGINT blocked to prevent inconsistency between opkg database and filesystem */
+    /* this next section we do with SIGINT blocked to prevent inconsistency
+     * between opkg database and filesystem */
 
     sigemptyset(&newset);
     sigaddset(&newset, SIGINT);

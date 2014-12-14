@@ -123,7 +123,7 @@ static X509_STORE *setup_verify(char *CAfile, char *CApath)
     }
     // adds the X509 file lookup method
     lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file());
-    if (lookup == NULL) {
+    if (!lookup) {
         goto end;
     }
     // Autenticating against one CA file
@@ -190,7 +190,8 @@ int opkg_verify_openssl_signature(const char *file, const char *sigfile)
     openssl_init();
 
     // Set-up the key store
-    store = setup_verify(opkg_config->signature_ca_file, opkg_config->signature_ca_path);
+    store = setup_verify(opkg_config->signature_ca_file,
+                         opkg_config->signature_ca_path);
     if (!store) {
         opkg_msg(ERROR, "Can't open CA certificates.\n");
         goto verify_file_end;
