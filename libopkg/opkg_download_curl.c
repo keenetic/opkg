@@ -204,12 +204,11 @@ int check_file_stamp(const char *file_name, char *stamp)
             diff = -1;
             break;
         }
-        if (((size < STAMP_BUF_SIZE) && (size != (int)strlen(stamp)))
-            || ((size == STAMP_BUF_SIZE) && (strlen(stamp) < STAMP_BUF_SIZE))
-            || memcmp(stamp_buf, stamp, size)) {
-            diff = 1;
+        diff = ((size < STAMP_BUF_SIZE) && (size != (int)strlen(stamp)))
+                || ((size == STAMP_BUF_SIZE) && (strlen(stamp) < STAMP_BUF_SIZE))
+                || memcmp(stamp_buf, stamp, size);
+        if (diff)
             break;
-        }
         stamp += STAMP_BUF_SIZE;
     }
 
