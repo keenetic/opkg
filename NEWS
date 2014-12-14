@@ -31,6 +31,87 @@ User visible:
 
 - Only install `opkg-key` when gpg support is enabled
 
+- `update-alternatives` has been moved out of opkg and into opkg-utils
+
+- Only upgrade installed packages during `opkg upgrade` (issue 127)
+
+- Add https proxy support and improve proxy authentication when using the CURL
+  backend for downloads.
+
+- Improve package and package feed verification. Signatures can now be checked
+  for individual package files if the option `check_pkg_signature` is set (issue
+  132).
+
+- Add support for HTTP basic authentication when using the CURL backend for
+  downloads.
+
+- Allow both openssl and gpg support to coexist within a single build of opkg.
+  The signature verification method is now controlled by the `signature_type`
+  option, which defaults to using gpg signatures.
+
+- Add support for ASCII-armored gpg signatures.
+
+- Rename `opkg-cl` to `opkg`.
+
+- Add `lock_file` configuration option. This option replaces the
+  `--with-opkglockfile` argument to `./configure`, therefore allowing the lock
+  file path to be specified at run-time.
+
+- Drop `--with-opkglibdir` argument to `./configure`. The library directory now
+  always defaults to `/var/lib` but the paths to the lists dir, info dir and
+  status file may now be separately controlled at runtime. These paths are set by
+  the `lists_dir`, `info_dir` and `status_file` options.
+
+- Drop `--with-opkgetcdir` argument to `./configure`. The etc directory is
+  always `/etc`, however the OPKG_CONF_DIR environment variable may be set
+  before executing opkg to read configuration files from a path other than
+  `/etc/opkg`.
+
+- Drop support for the old `lists_dir` option syntax. The new syntax introduced
+  in v0.2.3 must now be used.
+
+- The default cache directory is now `/var/cache` (issue 131) but can still be
+  changed using the `cache_dir` option.
+
+- Support package filename arguments to `opkg info` (issue 125).
+
+- Correctly handle pacakges which list a virtual package in Provides, Replaces
+  and Conflicts (issue 89).
+
+- Ensure that the lock file can be created by creating the parent directory if
+  it does not already exist (issue 110).
+
+- Allow pkg-config to be used to find the gpg-error library.
+
+- By default, packages accessed using `file://` URLs are no longer cached as it
+  is assumed that they will always be accessible. However, the
+  `cache_local_files` option may be set to use the old behaviour and copy local
+  files into the cache (issue 139).
+
+- Issue a NOTICE message not an ERROR message if files listed as Conffiles have
+  been changed by the user prior to a package upgrade but the `force_maintainer`
+  option has not been set (issue 128, part 1).
+
+- Add `ignore_maintainer` option to silently ignore changes to files listed as
+  Conffiles during a package upgrade (issue 128, part 2).
+
+- Add `opkg-key reset` command to remove all trusted keys.
+
+- Add `opkg-key populate` command to populated the list of trusted keys using
+  the contents of `/usr/share/opkg/keyrings`.
+
+- Improve usage output of `opkg-key`.
+
+- Call prerm and postrm scripts on package upgrade (issue 104).
+
+- Add `no_install_recommends` option and `--no-install-recommends` command line
+  argument to prevent the installation of packages listed as Recommends.
+
+- Add `--add-exclude` command line argument to add packages to an exclusion
+  list. Packages on this exclusion list will not be installed and an error will
+  occur if they are required as dependencies of any other package to be
+  installed.
+
 Developer visible:
 
 - Improved testsuite with more tests, `make check` now runs the testsuite and
@@ -51,6 +132,19 @@ Developer visible:
   handling (adds dependency on libarchive)
 
 - Remove libbb!
+
+- Lots of code refactoring and minor improvements.
+
+- The libopkg API defined in 'libopkg/opkg.c' is deprecated. opkg must be
+  configured with the `--enable-libopkg-api` argument to build this API.
+
+- Drop unnecessary source files under 'tests'
+
+- Add `scripts/checkpatch.pl`, adapted from the Linux kernel. This script may be
+  used to check that patches match the expected coding style and are free from
+  some common mistakes.
+
+- Remove confusing `from_upgrade` argument from `opkg_remove_pkg`.
 
 opkg-0.2.4
 ==========
