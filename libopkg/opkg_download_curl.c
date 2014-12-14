@@ -197,7 +197,13 @@ int check_file_stamp(const char *file_name, char *stamp)
         free(file_path);
         return -1;
     }
-    while ((size = fread(stamp_buf, 1, STAMP_BUF_SIZE, file)) && *stamp) {
+    while (*stamp) {
+        size = fread(stamp_buf, 1, STAMP_BUF_SIZE, file);
+        if ((size == 0) && ferror(file)) {
+            opkg_msg(ERROR, "Failed to read from file %s\n", file_path);
+            diff = -1;
+            break;
+        }
         if (((size < STAMP_BUF_SIZE) && (size != (int)strlen(stamp)))
             || ((size == STAMP_BUF_SIZE) && (strlen(stamp) < STAMP_BUF_SIZE))
             || memcmp(stamp_buf, stamp, size)) {
