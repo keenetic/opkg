@@ -1047,7 +1047,6 @@ str_list_t *pkg_get_installed_files(pkg_t * pkg)
     FILE *list_file = NULL;
     char *line;
     char *installed_file_name;
-    unsigned int rootdirlen = 0;
     int list_from_package;
 
     pkg->installed_files_ref_cnt++;
@@ -1116,9 +1115,6 @@ str_list_t *pkg_get_installed_files(pkg_t * pkg)
         free(list_file_name);
     }
 
-    if (opkg_config->offline_root)
-        rootdirlen = strlen(opkg_config->offline_root);
-
     while (1) {
         char *file_name;
 
@@ -1138,8 +1134,9 @@ str_list_t *pkg_get_installed_files(pkg_t * pkg)
             sprintf_alloc(&installed_file_name, "%s%s", pkg->dest->root_dir,
                           file_name);
         } else {
-            if (opkg_config->offline_root
-                && strncmp(opkg_config->offline_root, file_name, rootdirlen)) {
+            int unmatched_offline_root = opkg_config->offline_root
+                    && !str_starts_with(file_name, opkg_config->offline_root);
+            if (unmatched_offline_root) {
                 sprintf_alloc(&installed_file_name, "%s%s",
                               opkg_config->offline_root, file_name);
             } else {
