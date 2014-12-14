@@ -251,10 +251,16 @@ int opkg_validate_cached_file(const char *src, const char *cache_location)
     }
     curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &src_size);
 
-    if (!file_exists(cache_location) || !etag
-        || check_file_stamp(cache_location, etag)) {
-        unlink(cache_location);
-        if (etag && create_file_stamp(cache_location, etag))
+    int match = 0;
+    if (file_exists(cache_location)) {
+        if (etag && (check_file_stamp(cache_location, etag) == 0))
+            match = 1;
+        else
+            unlink(cache_location);
+    }
+    if (!match) {
+        int r = create_file_stamp(cache_location, etag);
+        if (r != 0)
             opkg_msg(ERROR, "Failed to create stamp for %s.\n", cache_location);
     }
     free(etag);
