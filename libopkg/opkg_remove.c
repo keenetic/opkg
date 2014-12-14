@@ -215,8 +215,7 @@ static int remove_autoinstalled(pkg_t * pkg)
                          "%s was autoinstalled and is " "still required by %d "
                          "installed packages.\n", p->name, n_deps);
 
-            if (dependents)
-                free(dependents);
+            free(dependents);
         }
     }
 
@@ -289,8 +288,7 @@ int opkg_remove_pkg(pkg_t * pkg)
                 return err;
             }
         }
-        if (dependents)
-            free(dependents);
+        free(dependents);
     }
 
     opkg_msg(NOTICE, "Removing package %s from %s...\n", pkg->name,

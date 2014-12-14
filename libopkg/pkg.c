@@ -156,14 +156,12 @@ void pkg_deinit(pkg_t * pkg)
 {
     unsigned int i;
 
-    if (pkg->name)
-        free(pkg->name);
+    free(pkg->name);
     pkg->name = NULL;
 
     pkg->epoch = 0;
 
-    if (pkg->version)
-        free(pkg->version);
+    free(pkg->version);
     pkg->version = NULL;
     /* revision shares storage with version, so don't free */
     pkg->revision = NULL;
@@ -175,20 +173,16 @@ void pkg_deinit(pkg_t * pkg)
     /* owned by opkg_conf_t */
     pkg->src = NULL;
 
-    if (pkg->architecture)
-        free(pkg->architecture);
+    free(pkg->architecture);
     pkg->architecture = NULL;
 
-    if (pkg->maintainer)
-        free(pkg->maintainer);
+    free(pkg->maintainer);
     pkg->maintainer = NULL;
 
-    if (pkg->section)
-        free(pkg->section);
+    free(pkg->section);
     pkg->section = NULL;
 
-    if (pkg->description)
-        free(pkg->description);
+    free(pkg->description);
     pkg->description = NULL;
 
     pkg->state_want = SW_UNKNOWN;
@@ -198,8 +192,7 @@ void pkg_deinit(pkg_t * pkg)
 
     active_list_clear(&pkg->list);
 
-    if (pkg->replaces)
-        free(pkg->replaces);
+    free(pkg->replaces);
     pkg->replaces = NULL;
 
     if (pkg->depends) {
@@ -217,41 +210,33 @@ void pkg_deinit(pkg_t * pkg)
         free(pkg->conflicts);
     }
 
-    if (pkg->provides)
-        free(pkg->provides);
+    free(pkg->provides);
 
     pkg->pre_depends_count = 0;
     pkg->provides_count = 0;
 
-    if (pkg->filename)
-        free(pkg->filename);
+    free(pkg->filename);
     pkg->filename = NULL;
 
-    if (pkg->local_filename)
-        free(pkg->local_filename);
+    free(pkg->local_filename);
     pkg->local_filename = NULL;
 
     /* CLEANUP: It'd be nice to pullin the cleanup function from
      * opkg_install.c here. See comment in
      * opkg_install.c:cleanup_temporary_files */
-    if (pkg->tmp_unpack_dir)
-        free(pkg->tmp_unpack_dir);
+    free(pkg->tmp_unpack_dir);
     pkg->tmp_unpack_dir = NULL;
 
-    if (pkg->md5sum)
-        free(pkg->md5sum);
+    free(pkg->md5sum);
     pkg->md5sum = NULL;
 
-    if (pkg->sha256sum)
-        free(pkg->sha256sum);
+    free(pkg->sha256sum);
     pkg->sha256sum = NULL;
 
-    if (pkg->priority)
-        free(pkg->priority);
+    free(pkg->priority);
     pkg->priority = NULL;
 
-    if (pkg->source)
-        free(pkg->source);
+    free(pkg->source);
     pkg->source = NULL;
 
     conffile_list_deinit(&pkg->conffiles);
@@ -263,8 +248,7 @@ void pkg_deinit(pkg_t * pkg)
     pkg_free_installed_files(pkg);
     pkg->essential = 0;
 
-    if (pkg->tags)
-        free(pkg->tags);
+    free(pkg->tags);
     pkg->tags = NULL;
 }
 

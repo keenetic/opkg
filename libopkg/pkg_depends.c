@@ -809,8 +809,7 @@ void buildProvides(abstract_pkg_t * ab_pkg, pkg_t * pkg)
 
         abstract_pkg_vec_insert(provided_abpkg->provided_by, ab_pkg);
     }
-    if (pkg->provides_str)
-        free(pkg->provides_str);
+    free(pkg->provides_str);
 }
 
 void buildConflicts(pkg_t * pkg)
@@ -829,8 +828,7 @@ void buildConflicts(pkg_t * pkg)
         free(pkg->conflicts_str[i]);
         conflicts++;
     }
-    if (pkg->conflicts_str)
-        free(pkg->conflicts_str);
+    free(pkg->conflicts_str);
 }
 
 void buildReplaces(abstract_pkg_t * ab_pkg, pkg_t * pkg)
@@ -857,8 +855,7 @@ void buildReplaces(abstract_pkg_t * ab_pkg, pkg_t * pkg)
             abstract_pkg_vec_insert(old_abpkg->replaced_by, ab_pkg);
     }
 
-    if (pkg->replaces_str)
-        free(pkg->replaces_str);
+    free(pkg->replaces_str);
 }
 
 void buildDepends(pkg_t * pkg)
@@ -880,16 +877,14 @@ void buildDepends(pkg_t * pkg)
         depends->type = PREDEPEND;
         depends++;
     }
-    if (pkg->pre_depends_str)
-        free(pkg->pre_depends_str);
+    free(pkg->pre_depends_str);
 
     for (i = 0; i < pkg->depends_count; i++) {
         parseDepends(depends, pkg->depends_str[i]);
         free(pkg->depends_str[i]);
         depends++;
     }
-    if (pkg->depends_str)
-        free(pkg->depends_str);
+    free(pkg->depends_str);
 
     for (i = 0; i < pkg->recommends_count; i++) {
         parseDepends(depends, pkg->recommends_str[i]);
@@ -897,8 +892,7 @@ void buildDepends(pkg_t * pkg)
         depends->type = RECOMMEND;
         depends++;
     }
-    if (pkg->recommends_str)
-        free(pkg->recommends_str);
+    free(pkg->recommends_str);
 
     for (i = 0; i < pkg->suggests_count; i++) {
         parseDepends(depends, pkg->suggests_str[i]);
@@ -906,8 +900,7 @@ void buildDepends(pkg_t * pkg)
         depends->type = SUGGEST;
         depends++;
     }
-    if (pkg->suggests_str)
-        free(pkg->suggests_str);
+    free(pkg->suggests_str);
 }
 
 const char *constraint_to_str(enum version_constraint c)
