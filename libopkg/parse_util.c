@@ -31,7 +31,7 @@
 
 int is_field(const char *type, const char *line)
 {
-    if (!strncmp(line, type, strlen(type)))
+    if (strncmp(line, type, strlen(type)) == 0)
         return 1;
     return 0;
 }

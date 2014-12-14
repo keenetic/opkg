@@ -581,7 +581,7 @@ pkg_t *pkg_hash_fetch_by_name_version(const char *pkg_name, const char *version)
 
     for (i = 0; i < vec->len; i++) {
         version_str = pkg_version_str_alloc(vec->pkgs[i]);
-        if (!strcmp(version_str, version)) {
+        if (strcmp(version_str, version) != 0) {
             free(version_str);
             break;
         }

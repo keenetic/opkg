@@ -925,29 +925,29 @@ const char *constraint_to_str(enum version_constraint c)
 
 enum version_constraint str_to_constraint(const char **str)
 {
-    if (!strncmp(*str, "<<", 2)) {
+    if (strncmp(*str, "<<", 2) == 0) {
         *str += 2;
         return EARLIER;
-    } else if (!strncmp(*str, "<=", 2)) {
+    } else if (strncmp(*str, "<=", 2) == 0) {
         *str += 2;
         return EARLIER_EQUAL;
-    } else if (!strncmp(*str, ">=", 2)) {
+    } else if (strncmp(*str, ">=", 2) == 0) {
         *str += 2;
         return LATER_EQUAL;
-    } else if (!strncmp(*str, ">>", 2)) {
+    } else if (strncmp(*str, ">>", 2) == 0) {
         *str += 2;
         return LATER;
-    } else if (!strncmp(*str, "=", 1)) {
+    } else if (strncmp(*str, "=", 1) == 0) {
         *str += 1;
         return EQUAL;
     }
     /* should these be here to support deprecated designations; dpkg does */
-    else if (!strncmp(*str, "<", 1)) {
+    else if (strncmp(*str, "<", 1) == 0) {
         *str += 1;
         opkg_msg(NOTICE,
                  "Deprecated version constraint '<' was used with the same meaning as '<='. Use '<<' for EARLIER constraint.\n");
         return EARLIER_EQUAL;
-    } else if (!strncmp(*str, ">", 1)) {
+    } else if (strncmp(*str, ">", 1) == 0) {
         *str += 1;
         opkg_msg(NOTICE,
                  "Deprecated version constraint '>' was used with the same meaning as '>='. Use '>>' for LATER constraint.\n");
