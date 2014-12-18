@@ -27,6 +27,7 @@
 
 #include "opkg_download.h"
 #include "opkg_message.h"
+#include "opkg_utils.h"
 
 #include "sprintf_alloc.h"
 #include "file_util.h"
@@ -35,11 +36,6 @@
 #ifdef HAVE_OPENSSL
 #include "opkg_openssl.h"
 #endif
-
-static int str_starts_with(const char *str, const char *prefix)
-{
-    return (strncmp(str, prefix, strlen(prefix)) == 0);
-}
 
 /*
  * Make curl an instance variable so we don't have to instanciate it

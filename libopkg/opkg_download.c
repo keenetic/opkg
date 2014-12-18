@@ -27,15 +27,11 @@
 #include "opkg_download.h"
 #include "opkg_message.h"
 #include "opkg_verify.h"
+#include "opkg_utils.h"
 
 #include "sprintf_alloc.h"
 #include "file_util.h"
 #include "xfuncs.h"
-
-static int str_starts_with(const char *str, const char *prefix)
-{
-    return (strncmp(str, prefix, strlen(prefix)) == 0);
-}
 
 static int opkg_download_set_env()
 {

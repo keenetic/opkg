@@ -78,3 +78,8 @@ int line_is_blank(const char *line)
     }
     return 1;
 }
+
+int str_starts_with(const char *str, const char *prefix)
+{
+    return (strncmp(str, prefix, strlen(prefix)) == 0);
+}
