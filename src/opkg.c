@@ -342,8 +342,8 @@ int main(int argc, char *argv[])
     int opts, err = -1;
     char *cmd_name = NULL;
     opkg_cmd_t *cmd;
-    int nocheckfordirorfile = 0;
-    int noreadfeedsfile = 0;
+    int nocheckfordirorfile;
+    int noreadfeedsfile;
 
     if (opkg_conf_init())
         goto err0;
@@ -358,22 +358,23 @@ int main(int argc, char *argv[])
 
     cmd_name = argv[opts++];
 
-    if (!strcmp(cmd_name, "print-architecture")
+    nocheckfordirorfile = !strcmp(cmd_name, "print-architecture")
         || !strcmp(cmd_name, "print_architecture")
         || !strcmp(cmd_name, "print-installation-architecture")
-        || !strcmp(cmd_name, "print_installation_architecture"))
-        nocheckfordirorfile = 1;
+        || !strcmp(cmd_name, "print_installation_architecture");
 
-    if (!strcmp(cmd_name, "flag") || !strcmp(cmd_name, "configure")
-        || !strcmp(cmd_name, "remove") || !strcmp(cmd_name, "files")
-        || !strcmp(cmd_name, "search") || !strcmp(cmd_name, "compare_versions")
+    noreadfeedsfile = !strcmp(cmd_name, "flag")
+        || !strcmp(cmd_name, "configure")
+        || !strcmp(cmd_name, "remove")
+        || !strcmp(cmd_name, "files")
+        || !strcmp(cmd_name, "search")
+        || !strcmp(cmd_name, "compare_versions")
         || !strcmp(cmd_name, "compare-versions")
         || !strcmp(cmd_name, "list_installed")
         || !strcmp(cmd_name, "list-installed")
         || !strcmp(cmd_name, "list_changed_conffiles")
         || !strcmp(cmd_name, "list-changed-conffiles")
-        || !strcmp(cmd_name, "status"))
-        noreadfeedsfile = 1;
+        || !strcmp(cmd_name, "status");
 
     cmd = opkg_cmd_find(cmd_name);
     if (cmd == NULL) {
