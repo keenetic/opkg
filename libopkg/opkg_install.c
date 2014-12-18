@@ -229,8 +229,11 @@ static int verify_pkg_installable(pkg_t * pkg)
         return 0;
 
     if (pkg->dest) {
-        if (!strcmp(pkg->dest->name, "root") && opkg_config->overlay_root
-            && !stat(opkg_config->overlay_root, &s) && (s.st_mode & S_IFDIR))
+        int have_overlay_root = !strcmp(pkg->dest->name, "root")
+                && opkg_config->overlay_root
+                && !stat(opkg_config->overlay_root, &s)
+                && (s.st_mode & S_IFDIR);
+        if (have_overlay_root)
             root_dir = opkg_config->overlay_root;
         else
             root_dir = pkg->dest->root_dir;
