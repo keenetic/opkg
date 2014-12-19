@@ -3,19 +3,13 @@ BUGS
 
 See issue list: http://code.google.com/p/opkg/issues/list
 
- * Fix comments marked "XXX".
-
- * Consistent indentation.
-
- * Improve error handling and propagation up the call stack.
+ * Resolve 'XXX', 'FIXME' and 'TODO' comments in the code.
 
  * Remove dead and duplicate code. Refactor duplicated functionality.
 
  * Remove pkg_info_preinstall_check().
 
  * Reduce memory used per pkg_t and peak memory use in general.
-
- * #includes are a mess.
 
  * Refactor opkg_install_pkg() into more precise functions.
 
