@@ -16,23 +16,26 @@ if [ \( $# -eq 1 \) -a \( "$1" = "--clean" \) ]; then
 	rm -f libtool
 	rm -f aclocal.m4
 	rm -f libopkg.pc
-	rm -f man/{opkg.1,opkg-key.1}
-	rm -f Makefile {libopkg,man,utils,src}/Makefile
-	rm -f Makefile.in {libopkg,man,utils,src}/Makefile.in
-	rm -f config.h{,.in}
+	rm -f man/opkg.1 man/opkg-key.1
+	rm -f Makefile Makefile.in
+	rm -f libopkg/Makefile libopkg/Makefile.in
+	rm -f man/Makefile man/Makefile.in
+	rm -f utils/Makefile utils/Makefile.in
+	rm -f src/Makefile src/Makefile.in
+	rm -f config.h config.h.in
 	rm -f m4/lt*.m4 m4/libtool.m4 m4/pkg.m4
 	rm -rf po conf autom4te.cache
-	rm -rf {libopkg,src,tests}/.deps
+	rm -rf libopkg/.deps src/.deps
+	rm -rf libopkg/.libs src/.libs
 
-	rm -f {libopkg,src}/*.o
+	rm -f libopkg/*.o src/*.o
 	rm -f libopkg/*.lo
 	rm -f libopkg/*.la
-	rm -f src/opkg tests/libopkg_test
+	rm -f src/opkg
 	rm -f stamp-h1
-	rm -rf {libopkg,src}/.libs
 
-	rm -f tests/{,core/,regress/,misc/}*.py{c,o}
-	rm -rf tests/{,core/,regress/,misc/}__pycache__
+	rm -f tests/*.pyc tests/*.pyo
+	rm -rf tests/__pycache__
 
 	echo "Done. If you want regenerate the Autotool files call 'autogen.sh' without the '--clean' argument."
 	exit 0
