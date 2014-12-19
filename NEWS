@@ -1,79 +1,103 @@
-opkg-0.3.0 (in development)
-===========================
+opkg-0.3.0-rc1
+==============
 
-User visible:
+- Reformat all C code so that it is easier to read (issue 119).
 
-- opkg now depends on libarchive
+- Fix a few minor logic bugs.
 
-- Added config option `autoremove` equivalent to `--autoremove` command line
-  flag
+- Tidy up `autogen.sh` and ensure it runs correctly with old versions of
+  `aclocal` and non-bash shells.
 
-- Added config option `overwrite_no_owner` allowing un-owned files to be
-  overwritten during package install (issue 99)
+- Rearrange test scripts into logical categories.
 
-- Added config options `connect_timeout_ms`, `transfer_timeout_ms` and
-  `follow_location` for use with CURL
+- Fix segfault when reinstalling a package with `force_reinstall` set (issue
+  153).
 
-- Added command line option `--volatile-cache`
+opkg-0.3.0-rc0
+==============
 
-- Support implicit and explicit FTP-over-SSL when curl is enabled
+Dependency changes:
 
-- Improved download caching
+- opkg now depends on libarchive.
 
-- Allow interrupted downloads to be resumed when curl is enabled (issue 115)
-
-- Improved heuristics to determine whether an argument is a package name, remote
-  URI or local path
-
-- Improved detection and handling of package conflicts
-
-- Better handling of package flags (such as hold) and status
-
-- Only install `opkg-key` when gpg support is enabled
-
-- `update-alternatives` has been moved out of opkg and into opkg-utils
-
-- Only upgrade installed packages during `opkg upgrade` (issue 127)
-
-- Add https proxy support and improve proxy authentication when using the CURL
-  backend for downloads.
-
-- Improve package and package feed verification. Signatures can now be checked
-  for individual package files if the option `check_pkg_signature` is set (issue
-  132).
-
-- Add support for HTTP basic authentication when using the CURL backend for
-  downloads.
-
-- Allow both openssl and gpg support to coexist within a single build of opkg.
-  The signature verification method is now controlled by the `signature_type`
-  option, which defaults to using gpg signatures.
-
-- Add support for ASCII-armored gpg signatures.
+opkg:
 
 - Rename `opkg-cl` to `opkg`.
 
-- Add `lock_file` configuration option. This option replaces the
-  `--with-opkglockfile` argument to `./configure`, therefore allowing the lock
-  file path to be specified at run-time.
+- Add config option `autoremove` equivalent to `--autoremove` command line
+  flag.
 
-- Drop `--with-opkglibdir` argument to `./configure`. The library directory now
-  always defaults to `/var/lib` but the paths to the lists dir, info dir and
-  status file may now be separately controlled at runtime. These paths are set by
-  the `lists_dir`, `info_dir` and `status_file` options.
+- Add config option `overwrite_no_owner` allowing un-owned files to be
+  overwritten during package install (issue 99).
 
-- Drop `--with-opkgetcdir` argument to `./configure`. The etc directory is
-  always `/etc`, however the OPKG_CONF_DIR environment variable may be set
-  before executing opkg to read configuration files from a path other than
-  `/etc/opkg`.
+- Add config options `connect_timeout_ms`, `transfer_timeout_ms` and
+  `follow_location` for use with CURL.
 
-- Drop support for the old `lists_dir` option syntax. The new syntax introduced
-  in v0.2.3 must now be used.
+- Add command line option `--volatile-cache`.
 
-- The default cache directory is now `/var/cache` (issue 131) but can still be
-  changed using the `cache_dir` option.
+- Add config option `no_install_recommends` and command line option
+  `--no-install-recommends` to prevent the installation of packages listed as
+  Recommends.
 
-- Support package filename arguments to `opkg info` (issue 125).
+- Add command line option `--add-exclude` to add packages to an exclusion list.
+
+- Add config option `ignore_maintainer` to silently ignore changes to files
+  listed as Conffiles during a package upgrade (issue 128, part 2).
+
+- Add config option `lock_file`. This option replaces the configure script
+  argument `--with-opkglockfile`, allowing the lock file path to be specified at
+  run-time.
+
+- Add config options `info_dir` and `status_file`. Together with the config
+  option `lists_dir` which existed previously, these options replace the
+  configure script argument `--with-opkglibdir`, allowing the paths to the the
+  data files and directories to be specified at run-time and with better
+  granularity.
+
+- Add config option `signature_type` allowing the signature verification backend
+  to be selected at runtime. Both openssl and gpg support may not coexist within
+  a single build of opkg.
+
+- Add config option `check_pkg_signature` which allows individual package files
+  to be signed and verified.
+
+- Add config option `cache_local_files` to copy local files into the cache when
+  downloading. If this option is not set, any URL with a `file://` is symlinked
+  into the cache rather than downloaded (issue 139).
+
+- Drop support for the old `lists_dir` config option syntax. The new syntax
+  introduced in v0.2.3 must now be used.
+
+- Add support for passing package filename arguments to `opkg info` (issue 125).
+
+- Add support for implicit and explicit FTP-over-SSL when using the curl
+  download backend.
+
+- Add support for a https proxy using the curl download backend.
+
+- Add support for http basic authentication when using the CURL download
+  backend.
+
+- Add support for ASCII-armored gpg signatures.
+
+- Change the default cache directory to `/var/cache` (issue 131).
+
+- Improve package and package feed verification.
+
+- Improve download caching.
+
+- Improve heuristics to determine whether an argument is a package name, remote
+  URI or local path.
+
+- Improve detection and handling of package conflicts.
+
+- Improve handling of package flags (such as hold) and status.
+
+- Improve proxy authentication when using the curl download backend.
+
+- Allow interrupted downloads to be resumed when curl is enabled (issue 115).
+
+- Only upgrade installed packages during `opkg upgrade` (issue 127).
 
 - Correctly handle pacakges which list a virtual package in Provides, Replaces
   and Conflicts (issue 89).
@@ -81,19 +105,15 @@ User visible:
 - Ensure that the lock file can be created by creating the parent directory if
   it does not already exist (issue 110).
 
-- Allow pkg-config to be used to find the gpg-error library.
-
-- By default, packages accessed using `file://` URLs are no longer cached as it
-  is assumed that they will always be accessible. However, the
-  `cache_local_files` option may be set to use the old behaviour and copy local
-  files into the cache (issue 139).
-
 - Issue a NOTICE message not an ERROR message if files listed as Conffiles have
   been changed by the user prior to a package upgrade but the `force_maintainer`
   option has not been set (issue 128, part 1).
 
-- Add `ignore_maintainer` option to silently ignore changes to files listed as
-  Conffiles during a package upgrade (issue 128, part 2).
+- Call prerm and postrm scripts on package upgrade (issue 104).
+
+opkg-key:
+
+- Only install `opkg-key` when gpg support is enabled.
 
 - Add `opkg-key reset` command to remove all trusted keys.
 
@@ -102,49 +122,48 @@ User visible:
 
 - Improve usage output of `opkg-key`.
 
-- Call prerm and postrm scripts on package upgrade (issue 104).
+update-alternatives:
 
-- Add `no_install_recommends` option and `--no-install-recommends` command line
-  argument to prevent the installation of packages listed as Recommends.
-
-- Add `--add-exclude` command line argument to add packages to an exclusion
-  list. Packages on this exclusion list will not be installed and an error will
-  occur if they are required as dependencies of any other package to be
-  installed.
+- `update-alternatives` has been moved out of opkg and into opkg-utils.
 
 Developer visible:
 
-- Improved testsuite with more tests, `make check` now runs the testsuite and
-  exits non-zero if any test fails
+- Add functions `opkg_conf_get_option` and `opkg_conf_set_option`, direct
+  access to `options` array is no longer allowed.
 
-- Improved `autogen.sh` script for developers & maintainers, no longer runs
-  configure directly. `./autogen.sh --clean` now removes all generated files
-  without requiring configure to have been ran
-
-- Renamed `conf` -> `opkg_config` to prevent global symbol clashes (issue 92)
-
-- Added functions `opkg_conf_get_option` and `opkg_conf_set_option`, direct
-  access to `options` array is no longer allowed
-
-- Added documentation in `developer-doc` directory
-
-- Use libarchive to extract packages instead of hand-rolled tar, ar and gzip
-  handling (adds dependency on libarchive)
-
-- Remove libbb!
-
-- Lots of code refactoring and minor improvements.
-
-- The libopkg API defined in 'libopkg/opkg.c' is deprecated. opkg must be
-  configured with the `--enable-libopkg-api` argument to build this API.
-
-- Drop unnecessary source files under 'tests'
+- Add documentation in `developer-doc` directory.
 
 - Add `scripts/checkpatch.pl`, adapted from the Linux kernel. This script may be
   used to check that patches match the expected coding style and are free from
   some common mistakes.
 
 - Remove confusing `from_upgrade` argument from `opkg_remove_pkg`.
+
+- Drop the configure script arguments `--with-opkglockfile`, `--with-opkglibdir`
+  and `--with-opkgtcdir`.
+
+- Drop unnecessary source files under 'tests'.
+
+- Deprecate the libopkg API defined in 'libopkg/opkg.c'. The configure script
+  argument `--enable-libopkg-api` must be given to build this API.
+
+- Improve testsuite with more tests, `make check` now runs the testsuite and
+  exits non-zero if any test fails.
+
+- Improve `autogen.sh` script for developers & maintainers, no longer runs
+  configure directly. `./autogen.sh --clean` now removes all generated files
+  without requiring configure to have been ran.
+
+- Rename `conf` -> `opkg_config` to prevent global symbol clashes (issue 92).
+
+- Allow pkg-config to be used to find the gpg-error library.
+
+- Use libarchive to extract packages instead of hand-rolled tar, ar and gzip
+  handling (adds dependency on libarchive).
+
+- Remove libbb!
+
+- Lots of code refactoring and minor improvements.
 
 opkg-0.2.4
 ==========
