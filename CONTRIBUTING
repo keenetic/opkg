@@ -106,11 +106,13 @@ a separate branch:
 You can add `--cover-letter` to that command if you want to include a
 descriptive email along with your patches.
 
-Before submitting your patches, you must ensure that they fit the coding
-style which is used within the project. Fortunately, a large part of that
-time-consuming check has been automatized for your convenience: the
-checkpatch.pl script (in scripts/) is able to pinpoint various
-style violations on both patches and source code.
+Before submitting your patches, please ensure that they fit the coding
+style which is used within the project. To assist with this you can run the
+checkpatch.pl script (in scripts) which is able to pinpoint various style
+violations on both patches and source code. However, please bear in mind that
+checkpatch.pl is not perfect and it may sometimes give bad advice. To quote Ted
+Ts'o on LKML: You need to know when the right thing to do is to say, "Go home,
+checkpatch, you're drunk."
 
 To use this script, simply invoke it from the command line. If you want to
 check a whole file, use the following invocation:
