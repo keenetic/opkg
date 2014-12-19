@@ -17,22 +17,22 @@ if [ \( $# -eq 1 \) -a \( "$1" = "--clean" \) ]; then
 	rm -f aclocal.m4
 	rm -f libopkg.pc
 	rm -f man/{opkg.1,opkg-key.1}
-	rm -f Makefile {libopkg,tests,man,utils,src}/Makefile
-	rm -f Makefile.in {libopkg,tests,man,utils,src}/Makefile.in
+	rm -f Makefile {libopkg,man,utils,src}/Makefile
+	rm -f Makefile.in {libopkg,man,utils,src}/Makefile.in
 	rm -f config.h{,.in}
 	rm -f m4/lt*.m4 m4/libtool.m4 m4/pkg.m4
 	rm -rf po conf autom4te.cache
 	rm -rf {libopkg,src,tests}/.deps
 
-	rm -f {libopkg,tests,src}/*.o
+	rm -f {libopkg,src}/*.o
 	rm -f libopkg/*.lo
 	rm -f libopkg/*.la
 	rm -f src/opkg tests/libopkg_test
 	rm -f stamp-h1
-	rm -rf {libopkg,tests,src}/.libs
+	rm -rf {libopkg,src}/.libs
 
-	rm -f tests/regress/*.py{c,o}
-	rm -rf tests/regress/__pycache__
+	rm -f tests/{,core/,regress/,misc/}*.py{c,o}
+	rm -rf tests/{,core/,regress/,misc/}__pycache__
 
 	echo "Done. If you want regenerate the Autotool files call 'autogen.sh' without the '--clean' argument."
 	exit 0

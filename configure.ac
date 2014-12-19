@@ -229,7 +229,6 @@ AC_SUBST([CLEAN_DATE])
 AC_OUTPUT(
     Makefile
     libopkg/Makefile
-    tests/Makefile
     src/Makefile
     utils/Makefile
     libopkg.pc
