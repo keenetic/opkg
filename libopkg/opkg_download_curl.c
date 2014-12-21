@@ -254,7 +254,7 @@ int opkg_validate_cached_file(const char *src, const char *cache_location)
         else
             unlink(cache_location);
     }
-    if (!match) {
+    if (!match && etag) {
         int r = create_file_stamp(cache_location, etag);
         if (r != 0)
             opkg_msg(ERROR, "Failed to create stamp for %s.\n", cache_location);
