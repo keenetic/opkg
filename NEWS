@@ -1,3 +1,9 @@
+opkg-0.3.0-rc2
+==============
+
+- Ensure `libopkg/xfuncs.h`, `tests/` and `scripts/` are included in the release
+  archive!
+
 opkg-0.3.0-rc1
 ==============
 
