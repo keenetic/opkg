@@ -38,6 +38,7 @@ REGRESSION_TESTS := core/01_install.py \
 		    regress/issue124a.py \
 		    regress/issue127.py \
 		    regress/issue152.py \
+		    regress/issue154.py \
 		    misc/filehash.py \
 		    misc/update_loses_autoinstalled_flag.py
 RUN_TESTS := $(REGRESSION_TESTS:%.py=run-%.py)
