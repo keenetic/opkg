@@ -500,7 +500,8 @@ static int pkg_remove_installed_replacees_unwind(pkg_vec_t * replacees)
 }
 
 /* compares versions of pkg and old_pkg, returns 0 if OK to proceed with
- * installation of pkg, 1 otherwise */
+ * installation of pkg, 1 if the package is already up-to-date or -1 if the
+ * install would be a downgrade. */
 static int opkg_install_check_downgrade(pkg_t * pkg, pkg_t * old_pkg,
                                         int message)
 {
@@ -552,7 +553,7 @@ static int opkg_install_check_downgrade(pkg_t * pkg, pkg_t * old_pkg,
          * downgrade.
          */
         if (cmp < 0 && !opkg_config->force_downgrade)
-            return 1;
+            return -1;
 
         /* Install is go... */
         pkg->dest = old_pkg->dest;
@@ -1380,8 +1381,10 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
     old_pkg = pkg_hash_fetch_installed_by_name(pkg->name);
 
     err = opkg_install_check_downgrade(pkg, old_pkg, message);
-    if (err)
+    if (err < 0)
         return -1;
+    else if ((err == 1) && !from_upgrade)
+        return 0;
 
     pkg->state_want = SW_INSTALL;
     if (old_pkg) {
