@@ -16,11 +16,8 @@
 # opkg should upgrade package A and B to version 2 and exit with 0.
 # It correctly updates the packages, but exits with -1.
 #
-# Status
-# ======
+# Status: Resolved
 #
-# adelcast:
-# > Open
 
 import os
 import opk, cfg, opkgcl
@@ -49,6 +46,6 @@ if not opkgcl.is_installed("a", "2.0"):
 if not opkgcl.is_installed("b", "2.0"):
     opk.fail("New version of package 'b' available during upgrade but was not installed")
 if status != 0:
-    opk.xfail("Return value was different than 0")
+    opk.fail("Return value was different than 0")
 opkgcl.remove("a")
 opkgcl.remove("b")
