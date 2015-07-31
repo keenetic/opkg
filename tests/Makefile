@@ -21,6 +21,7 @@ REGRESSION_TESTS := core/01_install.py \
 		    core/20_exclude.py \
 		    regress/issue26.py \
 		    regress/issue31.py \
+		    regress/issue32.py \
 		    regress/issue45.py \
 		    regress/issue46.py \
 		    regress/issue50.py \
