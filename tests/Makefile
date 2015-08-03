@@ -19,6 +19,11 @@ REGRESSION_TESTS := core/01_install.py \
 		    core/18_upgrade_recommends.py \
 		    core/19_no_recommends.py \
 		    core/20_exclude.py \
+		    core/21_autoremove.py \
+		    core/22_autoremove_dependency.py \
+		    core/23_force_depends.py \
+		    core/24_nodeps.py \
+		    core/25_essential.py \
 		    regress/issue26.py \
 		    regress/issue31.py \
 		    regress/issue32.py \
