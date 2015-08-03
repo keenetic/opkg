@@ -25,6 +25,11 @@ REGRESSION_TESTS := core/01_install.py \
 		    core/24_nodeps.py \
 		    core/25_essential.py \
 		    core/26_prefer_arch_to_version.py \
+		    core/27_reldeps_lt.py \
+		    core/28_reldeps_lteq.py \
+		    core/29_reldeps_eq.py \
+		    core/30_reldeps_gteq.py \
+		    core/31_reldeps_gt.py \
 		    regress/issue26.py \
 		    regress/issue31.py \
 		    regress/issue32.py \
