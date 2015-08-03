@@ -10,7 +10,7 @@ class Opk:
 			"Section", "Architecture", "Maintainer", "MD5Sum",\
 			"Size", "InstalledSize", "Filename", "Source",\
 			"Description", "OE", "Homepage", "Priority",\
-			"Conffiles"]
+			"Conffiles", "Essential"]
 
 	def __init__(self, **control):
 		for k in control.keys():
