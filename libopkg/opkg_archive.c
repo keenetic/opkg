@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "opkg_conf.h"
 #include "opkg_message.h"
 #include "opkg_archive.h"
 #include "file_util.h"
@@ -715,6 +716,9 @@ struct opkg_ar *ar_open_pkg_data_archive(const char *filename)
      */
     ar->extract_flags = ARCHIVE_EXTRACT_OWNER | ARCHIVE_EXTRACT_PERM |
         ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_UNLINK;
+
+    if (opkg_config->ignore_uid)
+        ar->extract_flags &= ~ARCHIVE_EXTRACT_OWNER;
 
     return ar;
 }

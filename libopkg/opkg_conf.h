@@ -78,6 +78,7 @@ typedef struct opkg_conf {
 
     /* options */
     int autoremove;
+    int ignore_uid;
     int force_depends;
     int force_defaults;
     int force_maintainer;

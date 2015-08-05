@@ -54,6 +54,7 @@ static opkg_option_t options[] = {
     {"force_defaults", OPKG_OPT_TYPE_BOOL, &_conf.force_defaults},
     {"force_maintainer", OPKG_OPT_TYPE_BOOL, &_conf.force_maintainer},
     {"ignore_maintainer", OPKG_OPT_TYPE_BOOL, &_conf.ignore_maintainer},
+    {"ignore_uid", OPKG_OPT_TYPE_BOOL, &_conf.ignore_uid},
     {"force_depends", OPKG_OPT_TYPE_BOOL, &_conf.force_depends},
     {"force_overwrite", OPKG_OPT_TYPE_BOOL, &_conf.force_overwrite},
     {"force_downgrade", OPKG_OPT_TYPE_BOOL, &_conf.force_downgrade},
