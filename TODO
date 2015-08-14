@@ -23,6 +23,25 @@ Solver bugs:
 
  * opkg_list_upgradable_cmd() does not work with an external solver enabled.
 
+ * Fix hacky way libsolv's arch comparisons are bypassed when
+   prefer_arch_to_version is not set in libsolv_solver_set_arch_policy().
+   See openSUSE/libsolv issue #98 on github.
+
+ * libsolv's upgrade will not automatically remove orphaned packages.
+   This causes failures of tests core/18_upgrade_recommends.py
+   and misc/update_loses_autoinstalled_flag.py.
+
+ * The different order in which libsolv visits packages can cause
+   some file ownership problems causing regress/issue50.py to fail
+   because of the same problem as issue 156.
+
+ * libsolv supports dist-upgrade. The functionality to use it is implemented
+   in opkg_solver.c and opkg_solver_libsolv.c. Add an option in opkg_cmd to
+   use this.
+
+ * for libsolv get correct package during a reinstall when there are two
+   packages with the same name and version, and revert hack in pkg_hash.c
+
 FEATURES
 ========
 

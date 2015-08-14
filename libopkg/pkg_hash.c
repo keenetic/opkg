@@ -579,7 +579,10 @@ pkg_t *pkg_hash_fetch_by_name_version(const char *pkg_name, const char *version)
     if (!vec)
         return NULL;
 
-    for (i = 0; i < vec->len; i++) {
+    // TODO: Packages are traversed in reverse order to get the latest
+    // package in case more than one package is of the same version.
+    // This is so that libsolv choses the correct package for reinstall
+    for (i = vec->len-1; i >= 0; i--) {
         version_str = pkg_version_str_alloc(vec->pkgs[i]);
         if (strcmp(version_str, version) == 0) {
             free(version_str);
@@ -588,7 +591,8 @@ pkg_t *pkg_hash_fetch_by_name_version(const char *pkg_name, const char *version)
         free(version_str);
     }
 
-    if (i == vec->len)
+    // TODO: see above
+    if (i == -1)
         return NULL;
 
     return vec->pkgs[i];

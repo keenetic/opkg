@@ -19,12 +19,20 @@
 #include "opkg_solver.h"
 #include "opkg_message.h"
 
+#ifdef HAVE_SOLVER_LIBSOLV
+#include "opkg_solver_libsolv.h"
+#endif
+
 int opkg_solver_install(int num_pkgs, char **pkg_names)
 {
     int err = 0;
 
+#ifdef HAVE_SOLVER_LIBSOLV
+    err = opkg_solver_libsolv_perform_action(JOB_INSTALL, num_pkgs, pkg_names);
+#else
     err = 1;
     opkg_msg(ERROR,"Current solver does not support install!\n");
+#endif
     return err;
 }
 
@@ -32,8 +40,12 @@ int opkg_solver_remove(int num_pkgs, char **pkg_names)
 {
     int err = 0;
 
+#ifdef HAVE_SOLVER_LIBSOLV
+    err = opkg_solver_libsolv_perform_action(JOB_REMOVE, num_pkgs, pkg_names);
+#else
     err = 1;
     opkg_msg(ERROR,"Current solver does not support remove!\n");
+#endif
     return err;
 }
 
@@ -41,8 +53,12 @@ int opkg_solver_upgrade(int num_pkgs, char **pkg_names)
 {
     int err = 0;
 
+#ifdef HAVE_SOLVER_LIBSOLV
+    err = opkg_solver_libsolv_perform_action(JOB_UPGRADE, num_pkgs, pkg_names);
+#else
     err = 1;
     opkg_msg(ERROR,"Current solver does not support upgrade!\n");
+#endif
     return err;
 }
 
@@ -50,7 +66,11 @@ int opkg_solver_distupgrade(int num_pkgs, char **pkg_names)
 {
     int err = 0;
 
+#ifdef HAVE_SOLVER_LIBSOLV
+    err = opkg_solver_libsolv_perform_action(JOB_DISTUPGRADE, num_pkgs, pkg_names);
+#else
     err = 1;
     opkg_msg(ERROR,"Current solver does not support dist-upgrade!\n");
+#endif
     return err;
 }

@@ -157,6 +157,20 @@ if test "x$want_solver" != "xno"; then
             [yes],
                 [AC_MSG_RESULT(no)
                  AC_MSG_ERROR(Specify which solver with --enable-solver=<SOLVER>)],
+            [libsolv],
+                [AC_MSG_RESULT(libsolv)
+
+                SOLVER_CFLAGS="-I/usr/local/include/"
+                SOLVER_LIBS="-lsolv -lsolvext"
+                AC_CHECK_LIB([solv],
+                             [solver_solve],
+                             [],
+                             [AC_MSG_ERROR(libsolv not found)])
+                dnl TODO: remove previous 6 lines and uncomment line below to use
+                dnl pkg-config once there is a release of libsolv with pkg-config:
+                dnl PKG_CHECK_MODULES(SOLVER, libsolv)
+
+                AC_DEFINE(HAVE_SOLVER_LIBSOLV,1,[Define if you want to use libsolv])],
             # default
             [AC_MSG_RESULT(no)
              AC_MSG_ERROR(Solver <$want_solver> not supported)])
@@ -164,6 +178,8 @@ if test "x$want_solver" != "xno"; then
     AC_SUBST(SOLVER_CFLAGS)
     AC_SUBST(SOLVER_LIBS)
 fi
+
+AM_CONDITIONAL(HAVE_SOLVER_LIBSOLV,test "x$want_solver" == "xlibsolv")
 
 dnl **********
 dnl GPGME

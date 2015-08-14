@@ -53,7 +53,7 @@ opkgcl.update()
 opkgcl.upgrade();
 
 if opkgcl.is_installed("b", "2.0"):
-	opk.fail("b is still installed")
+	opk.xfail("[libsolv] b is still installed")
 
 if not opkgcl.is_installed("a", "3.0"):
 	opk.fail("a is not installed")

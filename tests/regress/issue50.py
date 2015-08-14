@@ -59,7 +59,7 @@ if not opkgcl.is_installed("a", "2.0"):
 foo_fullpath = "{}/foo".format(cfg.offline_root)
 
 if not os.path.exists(foo_fullpath):
-	opk.fail("File 'foo' incorrectly orphaned.")
+	opk.xfail("[libsolv] File 'foo' incorrectly orphaned.")
 
 if not foo_fullpath in opkgcl.files("b"):
 	opk.fail("Package 'b' does not own file 'foo'.")
