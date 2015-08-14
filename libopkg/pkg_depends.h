@@ -88,16 +88,19 @@ int pkg_breaks_reverse_dep(pkg_t * pkg);
 char *pkg_depend_str(pkg_t * pkg, int index);
 void buildDependedUponBy(pkg_t * pkg, abstract_pkg_t * ab_pkg);
 int version_constraints_satisfied(depend_t * depends, pkg_t * pkg);
+int pkg_dependence_satisfiable(depend_t * depend);
+const char *constraint_to_str(enum version_constraint c);
+enum version_constraint str_to_constraint(const char **str);
+int is_pkg_in_pkg_vec(pkg_vec_t * vec, pkg_t * pkg);
+
+#ifndef HAVE_SOLVER
 int pkg_hash_fetch_unsatisfied_dependencies(pkg_t * pkg,
                                             pkg_vec_t * depends,
                                             char ***unresolved);
 pkg_vec_t *pkg_hash_fetch_satisfied_dependencies(pkg_t * pkg);
 pkg_vec_t *pkg_hash_fetch_conflicts(pkg_t * pkg);
-int pkg_dependence_satisfiable(depend_t * depend);
 int pkg_dependence_satisfied(depend_t * depend);
-const char *constraint_to_str(enum version_constraint c);
-enum version_constraint str_to_constraint(const char **str);
-int is_pkg_in_pkg_vec(pkg_vec_t * vec, pkg_t * pkg);
+#endif
 
 #ifdef __cplusplus
 }

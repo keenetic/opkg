@@ -19,6 +19,10 @@ See issue list: http://code.google.com/p/opkg/issues/list
       PN pkgs in a provider
    It can be O(P) if a hash table is used.
 
+Solver bugs:
+
+ * opkg_list_upgradable_cmd() does not work with an external solver enabled.
+
 FEATURES
 ========
 

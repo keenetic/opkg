@@ -46,132 +46,21 @@
 #include "xsystem.h"
 #include "xfuncs.h"
 
-static int satisfy_dependencies_for(pkg_t * pkg)
-{
-    unsigned int i;
-    int err;
-    pkg_vec_t *depends = pkg_vec_alloc();
-    pkg_t *dep;
-    char **tmp, **unresolved = NULL;
-    int ndepends;
-
-    ndepends =
-        pkg_hash_fetch_unsatisfied_dependencies(pkg, depends, &unresolved);
-
-    if (unresolved) {
-        opkg_msg(ERROR, "Cannot satisfy the following dependencies for %s:\n",
-                 pkg->name);
-        tmp = unresolved;
-        while (*unresolved) {
-            opkg_message(ERROR, "\t%s", *unresolved);
-            free(*unresolved);
-            unresolved++;
-        }
-        free(tmp);
-        opkg_message(ERROR, "\n");
-        if (!opkg_config->force_depends) {
-            opkg_msg(INFO,
-                "This could mean that your package list is out of date or that the packages\n"
-                "mentioned above do not yet exist (try 'opkg update'). To proceed in spite\n"
-                "of this problem try again with the '-force-depends' option.\n");
-            pkg_vec_free(depends);
-            return -1;
-        }
-    }
-
-    if (ndepends <= 0) {
-        pkg_vec_free(depends);
-        depends = pkg_hash_fetch_satisfied_dependencies(pkg);
-
-        for (i = 0; i < depends->len; i++) {
-            dep = depends->pkgs[i];
-            /* The package was uninstalled when we started, but another
-             * dep earlier in this loop may have depended on it and pulled
-             * it in, so check first. */
-            if (is_pkg_in_pkg_vec(dep->wanted_by, pkg)) {
-                opkg_msg(NOTICE, "Breaking circular dependency on %s for %s.\n",
-                         pkg->name, dep->name);
-                continue;
-            }
-            int needs_install = (dep->state_status != SS_INSTALLED)
-                    && (dep->state_status != SS_UNPACKED);
-            if (needs_install) {
-                opkg_msg(DEBUG2, "Calling opkg_install_pkg.\n");
-                if (!is_pkg_in_pkg_vec(dep->wanted_by, pkg))
-                    pkg_vec_insert(dep->wanted_by, pkg);
-                err = opkg_install_pkg(dep, 0);
-                /* mark this package as having been automatically installed to
-                 * satisfy a dependency */
-                dep->auto_installed = 1;
-                if (err) {
-                    pkg_vec_free(depends);
-                    return err;
-                }
-            }
-        }
-
-        pkg_vec_free(depends);
-        return 0;
-    }
-
-    /* Mark packages as to-be-installed */
-    for (i = 0; i < depends->len; i++) {
-        /* Dependencies should be installed the same place as pkg */
-        if (depends->pkgs[i]->dest == NULL) {
-            depends->pkgs[i]->dest = pkg->dest;
-        }
-        depends->pkgs[i]->state_want = SW_INSTALL;
-    }
-
-    for (i = 0; i < depends->len; i++) {
-        dep = depends->pkgs[i];
-        /* The package was uninstalled when we started, but another
-         * dep earlier in this loop may have depended on it and pulled
-         * it in, so check first. */
-        if (!is_pkg_in_pkg_vec(dep->wanted_by, pkg))
-            pkg_vec_insert(dep->wanted_by, pkg);
-        int needs_install = (dep->state_status != SS_INSTALLED)
-                && (dep->state_status != SS_UNPACKED);
-        if (needs_install) {
-            opkg_msg(DEBUG2, "Calling opkg_install_pkg.\n");
-            err = opkg_install_pkg(dep, 0);
-            /* mark this package as having been automatically installed to
-             * satisfy a dependancy */
-            dep->auto_installed = 1;
-            if (err) {
-                pkg_vec_free(depends);
-                return err;
-            }
-        }
-    }
-
-    pkg_vec_free(depends);
-
-    return 0;
-}
-
-static int check_conflicts_for(pkg_t * pkg)
-{
-    unsigned int i;
-    pkg_vec_t *conflicts;
-
-    if (opkg_config->force_depends)
-        return 0;
-
-    conflicts = pkg_hash_fetch_conflicts(pkg);
-
-    if (conflicts) {
-        opkg_msg(ERROR, "The following packages conflict with %s:\n",
-                 pkg->name);
-        i = 0;
-        while (i < conflicts->len)
-            opkg_msg(ERROR, "\t%s", conflicts->pkgs[i++]->name);
-        opkg_message(ERROR, "\n");
-        pkg_vec_free(conflicts);
-        return -1;
-    }
-    return 0;
-}
+#ifndef HAVE_SOLVER
+static int satisfy_dependencies_for(pkg_t * pkg);
+static int check_conflicts_for(pkg_t * pkg);
+static int pkg_remove_orphan_dependent(pkg_t * pkg, pkg_t * old_pkg);
+static int pkg_get_installed_replacees(pkg_t * pkg,
+                                       pkg_vec_t * installed_replacees);
+static int pkg_remove_installed_replacees(pkg_vec_t * replacees);
+static int pkg_remove_installed_replacees_unwind(pkg_vec_t * replacees);
+static int prerm_deconfigure_conflictors(pkg_t * pkg, pkg_vec_t * conflictors);
+static int prerm_deconfigure_conflictors_unwind(pkg_t * pkg,
+                                                pkg_vec_t * conflictors);
+static int opkg_install_check_downgrade(pkg_t * pkg, pkg_t * old_pkg,
+                                        int message);
+static int opkg_prepare_install_by_name(const char *pkg_name, pkg_t ** pkg);
+#endif
 
 static int update_file_ownership(pkg_t * new_pkg, pkg_t * old_pkg)
 {
@@ -335,250 +224,6 @@ static int unpack_pkg_control_files(pkg_t * pkg)
     return 0;
 }
 
-/*
- * Remove packages which were auto_installed due to a dependency by old_pkg,
- * which are no longer a dependency in the new (upgraded) pkg.
- */
-static int pkg_remove_orphan_dependent(pkg_t * pkg, pkg_t * old_pkg)
-{
-    int i, j, k, l, found, r, err = 0;
-    int n_deps;
-    pkg_t *p;
-    struct compound_depend *cd0, *cd1;
-    abstract_pkg_t **dependents;
-
-    int count0 = old_pkg->pre_depends_count + old_pkg->depends_count
-        + old_pkg->recommends_count + old_pkg->suggests_count;
-    int count1 = pkg->pre_depends_count + pkg->depends_count
-        + pkg->recommends_count + pkg->suggests_count;
-
-    for (i = 0; i < count0; i++) {
-        cd0 = &old_pkg->depends[i];
-        if (cd0->type != DEPEND && cd0->type != RECOMMEND)
-            continue;
-        for (j = 0; j < cd0->possibility_count; j++) {
-            found = 0;
-
-            for (k = 0; k < count1; k++) {
-                cd1 = &pkg->depends[k];
-                if (cd1->type != DEPEND && cd1->type != RECOMMEND)
-                    continue;
-                for (l = 0; l < cd1->possibility_count; l++) {
-                    if (cd0->possibilities[j]->pkg == cd1->possibilities[l]->pkg) {
-                        found = 1;
-                        break;
-                    }
-                }
-                if (found)
-                    break;
-            }
-
-            if (found)
-                continue;
-
-            /*
-             * old_pkg has a dependency that pkg does not.
-             */
-            p = pkg_hash_fetch_installed_by_name(cd0->possibilities[j]->pkg->
-                                                 name);
-
-            if (!p)
-                continue;
-
-            if (!p->auto_installed)
-                continue;
-
-            n_deps = pkg_has_installed_dependents(p, &dependents);
-            n_deps--;           /* don't count old_pkg */
-
-            if (n_deps == 0) {
-                opkg_msg(NOTICE,
-                         "%s was autoinstalled and is "
-                         "now orphaned, removing.\n", p->name);
-
-                /* p has one installed dependency (old_pkg),
-                 * which we need to ignore during removal. */
-                p->state_flag |= SF_REPLACE;
-
-                r = opkg_remove_pkg(p);
-                if (!err)
-                    err = r;
-            } else
-                opkg_msg(INFO,
-                         "%s was autoinstalled and is " "still required by %d "
-                         "installed packages.\n", p->name, n_deps);
-
-        }
-    }
-
-    return err;
-}
-
-/* adds the list of providers of the package being replaced */
-static void pkg_get_provider_replacees(pkg_t * pkg,
-                                       abstract_pkg_vec_t * provided_by,
-                                       pkg_vec_t * replacees)
-{
-    int i, j;
-
-    for (i = 0; i < provided_by->len; i++) {
-        abstract_pkg_t *ap = provided_by->pkgs[i];
-        if (!ap->pkgs)
-            continue;
-        for (j = 0; j < ap->pkgs->len; j++) {
-            pkg_t *replacee = ap->pkgs->pkgs[j];
-            int installed = (replacee->state_status == SS_INSTALLED)
-                    || (replacee->state_status == SS_UNPACKED);
-            if (installed)
-                pkg_vec_insert(replacees, replacee);
-        }
-    }
-}
-
-/* returns number of installed replacees */
-static int pkg_get_installed_replacees(pkg_t * pkg,
-                                       pkg_vec_t * installed_replacees)
-{
-    abstract_pkg_t **replaces = pkg->replaces;
-    int replaces_count = pkg->replaces_count;
-    int i;
-    unsigned int j;
-    for (i = 0; i < replaces_count; i++) {
-        abstract_pkg_t *ab_pkg = replaces[i];
-        /* If any package listed in the replacement field is a virtual (provided)
-         * package, check to see if it conflicts with any abstract package that pkg
-         * provides
-         */
-        if (ab_pkg->provided_by && pkg_conflicts_abstract(pkg, ab_pkg))
-            pkg_get_provider_replacees(pkg, ab_pkg->provided_by,
-                                       installed_replacees);
-        pkg_vec_t *pkg_vec = ab_pkg->pkgs;
-        if (pkg_vec) {
-            for (j = 0; j < pkg_vec->len; j++) {
-                pkg_t *replacee = pkg_vec->pkgs[j];
-                if (!pkg_conflicts(pkg, replacee))
-                    continue;
-                if (replacee->state_status == SS_INSTALLED) {
-                    pkg_vec_insert(installed_replacees, replacee);
-                }
-            }
-        }
-    }
-    return installed_replacees->len;
-}
-
-static int pkg_remove_installed_replacees(pkg_vec_t * replacees)
-{
-    int i;
-    int replaces_count = replacees->len;
-    for (i = 0; i < replaces_count; i++) {
-        pkg_t *replacee = replacees->pkgs[i];
-        int err;
-        replacee->state_flag |= SF_REPLACE;     /* flag it so remove won't complain */
-        err = opkg_remove_pkg(replacee);
-        if (err)
-            return err;
-    }
-    return 0;
-}
-
-/* to unwind the removal: make sure they are installed */
-static int pkg_remove_installed_replacees_unwind(pkg_vec_t * replacees)
-{
-    int i, err;
-    int replaces_count = replacees->len;
-    for (i = 0; i < replaces_count; i++) {
-        pkg_t *replacee = replacees->pkgs[i];
-        if (replacee->state_status != SS_INSTALLED) {
-            opkg_msg(DEBUG2, "Calling opkg_install_pkg.\n");
-            err = opkg_install_pkg(replacee, 0);
-            if (err)
-                return err;
-        }
-    }
-    return 0;
-}
-
-/* compares versions of pkg and old_pkg, returns 0 if OK to proceed with
- * installation of pkg, 1 if the package is already up-to-date or -1 if the
- * install would be a downgrade. */
-static int opkg_install_check_downgrade(pkg_t * pkg, pkg_t * old_pkg,
-                                        int message)
-{
-    if (old_pkg) {
-        int cmp = pkg_compare_versions(pkg, old_pkg);
-
-        if (!opkg_config->download_only) {
-            /* Print message. */
-            char *old_version = pkg_version_str_alloc(old_pkg);
-            char *new_version = pkg_version_str_alloc(pkg);
-            const char *s;
-
-            if (cmp < 0) {
-                if (opkg_config->force_downgrade)
-                    s = "Downgrading";
-                else
-                    s = "Not downgrading";
-                opkg_msg(NOTICE, "%s %s from %s to %s on %s.\n", s, pkg->name,
-                         old_version, new_version, old_pkg->dest->name);
-            } else if (cmp == 0) {
-                opkg_msg(NOTICE, "%s (%s) already installed on %s.\n",
-                         pkg->name, new_version, old_pkg->dest->name);
-            } else {
-                /* Compare versions without force_reinstall flag to see if this
-                 * is really an upgrade or a reinstall.
-                 */
-                int is_upgrade = pkg_compare_versions_no_reinstall(pkg, old_pkg);
-                if (is_upgrade) {
-                    s = "Upgrading";
-                    opkg_msg(NOTICE, "%s %s from %s to %s on %s.\n", s,
-                             pkg->name, old_version, new_version,
-                             old_pkg->dest->name);
-                } else {
-                    s = "Reinstalling";
-                    opkg_msg(NOTICE, "%s %s (%s) on %s.\n", s, pkg->name,
-                             new_version, old_pkg->dest->name);
-                }
-            }
-
-            free(old_version);
-            free(new_version);
-        }
-
-        /* Do nothing if package already up-to-date. */
-        if (cmp == 0)
-            return 1;
-
-        /* Do nothing if newer version is installed and we're not forcing a
-         * downgrade.
-         */
-        if (cmp < 0 && !opkg_config->force_downgrade)
-            return -1;
-
-        /* Install is go... */
-        pkg->dest = old_pkg->dest;
-        return 0;
-    }
-
-    /* No old package. */
-    if (!opkg_config->download_only) {
-        char *version = pkg_version_str_alloc(pkg);
-        const char *s;
-
-        if (message)
-            s = "Upgrading";
-        else
-            s = "Installing";
-
-        opkg_msg(NOTICE, "%s %s (%s) on %s.\n", s, pkg->name, version,
-                 pkg->dest->name);
-
-        free(version);
-    }
-
-    return 0;
-}
-
 static int prerm_upgrade_old_pkg(pkg_t * pkg, pkg_t * old_pkg)
 {
     int err;
@@ -611,41 +256,6 @@ static int prerm_upgrade_old_pkg_unwind(pkg_t * pkg, pkg_t * old_pkg)
      * Error unwind:
      * old-postinst abort-upgrade new-version
      */
-    return 0;
-}
-
-static int prerm_deconfigure_conflictors(pkg_t * pkg, pkg_vec_t * conflictors)
-{
-    /* DPKG_INCOMPATIBILITY:
-     * dpkg does some things here that we don't do yet. Do we care?
-     * 2. If a 'conflicting' package is being removed at the same time:
-     * 1. If any packages depended on that conflicting package and
-     * --auto-deconfigure is specified, call, for each such package:
-     * deconfigured's-prerm deconfigure \
-     * in-favour package-being-installed version \
-     * removing conflicting-package version
-     * Error unwind:
-     * deconfigured's-postinst abort-deconfigure \
-     * in-favour package-being-installed-but-failed version \
-     * removing conflicting-package version
-     *
-     * The deconfigured packages are marked as requiring
-     * configuration, so that if --install is used they will be
-     * configured again if possible.
-     * 2. To prepare for removal of the conflicting package, call:
-     * conflictor's-prerm remove in-favour package new-version
-     * Error unwind:
-     * conflictor's-postinst abort-remove in-favour package new-version
-     */
-    return 0;
-}
-
-static int prerm_deconfigure_conflictors_unwind(pkg_t * pkg,
-                                                pkg_vec_t * conflictors)
-{
-    /* DPKG_INCOMPATIBILITY: dpkg does some things here that we don't
-     * do yet. Do we care?  (See prerm_deconfigure_conflictors for
-     * details) */
     return 0;
 }
 
@@ -1219,6 +829,717 @@ static int resolve_conffiles(pkg_t * pkg)
     return 0;
 }
 
+/**
+ *  @brief Really install a pkg_t
+ */
+int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
+{
+    int err = 0;
+    pkg_t *old_pkg = NULL;
+    abstract_pkg_t *ab_pkg = NULL;
+    int old_state_flag;
+    sigset_t newset, oldset;
+
+#ifndef HAVE_SOLVER
+    int message = 0;
+    pkg_vec_t *replacees;
+
+    if (from_upgrade)
+        /* Coming from an upgrade, and should change the output message */
+        message = 1;
+#endif
+
+    opkg_msg(DEBUG2, "Calling pkg_arch_supported.\n");
+
+    if (!pkg_arch_supported(pkg)) {
+        opkg_msg(ERROR,
+                 "INTERNAL ERROR: architecture %s for pkg %s is unsupported.\n",
+                 pkg->architecture, pkg->name);
+        return -1;
+    }
+
+#ifndef HAVE_SOLVER
+    if (pkg->state_status == SS_INSTALLED && opkg_config->nodeps == 0) {
+        err = satisfy_dependencies_for(pkg);
+        if (err)
+            return -1;
+
+        opkg_msg(NOTICE, "Package %s is already installed on %s.\n", pkg->name,
+                 pkg->dest->name);
+        return 0;
+    }
+#endif
+
+    if (pkg->dest == NULL) {
+        pkg->dest = opkg_config->default_dest;
+    }
+
+    old_pkg = pkg_hash_fetch_installed_by_name(pkg->name);
+
+#ifndef HAVE_SOLVER
+    err = opkg_install_check_downgrade(pkg, old_pkg, message);
+    if (err < 0)
+        return -1;
+    else if ((err == 1) && !from_upgrade)
+        return 0;
+#endif
+
+    pkg->state_want = SW_INSTALL;
+    if (old_pkg) {
+        old_pkg->state_want = SW_DEINSTALL;
+        /* needed for check_data_file_clashes of dependencies */
+    }
+
+#ifndef HAVE_SOLVER
+    err = check_conflicts_for(pkg);
+    if (err)
+        return -1;
+
+    /* this setup is to remove the upgrade scenario in the end when
+     * installing pkg A, A deps B & B deps on A. So both B and A are
+     * installed. Then A's installation is started resulting in an
+     * uncecessary upgrade */
+    if (pkg->state_status == SS_INSTALLED)
+        return 0;
+#endif
+
+    err = verify_pkg_installable(pkg);
+    if (err)
+        return -1;
+
+    /* check that the repository is valid */
+    if (opkg_config->check_signature && pkg->src) {
+        /* pkg_src_verify prints an error message so we don't have to. */
+        err = pkg_src_verify(pkg->src);
+        if (err)
+            return err;
+    }
+
+    if (pkg->local_filename == NULL) {
+        err = opkg_download_pkg(pkg);
+        if (err) {
+            opkg_msg(ERROR,
+                     "Failed to download %s. "
+                     "Perhaps you need to run 'opkg update'?\n", pkg->name);
+            return -1;
+        }
+    }
+
+    if (opkg_config->download_only) {
+#ifndef HAVE_SOLVER
+        if (opkg_config->nodeps == 0) {
+            err = satisfy_dependencies_for(pkg);
+            if (err)
+                return -1;
+        }
+#endif
+        return 0;
+    }
+
+    if (pkg->tmp_unpack_dir == NULL) {
+        err = unpack_pkg_control_files(pkg);
+        if (err == -1) {
+            opkg_msg(ERROR, "Failed to unpack control files from %s.\n",
+                     pkg->local_filename);
+            return -1;
+        }
+    }
+
+    err = update_file_ownership(pkg, old_pkg);
+    if (err)
+        return -1;
+
+#ifndef HAVE_SOLVER
+    if (opkg_config->nodeps == 0) {
+        err = satisfy_dependencies_for(pkg);
+        if (err)
+            return -1;
+        if (pkg->state_status == SS_UNPACKED)
+            /* Circular dependency has installed it for us. */
+            return 0;
+    }
+
+    replacees = pkg_vec_alloc();
+    pkg_get_installed_replacees(pkg, replacees);
+#endif
+
+    /* this next section we do with SIGINT blocked to prevent inconsistency
+     * between opkg database and filesystem */
+
+    sigemptyset(&newset);
+    sigaddset(&newset, SIGINT);
+    sigprocmask(SIG_BLOCK, &newset, &oldset);
+
+    opkg_state_changed++;
+    pkg->state_flag |= SF_FILELIST_CHANGED;
+
+#ifndef HAVE_SOLVER
+    /* DPKG_INCOMPATIBILITY:
+     * For upgrades, dpkg and apt-get will not remove orphaned dependents.
+     * Apt-get will instead tell the user to use apt-get autoremove to remove
+     * the autoinstalled orphaned package if it is no longer needed */
+    if (old_pkg)
+        pkg_remove_orphan_dependent(pkg, old_pkg);
+
+    /* XXX: BUG: we really should treat replacement more like an upgrade
+     *      Instead, we're going to remove the replacees
+     */
+    err = pkg_remove_installed_replacees(replacees);
+    if (err)
+        goto UNWIND_REMOVE_INSTALLED_REPLACEES;
+#endif
+    err = prerm_upgrade_old_pkg(pkg, old_pkg);
+    if (err)
+        goto UNWIND_PRERM_UPGRADE_OLD_PKG;
+#ifndef HAVE_SOLVER
+    err = prerm_deconfigure_conflictors(pkg, replacees);
+    if (err)
+        goto UNWIND_PRERM_DECONFIGURE_CONFLICTORS;
+#endif
+    err = preinst_configure(pkg, old_pkg);
+    if (err)
+        goto UNWIND_PREINST_CONFIGURE;
+
+    err = backup_modified_conffiles(pkg, old_pkg);
+    if (err)
+        goto UNWIND_BACKUP_MODIFIED_CONFFILES;
+
+    err = check_data_file_clashes(pkg, old_pkg);
+    if (err)
+        goto UNWIND_CHECK_DATA_FILE_CLASHES;
+
+    err = postrm_upgrade_old_pkg(pkg, old_pkg);
+    if (err)
+        goto UNWIND_POSTRM_UPGRADE_OLD_PKG;
+
+    if (opkg_config->noaction)
+        return 0;
+
+    /* point of no return: no unwinding after this */
+    if (old_pkg) {
+        old_pkg->state_want = SW_DEINSTALL;
+
+        if (old_pkg->state_flag & SF_NOPRUNE) {
+            opkg_msg(INFO,
+                     "Not removing obsolesced files because "
+                     "package %s marked noprune.\n", old_pkg->name);
+        } else {
+            opkg_msg(INFO, "Removing obsolesced files for %s\n", old_pkg->name);
+            err = remove_obsolesced_files(pkg, old_pkg);
+            if (err) {
+                opkg_msg(ERROR,
+                         "Failed to determine "
+                         "obsolete files from previously " "installed %s\n",
+                         old_pkg->name);
+            }
+        }
+
+        /* removing files from old package, to avoid ghost files */
+        remove_data_files_and_list(old_pkg);
+        remove_maintainer_scripts(old_pkg);
+
+        /* maintain the "Auto-Installed: yes" flag */
+        pkg->auto_installed = old_pkg->auto_installed;
+    }
+
+    opkg_msg(INFO, "Installing maintainer scripts.\n");
+    err = install_maintainer_scripts(pkg, old_pkg);
+    if (err) {
+        opkg_msg(ERROR,
+                 "Failed to extract maintainer scripts for %s."
+                 " Package debris may remain!\n", pkg->name);
+        goto pkg_is_hosed;
+    }
+
+    /* the following just returns 0 */
+    remove_disappeared(pkg);
+
+    opkg_msg(INFO, "Installing data files for %s.\n", pkg->name);
+
+    err = install_data_files(pkg);
+    if (err) {
+        opkg_msg(ERROR,
+                 "Failed to extract data files for %s. "
+                 "Package debris may remain!\n", pkg->name);
+        goto pkg_is_hosed;
+    }
+
+    err = check_data_file_clashes_change(pkg, old_pkg);
+    if (err) {
+        opkg_msg(ERROR,
+                 "check_data_file_clashes_change() failed for "
+                 "for files belonging to %s.\n", pkg->name);
+    }
+
+    opkg_msg(INFO, "Resolving conf files for %s\n", pkg->name);
+    resolve_conffiles(pkg);
+
+    pkg->state_status = SS_UNPACKED;
+    old_state_flag = pkg->state_flag;
+    pkg->state_flag &= ~SF_PREFER;
+    opkg_msg(DEBUG, "pkg=%s old_state_flag=%x state_flag=%x\n", pkg->name,
+             old_state_flag, pkg->state_flag);
+
+    if (old_pkg)
+        old_pkg->state_status = SS_NOT_INSTALLED;
+
+    time(&pkg->installed_time);
+
+    ab_pkg = pkg->parent;
+    if (ab_pkg)
+        ab_pkg->state_status = pkg->state_status;
+
+    sigprocmask(SIG_UNBLOCK, &newset, &oldset);
+#ifndef HAVE_SOLVER
+    pkg_vec_free(replacees);
+#endif
+    return 0;
+
+ UNWIND_POSTRM_UPGRADE_OLD_PKG:
+    postrm_upgrade_old_pkg_unwind(pkg, old_pkg);
+ UNWIND_CHECK_DATA_FILE_CLASHES:
+    check_data_file_clashes_unwind(pkg, old_pkg);
+ UNWIND_BACKUP_MODIFIED_CONFFILES:
+    backup_modified_conffiles_unwind(pkg, old_pkg);
+ UNWIND_PREINST_CONFIGURE:
+    preinst_configure_unwind(pkg, old_pkg);
+#ifndef HAVE_SOLVER
+ UNWIND_PRERM_DECONFIGURE_CONFLICTORS:
+    prerm_deconfigure_conflictors_unwind(pkg, replacees);
+#endif
+ UNWIND_PRERM_UPGRADE_OLD_PKG:
+    prerm_upgrade_old_pkg_unwind(pkg, old_pkg);
+#ifndef HAVE_SOLVER
+ UNWIND_REMOVE_INSTALLED_REPLACEES:
+    pkg_remove_installed_replacees_unwind(replacees);
+#endif
+ pkg_is_hosed:
+    /* Set the package flags to something consistent which indicates a
+     * failed install.
+     */
+    pkg->state_flag = SF_REINSTREQ;
+    pkg->state_status = SS_HALF_INSTALLED;
+
+    /* Print some advice for the user. */
+    opkg_msg(NOTICE, "To remove package debris, try `opkg remove %s`.\n",
+             pkg->name);
+    opkg_msg(NOTICE, "To re-attempt the install, try `opkg install %s`.\n",
+             pkg->name);
+
+    sigprocmask(SIG_UNBLOCK, &newset, &oldset);
+#ifndef HAVE_SOLVER
+    pkg_vec_free(replacees);
+#endif
+    return -1;
+}
+
+#ifndef HAVE_SOLVER
+static int satisfy_dependencies_for(pkg_t * pkg)
+{
+    unsigned int i;
+    int err;
+    pkg_vec_t *depends = pkg_vec_alloc();
+    pkg_t *dep;
+    char **tmp, **unresolved = NULL;
+    int ndepends;
+
+    ndepends =
+        pkg_hash_fetch_unsatisfied_dependencies(pkg, depends, &unresolved);
+
+    if (unresolved) {
+        opkg_msg(ERROR, "Cannot satisfy the following dependencies for %s:\n",
+                 pkg->name);
+        tmp = unresolved;
+        while (*unresolved) {
+            opkg_message(ERROR, "\t%s", *unresolved);
+            free(*unresolved);
+            unresolved++;
+        }
+        free(tmp);
+        opkg_message(ERROR, "\n");
+        if (!opkg_config->force_depends) {
+            opkg_msg(INFO,
+                "This could mean that your package list is out of date or that the packages\n"
+                "mentioned above do not yet exist (try 'opkg update'). To proceed in spite\n"
+                "of this problem try again with the '-force-depends' option.\n");
+            pkg_vec_free(depends);
+            return -1;
+        }
+    }
+
+    if (ndepends <= 0) {
+        pkg_vec_free(depends);
+        depends = pkg_hash_fetch_satisfied_dependencies(pkg);
+
+        for (i = 0; i < depends->len; i++) {
+            dep = depends->pkgs[i];
+            /* The package was uninstalled when we started, but another
+             * dep earlier in this loop may have depended on it and pulled
+             * it in, so check first. */
+            if (is_pkg_in_pkg_vec(dep->wanted_by, pkg)) {
+                opkg_msg(NOTICE, "Breaking circular dependency on %s for %s.\n",
+                         pkg->name, dep->name);
+                continue;
+            }
+            int needs_install = (dep->state_status != SS_INSTALLED)
+                    && (dep->state_status != SS_UNPACKED);
+            if (needs_install) {
+                opkg_msg(DEBUG2, "Calling opkg_install_pkg.\n");
+                if (!is_pkg_in_pkg_vec(dep->wanted_by, pkg))
+                    pkg_vec_insert(dep->wanted_by, pkg);
+                err = opkg_install_pkg(dep, 0);
+                /* mark this package as having been automatically installed to
+                 * satisfy a dependency */
+                dep->auto_installed = 1;
+                if (err) {
+                    pkg_vec_free(depends);
+                    return err;
+                }
+            }
+        }
+
+        pkg_vec_free(depends);
+        return 0;
+    }
+
+    /* Mark packages as to-be-installed */
+    for (i = 0; i < depends->len; i++) {
+        /* Dependencies should be installed the same place as pkg */
+        if (depends->pkgs[i]->dest == NULL) {
+            depends->pkgs[i]->dest = pkg->dest;
+        }
+        depends->pkgs[i]->state_want = SW_INSTALL;
+    }
+
+    for (i = 0; i < depends->len; i++) {
+        dep = depends->pkgs[i];
+        /* The package was uninstalled when we started, but another
+         * dep earlier in this loop may have depended on it and pulled
+         * it in, so check first. */
+        if (!is_pkg_in_pkg_vec(dep->wanted_by, pkg))
+            pkg_vec_insert(dep->wanted_by, pkg);
+        int needs_install = (dep->state_status != SS_INSTALLED)
+                && (dep->state_status != SS_UNPACKED);
+        if (needs_install) {
+            opkg_msg(DEBUG2, "Calling opkg_install_pkg.\n");
+            err = opkg_install_pkg(dep, 0);
+            /* mark this package as having been automatically installed to
+             * satisfy a dependancy */
+            dep->auto_installed = 1;
+            if (err) {
+                pkg_vec_free(depends);
+                return err;
+            }
+        }
+    }
+
+    pkg_vec_free(depends);
+
+    return 0;
+}
+
+static int check_conflicts_for(pkg_t * pkg)
+{
+    unsigned int i;
+    pkg_vec_t *conflicts;
+
+    if (opkg_config->force_depends)
+        return 0;
+
+    conflicts = pkg_hash_fetch_conflicts(pkg);
+
+    if (conflicts) {
+        opkg_msg(ERROR, "The following packages conflict with %s:\n",
+                 pkg->name);
+        i = 0;
+        while (i < conflicts->len)
+            opkg_msg(ERROR, "\t%s", conflicts->pkgs[i++]->name);
+        opkg_message(ERROR, "\n");
+        pkg_vec_free(conflicts);
+        return -1;
+    }
+    return 0;
+}
+
+/*
+ * Remove packages which were auto_installed due to a dependency by old_pkg,
+ * which are no longer a dependency in the new (upgraded) pkg.
+ */
+static int pkg_remove_orphan_dependent(pkg_t * pkg, pkg_t * old_pkg)
+{
+    int i, j, k, l, found, r, err = 0;
+    int n_deps;
+    pkg_t *p;
+    struct compound_depend *cd0, *cd1;
+    abstract_pkg_t **dependents;
+
+    int count0 = old_pkg->pre_depends_count + old_pkg->depends_count
+        + old_pkg->recommends_count + old_pkg->suggests_count;
+    int count1 = pkg->pre_depends_count + pkg->depends_count
+        + pkg->recommends_count + pkg->suggests_count;
+
+    for (i = 0; i < count0; i++) {
+        cd0 = &old_pkg->depends[i];
+        if (cd0->type != DEPEND && cd0->type != RECOMMEND)
+            continue;
+        for (j = 0; j < cd0->possibility_count; j++) {
+            found = 0;
+
+            for (k = 0; k < count1; k++) {
+                cd1 = &pkg->depends[k];
+                if (cd1->type != DEPEND && cd1->type != RECOMMEND)
+                    continue;
+                for (l = 0; l < cd1->possibility_count; l++) {
+                    if (cd0->possibilities[j]->pkg == cd1->possibilities[l]->pkg) {
+                        found = 1;
+                        break;
+                    }
+                }
+                if (found)
+                    break;
+            }
+
+            if (found)
+                continue;
+
+            /*
+             * old_pkg has a dependency that pkg does not.
+             */
+            p = pkg_hash_fetch_installed_by_name(cd0->possibilities[j]->pkg->
+                                                 name);
+
+            if (!p)
+                continue;
+
+            if (!p->auto_installed)
+                continue;
+
+            n_deps = pkg_has_installed_dependents(p, &dependents);
+            n_deps--;           /* don't count old_pkg */
+
+            if (n_deps == 0) {
+                opkg_msg(NOTICE,
+                         "%s was autoinstalled and is "
+                         "now orphaned, removing.\n", p->name);
+
+                /* p has one installed dependency (old_pkg),
+                 * which we need to ignore during removal. */
+                p->state_flag |= SF_REPLACE;
+
+                r = opkg_remove_pkg(p);
+                if (!err)
+                    err = r;
+            } else
+                opkg_msg(INFO,
+                         "%s was autoinstalled and is " "still required by %d "
+                         "installed packages.\n", p->name, n_deps);
+
+        }
+    }
+
+    return err;
+}
+
+/* adds the list of providers of the package being replaced */
+static void pkg_get_provider_replacees(pkg_t * pkg,
+                                       abstract_pkg_vec_t * provided_by,
+                                       pkg_vec_t * replacees)
+{
+    int i, j;
+
+    for (i = 0; i < provided_by->len; i++) {
+        abstract_pkg_t *ap = provided_by->pkgs[i];
+        if (!ap->pkgs)
+            continue;
+        for (j = 0; j < ap->pkgs->len; j++) {
+            pkg_t *replacee = ap->pkgs->pkgs[j];
+            int installed = (replacee->state_status == SS_INSTALLED)
+                    || (replacee->state_status == SS_UNPACKED);
+            if (installed)
+                pkg_vec_insert(replacees, replacee);
+        }
+    }
+}
+
+/* returns number of installed replacees */
+static int pkg_get_installed_replacees(pkg_t * pkg,
+                                       pkg_vec_t * installed_replacees)
+{
+    abstract_pkg_t **replaces = pkg->replaces;
+    int replaces_count = pkg->replaces_count;
+    int i;
+    unsigned int j;
+    for (i = 0; i < replaces_count; i++) {
+        abstract_pkg_t *ab_pkg = replaces[i];
+        /* If any package listed in the replacement field is a virtual (provided)
+         * package, check to see if it conflicts with any abstract package that pkg
+         * provides
+         */
+        if (ab_pkg->provided_by && pkg_conflicts_abstract(pkg, ab_pkg))
+            pkg_get_provider_replacees(pkg, ab_pkg->provided_by,
+                                       installed_replacees);
+        pkg_vec_t *pkg_vec = ab_pkg->pkgs;
+        if (pkg_vec) {
+            for (j = 0; j < pkg_vec->len; j++) {
+                pkg_t *replacee = pkg_vec->pkgs[j];
+                if (!pkg_conflicts(pkg, replacee))
+                    continue;
+                if (replacee->state_status == SS_INSTALLED) {
+                    pkg_vec_insert(installed_replacees, replacee);
+                }
+            }
+        }
+    }
+    return installed_replacees->len;
+}
+
+static int pkg_remove_installed_replacees(pkg_vec_t * replacees)
+{
+    int i;
+    int replaces_count = replacees->len;
+    for (i = 0; i < replaces_count; i++) {
+        pkg_t *replacee = replacees->pkgs[i];
+        int err;
+        replacee->state_flag |= SF_REPLACE;     /* flag it so remove won't complain */
+        err = opkg_remove_pkg(replacee);
+        if (err)
+            return err;
+    }
+    return 0;
+}
+
+/* to unwind the removal: make sure they are installed */
+static int pkg_remove_installed_replacees_unwind(pkg_vec_t * replacees)
+{
+    int i, err;
+    int replaces_count = replacees->len;
+    for (i = 0; i < replaces_count; i++) {
+        pkg_t *replacee = replacees->pkgs[i];
+        if (replacee->state_status != SS_INSTALLED) {
+            opkg_msg(DEBUG2, "Calling opkg_install_pkg.\n");
+            err = opkg_install_pkg(replacee, 0);
+            if (err)
+                return err;
+        }
+    }
+    return 0;
+}
+
+static int prerm_deconfigure_conflictors(pkg_t * pkg, pkg_vec_t * conflictors)
+{
+    /* DPKG_INCOMPATIBILITY:
+     * dpkg does some things here that we don't do yet. Do we care?
+     * 2. If a 'conflicting' package is being removed at the same time:
+     * 1. If any packages depended on that conflicting package and
+     * --auto-deconfigure is specified, call, for each such package:
+     * deconfigured's-prerm deconfigure \
+     * in-favour package-being-installed version \
+     * removing conflicting-package version
+     * Error unwind:
+     * deconfigured's-postinst abort-deconfigure \
+     * in-favour package-being-installed-but-failed version \
+     * removing conflicting-package version
+     *
+     * The deconfigured packages are marked as requiring
+     * configuration, so that if --install is used they will be
+     * configured again if possible.
+     * 2. To prepare for removal of the conflicting package, call:
+     * conflictor's-prerm remove in-favour package new-version
+     * Error unwind:
+     * conflictor's-postinst abort-remove in-favour package new-version
+     */
+    return 0;
+}
+
+static int prerm_deconfigure_conflictors_unwind(pkg_t * pkg,
+                                                pkg_vec_t * conflictors)
+{
+    /* DPKG_INCOMPATIBILITY: dpkg does some things here that we don't
+     * do yet. Do we care?  (See prerm_deconfigure_conflictors for
+     * details) */
+    return 0;
+}
+
+/* compares versions of pkg and old_pkg, returns 0 if OK to proceed with
+ * installation of pkg, 1 if the package is already up-to-date or -1 if the
+ * install would be a downgrade. */
+static int opkg_install_check_downgrade(pkg_t * pkg, pkg_t * old_pkg,
+                                        int message)
+{
+    if (old_pkg) {
+        int cmp = pkg_compare_versions(pkg, old_pkg);
+
+        if (!opkg_config->download_only) {
+            /* Print message. */
+            char *old_version = pkg_version_str_alloc(old_pkg);
+            char *new_version = pkg_version_str_alloc(pkg);
+            const char *s;
+
+            if (cmp < 0) {
+                if (opkg_config->force_downgrade)
+                    s = "Downgrading";
+                else
+                    s = "Not downgrading";
+                opkg_msg(NOTICE, "%s %s from %s to %s on %s.\n", s, pkg->name,
+                         old_version, new_version, old_pkg->dest->name);
+            } else if (cmp == 0) {
+                opkg_msg(NOTICE, "%s (%s) already installed on %s.\n",
+                         pkg->name, new_version, old_pkg->dest->name);
+            } else {
+                /* Compare versions without force_reinstall flag to see if this
+                 * is really an upgrade or a reinstall.
+                 */
+                int is_upgrade = pkg_compare_versions_no_reinstall(pkg, old_pkg);
+                if (is_upgrade) {
+                    s = "Upgrading";
+                    opkg_msg(NOTICE, "%s %s from %s to %s on %s.\n", s,
+                             pkg->name, old_version, new_version,
+                             old_pkg->dest->name);
+                } else {
+                    s = "Reinstalling";
+                    opkg_msg(NOTICE, "%s %s (%s) on %s.\n", s, pkg->name,
+                             new_version, old_pkg->dest->name);
+                }
+            }
+
+            free(old_version);
+            free(new_version);
+        }
+
+        /* Do nothing if package already up-to-date. */
+        if (cmp == 0)
+            return 1;
+
+        /* Do nothing if newer version is installed and we're not forcing a
+         * downgrade.
+         */
+        if (cmp < 0 && !opkg_config->force_downgrade)
+            return -1;
+
+        /* Install is go... */
+        pkg->dest = old_pkg->dest;
+        return 0;
+    }
+
+    /* No old package. */
+    if (!opkg_config->download_only) {
+        char *version = pkg_version_str_alloc(pkg);
+        const char *s;
+
+        if (message)
+            s = "Upgrading";
+        else
+            s = "Installing";
+
+        opkg_msg(NOTICE, "%s %s (%s) on %s.\n", s, pkg->name, version,
+                 pkg->dest->name);
+
+        free(version);
+    }
+
+    return 0;
+}
+
 static int opkg_prepare_install_by_name(const char *pkg_name, pkg_t ** pkg)
 {
     int cmp;
@@ -1338,282 +1659,4 @@ int opkg_install_multiple_by_name(str_list_t * pkg_names)
 
     return 0;
 }
-
-/**
- *  @brief Really install a pkg_t
- */
-int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
-{
-    int err = 0;
-    int message = 0;
-    pkg_t *old_pkg = NULL;
-    pkg_vec_t *replacees;
-    abstract_pkg_t *ab_pkg = NULL;
-    int old_state_flag;
-    sigset_t newset, oldset;
-
-    if (from_upgrade)
-        /* Coming from an upgrade, and should change the output message */
-        message = 1;
-
-    opkg_msg(DEBUG2, "Calling pkg_arch_supported.\n");
-
-    if (!pkg_arch_supported(pkg)) {
-        opkg_msg(ERROR,
-                 "INTERNAL ERROR: architecture %s for pkg %s is unsupported.\n",
-                 pkg->architecture, pkg->name);
-        return -1;
-    }
-    if (pkg->state_status == SS_INSTALLED && opkg_config->nodeps == 0) {
-        err = satisfy_dependencies_for(pkg);
-        if (err)
-            return -1;
-
-        opkg_msg(NOTICE, "Package %s is already installed on %s.\n", pkg->name,
-                 pkg->dest->name);
-        return 0;
-    }
-
-    if (pkg->dest == NULL) {
-        pkg->dest = opkg_config->default_dest;
-    }
-
-    old_pkg = pkg_hash_fetch_installed_by_name(pkg->name);
-
-    err = opkg_install_check_downgrade(pkg, old_pkg, message);
-    if (err < 0)
-        return -1;
-    else if ((err == 1) && !from_upgrade)
-        return 0;
-
-    pkg->state_want = SW_INSTALL;
-    if (old_pkg) {
-        old_pkg->state_want = SW_DEINSTALL;
-        /* needed for check_data_file_clashes of dependencies */
-    }
-
-    err = check_conflicts_for(pkg);
-    if (err)
-        return -1;
-
-    /* this setup is to remove the upgrade scenario in the end when
-     * installing pkg A, A deps B & B deps on A. So both B and A are
-     * installed. Then A's installation is started resulting in an
-     * uncecessary upgrade */
-    if (pkg->state_status == SS_INSTALLED)
-        return 0;
-
-    err = verify_pkg_installable(pkg);
-    if (err)
-        return -1;
-
-    /* check that the repository is valid */
-    if (opkg_config->check_signature && pkg->src) {
-        /* pkg_src_verify prints an error message so we don't have to. */
-        err = pkg_src_verify(pkg->src);
-        if (err)
-            return err;
-    }
-
-    if (pkg->local_filename == NULL) {
-        err = opkg_download_pkg(pkg);
-        if (err) {
-            opkg_msg(ERROR,
-                     "Failed to download %s. "
-                     "Perhaps you need to run 'opkg update'?\n", pkg->name);
-            return -1;
-        }
-    }
-
-    if (opkg_config->download_only) {
-        if (opkg_config->nodeps == 0) {
-            err = satisfy_dependencies_for(pkg);
-            if (err)
-                return -1;
-        }
-        return 0;
-    }
-
-    if (pkg->tmp_unpack_dir == NULL) {
-        err = unpack_pkg_control_files(pkg);
-        if (err == -1) {
-            opkg_msg(ERROR, "Failed to unpack control files from %s.\n",
-                     pkg->local_filename);
-            return -1;
-        }
-    }
-
-    err = update_file_ownership(pkg, old_pkg);
-    if (err)
-        return -1;
-
-    if (opkg_config->nodeps == 0) {
-        err = satisfy_dependencies_for(pkg);
-        if (err)
-            return -1;
-        if (pkg->state_status == SS_UNPACKED)
-            /* Circular dependency has installed it for us. */
-            return 0;
-    }
-
-    replacees = pkg_vec_alloc();
-    pkg_get_installed_replacees(pkg, replacees);
-
-    /* this next section we do with SIGINT blocked to prevent inconsistency
-     * between opkg database and filesystem */
-
-    sigemptyset(&newset);
-    sigaddset(&newset, SIGINT);
-    sigprocmask(SIG_BLOCK, &newset, &oldset);
-
-    opkg_state_changed++;
-    pkg->state_flag |= SF_FILELIST_CHANGED;
-
-    if (old_pkg)
-        pkg_remove_orphan_dependent(pkg, old_pkg);
-
-    /* XXX: BUG: we really should treat replacement more like an upgrade
-     *      Instead, we're going to remove the replacees
-     */
-    err = pkg_remove_installed_replacees(replacees);
-    if (err)
-        goto UNWIND_REMOVE_INSTALLED_REPLACEES;
-
-    err = prerm_upgrade_old_pkg(pkg, old_pkg);
-    if (err)
-        goto UNWIND_PRERM_UPGRADE_OLD_PKG;
-
-    err = prerm_deconfigure_conflictors(pkg, replacees);
-    if (err)
-        goto UNWIND_PRERM_DECONFIGURE_CONFLICTORS;
-
-    err = preinst_configure(pkg, old_pkg);
-    if (err)
-        goto UNWIND_PREINST_CONFIGURE;
-
-    err = backup_modified_conffiles(pkg, old_pkg);
-    if (err)
-        goto UNWIND_BACKUP_MODIFIED_CONFFILES;
-
-    err = check_data_file_clashes(pkg, old_pkg);
-    if (err)
-        goto UNWIND_CHECK_DATA_FILE_CLASHES;
-
-    err = postrm_upgrade_old_pkg(pkg, old_pkg);
-    if (err)
-        goto UNWIND_POSTRM_UPGRADE_OLD_PKG;
-
-    if (opkg_config->noaction)
-        return 0;
-
-    /* point of no return: no unwinding after this */
-    if (old_pkg) {
-        old_pkg->state_want = SW_DEINSTALL;
-
-        if (old_pkg->state_flag & SF_NOPRUNE) {
-            opkg_msg(INFO,
-                     "Not removing obsolesced files because "
-                     "package %s marked noprune.\n", old_pkg->name);
-        } else {
-            opkg_msg(INFO, "Removing obsolesced files for %s\n", old_pkg->name);
-            err = remove_obsolesced_files(pkg, old_pkg);
-            if (err) {
-                opkg_msg(ERROR,
-                         "Failed to determine "
-                         "obsolete files from previously " "installed %s\n",
-                         old_pkg->name);
-            }
-        }
-
-        /* removing files from old package, to avoid ghost files */
-        remove_data_files_and_list(old_pkg);
-        remove_maintainer_scripts(old_pkg);
-
-        /* maintain the "Auto-Installed: yes" flag */
-        pkg->auto_installed = old_pkg->auto_installed;
-    }
-
-    opkg_msg(INFO, "Installing maintainer scripts.\n");
-    err = install_maintainer_scripts(pkg, old_pkg);
-    if (err) {
-        opkg_msg(ERROR,
-                 "Failed to extract maintainer scripts for %s."
-                 " Package debris may remain!\n", pkg->name);
-        goto pkg_is_hosed;
-    }
-
-    /* the following just returns 0 */
-    remove_disappeared(pkg);
-
-    opkg_msg(INFO, "Installing data files for %s.\n", pkg->name);
-
-    err = install_data_files(pkg);
-    if (err) {
-        opkg_msg(ERROR,
-                 "Failed to extract data files for %s. "
-                 "Package debris may remain!\n", pkg->name);
-        goto pkg_is_hosed;
-    }
-
-    err = check_data_file_clashes_change(pkg, old_pkg);
-    if (err) {
-        opkg_msg(ERROR,
-                 "check_data_file_clashes_change() failed for "
-                 "for files belonging to %s.\n", pkg->name);
-    }
-
-    opkg_msg(INFO, "Resolving conf files for %s\n", pkg->name);
-    resolve_conffiles(pkg);
-
-    pkg->state_status = SS_UNPACKED;
-    old_state_flag = pkg->state_flag;
-    pkg->state_flag &= ~SF_PREFER;
-    opkg_msg(DEBUG, "pkg=%s old_state_flag=%x state_flag=%x\n", pkg->name,
-             old_state_flag, pkg->state_flag);
-
-    if (old_pkg)
-        old_pkg->state_status = SS_NOT_INSTALLED;
-
-    time(&pkg->installed_time);
-
-    ab_pkg = pkg->parent;
-    if (ab_pkg)
-        ab_pkg->state_status = pkg->state_status;
-
-    sigprocmask(SIG_UNBLOCK, &newset, &oldset);
-    pkg_vec_free(replacees);
-    return 0;
-
- UNWIND_POSTRM_UPGRADE_OLD_PKG:
-    postrm_upgrade_old_pkg_unwind(pkg, old_pkg);
- UNWIND_CHECK_DATA_FILE_CLASHES:
-    check_data_file_clashes_unwind(pkg, old_pkg);
- UNWIND_BACKUP_MODIFIED_CONFFILES:
-    backup_modified_conffiles_unwind(pkg, old_pkg);
- UNWIND_PREINST_CONFIGURE:
-    preinst_configure_unwind(pkg, old_pkg);
- UNWIND_PRERM_DECONFIGURE_CONFLICTORS:
-    prerm_deconfigure_conflictors_unwind(pkg, replacees);
- UNWIND_PRERM_UPGRADE_OLD_PKG:
-    prerm_upgrade_old_pkg_unwind(pkg, old_pkg);
- UNWIND_REMOVE_INSTALLED_REPLACEES:
-    pkg_remove_installed_replacees_unwind(replacees);
-
- pkg_is_hosed:
-    /* Set the package flags to something consistent which indicates a
-     * failed install.
-     */
-    pkg->state_flag = SF_REINSTREQ;
-    pkg->state_status = SS_HALF_INSTALLED;
-
-    /* Print some advice for the user. */
-    opkg_msg(NOTICE, "To remove package debris, try `opkg remove %s`.\n",
-             pkg->name);
-    opkg_msg(NOTICE, "To re-attempt the install, try `opkg install %s`.\n",
-             pkg->name);
-
-    sigprocmask(SIG_UNBLOCK, &newset, &oldset);
-
-    pkg_vec_free(replacees);
-    return -1;
-}
+#endif

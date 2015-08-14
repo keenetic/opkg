@@ -140,6 +140,11 @@ AC_ARG_ENABLE(solver, AC_HELP_STRING([--enable-solver], [Enable solver support.
 AM_CONDITIONAL(HAVE_SOLVER, test "x$want_solver" != "xno")
 
 if test "x$want_solver" != "xno"; then
+    # do not allow opkg to be built with both old API and extrnal solver support
+    if test "x$want_libopkg_api" = "xyes"; then
+        AC_MSG_ERROR(External solver support not compatable with deprecated libopkg API!)
+    fi
+
     AC_DEFINE(HAVE_SOLVER, 1, [Define if you want to use a solver])
 
     SOLVER_CFLAGS=""

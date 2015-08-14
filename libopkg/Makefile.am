@@ -9,14 +9,14 @@ opkg_headers = active_list.h cksum_list.h conffile.h conffile_list.h \
 	file_util.h hash_table.h list.h md5.h nv_pair.h nv_pair_list.h \
 	opkg_archive.h opkg_cmd.h opkg_conf.h opkg_configure.h \
 	opkg_download.h opkg_install.h opkg_message.h \
-	opkg_remove.h opkg_upgrade.h opkg_utils.h parse_util.h pkg.h \
+	opkg_remove.h opkg_utils.h parse_util.h pkg.h \
 	pkg_depends.h pkg_dest.h pkg_dest_list.h pkg_extract.h pkg_hash.h \
 	pkg_parse.h pkg_src.h pkg_src_list.h pkg_vec.h release.h \
 	release_parse.h sha256.h sprintf_alloc.h str_list.h void_list.h \
 	xregex.h xsystem.h xfuncs.h opkg_verify.h
 
 opkg_sources = opkg_cmd.c opkg_configure.c opkg_download.c \
-	opkg_install.c opkg_upgrade.c opkg_remove.c opkg_conf.c release.c \
+	opkg_install.c opkg_remove.c opkg_conf.c release.c \
 	release_parse.c opkg_utils.c pkg.c pkg_depends.c pkg_extract.c \
 	hash_table.c pkg_hash.c pkg_parse.c pkg_vec.c conffile.c \
 	conffile_list.c nv_pair.c nv_pair_list.c pkg_dest.c pkg_dest_list.c \
@@ -50,8 +50,8 @@ if HAVE_SOLVER
 opkg_sources += opkg_solver.c
 opkg_headers += opkg_solver.h
 else
-opkg_sources += opkg_action.c
-opkg_headers += opkg_action.h
+opkg_sources += opkg_action.c opkg_upgrade.c
+opkg_headers += opkg_action.h opkg_upgrade.h
 endif
 
 lib_LTLIBRARIES = libopkg.la

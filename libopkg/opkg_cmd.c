@@ -39,7 +39,6 @@
 #include "opkg_utils.h"
 #include "opkg_download.h"
 #include "opkg_install.h"
-#include "opkg_upgrade.h"
 #include "opkg_remove.h"
 #include "opkg_configure.h"
 #include "opkg_verify.h"
@@ -50,6 +49,7 @@
 #include "opkg_solver.h"
 #else
 #include "opkg_action.h"
+#include "opkg_upgrade.h"
 #endif
 
 static void print_pkg(pkg_t * pkg)
@@ -571,6 +571,13 @@ static int opkg_list_changed_conffiles_cmd(int argc, char **argv)
 
 static int opkg_list_upgradable_cmd(int argc, char **argv)
 {
+#ifdef HAVE_SOLVER
+    // TODO: this requires prepare_upgrade_list in opkg_upgrade.c but opkg_upgrade
+    // is not built when an external solver is enabled. Either let the solver
+    // handle this, include opkg_upgrade, or put prepare_upgrade_list somewhere else.
+    opkg_msg(ERROR,"list-upgradable command not available with external solver enabled\n");
+    return -1;
+#else
     struct active_list *head = prepare_upgrade_list();
     struct active_list *node = NULL;
     pkg_t *_old_pkg, *_new_pkg;
@@ -589,6 +596,7 @@ static int opkg_list_upgradable_cmd(int argc, char **argv)
     }
     active_list_head_delete(head);
     return 0;
+#endif
 }
 
 static int opkg_info_status_cmd(int argc, char **argv, int installed_only)
