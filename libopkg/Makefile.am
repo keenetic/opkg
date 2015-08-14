@@ -1,7 +1,7 @@
 
 AM_CFLAGS=-Wall -DHOST_CPU_STR=\"@host_cpu@\" -DDATADIR=\"@datadir@\" \
 	-I$(top_srcdir)	$(LIBARCHIVE_CFLAGS) $(BIGENDIAN_CFLAGS) $(CURL_CFLAGS) \
-	$(GPGME_CFLAGS) $(GPGERR_CFLAGS) $(PATHFINDER_CFLAGS)
+	$(GPGME_CFLAGS) $(GPGERR_CFLAGS) $(PATHFINDER_CFLAGS) $(SOLVER_CFLAGS)
 
 libopkg_includedir=$(includedir)/libopkg
 
@@ -46,6 +46,13 @@ if HAVE_LIBOPKG_API
 opkg_sources += opkg.c
 opkg_headers += opkg.h
 endif
+if HAVE_SOLVER
+opkg_sources += opkg_solver.c
+opkg_headers += opkg_solver.h
+else
+opkg_sources += opkg_action.c
+opkg_headers += opkg_action.h
+endif
 
 lib_LTLIBRARIES = libopkg.la
 libopkg_la_SOURCES = $(opkg_sources) $(opkg_headers)
@@ -57,6 +64,6 @@ endif
 
 libopkg_la_LIBADD = $(LIBARCHIVE_LIBS) \
 		    $(CURL_LIBS) $(GPGME_LIBS) $(GPGERR_LIBS) $(OPENSSL_LIBS) \
-		    $(PATHFINDER_LIBS)
+		    $(PATHFINDER_LIBS) $(SOLVER_LIBS)
 
 libopkg_la_LDFLAGS = -version-info 1:0:0

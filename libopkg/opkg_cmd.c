@@ -35,7 +35,6 @@
 #include "pkg_dest.h"
 #include "pkg_parse.h"
 #include "sprintf_alloc.h"
-#include "pkg.h"
 #include "file_util.h"
 #include "opkg_utils.h"
 #include "opkg_download.h"
@@ -46,6 +45,12 @@
 #include "opkg_verify.h"
 #include "xsystem.h"
 #include "xfuncs.h"
+
+#ifdef HAVE_SOLVER
+#include "opkg_solver.h"
+#else
+#include "opkg_action.h"
+#endif
 
 static void print_pkg(pkg_t * pkg)
 {
@@ -394,7 +399,6 @@ static int opkg_install_cmd(int argc, char **argv)
     int i;
     char *arg;
     int err = 0;
-    str_list_t *pkg_names_to_install = NULL;
     int r;
 
     signal(SIGINT, sigint_handler);
@@ -412,29 +416,11 @@ static int opkg_install_cmd(int argc, char **argv)
     }
     pkg_info_preinstall_check();
 
-    if (opkg_config->combine)
-        pkg_names_to_install = str_list_alloc();
-
-    for (i = 0; i < argc; i++) {
-        arg = argv[i];
-        if (opkg_config->combine) {
-            str_list_append(pkg_names_to_install, arg);
-        } else {
-            r = opkg_install_by_name(arg);
-            if (r != 0) {
-                opkg_msg(ERROR, "Cannot install package %s.\n", arg);
-                err = -1;
-            }
-        }
-    }
-
-    if (opkg_config->combine) {
-        r = opkg_install_multiple_by_name(pkg_names_to_install);
-        if (r != 0)
-            err = -1;
-
-        str_list_purge(pkg_names_to_install);
-    }
+#ifdef HAVE_SOLVER
+    err = opkg_solver_install(argc, argv);
+#else
+    err = opkg_install(argc, argv);
+#endif
 
     r = opkg_configure_packages(NULL);
     if (r != 0)
@@ -447,72 +433,18 @@ static int opkg_install_cmd(int argc, char **argv)
 
 static int opkg_upgrade_cmd(int argc, char **argv)
 {
-    int i;
-    unsigned int j;
-    pkg_t *pkg;
     int err = 0;
-    pkg_vec_t *pkgs_to_upgrade = NULL;
     int r;
 
     signal(SIGINT, sigint_handler);
 
-    if (argc) {
-        pkg_info_preinstall_check();
+    pkg_info_preinstall_check();
 
-        if (opkg_config->combine)
-            pkgs_to_upgrade = pkg_vec_alloc();
-
-        for (i = 0; i < argc; i++) {
-            if (opkg_config->restrict_to_default_dest) {
-                pkg = pkg_hash_fetch_installed_by_name_dest(argv[i],
-                        opkg_config->default_dest);
-                if (pkg == NULL) {
-                    opkg_msg(ERROR, "Package %s not installed in %s.\n",
-                             argv[i], opkg_config->default_dest->name);
-                    continue;
-                }
-            } else {
-                pkg = pkg_hash_fetch_installed_by_name(argv[i]);
-                if (pkg == NULL) {
-                    opkg_msg(ERROR, "Package %s not installed.\n", argv[i]);
-                    continue;
-                }
-            }
-            if (opkg_config->combine) {
-                pkg_vec_insert(pkgs_to_upgrade, pkg);
-            } else {
-                r = opkg_upgrade_pkg(pkg);
-                if (r != 0)
-                    err = -1;
-            }
-        }
-
-        if (opkg_config->combine) {
-            r = opkg_upgrade_multiple_pkgs(pkgs_to_upgrade);
-            if (r != 0)
-                err = -1;
-
-            pkg_vec_free(pkgs_to_upgrade);
-        }
-    } else {
-        pkg_vec_t *installed = pkg_vec_alloc();
-
-        pkg_info_preinstall_check();
-
-        pkg_hash_fetch_all_installed(installed);
-
-        if (opkg_config->combine) {
-            err = opkg_upgrade_multiple_pkgs(installed);
-        } else {
-            for (j = 0; j < installed->len; j++) {
-                pkg = installed->pkgs[j];
-                r = opkg_upgrade_pkg(pkg);
-                if (r != 0)
-                    err = -1;
-            }
-        }
-        pkg_vec_free(installed);
-    }
+#ifdef HAVE_SOLVER
+    opkg_solver_upgrade(argc, argv);
+#else
+    err = opkg_upgrade(argc, argv);
+#endif
 
     r = opkg_configure_packages(NULL);
     if (r != 0)
@@ -746,56 +678,17 @@ static int opkg_clean_cmd(int argc, char **argv)
 
 static int opkg_remove_cmd(int argc, char **argv)
 {
-    int i, done, err = 0;
-    unsigned int a;
-    pkg_t *pkg;
-    pkg_t *pkg_to_remove;
-    pkg_vec_t *available;
-    int r;
-
-    done = 0;
+    int err = 0;
 
     signal(SIGINT, sigint_handler);
 
     pkg_info_preinstall_check();
 
-    available = pkg_vec_alloc();
-    pkg_hash_fetch_all_installed(available);
-
-    for (i = 0; i < argc; i++) {
-        for (a = 0; a < available->len; a++) {
-            pkg = available->pkgs[a];
-            if (fnmatch(argv[i], pkg->name, 0)) {
-                continue;
-            }
-            if (opkg_config->restrict_to_default_dest) {
-                pkg_to_remove = pkg_hash_fetch_installed_by_name_dest(pkg->name,
-                        opkg_config->default_dest);
-            } else {
-                pkg_to_remove = pkg_hash_fetch_installed_by_name(pkg->name);
-            }
-
-            if (pkg_to_remove == NULL) {
-                opkg_msg(ERROR, "Package %s is not installed.\n", pkg->name);
-                continue;
-            }
-            if (pkg->state_status == SS_NOT_INSTALLED) {
-                opkg_msg(ERROR, "Package %s not installed.\n", pkg->name);
-                continue;
-            }
-
-            r = opkg_remove_pkg(pkg_to_remove);
-            if (r != 0)
-                err = -1;
-            else
-                done = 1;
-        }
-    }
-
-    pkg_vec_free(available);
-
-    if (done == 0)
-        opkg_msg(NOTICE, "No packages removed.\n");
+#ifdef HAVE_SOLVER
+    err = opkg_solver_remove(argc, argv);
+#else
+    err = opkg_remove(argc, argv);
+#endif
 
     write_status_files_if_changed();
     return err;

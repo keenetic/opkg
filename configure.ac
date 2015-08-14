@@ -133,6 +133,32 @@ return OPENSSL_VERSION_NUMBER; ],
   AC_SUBST(OPENSSL_LIBS)
 fi
 
+# check for external solver
+AC_ARG_ENABLE(solver, AC_HELP_STRING([--enable-solver], [Enable solver support.
+  [[default=no]] ]), [want_solver="$enableval"], [want_solver="no"])
+
+AM_CONDITIONAL(HAVE_SOLVER, test "x$want_solver" != "xno")
+
+if test "x$want_solver" != "xno"; then
+    AC_DEFINE(HAVE_SOLVER, 1, [Define if you want to use a solver])
+
+    SOLVER_CFLAGS=""
+    SOLVER_LIBS=""
+
+    AC_MSG_CHECKING([for solver])
+    AS_CASE(["$want_solver"],
+            [no],
+                [AC_MSG_RESULT(no)],
+            [yes],
+                [AC_MSG_RESULT(no)
+                 AC_MSG_ERROR(Specify which solver with --enable-solver=<SOLVER>)],
+            # default
+            [AC_MSG_RESULT(no)
+             AC_MSG_ERROR(Solver <$want_solver> not supported)])
+
+    AC_SUBST(SOLVER_CFLAGS)
+    AC_SUBST(SOLVER_LIBS)
+fi
 
 dnl **********
 dnl GPGME
