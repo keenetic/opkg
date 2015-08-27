@@ -122,6 +122,9 @@ static int copy_to_stream(struct archive *a, FILE * stream)
     int eof;
     size_t len = EXTRACT_BUFFER_LEN;
 
+    if (archive_format(a) == ARCHIVE_FORMAT_EMPTY)
+        return 0;
+
     buffer = xmalloc(len);
 
     while (1) {
@@ -655,6 +658,13 @@ static struct archive *open_compressed_file(const char *filename)
         goto err_cleanup;
     }
 
+    r = archive_read_support_format_empty(ar);
+    if (r != ARCHIVE_OK) {
+        opkg_msg(ERROR, "Empty format not supported: %s\n",
+                 archive_error_string(ar));
+        goto err_cleanup;
+    }
+
     /* Open input file and prepare for reading. */
     r = archive_read_open_filename(ar, filename, EXTRACT_BUFFER_LEN);
     if (r != ARCHIVE_OK) {
@@ -727,6 +737,7 @@ struct opkg_ar *ar_open_compressed_file(const char *filename)
 {
     struct opkg_ar *ar;
     struct archive_entry *entry;
+    int eof;
 
     ar = (struct opkg_ar *)xmalloc(sizeof(struct opkg_ar));
 
@@ -741,8 +752,8 @@ struct opkg_ar *ar_open_compressed_file(const char *filename)
      * header. We skip over this header here so that the caller doesn't need
      * to know about it.
      */
-    entry = read_header(ar->ar, NULL);
-    if (!entry)
+    entry = read_header(ar->ar, &eof);
+    if (!entry && !eof)
         goto err_cleanup;
 
     return ar;
