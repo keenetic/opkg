@@ -416,8 +416,8 @@ static int extract_entry(struct archive *a, struct archive_entry *entry,
         break;
 
     case ARCHIVE_WARN:
-        opkg_msg(NOTICE, "Warning when extracting archive entry: %s\n",
-                 archive_error_string(a));
+        opkg_msg(NOTICE, "Warning when extracting archive entry '%s': %s\n",
+                 archive_entry_pathname(entry), archive_error_string(a));
         break;
 
     case ARCHIVE_RETRY:
