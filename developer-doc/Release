@@ -33,15 +33,10 @@ http://downloads.yoctoproject.org/releases/opkg/
     'sha1sum opkg-* > SHA1SUMS' and 'sha256sum opkg-* > SHA256SUMS' in the
     release directory.
 
-10) Upload the new release directory to a staging location which can be
-    publically accessed. This has usually been:
-        'http://www.paulbarker.me.uk/dist/opkg/'
+10) Upload the new files to the release location on the Yocto Project download
+    server.
 
-11) Inform the Yocto Project administrator (currently Michael Halstead) that a
-    new release has been made and ask for the release directory to be
-    synchronised to the new content of the staging directory.
-
-12) Update the opkg project page at 'http://code.google.com/p/opkg/' to link to
+11) Update the opkg project page at 'http://code.google.com/p/opkg/' to link to
     the new release.
 
-13) Announce the release by email to 'opkg-devel@googlegroups.com'.
+12) Announce the release by email to 'opkg-devel@googlegroups.com'.
