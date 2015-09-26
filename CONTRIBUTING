@@ -86,16 +86,15 @@ the script:
 
 ## Submitting patches for review
 
-Please submit all patches to the opkg mailing list (opkg-devel@googlegroups.com)
-and Cc the maintainer (paul@paulbarker.me.uk). Also make sure that you use the
--M option on the command line or the "diff.renames=copy" option in your config.
+Please submit all patches to the opkg mailing list opkg-devel@googlegroups.com.
+Also make sure that you use the -M option on the command line or the
+"diff.renames=copy" option in your config.
 
 That sounds like a lot to remember but if you run the following commands in your
 opkg directory it will all be done automatically when you use `git format-patch`
 or `git send-email`:
 
 	git config format.to "opkg-devel@googlegroups.com"
-	git config format.cc "paul@paulbarker.me.uk"
 	git config diff.renames copy
 
 To prepare your patches, assuming you took the advice before about developing on
