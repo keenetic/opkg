@@ -715,10 +715,12 @@ int opkg_conf_load(void)
         free(opkg_config->lists_dir);
         opkg_config->lists_dir = tmp;
 
-        sprintf_alloc(&tmp, "%s/%s", opkg_config->offline_root,
-                      opkg_config->cache_dir);
-        free(opkg_config->cache_dir);
-        opkg_config->cache_dir = tmp;
+        if (!opkg_config->host_cache_dir) {
+            sprintf_alloc(&tmp, "%s/%s", opkg_config->offline_root,
+                          opkg_config->cache_dir);
+            free(opkg_config->cache_dir);
+            opkg_config->cache_dir = tmp;
+        }
     }
 
     if (opkg_config->info_dir == NULL)
