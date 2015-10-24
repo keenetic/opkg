@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 #	test-branch.py: 'make check' on each commit on a branch
 #
