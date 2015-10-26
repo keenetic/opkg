@@ -268,9 +268,10 @@ int opkg_download_pkg(pkg_t * pkg)
     if (!err)
         goto cleanup;
 
-    pkg->local_filename = opkg_download_cache(url, NULL, NULL);
-    if (pkg->local_filename == NULL) {
-        err = -1;
+    err = opkg_download_internal(url, pkg->local_filename, NULL, NULL, 1);
+    if (err) {
+	free(pkg->local_filename);
+	pkg->local_filename = NULL;
         goto cleanup;
     }
 
