@@ -354,6 +354,7 @@ int pkg_merge(pkg_t * oldpkg, pkg_t * newpkg)
         oldpkg->provides_count = newpkg->provides_count;
         newpkg->provides_count = 0;
 
+        free(oldpkg->provides);
         oldpkg->provides = newpkg->provides;
         newpkg->provides = NULL;
     }
