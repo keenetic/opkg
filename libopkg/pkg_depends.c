@@ -54,7 +54,7 @@ int version_constraints_satisfied(depend_t * depends, pkg_t * pkg)
 
     comparison = pkg_compare_versions(pkg, temp);
 
-    free(temp->version);
+    pkg_deinit(temp);
     free(temp);
 
     if ((depends->constraint == EARLIER) && (comparison < 0))
