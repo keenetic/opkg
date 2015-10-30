@@ -384,6 +384,7 @@ static int backup_modified_conffiles(pkg_t * pkg, pkg_t * old_pkg)
         cf_name = root_filename_alloc(cf->name);
         /* Ignore if this was a conffile in old_pkg as well */
         if (pkg_get_conffile(old_pkg, cf->name)) {
+            free(cf_name);
             continue;
         }
 
