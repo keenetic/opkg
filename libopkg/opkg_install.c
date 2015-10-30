@@ -279,6 +279,7 @@ static int preinst_configure(pkg_t * pkg, pkg_t * old_pkg)
     err = pkg_run_script(pkg, "preinst", preinst_args);
     if (err) {
         opkg_msg(ERROR, "Aborting installation of %s.\n", pkg->name);
+        free(preinst_args);
         return -1;
     }
 
