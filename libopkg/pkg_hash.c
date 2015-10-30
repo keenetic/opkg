@@ -143,6 +143,8 @@ int pkg_hash_add_from_file(const char *file_name, pkg_src_t * src,
                      "Package %s version %s has no "
                      "valid architecture, ignoring.\n", pkg->name, version_str);
             free(version_str);
+            pkg_deinit(pkg);
+            free(pkg);
             continue;
         }
         if (!pkg->arch_priority) {
@@ -152,6 +154,8 @@ int pkg_hash_add_from_file(const char *file_name, pkg_src_t * src,
                      "which cannot be installed here, ignoring.\n", pkg->name,
                      version_str, pkg->architecture);
             free(version_str);
+            pkg_deinit(pkg);
+            free(pkg);
             continue;
         }
 
