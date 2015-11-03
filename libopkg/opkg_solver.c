@@ -20,7 +20,7 @@
 #include "opkg_message.h"
 
 #ifdef HAVE_SOLVER_LIBSOLV
-#include "opkg_solver_libsolv.h"
+#include "solvers/libsolv/opkg_solver_libsolv.h"
 #endif
 
 int opkg_solver_install(int num_pkgs, char **pkg_names)

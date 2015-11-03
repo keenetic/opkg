@@ -50,8 +50,8 @@ if HAVE_SOLVER
 opkg_sources += opkg_solver.c
 opkg_headers += opkg_solver.h
 if HAVE_SOLVER_LIBSOLV
-opkg_sources += opkg_solver_libsolv.c
-opkg_headers += opkg_solver_libsolv.h
+opkg_sources += solvers/libsolv/opkg_solver_libsolv.c
+opkg_headers += solvers/libsolv/opkg_solver_libsolv.h
 endif
 else
 opkg_sources += opkg_action.c opkg_upgrade.c
