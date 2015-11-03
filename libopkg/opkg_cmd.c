@@ -441,7 +441,7 @@ static int opkg_upgrade_cmd(int argc, char **argv)
     pkg_info_preinstall_check();
 
 #ifdef HAVE_SOLVER
-    opkg_solver_upgrade(argc, argv);
+    err = opkg_solver_upgrade(argc, argv);
 #else
     err = opkg_upgrade(argc, argv);
 #endif
