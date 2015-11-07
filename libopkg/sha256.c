@@ -29,6 +29,8 @@
 #include <stddef.h>
 #include <string.h>
 
+#include "string_util.h"
+
 #if USE_UNLOCKED_IO
 #include "unlocked-io.h"
 #endif
@@ -516,4 +518,9 @@ void sha256_process_block(const void *buffer, size_t len,
         g = ctx->state[6] += g;
         h = ctx->state[7] += h;
     }
+}
+
+char *sha256_to_string(const void *sha256sum_bin)
+{
+    return bin_to_hex(sha256sum_bin, 32);
 }

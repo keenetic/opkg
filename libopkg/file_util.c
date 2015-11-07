@@ -374,27 +374,13 @@ char *file_md5sum_alloc(const char *file_name)
 #ifdef HAVE_SHA256
 char *file_sha256sum_alloc(const char *file_name)
 {
-    static const int sha256sum_bin_len = 32;
-    static const int sha256sum_hex_len = 64;
-
-    static const unsigned char bin2hex[16] = {
-        '0', '1', '2', '3',
-        '4', '5', '6', '7',
-        '8', '9', 'a', 'b',
-        'c', 'd', 'e', 'f'
-    };
-
-    int i, err;
+    int err;
     FILE *file;
-    char *sha256sum_hex;
-    unsigned char sha256sum_bin[sha256sum_bin_len];
-
-    sha256sum_hex = xcalloc(1, sha256sum_hex_len + 1);
+    unsigned char sha256sum_bin[32];
 
     file = fopen(file_name, "r");
     if (file == NULL) {
         opkg_perror(ERROR, "Failed to open file %s", file_name);
-        free(sha256sum_hex);
         return NULL;
     }
 
@@ -402,20 +388,12 @@ char *file_sha256sum_alloc(const char *file_name)
     if (err) {
         opkg_msg(ERROR, "Could't compute sha256sum for %s.\n", file_name);
         fclose(file);
-        free(sha256sum_hex);
         return NULL;
     }
 
     fclose(file);
 
-    for (i = 0; i < sha256sum_bin_len; i++) {
-        sha256sum_hex[i * 2] = bin2hex[sha256sum_bin[i] >> 4];
-        sha256sum_hex[i * 2 + 1] = bin2hex[sha256sum_bin[i] & 0xf];
-    }
-
-    sha256sum_hex[sha256sum_hex_len] = '\0';
-
-    return sha256sum_hex;
+    return sha256_to_string(sha256sum_bin);
 }
 
 #endif

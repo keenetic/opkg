@@ -85,6 +85,9 @@ extern int sha224_stream(FILE * stream, void *resblock);
 extern void *sha256_buffer(const char *buffer, size_t len, void *resblock);
 extern void *sha224_buffer(const char *buffer, size_t len, void *resblock);
 
+/* Convert a binary sha256sum value to an ASCII string. */
+char *sha256_to_string(const void *sha256sum_bin);
+
 #ifdef __cplusplus
 }
 #endif
