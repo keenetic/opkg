@@ -118,6 +118,9 @@ extern int __md5_stream(FILE * stream, void *resblock) __THROW;
 extern void *__md5_buffer(const char *buffer, size_t len,
                           void *resblock) __THROW;
 
+/* Convert a binary md5sum value to an ASCII string. */
+char *md5_to_string(const void *md5sum_bin);
+
 #ifdef __cplusplus
 }
 #endif

@@ -30,6 +30,8 @@
 #include <string.h>
 #include <sys/types.h>
 
+#include "string_util.h"
+
 #if USE_UNLOCKED_IO
 #include "unlocked-io.h"
 #endif
@@ -430,4 +432,9 @@ void md5_process_block(const void *buffer, size_t len, struct md5_ctx *ctx)
     ctx->B = B;
     ctx->C = C;
     ctx->D = D;
+}
+
+char *md5_to_string(const void *md5sum_bin)
+{
+    return bin_to_hex(md5sum_bin, 16);
 }
