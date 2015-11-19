@@ -30,7 +30,7 @@ int opkg_remove_pkg(pkg_t * pkg);
 void remove_data_files_and_list(pkg_t * pkg);
 void remove_maintainer_scripts(pkg_t * pkg);
 
-#ifndef HAVE_SOLVER
+#ifdef HAVE_SOLVER_INTERNAL
 int pkg_has_installed_dependents(pkg_t * pkg,
                                  abstract_pkg_t *** pdependents);
 #endif

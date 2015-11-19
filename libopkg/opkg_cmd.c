@@ -47,7 +47,7 @@
 #include "opkg_solver.h"
 
 /* Needed by opkg_list_upgradable */
-#ifndef HAVE_SOLVER
+#ifdef HAVE_SOLVER_INTERNAL
 #include "solvers/internal/opkg_upgrade.h"
 #endif
 
@@ -562,7 +562,7 @@ static int opkg_list_changed_conffiles_cmd(int argc, char **argv)
 
 static int opkg_list_upgradable_cmd(int argc, char **argv)
 {
-#ifdef HAVE_SOLVER
+#ifndef HAVE_SOLVER_INTERNAL
     // TODO: this requires prepare_upgrade_list in opkg_upgrade.c but opkg_upgrade
     // is not built when an external solver is enabled. Either let the solver
     // handle this, include opkg_upgrade, or put prepare_upgrade_list somewhere else.

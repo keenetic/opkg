@@ -47,11 +47,10 @@ if HAVE_LIBOPKG_API
 opkg_sources += opkg.c
 opkg_headers += opkg.h
 endif
-if HAVE_SOLVER
 if HAVE_SOLVER_LIBSOLV
 opkg_sources += solvers/libsolv/opkg_solver_libsolv.c
 endif
-else
+if HAVE_SOLVER_INTERNAL
 opkg_sources += solvers/internal/opkg_action.c solvers/internal/opkg_upgrade.c
 opkg_headers += solvers/internal/opkg_upgrade.h
 endif

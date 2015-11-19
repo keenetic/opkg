@@ -35,7 +35,7 @@ static int parseDepends(compound_depend_t * compound_depend,
                         const char *depend_str);
 static depend_t *depend_init(void);
 
-#ifndef HAVE_SOLVER
+#ifdef HAVE_SOLVER_INTERNAL
 static char **add_unresolved_dep(pkg_t * pkg, char **the_lost, int ref_ndx);
 static char **merge_unresolved(char **oldstuff, char **newstuff);
 #endif
@@ -577,7 +577,7 @@ static int parseDepends(compound_depend_t * compound_depend,
     return 0;
 }
 
-#ifndef HAVE_SOLVER
+#ifdef HAVE_SOLVER_INTERNAL
 static int pkg_installed_and_constraint_satisfied(pkg_t * pkg, void *cdata)
 {
     depend_t *depend = (depend_t *) cdata;

@@ -28,7 +28,7 @@ extern "C" {
 
 int opkg_install_pkg(pkg_t * pkg, int from_upgrading);
 
-#ifndef HAVE_SOLVER
+#ifdef HAVE_SOLVER_INTERNAL
 int opkg_install_by_name(const char *pkg_name);
 int opkg_install_multiple_by_name(str_list_t * pkg_names);
 #endif

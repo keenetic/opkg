@@ -46,7 +46,7 @@
 #include "xsystem.h"
 #include "xfuncs.h"
 
-#ifndef HAVE_SOLVER
+#ifdef HAVE_SOLVER_INTERNAL
 static int satisfy_dependencies_for(pkg_t * pkg);
 static int check_conflicts_for(pkg_t * pkg);
 static int pkg_remove_orphan_dependent(pkg_t * pkg, pkg_t * old_pkg);
@@ -842,7 +842,7 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
     int old_state_flag;
     sigset_t newset, oldset;
 
-#ifndef HAVE_SOLVER
+#ifdef HAVE_SOLVER_INTERNAL
     int message = 0;
     pkg_vec_t *replacees;
 
@@ -860,7 +860,7 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
         return -1;
     }
 
-#ifndef HAVE_SOLVER
+#ifdef HAVE_SOLVER_INTERNAL
     if (pkg->state_status == SS_INSTALLED && opkg_config->nodeps == 0) {
         err = satisfy_dependencies_for(pkg);
         if (err)
@@ -878,7 +878,7 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
 
     old_pkg = pkg_hash_fetch_installed_by_name(pkg->name);
 
-#ifndef HAVE_SOLVER
+#ifdef HAVE_SOLVER_INTERNAL
     err = opkg_install_check_downgrade(pkg, old_pkg, message);
     if (err < 0)
         return -1;
@@ -892,7 +892,7 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
         /* needed for check_data_file_clashes of dependencies */
     }
 
-#ifndef HAVE_SOLVER
+#ifdef HAVE_SOLVER_INTERNAL
     err = check_conflicts_for(pkg);
     if (err)
         return -1;
@@ -928,7 +928,7 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
     }
 
     if (opkg_config->download_only) {
-#ifndef HAVE_SOLVER
+#ifdef HAVE_SOLVER_INTERNAL
         if (opkg_config->nodeps == 0) {
             err = satisfy_dependencies_for(pkg);
             if (err)
@@ -951,7 +951,7 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
     if (err)
         return -1;
 
-#ifndef HAVE_SOLVER
+#ifdef HAVE_SOLVER_INTERNAL
     if (opkg_config->nodeps == 0) {
         err = satisfy_dependencies_for(pkg);
         if (err)
@@ -975,7 +975,7 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
     opkg_state_changed++;
     pkg->state_flag |= SF_FILELIST_CHANGED;
 
-#ifndef HAVE_SOLVER
+#ifdef HAVE_SOLVER_INTERNAL
     /* DPKG_INCOMPATIBILITY:
      * For upgrades, dpkg and apt-get will not remove orphaned dependents.
      * Apt-get will instead tell the user to use apt-get autoremove to remove
@@ -993,7 +993,7 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
     err = prerm_upgrade_old_pkg(pkg, old_pkg);
     if (err)
         goto UNWIND_PRERM_UPGRADE_OLD_PKG;
-#ifndef HAVE_SOLVER
+#ifdef HAVE_SOLVER_INTERNAL
     err = prerm_deconfigure_conflictors(pkg, replacees);
     if (err)
         goto UNWIND_PRERM_DECONFIGURE_CONFLICTORS;
@@ -1092,7 +1092,7 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
         ab_pkg->state_status = pkg->state_status;
 
     sigprocmask(SIG_UNBLOCK, &newset, &oldset);
-#ifndef HAVE_SOLVER
+#ifdef HAVE_SOLVER_INTERNAL
     pkg_vec_free(replacees);
 #endif
     return 0;
@@ -1105,13 +1105,13 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
     backup_modified_conffiles_unwind(pkg, old_pkg);
  UNWIND_PREINST_CONFIGURE:
     preinst_configure_unwind(pkg, old_pkg);
-#ifndef HAVE_SOLVER
+#ifdef HAVE_SOLVER_INTERNAL
  UNWIND_PRERM_DECONFIGURE_CONFLICTORS:
     prerm_deconfigure_conflictors_unwind(pkg, replacees);
 #endif
  UNWIND_PRERM_UPGRADE_OLD_PKG:
     prerm_upgrade_old_pkg_unwind(pkg, old_pkg);
-#ifndef HAVE_SOLVER
+#ifdef HAVE_SOLVER_INTERNAL
  UNWIND_REMOVE_INSTALLED_REPLACEES:
     pkg_remove_installed_replacees_unwind(replacees);
 #endif
@@ -1129,13 +1129,13 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
              pkg->name);
 
     sigprocmask(SIG_UNBLOCK, &newset, &oldset);
-#ifndef HAVE_SOLVER
+#ifdef HAVE_SOLVER_INTERNAL
     pkg_vec_free(replacees);
 #endif
     return -1;
 }
 
-#ifndef HAVE_SOLVER
+#ifdef HAVE_SOLVER_INTERNAL
 static int satisfy_dependencies_for(pkg_t * pkg)
 {
     unsigned int i;

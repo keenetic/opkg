@@ -30,7 +30,7 @@
 #include "sprintf_alloc.h"
 #include "xfuncs.h"
 
-#ifndef HAVE_SOLVER
+#ifdef HAVE_SOLVER_INTERNAL
 static int opkg_remove_dependent_pkgs(pkg_t * pkg, abstract_pkg_t ** dependents);
 static void print_dependents_warning(pkg_t * pkg, abstract_pkg_t ** dependents);
 static int remove_autoinstalled(pkg_t * pkg);
@@ -190,7 +190,7 @@ int opkg_remove_pkg(pkg_t * pkg)
     if (pkg->parent == NULL)
         return 0;
 
-#ifndef HAVE_SOLVER
+#ifdef HAVE_SOLVER_INTERNAL
     /* While remove pkg with '--force-removal-of-dependent-packages',
      * pkg may be added to remove list multiple times, add status
      * check to make sure pkg only be removed once. */
@@ -264,7 +264,7 @@ int opkg_remove_pkg(pkg_t * pkg)
     pkg->state_status = SS_NOT_INSTALLED;
 
     pkg->parent->state_status = SS_NOT_INSTALLED;
-#ifndef HAVE_SOLVER
+#ifdef HAVE_SOLVER_INTERNAL
     /* remove autoinstalled packages that are orphaned by the removal of this one */
     if (opkg_config->autoremove) {
         r = remove_autoinstalled(pkg);
@@ -275,7 +275,7 @@ int opkg_remove_pkg(pkg_t * pkg)
     return err;
 }
 
-#ifndef HAVE_SOLVER
+#ifdef HAVE_SOLVER_INTERNAL
 /*
  * Returns number of the number of packages depending on the packages provided by this package.
  * Every package implicitly provides itself.

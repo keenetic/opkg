@@ -133,53 +133,39 @@ return OPENSSL_VERSION_NUMBER; ],
   AC_SUBST(OPENSSL_LIBS)
 fi
 
-# check for external solver
-AC_ARG_ENABLE(solver, AC_HELP_STRING([--enable-solver], [Enable solver support.
-  [[default=no]] ]), [want_solver="$enableval"], [want_solver="no"])
+# check for libsolv solver
+AC_ARG_WITH(libsolv, AC_HELP_STRING([--with-libsolv], [Use libsolv solver support.
+  ]), [], [with_libsolv="no"])
 
-AM_CONDITIONAL(HAVE_SOLVER, test "x$want_solver" != "xno")
-
-if test "x$want_solver" != "xno"; then
+if test "x$with_libsolv" != "xno"; then
     # do not allow opkg to be built with both old API and extrnal solver support
     if test "x$want_libopkg_api" = "xyes"; then
         AC_MSG_ERROR(External solver support not compatable with deprecated libopkg API!)
     fi
 
-    AC_DEFINE(HAVE_SOLVER, 1, [Define if you want to use a solver])
-
     SOLVER_CFLAGS=""
     SOLVER_LIBS=""
-
     AC_MSG_CHECKING([for solver])
-    AS_CASE(["$want_solver"],
-            [no],
-                [AC_MSG_RESULT(no)],
-            [yes],
-                [AC_MSG_RESULT(no)
-                 AC_MSG_ERROR(Specify which solver with --enable-solver=<SOLVER>)],
-            [libsolv],
-                [AC_MSG_RESULT(libsolv)
+    AC_MSG_RESULT(libsolv)
+    SOLVER_CFLAGS="-I/usr/local/include/"
+    SOLVER_LIBS="-lsolv -lsolvext"
+    AC_CHECK_LIB([solv],
+                 [solver_solve],
+                 [],
+                [AC_MSG_ERROR(libsolv not found)])
+    dnl TODO: remove previous 6 lines and uncomment line below to use
+    dnl pkg-config once there is a release of libsolv with pkg-config:
+    dnl PKG_CHECK_MODULES(SOLVER, libsolv)
 
-                SOLVER_CFLAGS="-I/usr/local/include/"
-                SOLVER_LIBS="-lsolv -lsolvext"
-                AC_CHECK_LIB([solv],
-                             [solver_solve],
-                             [],
-                             [AC_MSG_ERROR(libsolv not found)])
-                dnl TODO: remove previous 6 lines and uncomment line below to use
-                dnl pkg-config once there is a release of libsolv with pkg-config:
-                dnl PKG_CHECK_MODULES(SOLVER, libsolv)
-
-                AC_DEFINE(HAVE_SOLVER_LIBSOLV,1,[Define if you want to use libsolv])],
-            # default
-            [AC_MSG_RESULT(no)
-             AC_MSG_ERROR(Solver <$want_solver> not supported)])
-
+    AC_DEFINE(HAVE_SOLVER_LIBSOLV,1,[Define if you want to use libsolv])
     AC_SUBST(SOLVER_CFLAGS)
     AC_SUBST(SOLVER_LIBS)
+else
+    AC_DEFINE(HAVE_SOLVER_INTERNAL,1,[Define if you want to use the internal solver])
 fi
 
-AM_CONDITIONAL(HAVE_SOLVER_LIBSOLV,test "x$want_solver" == "xlibsolv")
+AM_CONDITIONAL(HAVE_SOLVER_LIBSOLV, test "x$with_libsolv" != "xno")
+AM_CONDITIONAL(HAVE_SOLVER_INTERNAL, test "x$with_libsolv" = "xno")
 
 dnl **********
 dnl GPGME
