@@ -26,19 +26,15 @@
 
 #include "opkg.h"
 #include "opkg_conf.h"
-
 #include "opkg_install.h"
 #include "opkg_configure.h"
 #include "opkg_download.h"
 #include "opkg_remove.h"
-#include "opkg_upgrade.h"
+#include "solvers/internal/opkg_upgrade.h"
 #include "opkg_verify.h"
-
 #include "pkg_parse.h"
-
 #include "sprintf_alloc.h"
 #include "file_util.h"
-
 #include "xfuncs.h"
 
 #define opkg_assert(expr) if (!(expr)) { \

@@ -52,8 +52,8 @@ if HAVE_SOLVER_LIBSOLV
 opkg_sources += solvers/libsolv/opkg_solver_libsolv.c
 endif
 else
-opkg_sources += opkg_action.c opkg_upgrade.c
-opkg_headers += opkg_upgrade.h
+opkg_sources += solvers/internal/opkg_action.c solvers/internal/opkg_upgrade.c
+opkg_headers += solvers/internal/opkg_upgrade.h
 endif
 
 lib_LTLIBRARIES = libopkg.la
