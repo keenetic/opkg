@@ -53,14 +53,6 @@ enum job_action {
 };
 typedef enum job_action job_action_t;
 
-libsolv_solver_t *libsolv_solver_new(void);
-void libsolv_solver_free(libsolv_solver_t *libsolv_solver);
-
-void libsolv_solver_add_job(libsolv_solver_t *libsolv_solver,
-                            job_action_t action, char *pkg_name);
-int libsolv_solver_solve(libsolv_solver_t *libsolv_solver);
-int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver);
-
 #ifdef __cplusplus
 }
 #endif

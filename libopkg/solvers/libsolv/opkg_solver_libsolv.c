@@ -42,6 +42,13 @@
 #define PRIORITY_PREFERRED 90
 #define PRIORITY_MARKED_FOR_INSTALL 99
 
+static libsolv_solver_t *libsolv_solver_new(void);
+static void libsolv_solver_free(libsolv_solver_t *libsolv_solver);
+static void libsolv_solver_add_job(libsolv_solver_t *libsolv_solver,
+                                   job_action_t action, char *pkg_name);
+static int libsolv_solver_solve(libsolv_solver_t *libsolv_solver);
+static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver);
+
 int opkg_solver_install(int num_pkgs, char **pkg_names)
 {
     int i, err;
@@ -555,7 +562,7 @@ static void libsolv_solver_init(libsolv_solver_t *libsolv_solver)
     }
 }
 
-libsolv_solver_t *libsolv_solver_new(void)
+static libsolv_solver_t *libsolv_solver_new(void)
 {
     libsolv_solver_t *libsolv_solver;
 
@@ -565,8 +572,8 @@ libsolv_solver_t *libsolv_solver_new(void)
     return libsolv_solver;
 }
 
-void libsolv_solver_add_job(libsolv_solver_t *libsolv_solver,
-                            job_action_t action, char *pkg_name)
+static void libsolv_solver_add_job(libsolv_solver_t *libsolv_solver,
+                                   job_action_t action, char *pkg_name)
 {
     Id what = 0;
     Id how = 0;
@@ -607,7 +614,7 @@ void libsolv_solver_add_job(libsolv_solver_t *libsolv_solver,
     queue_push2(&libsolv_solver->solver_jobs, how, what);
 }
 
-int libsolv_solver_solve(libsolv_solver_t *libsolv_solver)
+static int libsolv_solver_solve(libsolv_solver_t *libsolv_solver)
 {
     int problem_count = solver_solve(libsolv_solver->solver,
                                      &libsolv_solver->solver_jobs);
@@ -640,7 +647,7 @@ int libsolv_solver_solve(libsolv_solver_t *libsolv_solver)
     return problem_count;
 }
 
-void libsolv_solver_free(libsolv_solver_t *libsolv_solver)
+static void libsolv_solver_free(libsolv_solver_t *libsolv_solver)
 {
     solver_free(libsolv_solver->solver);
     queue_free(&libsolv_solver->solver_jobs);
@@ -648,7 +655,7 @@ void libsolv_solver_free(libsolv_solver_t *libsolv_solver)
     free(libsolv_solver);
 }
 
-int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
+static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
 {
     int i, ret = 0, err = 0;
     Transaction *transaction;
