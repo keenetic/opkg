@@ -44,11 +44,10 @@
 #include "opkg_verify.h"
 #include "xsystem.h"
 #include "xfuncs.h"
-
-#ifdef HAVE_SOLVER
 #include "opkg_solver.h"
-#else
-#include "opkg_action.h"
+
+/* Needed by opkg_list_upgradable */
+#ifndef HAVE_SOLVER
 #include "opkg_upgrade.h"
 #endif
 
@@ -416,11 +415,7 @@ static int opkg_install_cmd(int argc, char **argv)
     }
     pkg_info_preinstall_check();
 
-#ifdef HAVE_SOLVER
     err = opkg_solver_install(argc, argv);
-#else
-    err = opkg_install(argc, argv);
-#endif
 
     r = opkg_configure_packages(NULL);
     if (r != 0)
@@ -440,11 +435,7 @@ static int opkg_upgrade_cmd(int argc, char **argv)
 
     pkg_info_preinstall_check();
 
-#ifdef HAVE_SOLVER
     err = opkg_solver_upgrade(argc, argv);
-#else
-    err = opkg_upgrade(argc, argv);
-#endif
 
     r = opkg_configure_packages(NULL);
     if (r != 0)
@@ -692,11 +683,7 @@ static int opkg_remove_cmd(int argc, char **argv)
 
     pkg_info_preinstall_check();
 
-#ifdef HAVE_SOLVER
     err = opkg_solver_remove(argc, argv);
-#else
-    err = opkg_remove(argc, argv);
-#endif
 
     write_status_files_if_changed();
     return err;

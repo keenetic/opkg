@@ -15,7 +15,6 @@
 */
 
 #include "config.h"
-#include "opkg_action.h"
 
 #include <fnmatch.h>
 #include <signal.h>
@@ -26,7 +25,7 @@
 #include "opkg_remove.h"
 #include "pkg.h"
 
-int opkg_remove(int num_pkgs, char **pkg_names)
+int opkg_solver_remove(int num_pkgs, char **pkg_names)
 {
     int i, err = 0;
     unsigned int a;
@@ -73,7 +72,7 @@ int opkg_remove(int num_pkgs, char **pkg_names)
     return err;
 }
 
-int opkg_install(int num_pkgs, char **pkg_names)
+int opkg_solver_install(int num_pkgs, char **pkg_names)
 {
     int i;
     char *pkg_name;
@@ -107,7 +106,7 @@ int opkg_install(int num_pkgs, char **pkg_names)
     return err;
 }
 
-int opkg_upgrade(int num_pkgs, char **pkg_names)
+int opkg_solver_upgrade(int num_pkgs, char **pkg_names)
 {
     int i;
     unsigned int j;
@@ -171,4 +170,10 @@ int opkg_upgrade(int num_pkgs, char **pkg_names)
     }
 
     return err;
+}
+
+int opkg_solver_distupgrade(int num_pkgs, char **pkg_names)
+{
+    opkg_msg(ERROR, "Internal solver does not support dist-upgrade!\n");
+    return -1;
 }
