@@ -24,7 +24,6 @@
 #include <solv/solver.h>
 #include <solv/solverdebug.h>
 
-#include "opkg_solver_libsolv.h"
 #include "opkg_install.h"
 #include "opkg_remove.h"
 #include "opkg_message.h"
@@ -41,6 +40,32 @@
    marked as preferred which have higher priority ofer other pakcages */
 #define PRIORITY_PREFERRED 90
 #define PRIORITY_MARKED_FOR_INSTALL 99
+
+struct libsolv_solver {
+    Solver *solver;
+    Queue solver_jobs;
+    Pool *pool;
+    Repo *repo_installed;
+    Repo *repo_available;
+    Repo *repo_preferred;
+    Repo *repo_to_install;
+};
+typedef struct libsolv_solver libsolv_solver_t;
+
+struct arch_data {
+    char *arch;
+    int priority;
+};
+typedef struct arch_data arch_data_t;
+
+enum job_action {
+    JOB_NOOP,
+    JOB_INSTALL,
+    JOB_REMOVE,
+    JOB_UPGRADE,
+    JOB_DISTUPGRADE
+};
+typedef enum job_action job_action_t;
 
 static libsolv_solver_t *libsolv_solver_new(void);
 static void libsolv_solver_free(libsolv_solver_t *libsolv_solver);
