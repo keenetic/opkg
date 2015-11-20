@@ -47,7 +47,6 @@ opkg_sources += opkg.c
 opkg_headers += opkg.h
 endif
 if HAVE_SOLVER
-opkg_sources += opkg_solver.c
 opkg_headers += opkg_solver.h
 if HAVE_SOLVER_LIBSOLV
 opkg_sources += solvers/libsolv/opkg_solver_libsolv.c

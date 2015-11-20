@@ -42,6 +42,107 @@
 #define PRIORITY_PREFERRED 90
 #define PRIORITY_MARKED_FOR_INSTALL 99
 
+int opkg_solver_install(int num_pkgs, char **pkg_names)
+{
+    int i, err;
+
+    libsolv_solver_t *solver = libsolv_solver_new();
+
+    if (num_pkgs == 0) {
+        opkg_msg(ERROR, "No packages specified for install!\n");
+        err = -1;
+        goto CLEANUP;
+    }
+
+    for (i = 0; i < num_pkgs; i++)
+        libsolv_solver_add_job(solver, JOB_INSTALL, pkg_names[i]);
+
+    err = libsolv_solver_solve(solver);
+    if (err)
+        goto CLEANUP;
+
+    err = libsolv_solver_execute_transaction(solver);
+
+CLEANUP:
+    libsolv_solver_free(solver);
+    return err;
+}
+
+int opkg_solver_remove(int num_pkgs, char **pkg_names)
+{
+    int i, err;
+
+    libsolv_solver_t *solver = libsolv_solver_new();
+
+    if (num_pkgs == 0) {
+        opkg_msg(ERROR, "No packages specified for removal!\n");
+        err = -1;
+        goto CLEANUP;
+    }
+
+    for (i = 0; i < num_pkgs; i++)
+        libsolv_solver_add_job(solver, JOB_REMOVE, pkg_names[i]);
+
+    err = libsolv_solver_solve(solver);
+    if (err)
+        goto CLEANUP;
+
+    err = libsolv_solver_execute_transaction(solver);
+
+CLEANUP:
+    libsolv_solver_free(solver);
+    return err;
+}
+
+int opkg_solver_upgrade(int num_pkgs, char **pkg_names)
+{
+    int i, err;
+
+    libsolv_solver_t *solver = libsolv_solver_new();
+
+    if (num_pkgs == 0) {
+        libsolv_solver_add_job(solver, JOB_UPGRADE, 0);
+    } else {
+        for (i = 0; i < num_pkgs; i++)
+            libsolv_solver_add_job(solver, JOB_UPGRADE, pkg_names[i]);
+    }
+
+    err = libsolv_solver_solve(solver);
+    if (err)
+        goto CLEANUP;
+
+    err = libsolv_solver_execute_transaction(solver);
+
+CLEANUP:
+    libsolv_solver_free(solver);
+    return err;
+}
+
+
+int opkg_solver_distupgrade(int num_pkgs, char **pkg_names)
+{
+    int i, err;
+
+    libsolv_solver_t *solver = libsolv_solver_new();
+
+    if (num_pkgs == 0) {
+        libsolv_solver_add_job(solver, JOB_DISTUPGRADE, 0);
+    } else {
+        for (i = 0; i < num_pkgs; i++)
+            libsolv_solver_add_job(solver, JOB_DISTUPGRADE, pkg_names[i]);
+    }
+
+    err = libsolv_solver_solve(solver);
+    if (err)
+        goto CLEANUP;
+
+    err = libsolv_solver_execute_transaction(solver);
+
+CLEANUP:
+    libsolv_solver_free(solver);
+    return err;
+}
+
 static int compare_arch_priorities(const void *p1, const void *p2)
 {
     int priority1 = ((arch_data_t *)p1)->priority;
@@ -627,36 +728,5 @@ int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
     }
 
     transaction_free(transaction);
-    return err;
-}
-
-int opkg_solver_libsolv_perform_action(job_action_t action,
-                                       int num_pkgs, char **pkg_names)
-{
-    int i, err;
-
-    libsolv_solver_t *solver = libsolv_solver_new();
-
-    if (num_pkgs == 0) {
-        if (action == JOB_UPGRADE || action == JOB_DISTUPGRADE) {
-            libsolv_solver_add_job(solver, action, 0);
-        } else {
-            opkg_msg(ERROR, "No packages specified for install or remove!\n");
-            err = -1;
-            goto CLEANUP;
-        }
-    }
-
-    for (i = 0; i < num_pkgs; i++)
-        libsolv_solver_add_job(solver, action, pkg_names[i]);
-
-    err = libsolv_solver_solve(solver);
-    if (err)
-        goto CLEANUP;
-
-    err = libsolv_solver_execute_transaction(solver);
-
- CLEANUP:
-    libsolv_solver_free(solver);
     return err;
 }

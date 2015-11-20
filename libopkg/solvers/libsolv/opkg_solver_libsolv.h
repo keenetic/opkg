@@ -61,9 +61,6 @@ void libsolv_solver_add_job(libsolv_solver_t *libsolv_solver,
 int libsolv_solver_solve(libsolv_solver_t *libsolv_solver);
 int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver);
 
-int opkg_solver_libsolv_perform_action(job_action_t action, int num_pkgs,
-                                       char **pkg_names);
-
 #ifdef __cplusplus
 }
 #endif
