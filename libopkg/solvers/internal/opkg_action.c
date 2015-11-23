@@ -15,9 +15,11 @@
 */
 
 #include "config.h"
+#include "opkg_solver_internal.h"
 
 #include <fnmatch.h>
 #include <signal.h>
+#include <stdlib.h>
 
 #include "opkg_message.h"
 #include "opkg_install.h"
@@ -25,16 +27,33 @@
 #include "opkg_remove.h"
 #include "pkg.h"
 
+static void print_dependents_warning(pkg_t *pkg, abstract_pkg_t **dependents)
+{
+    abstract_pkg_t *dep_ab_pkg;
+
+    opkg_msg(ERROR, "Package %s is depended upon by packages:\n", pkg->name);
+    while ((dep_ab_pkg = *dependents++) != NULL) {
+        if (dep_ab_pkg->state_status == SS_INSTALLED)
+            opkg_msg(ERROR, "\t%s\n", dep_ab_pkg->name);
+    }
+    opkg_msg(ERROR, "These might cease to work if package %s is removed.\n\n",
+             pkg->name);
+    opkg_msg(ERROR, "Force removal of this package with --force-depends.\n");
+    opkg_msg(ERROR, "Force removal of this package and its dependents\n");
+    opkg_msg(ERROR, "with --force-removal-of-dependent-packages.\n");
+}
+
 int opkg_solver_remove(int num_pkgs, char **pkg_names)
 {
     int i, err = 0;
     unsigned int a;
     pkg_t *pkg;
     pkg_t *pkg_to_remove;
-    pkg_vec_t *available;
+    pkg_vec_t *available, *pkgs_to_remove;
     int done = 0;
 
     available = pkg_vec_alloc();
+    pkgs_to_remove = pkg_vec_alloc();
     pkg_hash_fetch_all_installed(available);
 
     for (i = 0; i < num_pkgs; i++) {
@@ -57,18 +76,71 @@ int opkg_solver_remove(int num_pkgs, char **pkg_names)
                 opkg_msg(ERROR, "Package %s not installed.\n", pkg->name);
                 continue;
             }
-
-            err = opkg_remove_pkg(pkg_to_remove);
-            if (!err)
+            /* While remove pkg with '--force-removal-of-dependent-packages',
+             * pkg may be added to remove list multiple times, add status
+             * check to make sure pkg only be removed once. */
+            if (opkg_config->force_removal_of_dependent_packages
+                && pkg->state_flag & SF_FILELIST_CHANGED
+                && pkg->state_status == SS_NOT_INSTALLED)
                 done = 1;
+
+            pkg_vec_insert(pkgs_to_remove, pkg);
+
+            /* only attempt to remove dependent installed packages if
+             * force_depends is not specified or the package is being
+             * replaced.
+             */
+            if (!opkg_config->force_depends && !(pkg->state_flag & SF_REPLACE)) {
+                abstract_pkg_t **dependents;
+                int has_installed_dependents = pkg_has_installed_dependents(pkg,
+                        &dependents);
+
+                if (has_installed_dependents) {
+                    /*
+                     * if this package is depended upon by others, then either we should
+                     * not remove it or we should remove it and all of its dependents
+                     */
+
+                    if (!opkg_config->force_removal_of_dependent_packages) {
+                        print_dependents_warning(pkg, dependents);
+                        free(dependents);
+                        err = -1;
+                        continue;
+                    }
+
+                    /* get packages depending on this package - Karthik */
+                    if (opkg_get_dependent_pkgs(pkg, dependents, pkgs_to_remove)) {
+                        free(dependents);
+                        err = -1;
+                        continue;
+                    }
+                }
+                free(dependents);
+            }
+
+            /* get autoinstalled packages that are orphaned by the removal of
+             * this one */
+            if (opkg_config->autoremove) {
+                if (opkg_get_autoinstalled_pkgs(pkg, pkgs_to_remove))
+                    err = -1;
+            }
         }
     }
 
-    pkg_vec_free(available);
+    for (i = 0; i < pkgs_to_remove->len; i++) {
+        if (opkg_remove_pkg(pkgs_to_remove->pkgs[i])) {
+            err = -1;
+            break;
+        } else {
+            done = 1;
+        }
+    }
 
     if (done == 0)
         opkg_msg(NOTICE, "No packages removed.\n");
 
+    pkg_vec_free(available);
+    pkg_vec_free(pkgs_to_remove);
     return err;
 }
 

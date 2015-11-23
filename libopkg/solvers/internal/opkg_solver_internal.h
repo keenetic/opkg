@@ -24,6 +24,8 @@ extern "C" {
 #endif
 
 int pkg_has_installed_dependents(pkg_t *pkg, abstract_pkg_t ***pdependents);
+int opkg_get_dependent_pkgs(pkg_t *pkg, abstract_pkg_t **dependents, pkg_vec_t *dependent_pkgs);
+int opkg_get_autoinstalled_pkgs(pkg_t *pkg, pkg_vec_t *dependent_pkgs);
 
 #ifdef __cplusplus
 }
