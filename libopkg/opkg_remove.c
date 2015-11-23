@@ -423,7 +423,6 @@ static int remove_autoinstalled(pkg_t * pkg)
     int n_deps;
     pkg_t *p;
     struct compound_depend *cdep;
-    abstract_pkg_t **dependents;
     int r;
 
     int count = pkg->pre_depends_count + pkg->depends_count
@@ -455,7 +454,7 @@ static int remove_autoinstalled(pkg_t * pkg)
             if (!p->auto_installed)
                 continue;
 
-            n_deps = pkg_has_installed_dependents(p, &dependents);
+            n_deps = pkg_has_installed_dependents(p, NULL);
             if (n_deps == 0) {
                 opkg_msg(NOTICE,
                          "%s was autoinstalled and is "
@@ -467,8 +466,6 @@ static int remove_autoinstalled(pkg_t * pkg)
                 opkg_msg(INFO,
                          "%s was autoinstalled and is " "still required by %d "
                          "installed packages.\n", p->name, n_deps);
-
-            free(dependents);
         }
     }
 
