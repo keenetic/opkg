@@ -99,7 +99,6 @@ int pkg_hash_fetch_unsatisfied_dependencies(pkg_t * pkg,
                                             char ***unresolved);
 pkg_vec_t *pkg_hash_fetch_satisfied_dependencies(pkg_t * pkg);
 pkg_vec_t *pkg_hash_fetch_conflicts(pkg_t * pkg);
-int pkg_dependence_satisfied(depend_t * depend);
 #endif
 
 #ifdef __cplusplus
