@@ -47,6 +47,8 @@
 #include "xfuncs.h"
 
 #ifdef HAVE_SOLVER_INTERNAL
+#include "solvers/internal/opkg_solver_internal.h"
+
 static int satisfy_dependencies_for(pkg_t * pkg);
 static int check_conflicts_for(pkg_t * pkg);
 static int pkg_remove_orphan_dependent(pkg_t * pkg, pkg_t * old_pkg);

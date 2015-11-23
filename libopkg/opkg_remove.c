@@ -31,6 +31,8 @@
 #include "xfuncs.h"
 
 #ifdef HAVE_SOLVER_INTERNAL
+#include "solvers/internal/opkg_solver_internal.h"
+
 static int opkg_remove_dependent_pkgs(pkg_t * pkg, abstract_pkg_t ** dependents);
 static void print_dependents_warning(pkg_t * pkg, abstract_pkg_t ** dependents);
 static int remove_autoinstalled(pkg_t * pkg);
@@ -276,64 +278,6 @@ int opkg_remove_pkg(pkg_t * pkg)
 }
 
 #ifdef HAVE_SOLVER_INTERNAL
-/*
- * Returns number of the number of packages depending on the packages provided by this package.
- * Every package implicitly provides itself.
- */
-int pkg_has_installed_dependents(pkg_t * pkg, abstract_pkg_t *** pdependents)
-{
-    int nprovides = pkg->provides_count;
-    abstract_pkg_t **provides = pkg->provides;
-    unsigned int n_installed_dependents = 0;
-    unsigned int n_deps;
-    int i, j;
-    for (i = 0; i < nprovides; i++) {
-        abstract_pkg_t *providee = provides[i];
-        abstract_pkg_t *dep_ab_pkg;
-
-        n_deps = providee->depended_upon_by->len;
-        for (j = 0; j < n_deps; j++) {
-            dep_ab_pkg = providee->depended_upon_by->pkgs[j];
-            int dep_installed = (dep_ab_pkg->state_status == SS_INSTALLED)
-                    || (dep_ab_pkg->state_status == SS_UNPACKED);
-            if (dep_installed)
-                n_installed_dependents++;
-        }
-
-    }
-    /* if caller requested the set of installed dependents */
-    if (pdependents) {
-        int p = 0;
-        abstract_pkg_t **dependents =
-            xcalloc((n_installed_dependents + 1), sizeof(abstract_pkg_t *));
-
-        *pdependents = dependents;
-        for (i = 0; i < nprovides; i++) {
-            abstract_pkg_t *providee = provides[i];
-            abstract_pkg_t *dep_ab_pkg;
-
-            n_deps = providee->depended_upon_by->len;
-            for (j = 0; j < n_deps; j++) {
-                dep_ab_pkg = providee->depended_upon_by->pkgs[j];
-                int installed_not_marked =
-                        (dep_ab_pkg->state_status == SS_INSTALLED
-                         && !(dep_ab_pkg->state_flag & SF_MARKED));
-                if (installed_not_marked) {
-                    dependents[p++] = dep_ab_pkg;
-                    dep_ab_pkg->state_flag |= SF_MARKED;
-                }
-            }
-        }
-        dependents[p] = NULL;
-        /* now clear the marks */
-        for (i = 0; i < p; i++) {
-            abstract_pkg_t *dep_ab_pkg = dependents[i];
-            dep_ab_pkg->state_flag &= ~SF_MARKED;
-        }
-    }
-    return n_installed_dependents;
-}
-
 static int opkg_remove_dependent_pkgs(pkg_t * pkg, abstract_pkg_t ** dependents)
 {
     unsigned int i;
