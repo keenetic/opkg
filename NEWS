@@ -1,3 +1,20 @@
+opkg-0.3.1
+==========
+
+- Libsolv backend support. Add --enable-solver=libsolv config option to have opkg
+  use the external solver libsolv. This feature is fully functional, but in 
+  experimental stage.
+
+- Cache filenames are now based on the path md5sum instead of the full path, to
+  fix errors on long filepaths.
+
+- Fix several memory leaks
+
+- Add --host-cache-dir and --cache-dir command line flag to change the cache directory 
+  location
+
+- Fix error when processing empty Package.gz files.
+
 opkg-0.3.0
 ==========
 
