@@ -199,8 +199,10 @@ static void libsolv_solver_set_arch_policy(libsolv_solver_t *libsolv_solver)
     nv_pair_list_elt_t *arch_info;
 
     list_for_each_entry(arch_info, &opkg_config->arch_list.head, node) {
-        if (arch_count > arch_list_size)
-            archs = xrealloc(archs, arch_list_size *= 2);
+        if (arch_count >= arch_list_size) {
+            arch_list_size *= 2;
+            archs = xrealloc(archs, arch_list_size * sizeof(arch_data_t));
+        }
 
         archs[arch_count].arch = ((nv_pair_t *)(arch_info->data))->name;
         archs[arch_count].priority = atoi(((nv_pair_t *)
