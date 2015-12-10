@@ -143,20 +143,9 @@ if test "x$with_libsolv" != "xno"; then
         AC_MSG_ERROR(External solver support not compatable with deprecated libopkg API!)
     fi
 
-    SOLVER_CFLAGS=""
-    SOLVER_LIBS=""
     AC_MSG_CHECKING([for solver])
     AC_MSG_RESULT(libsolv)
-    SOLVER_CFLAGS="-I/usr/local/include/"
-    SOLVER_LIBS="-lsolv -lsolvext"
-    AC_CHECK_LIB([solv],
-                 [solver_solve],
-                 [],
-                [AC_MSG_ERROR(libsolv not found)])
-    dnl TODO: remove previous 6 lines and uncomment line below to use
-    dnl pkg-config once there is a release of libsolv with pkg-config:
-    dnl PKG_CHECK_MODULES(SOLVER, libsolv)
-
+    PKG_CHECK_MODULES(SOLVER, libsolv)
     AC_DEFINE(HAVE_SOLVER_LIBSOLV,1,[Define if you want to use libsolv])
     AC_SUBST(SOLVER_CFLAGS)
     AC_SUBST(SOLVER_LIBS)
