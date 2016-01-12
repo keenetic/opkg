@@ -1357,10 +1357,15 @@ static void pkg_get_provider_replacees(pkg_t * pkg,
             continue;
         for (j = 0; j < ap->pkgs->len; j++) {
             pkg_t *replacee = ap->pkgs->pkgs[j];
-            int installed = (replacee->state_status == SS_INSTALLED)
-                    || (replacee->state_status == SS_UNPACKED);
-            if (installed)
-                pkg_vec_insert(replacees, replacee);
+            pkg_t *old = pkg_hash_fetch_installed_by_name(pkg->name);
+            /* skip pkg if installed: it  will be removed during upgrade
+             * issue 8913 */
+            if (old != replacee) {
+                int installed = (replacee->state_status == SS_INSTALLED)
+                        || (replacee->state_status == SS_UNPACKED);
+                if (installed)
+                    pkg_vec_insert(replacees, replacee);
+            }
         }
     }
 }
