@@ -1,4 +1,4 @@
-import tarfile, os, sys
+import tarfile, os, sys, stat
 import cfg
 import errno
 
@@ -11,6 +11,12 @@ class Opk:
 			"Size", "InstalledSize", "Filename", "Source",\
 			"Description", "OE", "Homepage", "Priority",\
 			"Conffiles", "Essential"]
+
+	control = None
+	preinst = None
+	postinst = None
+	prerm = None
+	postrm = None
 
 	def __init__(self, **control):
 		for k in control.keys():
@@ -27,45 +33,63 @@ class Opk:
 		self.control = control
 
 	def write(self, tar_not_ar=False, data_files=None):
+		TEMP_FILES = ['control', 'control.tar.gz', 'data.tar.gz',
+			'preinst', 'postinst', 'prerm', 'postrm']
+
 		filename = "{Package}_{Version}_{Architecture}.opk"\
 						.format(**self.control)
-		if os.path.exists(filename):
-			os.unlink(filename)
-		if os.path.exists("control"):
-			os.unlink("control")
-		if os.path.exists("control.tar.gz"):
-			os.unlink("control.tar.gz")
-		if os.path.exists("data.tar.gz"):
-			os.unlink("data.tar.gz")
 
-		f = open("control", "w")
-		for k in self.control.keys():
-			f.write("{}: {}\n".format(k, self.control[k]))
-		f.close()
+		for f in TEMP_FILES + [filename]:
+			if os.path.exists(f):
+				os.unlink(f)
 
-		tar = tarfile.open("control.tar.gz", "w:gz")
-		tar.add("control")
-		tar.close()
+		with open("control", "w") as f:
+			for k in self.control.keys():
+				f.write("{}: {}\n".format(k, self.control[k]))
 
-		tar = tarfile.open("data.tar.gz", "w:gz")
-		if data_files:
-			for df in data_files:
-				tar.add(df)
-		tar.close()
+		if self.preinst:
+			with open("preinst", "w") as f:
+				os.fchmod(f.fileno(), 0o755)
+				f.write(self.preinst)
 
+		if self.postinst:
+			with open("postinst", "w") as f:
+				os.fchmod(f.fileno(), 0o755)
+				f.write(self.postinst)
+
+		if self.prerm:
+			with open("prerm", "w") as f:
+				os.fchmod(f.fileno(), 0o755)
+				f.write(self.prerm)
+
+		if self.postrm:
+			with open("postrm", "w") as f:
+				os.fchmod(f.fileno(), 0o755)
+				f.write(self.postrm)
+
+		with tarfile.open("control.tar.gz", "w:gz") as tar:
+			tar.add("control")
+			if self.preinst: tar.add("preinst")
+			if self.postinst: tar.add("postinst")
+			if self.prerm: tar.add("prerm")
+			if self.postrm: tar.add("postrm")
+
+		with tarfile.open("data.tar.gz", "w:gz") as tar:
+			if data_files:
+				for df in data_files:
+					tar.add(df)
 
 		if tar_not_ar:
-			tar = tarfile.open(filename, "w:gz")
-			tar.add("control.tar.gz")
-			tar.add("data.tar.gz")
-			tar.close()
+			with tarfile.open(filename, "w:gz") as tar:
+				tar.add("control.tar.gz")
+				tar.add("data.tar.gz")
 		else:
 			os.system("ar q {} control.tar.gz data.tar.gz \
 					2>/dev/null".format(filename))
 
-		os.unlink("control")
-		os.unlink("control.tar.gz")
-		os.unlink("data.tar.gz")
+		for f in TEMP_FILES:
+			if os.path.exists(f):
+				os.unlink(f)
 
 import hashlib
 def md5sum_file(fname):
