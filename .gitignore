@@ -9,12 +9,17 @@
 *.[oa]
 *~
 *.*.swp
+*.dirstamp
 
 Makefile
 Makefile.in
 # o_0
 Makefile.in.in
 !tests/regress/Makefile
+
+# The generated m4 subdirectory
+m4/
+!m4/gpgme.m4
 
 # The local aclocal.m4 file
 aclocal.m4
