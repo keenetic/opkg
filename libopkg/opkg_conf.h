@@ -65,6 +65,7 @@ typedef struct opkg_conf {
     char *conf_file;
 
     char *tmp_dir;
+    char *intercepts_dir; /* set to "/dev/null" to disable intercepts */
     char *lists_dir;
     char *cache_dir;
     char *lock_file;

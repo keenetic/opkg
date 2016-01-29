@@ -179,7 +179,7 @@ static opkg_intercept_t opkg_prep_intercepts(void)
 
     ctx = xcalloc(1, sizeof(*ctx));
     ctx->oldpath = xstrdup(getenv("PATH"));
-    sprintf_alloc(&newpath, "%s/opkg/intercept:%s", DATADIR, ctx->oldpath);
+    sprintf_alloc(&newpath, "%s:%s", opkg_config->intercepts_dir, ctx->oldpath);
     sprintf_alloc(&ctx->statedir, "%s/opkg-intercept-XXXXXX",
                   opkg_config->tmp_dir);
 
@@ -195,6 +195,7 @@ static opkg_intercept_t opkg_prep_intercepts(void)
 
     setenv("OPKG_INTERCEPT_DIR", ctx->statedir, 1);
     setenv("PATH", newpath, 1);
+    opkg_msg(DEBUG, "Added intercepts dir to PATH; new PATH=%s\n", newpath);
     free(newpath);
 
     return ctx;
@@ -206,6 +207,7 @@ static int opkg_finalize_intercepts(opkg_intercept_t ctx)
     int err = 0;
 
     setenv("PATH", ctx->oldpath, 1);
+    opkg_msg(DEBUG, "Removed intercepts dir from PATH; old PATH=%s\n", ctx->oldpath);
     free(ctx->oldpath);
 
     dir = opendir(ctx->statedir);
@@ -220,6 +222,7 @@ static int opkg_finalize_intercepts(opkg_intercept_t ctx)
             sprintf_alloc(&path, "%s/%s", ctx->statedir, de->d_name);
             if (access(path, X_OK) == 0) {
                 const char *argv[] = { "sh", "-c", path, NULL };
+                opkg_msg(DEBUG, "Run intercepted script %s\n", path);
                 xsystem(argv);
             }
             free(path);

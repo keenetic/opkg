@@ -30,6 +30,7 @@ REGRESSION_TESTS := core/01_install.py \
 		    core/29_reldeps_eq.py \
 		    core/30_reldeps_gteq.py \
 		    core/31_reldeps_gt.py \
+		    core/32_intercept_disable.py \
 		    regress/issue26.py \
 		    regress/issue31.py \
 		    regress/issue32.py \

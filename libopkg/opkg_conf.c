@@ -47,6 +47,7 @@ opkg_conf_t *opkg_config = &_conf;
  */
 static opkg_option_t options[] = {
     {"cache_dir", OPKG_OPT_TYPE_STRING, &_conf.cache_dir},
+    {"intercepts_dir", OPKG_OPT_TYPE_STRING, &_conf.intercepts_dir},
     {"lists_dir", OPKG_OPT_TYPE_STRING, &_conf.lists_dir},
     {"lock_file", OPKG_OPT_TYPE_STRING, &_conf.lock_file},
     {"info_dir", OPKG_OPT_TYPE_STRING, &_conf.info_dir},
@@ -703,6 +704,9 @@ int opkg_conf_load(void)
     hash_table_init("obs-file-hash", &opkg_config->obs_file_hash,
                     OPKG_CONF_DEFAULT_HASH_LEN / 16);
 
+    if (opkg_config->intercepts_dir == NULL)
+        opkg_config->intercepts_dir = xstrdup(DATADIR "/opkg/intercept");
+
     if (opkg_config->lists_dir == NULL)
         opkg_config->lists_dir = xstrdup(OPKG_CONF_DEFAULT_LISTS_DIR);
 
@@ -710,6 +714,11 @@ int opkg_conf_load(void)
         opkg_config->cache_dir = xstrdup(OPKG_CONF_DEFAULT_CACHE_DIR);
 
     if (opkg_config->offline_root) {
+        sprintf_alloc(&tmp, "%s/%s", opkg_config->offline_root,
+                      opkg_config->intercepts_dir);
+        free(opkg_config->intercepts_dir);
+        opkg_config->intercepts_dir = tmp;
+
         sprintf_alloc(&tmp, "%s/%s", opkg_config->offline_root,
                       opkg_config->lists_dir);
         free(opkg_config->lists_dir);
