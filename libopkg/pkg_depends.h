@@ -93,14 +93,6 @@ const char *constraint_to_str(enum version_constraint c);
 enum version_constraint str_to_constraint(const char **str);
 int is_pkg_in_pkg_vec(pkg_vec_t * vec, pkg_t * pkg);
 
-#ifdef HAVE_SOLVER_INTERNAL
-int pkg_hash_fetch_unsatisfied_dependencies(pkg_t * pkg,
-                                            pkg_vec_t * depends,
-                                            char ***unresolved);
-pkg_vec_t *pkg_hash_fetch_satisfied_dependencies(pkg_t * pkg);
-pkg_vec_t *pkg_hash_fetch_conflicts(pkg_t * pkg);
-#endif
-
 #ifdef __cplusplus
 }
 #endif

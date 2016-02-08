@@ -52,9 +52,10 @@ opkg_sources += solvers/libsolv/opkg_solver_libsolv.c
 endif
 if HAVE_SOLVER_INTERNAL
 opkg_sources += solvers/internal/opkg_action.c solvers/internal/opkg_upgrade_internal.c \
-                solvers/internal/opkg_solver_internal.c solvers/internal/opkg_install_internal.c
+                solvers/internal/opkg_solver_internal.c solvers/internal/opkg_install_internal.c \
+                solvers/internal/pkg_depends_internal.c
 opkg_headers += solvers/internal/opkg_upgrade_internal.h solvers/internal/opkg_solver_internal.h \
-                solvers/internal/opkg_install_internal.h
+                solvers/internal/opkg_install_internal.h solvers/internal/pkg_depends_internal.h
 endif
 
 lib_LTLIBRARIES = libopkg.la

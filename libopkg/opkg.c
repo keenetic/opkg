@@ -33,6 +33,7 @@
 #include "solvers/internal/opkg_upgrade_internal.h"
 #include "opkg_verify.h"
 #include "pkg_parse.h"
+#include "solvers/internal/pkg_depends_internal.h"
 #include "sprintf_alloc.h"
 #include "file_util.h"
 #include "xfuncs.h"

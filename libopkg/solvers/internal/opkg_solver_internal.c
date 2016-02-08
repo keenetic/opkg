@@ -18,6 +18,7 @@
 
 #include "opkg_message.h"
 #include "pkg.h"
+#include "pkg_depends_internal.h"
 #include "opkg_solver_internal.h"
 
 /* adds the list of providers of the package being replaced */
