@@ -23,7 +23,7 @@
 #include <stdlib.h>
 
 #include "opkg_install.h"
-#include "opkg_upgrade.h"
+#include "opkg_upgrade_internal.h"
 #include "opkg_message.h"
 #include "xfuncs.h"
 

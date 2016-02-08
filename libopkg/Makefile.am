@@ -51,9 +51,9 @@ if HAVE_SOLVER_LIBSOLV
 opkg_sources += solvers/libsolv/opkg_solver_libsolv.c
 endif
 if HAVE_SOLVER_INTERNAL
-opkg_sources += solvers/internal/opkg_action.c solvers/internal/opkg_upgrade.c \
+opkg_sources += solvers/internal/opkg_action.c solvers/internal/opkg_upgrade_internal.c \
                 solvers/internal/opkg_solver_internal.c solvers/internal/opkg_install_internal.c
-opkg_headers += solvers/internal/opkg_upgrade.h solvers/internal/opkg_solver_internal.h \
+opkg_headers += solvers/internal/opkg_upgrade_internal.h solvers/internal/opkg_solver_internal.h \
                 solvers/internal/opkg_install_internal.h
 endif
 

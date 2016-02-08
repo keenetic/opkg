@@ -13,8 +13,8 @@
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    General Public License for more details.
 */
-#ifndef OPKG_UPGRADE_H
-#define OPKG_UPGRADE_H
+#ifndef OPKG_UPGRADE_INTERNAL_H
+#define OPKG_UPGRADE_INTERNAL_H
 
 #include "active_list.h"
 #include "pkg.h"
@@ -31,4 +31,4 @@ struct active_list *prepare_upgrade_list(void);
 #ifdef __cplusplus
 }
 #endif
-#endif                          /* OPKG_UPGRADE_H */
+#endif                          /* OPKG_UPGRADE_INTERNAL_H */

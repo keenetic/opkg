@@ -48,7 +48,7 @@
 
 /* Needed by opkg_list_upgradable */
 #ifdef HAVE_SOLVER_INTERNAL
-#include "solvers/internal/opkg_upgrade.h"
+#include "solvers/internal/opkg_upgrade_internal.h"
 #endif
 
 static void print_pkg(pkg_t * pkg)

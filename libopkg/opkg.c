@@ -30,7 +30,7 @@
 #include "opkg_configure.h"
 #include "opkg_download.h"
 #include "opkg_remove.h"
-#include "solvers/internal/opkg_upgrade.h"
+#include "solvers/internal/opkg_upgrade_internal.h"
 #include "opkg_verify.h"
 #include "pkg_parse.h"
 #include "sprintf_alloc.h"
