@@ -49,7 +49,7 @@ if opkgcl.is_installed("c"):
 if opkgcl.is_installed("a"):
     opk.fail("Package 'a' installed but dependency 'c' is not installed due to a conflict.")
 if opkgcl.is_installed("b"):
-    opk.xfail("Package 'b' installed and orphaned.")
+    opk.fail("Package 'b' installed and orphaned.")
 
 opkgcl.remove("x")
 opkgcl.remove("a")
