@@ -15,6 +15,7 @@
 */
 
 #include "config.h"
+#include "opkg_install_internal.h"
 #include "opkg_solver_internal.h"
 
 #include <fnmatch.h>
