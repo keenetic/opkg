@@ -25,9 +25,7 @@ extern "C" {
 
 int opkg_install_by_name(const char *pkg_name);
 int opkg_install_multiple_by_name(str_list_t *pkg_names);
-int pkg_remove_orphan_dependent(pkg_t *pkg, pkg_t *old_pkg);
-int pkg_remove_installed_replacees(pkg_vec_t *replacees);
-int pkg_remove_installed_replacees_unwind(pkg_vec_t *replacees);
+int opkg_execute_install(pkg_t *pkg, pkg_vec_t *pkgs_to_install, pkg_vec_t *replacees, pkg_vec_t *orphans, int from_upgrade);
 
 #ifdef __cplusplus
 }

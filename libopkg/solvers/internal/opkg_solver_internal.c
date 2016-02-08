@@ -18,7 +18,7 @@
 
 #include "opkg_message.h"
 #include "pkg.h"
-#include "opkg_install.h"
+#include "opkg_solver_internal.h"
 
 /* adds the list of providers of the package being replaced */
 static void pkg_get_provider_replacees(pkg_t *pkg,
@@ -45,6 +45,77 @@ static void pkg_get_provider_replacees(pkg_t *pkg,
         }
     }
 }
+
+/*
+ * Get packages which were auto_installed due to a dependency by old_pkg,
+ * which are no longer a dependency in the new (upgraded) pkg.
+ */
+static void pkg_get_orphan_dependents(pkg_t *pkg, pkg_t *old_pkg, pkg_vec_t *orphans)
+{
+    int i, j, k, l, found;
+    int n_deps;
+    pkg_t *p;
+    struct compound_depend *cd0, *cd1;
+    abstract_pkg_t **dependents;
+
+    int count0 = old_pkg->pre_depends_count + old_pkg->depends_count
+        + old_pkg->recommends_count + old_pkg->suggests_count;
+    int count1 = pkg->pre_depends_count + pkg->depends_count
+        + pkg->recommends_count + pkg->suggests_count;
+
+    for (i = 0; i < count0; i++) {
+        cd0 = &old_pkg->depends[i];
+        if (cd0->type != DEPEND && cd0->type != RECOMMEND)
+            continue;
+        for (j = 0; j < cd0->possibility_count; j++) {
+            found = 0;
+
+            for (k = 0; k < count1; k++) {
+                cd1 = &pkg->depends[k];
+                if (cd1->type != DEPEND && cd1->type != RECOMMEND)
+                    continue;
+                for (l = 0; l < cd1->possibility_count; l++) {
+                    if (cd0->possibilities[j]->pkg == cd1->possibilities[l]->pkg) {
+                        found = 1;
+                        break;
+                    }
+                }
+                if (found)
+                    break;
+            }
+
+            if (found)
+                continue;
+
+            /*
+             * old_pkg has a dependency that pkg does not.
+             */
+            p = pkg_hash_fetch_installed_by_name(cd0->possibilities[j]->pkg->
+                                                 name);
+
+            if (!p)
+                continue;
+
+            if (!p->auto_installed)
+                continue;
+
+            n_deps = pkg_has_installed_dependents(p, &dependents);
+            n_deps--;           /* don't count old_pkg */
+
+            if (n_deps == 0) {
+                opkg_msg(NOTICE,
+                         "%s was autoinstalled and is "
+                         "now orphaned, will remove\n", p->name);
+                pkg_vec_insert(orphans, p);
+            } else
+                opkg_msg(INFO,
+                         "%s was autoinstalled and is " "still required by %d "
+                         "installed packages.\n", p->name, n_deps);
+
+        }
+    }
+}
+
 
 /*
  * Returns number of the number of packages depending on the packages provided by this package.
@@ -207,7 +278,7 @@ int opkg_get_autoinstalled_pkgs(pkg_t *pkg, pkg_vec_t *dependent_pkgs)
     return err;
 }
 
-int check_conflicts_for(pkg_t *pkg)
+static int check_conflicts_for(pkg_t *pkg)
 {
     unsigned int i;
     pkg_vec_t *conflicts;
@@ -231,7 +302,7 @@ int check_conflicts_for(pkg_t *pkg)
 }
 
 /* returns number of installed replacees */
-int pkg_get_installed_replacees(pkg_t *pkg,
+static int pkg_get_installed_replacees(pkg_t *pkg,
                                        pkg_vec_t *installed_replacees)
 {
     abstract_pkg_t **replaces = pkg->replaces;
@@ -265,7 +336,7 @@ int pkg_get_installed_replacees(pkg_t *pkg,
 /* compares versions of pkg and old_pkg, returns 0 if OK to proceed with
  * installation of pkg, 1 if the package is already up-to-date or -1 if the
  * install would be a downgrade. */
-int opkg_install_check_downgrade(pkg_t *pkg, pkg_t *old_pkg,
+static int opkg_install_check_downgrade(pkg_t *pkg, pkg_t *old_pkg,
                                         int message)
 {
     if (old_pkg) {
@@ -342,12 +413,12 @@ int opkg_install_check_downgrade(pkg_t *pkg, pkg_t *old_pkg,
     return 0;
 }
 
-int satisfy_dependencies_for(pkg_t *pkg)
+static int calculate_dependencies_for(pkg_t *pkg, pkg_vec_t *pkgs_to_install, pkg_vec_t *replacees, pkg_vec_t *orphans)
 {
     unsigned int i;
-    int err;
+    int err = 0;
     pkg_vec_t *depends = pkg_vec_alloc();
-    pkg_t *dep;
+    pkg_t *dep, *old_pkg;
     char **tmp, **unresolved = NULL;
     int ndepends;
 
@@ -370,8 +441,8 @@ int satisfy_dependencies_for(pkg_t *pkg)
                 "This could mean that your package list is out of date or that the packages\n"
                 "mentioned above do not yet exist (try 'opkg update'). To proceed in spite\n"
                 "of this problem try again with the '-force-depends' option.\n");
-            pkg_vec_free(depends);
-            return -1;
+            err = -1;
+            goto cleanup;
         }
     }
 
@@ -392,22 +463,29 @@ int satisfy_dependencies_for(pkg_t *pkg)
             int needs_install = (dep->state_status != SS_INSTALLED)
                     && (dep->state_status != SS_UNPACKED);
             if (needs_install) {
-                opkg_msg(DEBUG2, "Calling opkg_install_pkg.\n");
-                if (!is_pkg_in_pkg_vec(dep->wanted_by, pkg))
+                if (dep->dest == NULL)
+                    dep->dest = opkg_config->default_dest;
+                if (check_conflicts_for(dep)) {
+                    err = -1;
+                    goto cleanup;
+                }
+                if (!is_pkg_in_pkg_vec(dep->wanted_by, pkg)) {
+                    pkg_vec_insert(pkgs_to_install, dep);
+                    old_pkg = pkg_hash_fetch_installed_by_name(dep->name);
+
+                    pkg_get_installed_replacees(dep, replacees);
+                    /* DPKG_INCOMPATIBILITY:
+                     * For upgrades, dpkg and apt-get will not remove orphaned dependents.
+                     * Apt-get will instead tell the user to use apt-get autoremove to remove
+                     * the autoinstalled orphaned package if it is no longer needed */
+                    if (old_pkg)
+                        pkg_get_orphan_dependents(dep, old_pkg, orphans);
                     pkg_vec_insert(dep->wanted_by, pkg);
-                err = opkg_install_pkg(dep, 0);
-                /* mark this package as having been automatically installed to
-                 * satisfy a dependency */
-                dep->auto_installed = 1;
-                if (err) {
-                    pkg_vec_free(depends);
-                    return err;
                 }
             }
         }
 
-        pkg_vec_free(depends);
-        return 0;
+        goto cleanup;
     }
 
     /* Mark packages as to-be-installed */
@@ -429,19 +507,81 @@ int satisfy_dependencies_for(pkg_t *pkg)
         int needs_install = (dep->state_status != SS_INSTALLED)
                 && (dep->state_status != SS_UNPACKED);
         if (needs_install) {
-            opkg_msg(DEBUG2, "Calling opkg_install_pkg.\n");
-            err = opkg_install_pkg(dep, 0);
-            /* mark this package as having been automatically installed to
-             * satisfy a dependancy */
-            dep->auto_installed = 1;
-            if (err) {
-                pkg_vec_free(depends);
-                return err;
+            if (dep->dest == NULL)
+                dep->dest = opkg_config->default_dest;
+            if (check_conflicts_for(dep)) {
+                err = -1;
+                goto cleanup;
             }
+            pkg_vec_insert(pkgs_to_install, dep);
+            old_pkg = pkg_hash_fetch_installed_by_name(dep->name);
+
+            pkg_get_installed_replacees(dep, replacees);
+            if (old_pkg)
+                pkg_get_orphan_dependents(dep, old_pkg, replacees);
         }
     }
 
+cleanup:
     pkg_vec_free(depends);
+
+    return err;
+}
+
+int internal_solver_solv(typeId  transactionType, pkg_t *pkg, pkg_vec_t *pkgs_to_install, pkg_vec_t *replacees, pkg_vec_t *orphans)
+{
+    int err = 0;
+    int from_upgrade = (transactionType == SOLVER_TRANSACTION_UPGRADE);
+    pkg_t *old_pkg = NULL;
+
+    /* TODO: Solving for removal is not currently done in this function, it is done on
+     *       opkg_solver_remove. Logic should be migrated here.
+     */
+    if (transactionType == SOLVER_TRANSACTION_ERASE) {
+        opkg_msg(ERROR, "Internal error: internal_solver_solv doesn't support SOLVER_TRANSACTION_ERASE");
+        return -1;
+    }
+
+    if (pkg->dest == NULL) {
+        pkg->dest = opkg_config->default_dest;
+    }
+
+    /* pkg already installed case */
+    if (pkg->state_status == SS_INSTALLED && opkg_config->nodeps == 0) {
+        err = calculate_dependencies_for(pkg, pkgs_to_install, replacees, orphans);
+        if (err)
+            return -1;
+
+        opkg_msg(NOTICE, "Package %s is already installed on %s.\n", pkg->name,
+                 pkg->dest->name);
+        return 0;
+    }
+
+    old_pkg = pkg_hash_fetch_installed_by_name(pkg->name);
+
+    err = opkg_install_check_downgrade(pkg, old_pkg, from_upgrade);
+    if (err < 0)
+        return -1;
+    else if ((err == 1) && !from_upgrade)
+        return 0;
+
+    err = check_conflicts_for(pkg);
+    if (err)
+        return -1;
+
+    /* solve install operation for pkg */
+    if (opkg_config->nodeps == 0) {
+        err = calculate_dependencies_for(pkg, pkgs_to_install, replacees, orphans);
+        if (err)
+            return -1;
+    }
+
+    /* add orphans for top level pkg */
+    if (old_pkg)
+        pkg_get_orphan_dependents(pkg, old_pkg, orphans);
+
+    /* add top level pkg replacees to replacees vector */
+    pkg_get_installed_replacees(pkg, replacees);
 
     return 0;
 }

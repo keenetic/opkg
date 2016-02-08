@@ -24,94 +24,15 @@
 
 #include <stdlib.h>
 
-/*
- * Remove packages which were auto_installed due to a dependency by old_pkg,
- * which are no longer a dependency in the new (upgraded) pkg.
- */
-int pkg_remove_orphan_dependent(pkg_t *pkg, pkg_t *old_pkg)
-{
-    int i, j, k, l, found, r, err = 0;
-    int n_deps;
-    pkg_t *p;
-    struct compound_depend *cd0, *cd1;
-    abstract_pkg_t **dependents;
-
-    int count0 = old_pkg->pre_depends_count + old_pkg->depends_count
-        + old_pkg->recommends_count + old_pkg->suggests_count;
-    int count1 = pkg->pre_depends_count + pkg->depends_count
-        + pkg->recommends_count + pkg->suggests_count;
-
-    for (i = 0; i < count0; i++) {
-        cd0 = &old_pkg->depends[i];
-        if (cd0->type != DEPEND && cd0->type != RECOMMEND)
-            continue;
-        for (j = 0; j < cd0->possibility_count; j++) {
-            found = 0;
-
-            for (k = 0; k < count1; k++) {
-                cd1 = &pkg->depends[k];
-                if (cd1->type != DEPEND && cd1->type != RECOMMEND)
-                    continue;
-                for (l = 0; l < cd1->possibility_count; l++) {
-                    if (cd0->possibilities[j]->pkg == cd1->possibilities[l]->pkg) {
-                        found = 1;
-                        break;
-                    }
-                }
-                if (found)
-                    break;
-            }
-
-            if (found)
-                continue;
-
-            /*
-             * old_pkg has a dependency that pkg does not.
-             */
-            p = pkg_hash_fetch_installed_by_name(cd0->possibilities[j]->pkg->
-                                                 name);
-
-            if (!p)
-                continue;
-
-            if (!p->auto_installed)
-                continue;
-
-            n_deps = pkg_has_installed_dependents(p, &dependents);
-            n_deps--;           /* don't count old_pkg */
-
-            if (n_deps == 0) {
-                opkg_msg(NOTICE,
-                         "%s was autoinstalled and is "
-                         "now orphaned, removing.\n", p->name);
-
-                /* p has one installed dependency (old_pkg),
-                 * which we need to ignore during removal. */
-                p->state_flag |= SF_REPLACE;
-
-                r = opkg_remove_pkg(p);
-                if (!err)
-                    err = r;
-            } else
-                opkg_msg(INFO,
-                         "%s was autoinstalled and is " "still required by %d "
-                         "installed packages.\n", p->name, n_deps);
-
-        }
-    }
-
-    return err;
-}
-
-int pkg_remove_installed_replacees(pkg_vec_t *replacees)
+static int pkg_remove_installed(pkg_vec_t *pkgs_to_remove)
 {
     int i;
-    int replaces_count = replacees->len;
-    for (i = 0; i < replaces_count; i++) {
-        pkg_t *replacee = replacees->pkgs[i];
+    int pkgs_to_remove_count = pkgs_to_remove->len;
+    for (i = 0; i < pkgs_to_remove_count; i++) {
+        pkg_t *pkg = pkgs_to_remove->pkgs[i];
         int err;
-        replacee->state_flag |= SF_REPLACE;     /* flag it so remove won't complain */
-        err = opkg_remove_pkg(replacee);
+        pkg->state_flag |= SF_REPLACE;     /* flag it so remove won't complain */
+        err = opkg_remove_pkg(pkg);
         if (err)
             return err;
     }
@@ -119,7 +40,7 @@ int pkg_remove_installed_replacees(pkg_vec_t *replacees)
 }
 
 /* to unwind the removal: make sure they are installed */
-int pkg_remove_installed_replacees_unwind(pkg_vec_t *replacees)
+static int pkg_remove_installed_replacees_unwind(pkg_vec_t *replacees)
 {
     int i, err;
     int replaces_count = replacees->len;
@@ -201,18 +122,90 @@ static int opkg_prepare_install_by_name(const char *pkg_name, pkg_t **pkg)
     return 1;
 }
 
+int opkg_execute_install(pkg_t *pkg, pkg_vec_t *pkgs_to_install, pkg_vec_t *replacees, pkg_vec_t *orphans, int from_upgrade)
+{
+    int r, errors = 0;
+    unsigned int i;
+    pkg_t  *dependency, *old_pkg;
+
+    /* Add top level package to pkgs_to_install vector */
+    pkg_vec_insert(pkgs_to_install, pkg);
+
+    /* Remove orphans */
+    pkg_remove_installed(orphans);
+
+    /* Remove replacees */
+    r = pkg_remove_installed(replacees);
+    if (r) {
+        pkg_remove_installed_replacees_unwind(replacees);
+        return -1;
+    }
+
+    /* Install packages */
+    for (i = 0; i < pkgs_to_install->len; i++) {
+        dependency = pkgs_to_install->pkgs[i];
+
+        /* Skip installation if
+         *  1) Package is already installed (A deps B & B depends on A. Both B and A are installed, so A's processing triggers an unecessary upgrade
+         *  2) Package is unpacked, which means a circular dependency already installed it for us */
+        if (dependency->state_status == SS_INSTALLED ||
+                        /* Circular dependency has installed it for us */
+                        dependency->state_status == SS_UNPACKED)
+            continue;
+
+        opkg_msg(DEBUG2, "Calling opkg_install_pkg for %s %s.\n", dependency->name,
+                                        dependency->version);
+
+        /* Set all pkgs to auto_installed except the top level */
+        if (i < (pkgs_to_install->len - 1))
+            dependency->auto_installed = 1;
+        r = opkg_install_pkg(dependency, from_upgrade);
+        if (r < 0)
+            errors++;
+    }
+
+    if (errors) {
+        if (from_upgrade) {
+            /* The installation failed so we need to reset the appropriate
+             * state_want flags.
+             */
+            old_pkg = pkg_hash_fetch_installed_by_name(pkg->name);
+            if (old_pkg)
+                old_pkg->state_want = SW_INSTALL;
+            pkg->state_want = SW_UNKNOWN;
+        }
+        return -1;
+    }
+
+    return 0;
+}
+
 int opkg_install_by_name(const char *pkg_name)
 {
     pkg_t *pkg;
+    pkg_vec_t *pkgs_to_install, *replacees, *orphans;
     int r;
 
     r = opkg_prepare_install_by_name(pkg_name, &pkg);
     if (r <= 0)
         return r;
 
-    opkg_msg(DEBUG2, "Calling opkg_install_pkg for %s %s.\n", pkg->name,
-             pkg->version);
-    return opkg_install_pkg(pkg, 0);
+    pkgs_to_install = pkg_vec_alloc();
+    replacees = pkg_vec_alloc();
+    orphans = pkg_vec_alloc();
+
+    r = internal_solver_solv(SOLVER_TRANSACTION_INSTALL, pkg, pkgs_to_install, replacees, orphans);
+    if (r < 0)
+        goto cleanup;
+
+    r = opkg_execute_install(pkg, pkgs_to_install, replacees, orphans, 0);
+
+cleanup:
+    pkg_vec_free(pkgs_to_install);
+    pkg_vec_free(replacees);
+    pkg_vec_free(orphans);
+
+    return r;
 }
 
 int opkg_install_multiple_by_name(str_list_t *pkg_names)
@@ -223,7 +216,8 @@ int opkg_install_multiple_by_name(str_list_t *pkg_names)
     int r;
     int errors = 0;
     unsigned int i;
-    pkg_vec_t *pkgs_to_install = pkg_vec_alloc();
+    pkg_vec_t *pkgs_to_install, *deps_to_install, *replacees, *orphans;
+    pkgs_to_install = pkg_vec_alloc();
 
     /* Prepare all packages first. */
     for (pn = str_list_first(pkg_names); pn; pn = str_list_next(pkg_names, pn)) {
@@ -237,16 +231,27 @@ int opkg_install_multiple_by_name(str_list_t *pkg_names)
         pkg_vec_insert(pkgs_to_install, pkg);
     }
 
-    /* Now install all packages. */
     for (i = 0; i < pkgs_to_install->len; i++) {
+        deps_to_install = pkg_vec_alloc();
+        replacees = pkg_vec_alloc();
+        orphans = pkg_vec_alloc();
+
         pkg = pkgs_to_install->pkgs[i];
 
-        opkg_msg(DEBUG2, "Calling opkg_install_pkg for %s %s.\n", pkg->name,
-                 pkg->version);
-        r = opkg_install_pkg(pkg, 0);
-        if (r < 0)
+        r = internal_solver_solv(SOLVER_TRANSACTION_INSTALL, pkg, deps_to_install, replacees, orphans);
+        if (r < 0) {
             errors++;
-    }
+            goto cleanup;
+        }
+
+        r = opkg_execute_install(pkg, deps_to_install, replacees, orphans, 0);
+        if (r)
+            errors++;
+cleanup:
+        pkg_vec_free(deps_to_install);
+        pkg_vec_free(replacees);
+        pkg_vec_free(orphans);
+   }
 
     pkg_vec_free(pkgs_to_install);
     if (errors)

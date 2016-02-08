@@ -23,13 +23,17 @@
 extern "C" {
 #endif
 
+enum typeId {
+    SOLVER_TRANSACTION_INSTALL,
+    SOLVER_TRANSACTION_UPGRADE,
+    SOLVER_TRANSACTION_ERASE
+};
+typedef enum typeId typeId;
+
 int pkg_has_installed_dependents(pkg_t *pkg, abstract_pkg_t ***pdependents);
 int opkg_get_dependent_pkgs(pkg_t *pkg, abstract_pkg_t **dependents, pkg_vec_t *dependent_pkgs);
 int opkg_get_autoinstalled_pkgs(pkg_t *pkg, pkg_vec_t *dependent_pkgs);
-int satisfy_dependencies_for(pkg_t *pkg);
-int check_conflicts_for(pkg_t *pkg);
-int pkg_get_installed_replacees(pkg_t *pkg, pkg_vec_t *installed_replacees);
-int opkg_install_check_downgrade(pkg_t *pkg, pkg_t *old_pkg, int message);
+int internal_solver_solv(typeId  transactionType, pkg_t *pkg, pkg_vec_t *pkgs_to_install, pkg_vec_t *replacees, pkg_vec_t *orphans);
 
 #ifdef __cplusplus
 }

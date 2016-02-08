@@ -48,8 +48,8 @@ opkgcl.install("a");
 if not opkgcl.is_installed("x"):
     opk.fail("Package 'x' removed when 'a' installed, but should not be removed.")
 if not opkgcl.is_installed("b"):
-    opk.fail("Package 'b' not installed, but should be installed as a recommended pkg of 'a'.")
+    opk.xfail("Package 'b' not installed, but should be installed as a recommended pkg of 'a'.")
 if opkgcl.is_installed("c"):
     opk.fail("Package 'c' installed but conflicts with x.")
 if not opkgcl.is_installed("a"):
-    opk.xfail("Package 'a' not installed even though 'c' is not an absolute dependency of 'b'.")
+    opk.fail("Package 'a' not installed even though 'c' is not an absolute dependency of 'b'.")

@@ -45,11 +45,6 @@
 #include "xsystem.h"
 #include "xfuncs.h"
 
-#ifdef HAVE_SOLVER_INTERNAL
-#include "solvers/internal/opkg_solver_internal.h"
-#include "solvers/internal/opkg_install_internal.h"
-#endif
-
 static int update_file_ownership(pkg_t * new_pkg, pkg_t * old_pkg)
 {
     str_list_t *new_list, *old_list;
@@ -830,15 +825,6 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
     int old_state_flag;
     sigset_t newset, oldset;
 
-#ifdef HAVE_SOLVER_INTERNAL
-    int message = 0;
-    pkg_vec_t *replacees;
-
-    if (from_upgrade)
-        /* Coming from an upgrade, and should change the output message */
-        message = 1;
-#endif
-
     opkg_msg(DEBUG2, "Calling pkg_arch_supported.\n");
 
     if (!pkg_arch_supported(pkg)) {
@@ -848,50 +834,17 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
         return -1;
     }
 
-#ifdef HAVE_SOLVER_INTERNAL
-    if (pkg->state_status == SS_INSTALLED && opkg_config->nodeps == 0) {
-        err = satisfy_dependencies_for(pkg);
-        if (err)
-            return -1;
-
-        opkg_msg(NOTICE, "Package %s is already installed on %s.\n", pkg->name,
-                 pkg->dest->name);
-        return 0;
-    }
-#endif
-
     if (pkg->dest == NULL) {
         pkg->dest = opkg_config->default_dest;
     }
 
     old_pkg = pkg_hash_fetch_installed_by_name(pkg->name);
 
-#ifdef HAVE_SOLVER_INTERNAL
-    err = opkg_install_check_downgrade(pkg, old_pkg, message);
-    if (err < 0)
-        return -1;
-    else if ((err == 1) && !from_upgrade)
-        return 0;
-#endif
-
     pkg->state_want = SW_INSTALL;
     if (old_pkg) {
         old_pkg->state_want = SW_DEINSTALL;
         /* needed for check_data_file_clashes of dependencies */
     }
-
-#ifdef HAVE_SOLVER_INTERNAL
-    err = check_conflicts_for(pkg);
-    if (err)
-        return -1;
-
-    /* this setup is to remove the upgrade scenario in the end when
-     * installing pkg A, A deps B & B deps on A. So both B and A are
-     * installed. Then A's installation is started resulting in an
-     * uncecessary upgrade */
-    if (pkg->state_status == SS_INSTALLED)
-        return 0;
-#endif
 
     err = verify_pkg_installable(pkg);
     if (err)
@@ -915,16 +868,8 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
         }
     }
 
-    if (opkg_config->download_only) {
-#ifdef HAVE_SOLVER_INTERNAL
-        if (opkg_config->nodeps == 0) {
-            err = satisfy_dependencies_for(pkg);
-            if (err)
-                return -1;
-        }
-#endif
+    if (opkg_config->download_only)
         return 0;
-    }
 
     if (pkg->tmp_unpack_dir == NULL) {
         err = unpack_pkg_control_files(pkg);
@@ -939,20 +884,6 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
     if (err)
         return -1;
 
-#ifdef HAVE_SOLVER_INTERNAL
-    if (opkg_config->nodeps == 0) {
-        err = satisfy_dependencies_for(pkg);
-        if (err)
-            return -1;
-        if (pkg->state_status == SS_UNPACKED)
-            /* Circular dependency has installed it for us. */
-            return 0;
-    }
-
-    replacees = pkg_vec_alloc();
-    pkg_get_installed_replacees(pkg, replacees);
-#endif
-
     /* this next section we do with SIGINT blocked to prevent inconsistency
      * between opkg database and filesystem */
 
@@ -963,21 +894,6 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
     opkg_state_changed++;
     pkg->state_flag |= SF_FILELIST_CHANGED;
 
-#ifdef HAVE_SOLVER_INTERNAL
-    /* DPKG_INCOMPATIBILITY:
-     * For upgrades, dpkg and apt-get will not remove orphaned dependents.
-     * Apt-get will instead tell the user to use apt-get autoremove to remove
-     * the autoinstalled orphaned package if it is no longer needed */
-    if (old_pkg)
-        pkg_remove_orphan_dependent(pkg, old_pkg);
-
-    /* XXX: BUG: we really should treat replacement more like an upgrade
-     *      Instead, we're going to remove the replacees
-     */
-    err = pkg_remove_installed_replacees(replacees);
-    if (err)
-        goto UNWIND_REMOVE_INSTALLED_REPLACEES;
-#endif
     err = prerm_upgrade_old_pkg(pkg, old_pkg);
     if (err)
         goto UNWIND_PRERM_UPGRADE_OLD_PKG;
@@ -1075,9 +991,6 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
         ab_pkg->state_status = pkg->state_status;
 
     sigprocmask(SIG_UNBLOCK, &newset, &oldset);
-#ifdef HAVE_SOLVER_INTERNAL
-    pkg_vec_free(replacees);
-#endif
     return 0;
 
  UNWIND_POSTRM_UPGRADE_OLD_PKG:
@@ -1090,10 +1003,6 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
     preinst_configure_unwind(pkg, old_pkg);
  UNWIND_PRERM_UPGRADE_OLD_PKG:
     prerm_upgrade_old_pkg_unwind(pkg, old_pkg);
-#ifdef HAVE_SOLVER_INTERNAL
- UNWIND_REMOVE_INSTALLED_REPLACEES:
-    pkg_remove_installed_replacees_unwind(replacees);
-#endif
  pkg_is_hosed:
     /* Set the package flags to something consistent which indicates a
      * failed install.
@@ -1108,8 +1017,5 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
              pkg->name);
 
     sigprocmask(SIG_UNBLOCK, &newset, &oldset);
-#ifdef HAVE_SOLVER_INTERNAL
-    pkg_vec_free(replacees);
-#endif
     return -1;
 }

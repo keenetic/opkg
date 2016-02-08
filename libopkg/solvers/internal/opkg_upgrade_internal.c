@@ -17,13 +17,12 @@
    General Public License for more details.
 */
 
-#include "config.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "opkg_install.h"
 #include "opkg_upgrade_internal.h"
+#include "opkg_install_internal.h"
+#include "opkg_solver_internal.h"
 #include "opkg_message.h"
 #include "xfuncs.h"
 
@@ -102,22 +101,27 @@ static int opkg_prepare_upgrade_pkg(pkg_t * old, pkg_t ** pkg)
 int opkg_upgrade_pkg(pkg_t * old)
 {
     pkg_t *new;
+    pkg_vec_t *pkgs_to_install, *replacees, *orphans;
     int r;
 
     r = opkg_prepare_upgrade_pkg(old, &new);
     if (r <= 0)
         return r;
 
-    opkg_msg(DEBUG2, "Calling opkg_install_pkg for %s %s.\n", new->name,
-             new->version);
-    r = opkg_install_pkg(new, 1);
-    if (r < 0) {
-        /* The installation failed so we need to reset the appropriate
-         * state_want flags.
-         */
-        new->state_want = SW_UNKNOWN;
-        old->state_want = SW_INSTALL;
-    }
+    pkgs_to_install = pkg_vec_alloc();
+    replacees = pkg_vec_alloc();
+    orphans = pkg_vec_alloc();
+
+    r = internal_solver_solv(SOLVER_TRANSACTION_UPGRADE, new, pkgs_to_install, replacees, orphans);
+    if (r < 0)
+        goto cleanup;
+
+    r = opkg_execute_install(new, pkgs_to_install, replacees, orphans, 1);
+
+cleanup:
+    pkg_vec_free(pkgs_to_install);
+    pkg_vec_free(replacees);
+    pkg_vec_free(orphans);
 
     return r;
 }
@@ -126,14 +130,11 @@ int opkg_upgrade_multiple_pkgs(pkg_vec_t * pkgs_to_upgrade)
 {
     int r;
     unsigned int i;
-    pkg_t *pkg;
-    pkg_t *new;
-    upgrade_pair_t *pair;
-    void_list_t upgrade_pairs;
-    void_list_elt_t *iter;
+    pkg_t *pkg, *new;
+    pkg_vec_t  *upgrade_pkgs, *pkgs_to_install, *replacees, *orphans;
     int errors = 0;
 
-    void_list_init(&upgrade_pairs);
+    upgrade_pkgs = pkg_vec_alloc();
 
     /* Prepare all packages. */
     for (i = 0; i < pkgs_to_upgrade->len; i++) {
@@ -145,33 +146,35 @@ int opkg_upgrade_multiple_pkgs(pkg_vec_t * pkgs_to_upgrade)
         if (r <= 0)
             continue;
 
-        pair = (upgrade_pair_t *) xmalloc(sizeof(upgrade_pair_t));
-        pair->old = pkg;
-        pair->new = new;
-        void_list_push(&upgrade_pairs, pair);
+        pkg_vec_insert(upgrade_pkgs, new);
     }
 
-    /* Install all new packages. */
-    list_for_each_entry(iter, &upgrade_pairs.head, node) {
-        pair = iter->data;
-        pkg = pair->new;
+    for (i = 0; i < upgrade_pkgs->len; i++) {
+        pkgs_to_install = pkg_vec_alloc();
+        replacees = pkg_vec_alloc();
+        orphans = pkg_vec_alloc();
 
-        opkg_msg(DEBUG2, "Calling opkg_install_pkg for %s %s.\n", pkg->name,
-                 pkg->version);
-        r = opkg_install_pkg(pkg, 1);
+        new = upgrade_pkgs->pkgs[i];
+
+        r = internal_solver_solv(SOLVER_TRANSACTION_UPGRADE, new, pkgs_to_install, replacees, orphans);
         if (r < 0) {
-            /* The installation failed so we need to reset the appropriate
-             * state_want flags.
-             */
-            pkg->state_want = SW_UNKNOWN;
-            pair->old->state_want = SW_INSTALL;
             errors++;
+            goto cleanup;
         }
 
-        free(pair);
+        r = opkg_execute_install(new, pkgs_to_install, replacees, orphans, 1);
+
+        if (r < 0)
+            errors++;
+
+cleanup:
+        pkg_vec_free(pkgs_to_install);
+        pkg_vec_free(replacees);
+        pkg_vec_free(orphans);
     }
 
-    void_list_deinit(&upgrade_pairs);
+    pkg_vec_free(upgrade_pkgs);
+
     if (errors > 0)
         return -1;
 
