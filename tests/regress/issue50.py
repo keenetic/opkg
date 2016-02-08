@@ -7,7 +7,7 @@
 #
 # 1. Create package a version 1, containing file /foo.
 # 2. Create package a version 2, without file /foo, depending on package b.
-# 3. Create package b version 1, containing file /foo.
+# 3. Create package b version 1, containing file /foo which Conflicts  a (<< 2.0)
 # 4. Create package repository containing a_2 and b_1.
 # 5. Install a_1 manually.
 # 6. opkg update; opkg upgrade
@@ -42,7 +42,7 @@ opkgcl.install("a_1.0_all.opk")
 o = opk.OpkGroup()
 a2 = opk.Opk(Package="a", Version="2.0", Depends="b")
 a2.write()
-b1 = opk.Opk(Package="b", Version="1.0")
+b1 = opk.Opk(Package="b", Version="1.0", Conflicts="a (<< 2.0)")
 b1.write(data_files=["foo"])
 o.opk_list.append(a2)
 o.opk_list.append(b1)
