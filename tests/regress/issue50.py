@@ -51,7 +51,10 @@ o.write_list()
 os.unlink("foo")
 
 opkgcl.update()
-opkgcl.upgrade()
+status = opkgcl.upgrade()
+
+if status != 0:
+        opk.xfail("Upgrade operation failed (Return value was different than 0)")
 
 if not opkgcl.is_installed("a", "2.0"):
 	opk.fail("Package 'a_2.0' not installed.")
@@ -59,7 +62,7 @@ if not opkgcl.is_installed("a", "2.0"):
 foo_fullpath = "{}/foo".format(cfg.offline_root)
 
 if not os.path.exists(foo_fullpath):
-	opk.xfail("[libsolv] File 'foo' incorrectly orphaned.")
+	opk.fail("File 'foo' incorrectly orphaned.")
 
 if not foo_fullpath in opkgcl.files("b"):
 	opk.fail("Package 'b' does not own file 'foo'.")
