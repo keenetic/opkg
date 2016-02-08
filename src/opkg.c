@@ -312,6 +312,7 @@ static void usage()
     printf("\t                                than one candidate is found.\n");
     printf("\t--combine                       Combine upgrade and install operations, this\n");
     printf("\t                                may be needed to resolve dependency issues.\n");
+    printf("\t                                Only available for the internal solver backend.\n");
 
     printf("\nForce Options:\n");
     printf("\t--force-depends                 Install/remove despite failed dependencies\n");
