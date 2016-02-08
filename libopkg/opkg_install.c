@@ -56,9 +56,6 @@ static int pkg_get_installed_replacees(pkg_t * pkg,
                                        pkg_vec_t * installed_replacees);
 static int pkg_remove_installed_replacees(pkg_vec_t * replacees);
 static int pkg_remove_installed_replacees_unwind(pkg_vec_t * replacees);
-static int prerm_deconfigure_conflictors(pkg_t * pkg, pkg_vec_t * conflictors);
-static int prerm_deconfigure_conflictors_unwind(pkg_t * pkg,
-                                                pkg_vec_t * conflictors);
 static int opkg_install_check_downgrade(pkg_t * pkg, pkg_t * old_pkg,
                                         int message);
 static int opkg_prepare_install_by_name(const char *pkg_name, pkg_t ** pkg);
@@ -995,11 +992,6 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
     err = prerm_upgrade_old_pkg(pkg, old_pkg);
     if (err)
         goto UNWIND_PRERM_UPGRADE_OLD_PKG;
-#ifdef HAVE_SOLVER_INTERNAL
-    err = prerm_deconfigure_conflictors(pkg, replacees);
-    if (err)
-        goto UNWIND_PRERM_DECONFIGURE_CONFLICTORS;
-#endif
     err = preinst_configure(pkg, old_pkg);
     if (err)
         goto UNWIND_PREINST_CONFIGURE;
@@ -1107,10 +1099,6 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
     backup_modified_conffiles_unwind(pkg, old_pkg);
  UNWIND_PREINST_CONFIGURE:
     preinst_configure_unwind(pkg, old_pkg);
-#ifdef HAVE_SOLVER_INTERNAL
- UNWIND_PRERM_DECONFIGURE_CONFLICTORS:
-    prerm_deconfigure_conflictors_unwind(pkg, replacees);
-#endif
  UNWIND_PRERM_UPGRADE_OLD_PKG:
     prerm_upgrade_old_pkg_unwind(pkg, old_pkg);
 #ifdef HAVE_SOLVER_INTERNAL
@@ -1431,41 +1419,6 @@ static int pkg_remove_installed_replacees_unwind(pkg_vec_t * replacees)
                 return err;
         }
     }
-    return 0;
-}
-
-static int prerm_deconfigure_conflictors(pkg_t * pkg, pkg_vec_t * conflictors)
-{
-    /* DPKG_INCOMPATIBILITY:
-     * dpkg does some things here that we don't do yet. Do we care?
-     * 2. If a 'conflicting' package is being removed at the same time:
-     * 1. If any packages depended on that conflicting package and
-     * --auto-deconfigure is specified, call, for each such package:
-     * deconfigured's-prerm deconfigure \
-     * in-favour package-being-installed version \
-     * removing conflicting-package version
-     * Error unwind:
-     * deconfigured's-postinst abort-deconfigure \
-     * in-favour package-being-installed-but-failed version \
-     * removing conflicting-package version
-     *
-     * The deconfigured packages are marked as requiring
-     * configuration, so that if --install is used they will be
-     * configured again if possible.
-     * 2. To prepare for removal of the conflicting package, call:
-     * conflictor's-prerm remove in-favour package new-version
-     * Error unwind:
-     * conflictor's-postinst abort-remove in-favour package new-version
-     */
-    return 0;
-}
-
-static int prerm_deconfigure_conflictors_unwind(pkg_t * pkg,
-                                                pkg_vec_t * conflictors)
-{
-    /* DPKG_INCOMPATIBILITY: dpkg does some things here that we don't
-     * do yet. Do we care?  (See prerm_deconfigure_conflictors for
-     * details) */
     return 0;
 }
 
