@@ -61,4 +61,4 @@ if opkgcl.is_installed("a", "1.0"):
 	opk.fail("Package 'a' upgraded but old version still installed.")
 
 if not opkgcl.is_installed("b"):
-	opk.xfail("Package 'b' not installed despite being a dependency of installed packages.")
+	opk.fail("Package 'b' not installed despite being a dependency of installed packages.")

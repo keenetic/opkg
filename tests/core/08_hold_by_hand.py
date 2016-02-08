@@ -26,6 +26,6 @@ opkgcl.flag_hold("a")
 opkgcl.install("a_2.0_all.opk")
 
 if opkgcl.is_installed("a", "2.0"):
-	opk.xfail("Old version of package 'a' flagged as on hold but was upgraded.")
+	opk.fail("Old version of package 'a' flagged as on hold but was upgraded.")
 if not opkgcl.is_installed("a", "1.0"):
 	opk.fail("Package 'a' not upgraded but old version was removed.")
