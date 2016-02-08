@@ -26,6 +26,10 @@ extern "C" {
 int pkg_has_installed_dependents(pkg_t *pkg, abstract_pkg_t ***pdependents);
 int opkg_get_dependent_pkgs(pkg_t *pkg, abstract_pkg_t **dependents, pkg_vec_t *dependent_pkgs);
 int opkg_get_autoinstalled_pkgs(pkg_t *pkg, pkg_vec_t *dependent_pkgs);
+int satisfy_dependencies_for(pkg_t *pkg);
+int check_conflicts_for(pkg_t *pkg);
+int pkg_get_installed_replacees(pkg_t *pkg, pkg_vec_t *installed_replacees);
+int opkg_install_check_downgrade(pkg_t *pkg, pkg_t *old_pkg, int message);
 
 #ifdef __cplusplus
 }
