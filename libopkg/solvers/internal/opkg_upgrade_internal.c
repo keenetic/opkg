@@ -26,11 +26,6 @@
 #include "opkg_message.h"
 #include "xfuncs.h"
 
-typedef struct upgrade_pair {
-    pkg_t *old;
-    pkg_t *new;
-} upgrade_pair_t;
-
 static int opkg_prepare_upgrade_pkg(pkg_t * old, pkg_t ** pkg)
 {
     pkg_t *new;
