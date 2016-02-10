@@ -118,14 +118,6 @@ void active_list_clear(struct active_list *head)
     active_list_init(head);
 }
 
-void active_list_add_depend(struct active_list *node,
-                            struct active_list *depend)
-{
-    list_del_init(&depend->node);
-    list_add_tail(&depend->node, &node->depend);
-    depend->depended = node;
-}
-
 void active_list_add(struct active_list *head, struct active_list *node)
 {
     list_del_init(&node->node);
