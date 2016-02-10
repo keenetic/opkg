@@ -52,7 +52,7 @@ void pkg_src_deinit(pkg_src_t * src)
         free(src->extra_data);
 }
 
-int pkg_src_download(pkg_src_t * src)
+static int pkg_src_download(pkg_src_t * src)
 {
     int err = 0;
     char *url;
@@ -98,7 +98,7 @@ int pkg_src_download(pkg_src_t * src)
     return err;
 }
 
-int pkg_src_download_signature(pkg_src_t * src)
+static int pkg_src_download_signature(pkg_src_t * src)
 {
     int err = 0;
     char *url;
