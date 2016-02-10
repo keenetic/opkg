@@ -44,7 +44,6 @@ void pkg_src_list_deinit(pkg_src_list_t * list);
 pkg_src_t *pkg_src_list_append(pkg_src_list_t * list, const char *name,
                                const char *root_dir, const char *extra_data,
                                int gzip);
-void pkg_src_list_push(pkg_src_list_t * list, pkg_src_t * data);
 
 #ifdef __cplusplus
 }

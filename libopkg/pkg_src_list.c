@@ -57,8 +57,3 @@ pkg_src_t *pkg_src_list_append(pkg_src_list_t * list, const char *name,
 
     return pkg_src;
 }
-
-void pkg_src_list_push(pkg_src_list_t * list, pkg_src_t * data)
-{
-    void_list_push((void_list_t *) list, data);
-}
