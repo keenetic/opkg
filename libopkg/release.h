@@ -43,16 +43,10 @@ typedef struct release release_t;
 release_t *release_new(void);
 void release_deinit(release_t * release);
 int release_init_from_file(release_t * release, const char *filename);
-
-int release_arch_supported(release_t * release);
 int release_comps_supported(release_t * release, const char *complist);
 int release_download(release_t * release, pkg_src_t * dist, char *lists_dir,
                      char *tmpdir);
-
 const char **release_comps(release_t * release, unsigned int *count);
-
-int release_verify_file(release_t * release, const char *filename,
-                        const char *pathname);
 
 #ifdef __cplusplus
 }

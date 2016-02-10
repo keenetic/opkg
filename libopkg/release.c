@@ -46,6 +46,116 @@ static void release_init(release_t * release)
     release->complist_count = 0;
 }
 
+static const char *item_in_list(const char *comp, char **complist, unsigned int count)
+{
+    unsigned int i;
+
+    if (!complist)
+        return comp;
+
+    for (i = 0; i < count; i++) {
+        if (strcmp(comp, complist[i]) == 0)
+            return complist[i];
+    }
+
+    return NULL;
+}
+
+static int release_arch_supported(release_t * release)
+{
+    nv_pair_list_elt_t *l;
+
+    list_for_each_entry(l, &opkg_config->arch_list.head, node) {
+        nv_pair_t *nv = (nv_pair_t *) l->data;
+        const char *arch = item_in_list(nv->name, release->architectures,
+                release->architectures_count);
+        if (arch) {
+            opkg_msg(DEBUG, "Arch %s (priority %s) supported for dist %s.\n",
+                     nv->name, nv->value, release->name);
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+static int release_get_size(release_t * release, const char *pathname)
+{
+    const cksum_t *cksum;
+
+    if (release->md5sums) {
+        cksum = cksum_list_find(release->md5sums, pathname);
+        return cksum->size;
+    }
+#ifdef HAVE_SHA256
+    if (release->sha256sums) {
+        cksum = cksum_list_find(release->sha256sums, pathname);
+        return cksum->size;
+    }
+#endif
+
+    return -1;
+}
+
+static const char *release_get_md5(release_t * release, const char *pathname)
+{
+    const cksum_t *cksum;
+
+    if (release->md5sums) {
+        cksum = cksum_list_find(release->md5sums, pathname);
+        return cksum->value;
+    }
+
+    return '\0';
+}
+
+int release_verify_file(release_t * release, const char *file_name,
+                        const char *pathname)
+{
+    struct stat f_info;
+    char *f_md5 = NULL;
+    const char *md5 = release_get_md5(release, pathname);
+#ifdef HAVE_SHA256
+    char *f_sha256 = NULL;
+    const char *sha256 = release_get_sha256(release, pathname);
+#endif
+    int ret = 0;
+    int r;
+
+    r = stat(file_name, &f_info);
+    if ((r != 0) || (f_info.st_size != release_get_size(release, pathname))) {
+        opkg_msg(ERROR, "Size verification failed for %s - %s.\n",
+                 release->name, pathname);
+        ret = 1;
+    } else {
+
+        f_md5 = file_md5sum_alloc(file_name);
+#ifdef HAVE_SHA256
+        f_sha256 = file_sha256sum_alloc(file_name);
+#endif
+
+        if (md5 && strcmp(md5, f_md5)) {
+            opkg_msg(ERROR, "MD5 verification failed for %s - %s.\n",
+                     release->name, pathname);
+            ret = 1;
+#ifdef HAVE_SHA256
+        } else if (sha256 && strcmp(sha256, f_sha256)) {
+            opkg_msg(ERROR, "SHA256 verification failed for %s - %s.\n",
+                     release->name, pathname);
+            ret = 1;
+#endif
+        }
+
+    }
+
+    free(f_md5);
+#ifdef HAVE_SHA256
+    free(f_sha256);
+#endif
+
+    return ret;
+}
+
 release_t *release_new(void)
 {
     release_t *release;
@@ -100,39 +210,6 @@ int release_init_from_file(release_t * release, const char *filename)
     }
 
     return err;
-}
-
-const char *item_in_list(const char *comp, char **complist, unsigned int count)
-{
-    unsigned int i;
-
-    if (!complist)
-        return comp;
-
-    for (i = 0; i < count; i++) {
-        if (strcmp(comp, complist[i]) == 0)
-            return complist[i];
-    }
-
-    return NULL;
-}
-
-int release_arch_supported(release_t * release)
-{
-    nv_pair_list_elt_t *l;
-
-    list_for_each_entry(l, &opkg_config->arch_list.head, node) {
-        nv_pair_t *nv = (nv_pair_t *) l->data;
-        const char *arch = item_in_list(nv->name, release->architectures,
-                release->architectures_count);
-        if (arch) {
-            opkg_msg(DEBUG, "Arch %s (priority %s) supported for dist %s.\n",
-                     nv->name, nv->value, release->name);
-            return 1;
-        }
-    }
-
-    return 0;
 }
 
 int release_comps_supported(release_t * release, const char *complist)
@@ -243,36 +320,6 @@ int release_download(release_t * release, pkg_src_t * dist, char *lists_dir,
     return ret;
 }
 
-int release_get_size(release_t * release, const char *pathname)
-{
-    const cksum_t *cksum;
-
-    if (release->md5sums) {
-        cksum = cksum_list_find(release->md5sums, pathname);
-        return cksum->size;
-    }
-#ifdef HAVE_SHA256
-    if (release->sha256sums) {
-        cksum = cksum_list_find(release->sha256sums, pathname);
-        return cksum->size;
-    }
-#endif
-
-    return -1;
-}
-
-const char *release_get_md5(release_t * release, const char *pathname)
-{
-    const cksum_t *cksum;
-
-    if (release->md5sums) {
-        cksum = cksum_list_find(release->md5sums, pathname);
-        return cksum->value;
-    }
-
-    return '\0';
-}
-
 #ifdef HAVE_SHA256
 const char *release_get_sha256(release_t * release, const char *pathname)
 {
@@ -286,50 +333,3 @@ const char *release_get_sha256(release_t * release, const char *pathname)
     return '\0';
 }
 #endif
-
-int release_verify_file(release_t * release, const char *file_name,
-                        const char *pathname)
-{
-    struct stat f_info;
-    char *f_md5 = NULL;
-    const char *md5 = release_get_md5(release, pathname);
-#ifdef HAVE_SHA256
-    char *f_sha256 = NULL;
-    const char *sha256 = release_get_sha256(release, pathname);
-#endif
-    int ret = 0;
-    int r;
-
-    r = stat(file_name, &f_info);
-    if ((r != 0) || (f_info.st_size != release_get_size(release, pathname))) {
-        opkg_msg(ERROR, "Size verification failed for %s - %s.\n",
-                 release->name, pathname);
-        ret = 1;
-    } else {
-
-        f_md5 = file_md5sum_alloc(file_name);
-#ifdef HAVE_SHA256
-        f_sha256 = file_sha256sum_alloc(file_name);
-#endif
-
-        if (md5 && strcmp(md5, f_md5)) {
-            opkg_msg(ERROR, "MD5 verification failed for %s - %s.\n",
-                     release->name, pathname);
-            ret = 1;
-#ifdef HAVE_SHA256
-        } else if (sha256 && strcmp(sha256, f_sha256)) {
-            opkg_msg(ERROR, "SHA256 verification failed for %s - %s.\n",
-                     release->name, pathname);
-            ret = 1;
-#endif
-        }
-
-    }
-
-    free(f_md5);
-#ifdef HAVE_SHA256
-    free(f_sha256);
-#endif
-
-    return ret;
-}
