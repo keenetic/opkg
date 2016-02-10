@@ -24,7 +24,7 @@
 #include "cksum_list.h"
 #include "xfuncs.h"
 
-int cksum_init(cksum_t * cksum, char **itemlist)
+static int cksum_init(cksum_t * cksum, char **itemlist)
 {
     cksum->value = xstrdup(*itemlist++);
     cksum->size = atoi(*itemlist++);
@@ -33,7 +33,7 @@ int cksum_init(cksum_t * cksum, char **itemlist)
     return 0;
 }
 
-void cksum_deinit(cksum_t * cksum)
+static void cksum_deinit(cksum_t * cksum)
 {
     free(cksum->name);
     cksum->name = NULL;

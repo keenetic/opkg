@@ -29,9 +29,6 @@ typedef struct {
     int size;
 } cksum_t;
 
-int cksum_init(cksum_t * cksum, char **itemlist);
-void cksum_deinit(cksum_t * cksum);
-
 typedef struct void_list_elt cksum_list_elt_t;
 
 typedef struct void_list cksum_list_t;
