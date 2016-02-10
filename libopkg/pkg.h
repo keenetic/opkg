@@ -203,7 +203,6 @@ int pkg_name_version_and_architecture_compare(const void *a, const void *b);
 int abstract_pkg_name_compare(const void *a, const void *b);
 
 void pkg_formatted_info(FILE * fp, pkg_t * pkg);
-void pkg_formatted_field(FILE * fp, pkg_t * pkg, const char *field);
 
 void set_flags_from_control(pkg_t * pkg);
 

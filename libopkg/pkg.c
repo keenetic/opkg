@@ -561,21 +561,7 @@ static const char *pkg_state_status_to_str(pkg_state_status_t ss)
     return "<STATE_STATUS_UNKNOWN>";
 }
 
-pkg_state_status_t pkg_state_status_from_str(const char *str)
-{
-    unsigned int i;
-
-    for (i = 0; i < ARRAY_SIZE(pkg_state_status_map); i++) {
-        if (strcmp(str, pkg_state_status_map[i].str) == 0) {
-            return pkg_state_status_map[i].value;
-        }
-    }
-
-    opkg_msg(ERROR, "Internal error: state_status=%s\n", str);
-    return SS_NOT_INSTALLED;
-}
-
-void pkg_formatted_field(FILE * fp, pkg_t * pkg, const char *field)
+static void pkg_formatted_field(FILE * fp, pkg_t * pkg, const char *field)
 {
     unsigned int i, j;
     char *str;
@@ -811,6 +797,20 @@ void pkg_formatted_field(FILE * fp, pkg_t * pkg, const char *field)
 
  UNKNOWN_FMT_FIELD:
     opkg_msg(ERROR, "Internal error: field=%s\n", field);
+}
+
+pkg_state_status_t pkg_state_status_from_str(const char *str)
+{
+    unsigned int i;
+
+    for (i = 0; i < ARRAY_SIZE(pkg_state_status_map); i++) {
+        if (strcmp(str, pkg_state_status_map[i].str) == 0) {
+            return pkg_state_status_map[i].value;
+        }
+    }
+
+    opkg_msg(ERROR, "Internal error: state_status=%s\n", str);
+    return SS_NOT_INSTALLED;
 }
 
 void pkg_formatted_info(FILE * fp, pkg_t * pkg)
