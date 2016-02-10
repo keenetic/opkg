@@ -112,11 +112,6 @@ str_list_elt_t *str_list_next(str_list_t * list, str_list_elt_t * node)
                                              (void_list_elt_t *) node);
 }
 
-str_list_elt_t *str_list_last(str_list_t * list)
-{
-    return (str_list_elt_t *) void_list_last((void_list_t *) list);
-}
-
 void str_list_purge(str_list_t * list)
 {
     str_list_deinit(list);
