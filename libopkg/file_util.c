@@ -115,25 +115,6 @@ char *file_read_line_alloc(FILE * fp)
     return line;
 }
 
-int file_move(const char *src, const char *dest)
-{
-    int err;
-
-    err = rename(src, dest);
-    if (err == -1) {
-        if (errno == EXDEV) {
-            /* src & dest live on different file systems */
-            err = file_copy(src, dest);
-            if (err == 0)
-                unlink(src);
-        } else {
-            opkg_perror(ERROR, "Failed to rename %s to %s", src, dest);
-        }
-    }
-
-    return err;
-}
-
 static int copy_file_data(FILE * src_file, FILE * dst_file)
 {
     size_t nread, nwritten;
