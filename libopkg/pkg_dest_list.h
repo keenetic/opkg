@@ -37,7 +37,6 @@ void pkg_dest_list_deinit(pkg_dest_list_t * list);
 
 pkg_dest_t *pkg_dest_list_append(pkg_dest_list_t * list, const char *name,
                                  const char *root_dir);
-pkg_dest_list_elt_t *pkg_dest_list_pop(pkg_dest_list_t * list);
 
 #ifdef __cplusplus
 }

@@ -69,8 +69,3 @@ pkg_dest_t *pkg_dest_list_append(pkg_dest_list_t * list, const char *name,
 
     return pkg_dest;
 }
-
-pkg_dest_list_elt_t *pkg_dest_list_pop(pkg_dest_list_t * list)
-{
-    return (pkg_dest_list_elt_t *) void_list_pop((void_list_t *) list);
-}
