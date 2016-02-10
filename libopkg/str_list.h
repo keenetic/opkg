@@ -37,7 +37,6 @@ void str_list_init(str_list_t * list);
 void str_list_deinit(str_list_t * list);
 
 void str_list_append(str_list_t * list, char *data);
-void str_list_push(str_list_t * list, char *data);
 str_list_elt_t *str_list_pop(str_list_t * list);
 void str_list_remove(str_list_t * list, str_list_elt_t ** iter);
 void str_list_remove_elt(str_list_t * list, const char *target_str);

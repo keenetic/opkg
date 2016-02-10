@@ -67,11 +67,6 @@ void str_list_append(str_list_t * list, char *data)
     void_list_append((void_list_t *) list, xstrdup(data));
 }
 
-void str_list_push(str_list_t * list, char *data)
-{
-    void_list_push((void_list_t *) list, xstrdup(data));
-}
-
 str_list_elt_t *str_list_pop(str_list_t * list)
 {
     return (str_list_elt_t *) void_list_pop((void_list_t *) list);
