@@ -113,7 +113,7 @@ static int opkg_download_file(const char *src, const char *dest)
  * \return 0 if success, -1 if error occurs
  *
  */
-int opkg_download_internal(const char *src, const char *dest,
+static int opkg_download_internal(const char *src, const char *dest,
                            curl_progress_func cb, void *data, int use_cache)
 {
     int ret;
@@ -141,7 +141,7 @@ int opkg_download_internal(const char *src, const char *dest,
  * \return generated file path
  *
  */
-char *get_cache_location(const char *src)
+static char *get_cache_location(const char *src)
 {
     unsigned char md5sum_bin[16];
     char *md5sum_hex;
@@ -168,6 +168,22 @@ char *get_cache_location(const char *src)
     return cache_location;
 }
 
+/** \brief opkg_download_direct: downloads file directly
+ *
+ * \param src absolute URI of file to download
+ * \param dest destination path for downloaded file
+ * \param cb callback for curl download progress
+ * \param data data to pass to progress callback
+ * \return 0 on success, <0 on failure
+ *
+ */
+static int opkg_download_direct(const char *src, const char *dest,
+                         curl_progress_func cb, void *data)
+{
+    return opkg_download_internal(src, dest, cb, data, 0);
+}
+
+
 /** \brief opkg_download_cache: downloads file into cache
  *
  * \param src absolute URI of file to download
@@ -188,21 +204,6 @@ char *opkg_download_cache(const char *src, curl_progress_func cb, void *data)
         cache_location = NULL;
     }
     return cache_location;
-}
-
-/** \brief opkg_download_direct: downloads file directly
- *
- * \param src absolute URI of file to download
- * \param dest destination path for downloaded file
- * \param cb callback for curl download progress
- * \param data data to pass to progress callback
- * \return 0 on success, <0 on failure
- *
- */
-int opkg_download_direct(const char *src, const char *dest,
-                         curl_progress_func cb, void *data)
-{
-    return opkg_download_internal(src, dest, cb, data, 0);
 }
 
 int opkg_download(const char *src, const char *dest_file_name,
