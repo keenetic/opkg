@@ -34,12 +34,6 @@
 #include "file_util.h"
 #include "xfuncs.h"
 
-void pkg_hash_init(void)
-{
-    hash_table_init("pkg-hash", &opkg_config->pkg_hash,
-                    OPKG_CONF_DEFAULT_HASH_LEN);
-}
-
 static void free_pkgs(const char *key, void *entry, void *data)
 {
     unsigned int i;
@@ -66,40 +60,7 @@ static void free_pkgs(const char *key, void *entry, void *data)
     free(ab_pkg);
 }
 
-void pkg_hash_deinit(void)
-{
-    hash_table_foreach(&opkg_config->pkg_hash, free_pkgs, NULL);
-    hash_table_deinit(&opkg_config->pkg_hash);
-}
-
-int dist_hash_add_from_file(pkg_src_t * dist)
-{
-    nv_pair_list_elt_t *l;
-    char *list_file, *subname;
-    int r;
-
-    list_for_each_entry(l, &opkg_config->arch_list.head, node) {
-        nv_pair_t *nv = (nv_pair_t *) l->data;
-        sprintf_alloc(&subname, "%s-%s", dist->name, nv->name);
-        sprintf_alloc(&list_file, "%s/%s", opkg_config->lists_dir, subname);
-
-        if (file_exists(list_file)) {
-            r = pkg_hash_add_from_file(list_file, dist, NULL, 0);
-            if (r != 0) {
-                free(list_file);
-                return -1;
-            }
-            pkg_src_list_append(&opkg_config->pkg_src_list, subname,
-                                dist->value, "__dummy__", 0);
-        }
-
-        free(list_file);
-    }
-
-    return 0;
-}
-
-int pkg_hash_add_from_file(const char *file_name, pkg_src_t * src,
+static int pkg_hash_add_from_file(const char *file_name, pkg_src_t * src,
                            pkg_dest_t * dest, int is_status_file)
 {
     pkg_t *pkg;
@@ -167,6 +128,45 @@ int pkg_hash_add_from_file(const char *file_name, pkg_src_t * src,
     fclose(fp);
 
     return ret;
+}
+
+static int dist_hash_add_from_file(pkg_src_t * dist)
+{
+    nv_pair_list_elt_t *l;
+    char *list_file, *subname;
+    int r;
+
+    list_for_each_entry(l, &opkg_config->arch_list.head, node) {
+        nv_pair_t *nv = (nv_pair_t *) l->data;
+        sprintf_alloc(&subname, "%s-%s", dist->name, nv->name);
+        sprintf_alloc(&list_file, "%s/%s", opkg_config->lists_dir, subname);
+
+        if (file_exists(list_file)) {
+            r = pkg_hash_add_from_file(list_file, dist, NULL, 0);
+            if (r != 0) {
+                free(list_file);
+                return -1;
+            }
+            pkg_src_list_append(&opkg_config->pkg_src_list, subname,
+                                dist->value, "__dummy__", 0);
+        }
+
+        free(list_file);
+    }
+
+    return 0;
+}
+
+void pkg_hash_init(void)
+{
+    hash_table_init("pkg-hash", &opkg_config->pkg_hash,
+                    OPKG_CONF_DEFAULT_HASH_LEN);
+}
+
+void pkg_hash_deinit(void)
+{
+    hash_table_foreach(&opkg_config->pkg_hash, free_pkgs, NULL);
+    hash_table_deinit(&opkg_config->pkg_hash);
 }
 
 /*
