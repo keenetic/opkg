@@ -49,7 +49,6 @@ nv_pair_list_elt_t *nv_pair_list_prev(nv_pair_list_t * list,
                                       nv_pair_list_elt_t * node);
 nv_pair_list_elt_t *nv_pair_list_next(nv_pair_list_t * list,
                                       nv_pair_list_elt_t * node);
-nv_pair_list_elt_t *nv_pair_list_last(nv_pair_list_t * list);
 
 #ifdef __cplusplus
 }
