@@ -62,8 +62,3 @@ void pkg_src_list_push(pkg_src_list_t * list, pkg_src_t * data)
 {
     void_list_push((void_list_t *) list, data);
 }
-
-pkg_src_list_elt_t *pkg_src_list_pop(pkg_src_list_t * list)
-{
-    return (pkg_src_list_elt_t *) void_list_pop((void_list_t *) list);
-}
