@@ -90,13 +90,6 @@ nv_pair_list_elt_t *nv_pair_list_first(nv_pair_list_t * list)
     return (nv_pair_list_elt_t *) void_list_first((void_list_t *) list);
 }
 
-nv_pair_list_elt_t *nv_pair_list_prev(nv_pair_list_t * list,
-                                      nv_pair_list_elt_t * node)
-{
-    return (nv_pair_list_elt_t *) void_list_prev((void_list_t *) list,
-                                                 (void_list_elt_t *) node);
-}
-
 nv_pair_list_elt_t *nv_pair_list_next(nv_pair_list_t * list,
                                       nv_pair_list_elt_t * node)
 {
