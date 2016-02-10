@@ -36,11 +36,6 @@ conffile_t *conffile_list_append(conffile_list_t * list, const char *file_name,
     return nv_pair_list_append(list, file_name, md5sum);
 }
 
-void conffile_list_push(conffile_list_t * list, conffile_t * data)
-{
-    nv_pair_list_push(list, data);
-}
-
 conffile_list_elt_t *conffile_list_pop(conffile_list_t * list)
 {
     conffile_list_elt_t *pos = nv_pair_list_pop(list);

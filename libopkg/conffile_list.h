@@ -34,7 +34,6 @@ void conffile_list_deinit(conffile_list_t * list);
 
 conffile_t *conffile_list_append(conffile_list_t * list, const char *name,
                                  const char *root_dir);
-void conffile_list_push(conffile_list_t * list, conffile_t * data);
 conffile_list_elt_t *conffile_list_pop(conffile_list_t * list);
 
 #ifdef __cplusplus
