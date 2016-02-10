@@ -44,7 +44,7 @@
 static CURL *curl = NULL;
 static CURL *opkg_curl_init(curl_progress_func cb, void *data);
 
-size_t dummy_write(char *ptr, size_t size, size_t nmemb, void *userdata)
+static size_t dummy_write(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
     (void)ptr;
     (void)userdata;
@@ -61,7 +61,7 @@ size_t dummy_write(char *ptr, size_t size, size_t nmemb, void *userdata)
  * \return number of processed bytes
  *
  */
-size_t header_write(char *ptr, size_t size, size_t nmemb, void *userdata)
+static size_t header_write(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
     char prefix[5];
     unsigned long i;
@@ -147,7 +147,7 @@ static CURLcode curl_ssl_ctx_function(CURL * curl, void *sslctx, void *parm)
  * \return 0 if success, -1 if error occurs
  *
  */
-int create_file_stamp(const char *file_name, char *stamp)
+static int create_file_stamp(const char *file_name, char *stamp)
 {
     FILE *file;
     char *file_path;
@@ -173,7 +173,7 @@ int create_file_stamp(const char *file_name, char *stamp)
  * \return 0 if both stamps are equal or -1 otherwise
  *
  */
-int check_file_stamp(const char *file_name, char *stamp)
+static int check_file_stamp(const char *file_name, char *stamp)
 {
     FILE *file;
     char stamp_buf[STAMP_BUF_SIZE];
@@ -223,7 +223,7 @@ int check_file_stamp(const char *file_name, char *stamp)
  *         1 if file needs further downloading.
  *         -1 if error occurs.
  */
-int opkg_validate_cached_file(const char *src, const char *cache_location)
+static int opkg_validate_cached_file(const char *src, const char *cache_location)
 {
     CURLcode res;
     FILE *file;
