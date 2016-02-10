@@ -100,12 +100,6 @@ str_list_elt_t *str_list_first(str_list_t * list)
     return (str_list_elt_t *) void_list_first((void_list_t *) list);
 }
 
-str_list_elt_t *str_list_prev(str_list_t * list, str_list_elt_t * node)
-{
-    return (str_list_elt_t *) void_list_prev((void_list_t *) list,
-                                             (void_list_elt_t *) node);
-}
-
 str_list_elt_t *str_list_next(str_list_t * list, str_list_elt_t * node)
 {
     return (str_list_elt_t *) void_list_next((void_list_t *) list,

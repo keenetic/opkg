@@ -43,7 +43,6 @@ void str_list_remove(str_list_t * list, str_list_elt_t ** iter);
 void str_list_remove_elt(str_list_t * list, const char *target_str);
 
 str_list_elt_t *str_list_first(str_list_t * list);
-str_list_elt_t *str_list_prev(str_list_t * list, str_list_elt_t * node);
 str_list_elt_t *str_list_next(str_list_t * list, str_list_elt_t * node);
 
 void str_list_purge(str_list_t * list);
