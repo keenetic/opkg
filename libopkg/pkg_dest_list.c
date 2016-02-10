@@ -70,11 +70,6 @@ pkg_dest_t *pkg_dest_list_append(pkg_dest_list_t * list, const char *name,
     return pkg_dest;
 }
 
-void pkg_dest_list_push(pkg_dest_list_t * list, pkg_dest_t * data)
-{
-    void_list_push((void_list_t *) list, data);
-}
-
 pkg_dest_list_elt_t *pkg_dest_list_pop(pkg_dest_list_t * list)
 {
     return (pkg_dest_list_elt_t *) void_list_pop((void_list_t *) list);
