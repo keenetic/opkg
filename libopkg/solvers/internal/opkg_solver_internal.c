@@ -395,22 +395,6 @@ static int opkg_install_check_downgrade(pkg_t *pkg, pkg_t *old_pkg,
         return 0;
     }
 
-    /* No old package. */
-    if (!opkg_config->download_only) {
-        char *version = pkg_version_str_alloc(pkg);
-        const char *s;
-
-        if (message)
-            s = "Upgrading";
-        else
-            s = "Installing";
-
-        opkg_msg(NOTICE, "%s %s (%s) on %s.\n", s, pkg->name, version,
-                 pkg->dest->name);
-
-        free(version);
-    }
-
     return 0;
 }
 
