@@ -858,7 +858,7 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
             return err;
     }
 
-    if (pkg->local_filename == NULL) {
+    if (pkg->local_filename == NULL && !opkg_config->download_first) {
         err = opkg_download_pkg(pkg);
         if (err) {
             opkg_msg(ERROR,

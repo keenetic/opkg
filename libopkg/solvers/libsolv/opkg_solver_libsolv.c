@@ -25,6 +25,7 @@
 #include <solv/solverdebug.h>
 
 #include "opkg_install.h"
+#include "opkg_download.h"
 #include "opkg_remove.h"
 #include "opkg_message.h"
 #include "pkg_vec.h"
@@ -682,16 +683,27 @@ static void libsolv_solver_free(libsolv_solver_t *libsolv_solver)
     free(libsolv_solver);
 }
 
+static int requires_download(Id typeId)
+{
+    return typeId == SOLVER_TRANSACTION_INSTALL || typeId == SOLVER_TRANSACTION_UPGRADE ||
+                     typeId == SOLVER_TRANSACTION_DOWNGRADE || typeId == SOLVER_TRANSACTION_REINSTALL ||
+                     typeId == SOLVER_TRANSACTION_MULTIINSTALL;
+}
+
 static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
 {
     int i, ret = 0, err = 0;
     Transaction *transaction;
+    pkg_vec_t *pkgs;
 
     transaction = solver_create_transaction(libsolv_solver->solver);
+    pkgs = pkg_vec_alloc();
 
     if (!transaction->steps.count) {
         opkg_message(NOTICE, "No packages installed or removed.\n");
     } else {
+        pkg_t *pkg;
+
         /* order the transaction so dependencies are handled first */
         transaction_order(transaction, 0);
 
@@ -705,14 +717,36 @@ static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
             const char *pkg_name = pool_id2str(libsolv_solver->pool, solvable->name);
             const char *evr = pool_id2str(libsolv_solver->pool, solvable->evr);
 
-            pkg_t *pkg = pkg_hash_fetch_by_name_version(pkg_name, evr);
+            pkg = pkg_hash_fetch_by_name_version(pkg_name, evr);
+            pkg_vec_insert(pkgs, pkg);
+
+            if (pkg->local_filename == NULL && opkg_config->download_first &&
+                                      requires_download(typeId)) {
+                err = opkg_download_pkg(pkg);
+                if (err) {
+                    opkg_msg(ERROR,
+                             "Failed to download %s. "
+                             "Perhaps you need to run 'opkg update'?\n", pkg->name);
+                    ret = -1;
+                    goto CLEANUP;
+                }
+            }
+        }
+
+        for (i = 0; i < transaction->steps.count; i++) {
+            Id stepId = transaction->steps.elements[i];
+            Id typeId = transaction_type(transaction, stepId,
+                    SOLVER_TRANSACTION_SHOW_ACTIVE |
+                    SOLVER_TRANSACTION_CHANGE_IS_REINSTALL);
+
+            pkg = pkgs->pkgs[i];
             pkg_t *old = 0;
 
             Id decision_rule;
 
             switch (typeId) {
             case SOLVER_TRANSACTION_ERASE:
-                opkg_message(NOTICE, "Removing pkg %s - %s\n", pkg_name, evr);
+                opkg_message(NOTICE, "Removing pkg %s - %s\n", pkg->name, pkg->version);
                 ret = opkg_remove_pkg(pkg);
                 break;
             case SOLVER_TRANSACTION_DOWNGRADE:
@@ -728,11 +762,11 @@ static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
                                     != SOLVER_RULE_JOB)
                     pkg->auto_installed = 1;
 
-                opkg_message(NOTICE, "Installing pkg %s - %s\n", pkg_name, evr);
+                opkg_message(NOTICE, "Installing pkg %s - %s\n", pkg->name, pkg->version);
                 ret = opkg_install_pkg(pkg, 0);
                 break;
             case SOLVER_TRANSACTION_UPGRADE:
-                old = pkg_hash_fetch_installed_by_name(pkg_name);
+                old = pkg_hash_fetch_installed_by_name(pkg->name);
 
                 /* if an old version was found set the new package's
                    autoinstalled status to that of the old package. */
@@ -741,12 +775,12 @@ static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
 
                     pkg->auto_installed = old->auto_installed;
                     opkg_message(NOTICE, "Upgrading pkg %s from %s to %s\n",
-                                 pkg_name, old_version, evr);
+                                 pkg->name, old_version, pkg->version);
 
                     free(old_version);
                 } else {
                     opkg_message(NOTICE, "Upgrading pkg %s to %s\n",
-                                 pkg_name, evr);
+                                 pkg->name, pkg->version);
                 }
 
                 ret = opkg_install_pkg(pkg, 1);
@@ -761,6 +795,8 @@ static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
         }
     }
 
+CLEANUP:
+    pkg_vec_free(pkgs);
     transaction_free(transaction);
     return err;
 }

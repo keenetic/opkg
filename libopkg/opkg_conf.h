@@ -104,6 +104,7 @@ typedef struct opkg_conf {
     int verbosity;
     int noaction;
     int download_only;
+    int download_first;
     int overwrite_no_owner;
     int volatile_cache;
     int combine;

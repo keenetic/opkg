@@ -73,6 +73,7 @@ static opkg_option_t options[] = {
     {"test", OPKG_OPT_TYPE_BOOL, &_conf.noaction},
     {"noaction", OPKG_OPT_TYPE_BOOL, &_conf.noaction},
     {"download_only", OPKG_OPT_TYPE_BOOL, &_conf.download_only},
+    {"download_first", OPKG_OPT_TYPE_BOOL, &_conf.download_first}, /* Not available on internal solver */
     {"nodeps", OPKG_OPT_TYPE_BOOL, &_conf.nodeps},
     {"no_install_recommends", OPKG_OPT_TYPE_BOOL, &_conf.no_install_recommends},
     {"offline_root", OPKG_OPT_TYPE_STRING, &_conf.offline_root},
@@ -614,7 +615,6 @@ int opkg_conf_load(void)
 #if defined(HAVE_PATHFINDER)
     opkg_config->check_x509_path = 1;
 #endif
-
     if (!opkg_config->offline_root)
         opkg_config->offline_root = xstrdup(getenv("OFFLINE_ROOT"));
 
@@ -666,6 +666,12 @@ int opkg_conf_load(void)
 
         globfree(&globbuf);
     }
+
+    /* Option not available on the internal solver since it currently
+     * can't merge transactions, resulting in one solve per operation */
+#if defined(HAVE_SOLVER_INTERNAL)
+    opkg_config->download_first = 0;
+#endif
 
     if (opkg_config->lock_file == NULL)
         opkg_config->lock_file = xstrdup(OPKG_CONF_DEFAULT_LOCK_FILE);
