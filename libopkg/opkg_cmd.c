@@ -1066,7 +1066,7 @@ static int opkg_compare_versions_cmd(int argc, char **argv)
         parse_version(&p1, argv[0]);
         parse_version(&p2, argv[2]);
         p1.force_reinstall = p2.force_reinstall = 0;
-        return pkg_version_satisfied(&p1, &p2, argv[1]);
+        return pkg_version_satisfied(&p1, &p2, argv[1]) ? 0 : 1;
     } else {
         opkg_msg(ERROR,
                  "opkg compare_versions <v1> <op> <v2>\n"
