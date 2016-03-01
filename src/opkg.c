@@ -374,15 +374,15 @@ int main(int argc, char *argv[])
     nocheckfordirorfile = !strcmp(cmd_name, "print-architecture")
         || !strcmp(cmd_name, "print_architecture")
         || !strcmp(cmd_name, "print-installation-architecture")
-        || !strcmp(cmd_name, "print_installation_architecture");
+        || !strcmp(cmd_name, "print_installation_architecture")
+        || !strcmp(cmd_name, "compare_versions")
+        || !strcmp(cmd_name, "compare-versions");
 
     noreadfeedsfile = !strcmp(cmd_name, "flag")
         || !strcmp(cmd_name, "configure")
         || !strcmp(cmd_name, "remove")
         || !strcmp(cmd_name, "files")
         || !strcmp(cmd_name, "search")
-        || !strcmp(cmd_name, "compare_versions")
-        || !strcmp(cmd_name, "compare-versions")
         || !strcmp(cmd_name, "list_installed")
         || !strcmp(cmd_name, "list-installed")
         || !strcmp(cmd_name, "list_changed_conffiles")
