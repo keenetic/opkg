@@ -59,6 +59,7 @@ void free_error_list(void)
         err = err->next;
         free(err_tmp);
     }
+    error_list_head = NULL;
 }
 
 void print_error_list(void)
