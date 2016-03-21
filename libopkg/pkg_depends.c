@@ -299,8 +299,10 @@ void buildReplaces(abstract_pkg_t * ab_pkg, pkg_t * pkg)
         /* if a package pkg both replaces and conflicts old_abpkg,
          * then add it to the replaced_by vector so that old_abpkg
          * will be upgraded to ab_pkg automatically */
-        if (pkg_conflicts_abstract(pkg, old_abpkg))
-            abstract_pkg_vec_insert(old_abpkg->replaced_by, ab_pkg);
+        if (pkg_conflicts_abstract(pkg, old_abpkg)) {
+            if (!abstract_pkg_vec_contains(old_abpkg->replaced_by, ab_pkg))
+                abstract_pkg_vec_insert(old_abpkg->replaced_by, ab_pkg);
+        }
     }
 
     free(pkg->replaces_str);
