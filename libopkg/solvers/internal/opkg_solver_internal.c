@@ -454,19 +454,17 @@ static int calculate_dependencies_for(pkg_t *pkg, pkg_vec_t *pkgs_to_install, pk
                     err = -1;
                     goto cleanup;
                 }
-                if (!is_pkg_in_pkg_vec(dep->wanted_by, pkg)) {
-                    pkg_vec_insert(pkgs_to_install, dep);
-                    old_pkg = pkg_hash_fetch_installed_by_name(dep->name);
+                pkg_vec_insert(pkgs_to_install, dep);
+                old_pkg = pkg_hash_fetch_installed_by_name(dep->name);
 
-                    pkg_get_installed_replacees(dep, replacees);
-                    /* DPKG_INCOMPATIBILITY:
-                     * For upgrades, dpkg and apt-get will not remove orphaned dependents.
-                     * Apt-get will instead tell the user to use apt-get autoremove to remove
-                     * the autoinstalled orphaned package if it is no longer needed */
-                    if (old_pkg)
-                        pkg_get_orphan_dependents(dep, old_pkg, orphans);
-                    pkg_vec_insert(dep->wanted_by, pkg);
-                }
+                pkg_get_installed_replacees(dep, replacees);
+                /* DPKG_INCOMPATIBILITY:
+                 * For upgrades, dpkg and apt-get will not remove orphaned dependents.
+                 * Apt-get will instead tell the user to use apt-get autoremove to remove
+                 * the autoinstalled orphaned package if it is no longer needed */
+                if (old_pkg)
+                    pkg_get_orphan_dependents(dep, old_pkg, orphans);
+                pkg_vec_insert(dep->wanted_by, pkg);
             }
         }
 
