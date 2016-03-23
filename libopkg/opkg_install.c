@@ -522,8 +522,6 @@ static int check_data_file_clashes_change(pkg_t * pkg, pkg_t * old_pkg)
     str_list_t *files_list;
     str_list_elt_t *iter, *niter;
 
-    char *root_filename = NULL;
-
     files_list = pkg_get_installed_files(pkg);
     if (files_list == NULL)
         return -1;
@@ -531,12 +529,7 @@ static int check_data_file_clashes_change(pkg_t * pkg, pkg_t * old_pkg)
     for (iter = str_list_first(files_list), niter = str_list_next(files_list, iter);
             iter; iter = niter, niter = str_list_next(files_list, niter)) {
         char *filename = (char *)iter->data;
-        if (root_filename) {
-            free(root_filename);
-            root_filename = NULL;
-        }
-        root_filename = root_filename_alloc(filename);
-        if (file_exists(root_filename) && (!file_is_dir(root_filename))) {
+        if (file_exists(filename) && (!file_is_dir(filename))) {
             pkg_t *owner;
 
             owner = file_hash_get_file_owner(filename);
@@ -564,10 +557,6 @@ static int check_data_file_clashes_change(pkg_t * pkg, pkg_t * old_pkg)
             }
 
         }
-    }
-    if (root_filename) {
-        free(root_filename);
-        root_filename = NULL;
     }
     pkg_free_installed_files(pkg);
 
