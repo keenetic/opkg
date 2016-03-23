@@ -446,7 +446,8 @@ static int calculate_dependencies_for(pkg_t *pkg, pkg_vec_t *pkgs_to_install, pk
                 continue;
             }
             int needs_install = (dep->state_status != SS_INSTALLED)
-                    && (dep->state_status != SS_UNPACKED);
+                    && (dep->state_status != SS_UNPACKED)
+                    && !is_pkg_in_pkg_vec(pkgs_to_install, dep);
             if (needs_install) {
                 if (dep->dest == NULL)
                     dep->dest = opkg_config->default_dest;
@@ -454,6 +455,8 @@ static int calculate_dependencies_for(pkg_t *pkg, pkg_vec_t *pkgs_to_install, pk
                     err = -1;
                     goto cleanup;
                 }
+                pkg_vec_insert(dep->wanted_by, pkg);
+                calculate_dependencies_for(dep, pkgs_to_install, replacees, orphans);
                 pkg_vec_insert(pkgs_to_install, dep);
                 old_pkg = pkg_hash_fetch_installed_by_name(dep->name);
 
@@ -464,7 +467,6 @@ static int calculate_dependencies_for(pkg_t *pkg, pkg_vec_t *pkgs_to_install, pk
                  * the autoinstalled orphaned package if it is no longer needed */
                 if (old_pkg)
                     pkg_get_orphan_dependents(dep, old_pkg, orphans);
-                pkg_vec_insert(dep->wanted_by, pkg);
             }
         }
 
@@ -488,7 +490,8 @@ static int calculate_dependencies_for(pkg_t *pkg, pkg_vec_t *pkgs_to_install, pk
         if (!is_pkg_in_pkg_vec(dep->wanted_by, pkg))
             pkg_vec_insert(dep->wanted_by, pkg);
         int needs_install = (dep->state_status != SS_INSTALLED)
-                && (dep->state_status != SS_UNPACKED);
+                && (dep->state_status != SS_UNPACKED)
+                && !is_pkg_in_pkg_vec(pkgs_to_install, dep);
         if (needs_install) {
             if (dep->dest == NULL)
                 dep->dest = opkg_config->default_dest;
@@ -496,6 +499,7 @@ static int calculate_dependencies_for(pkg_t *pkg, pkg_vec_t *pkgs_to_install, pk
                 err = -1;
                 goto cleanup;
             }
+            calculate_dependencies_for(dep, pkgs_to_install, replacees, orphans);
             pkg_vec_insert(pkgs_to_install, dep);
             old_pkg = pkg_hash_fetch_installed_by_name(dep->name);
 
