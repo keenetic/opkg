@@ -357,6 +357,7 @@ int main(int argc, char *argv[])
     opkg_cmd_t *cmd;
     int nocheckfordirorfile;
     int noreadfeedsfile;
+    int noloadconf;
 
     if (opkg_conf_init())
         goto err0;
@@ -389,6 +390,9 @@ int main(int argc, char *argv[])
         || !strcmp(cmd_name, "list-changed-conffiles")
         || !strcmp(cmd_name, "status");
 
+    noloadconf = !strcmp(cmd_name, "compare_versions")
+        || !strcmp(cmd_name, "compare-versions");
+
     cmd = opkg_cmd_find(cmd_name);
     if (cmd == NULL) {
         fprintf(stderr, "%s: unknown sub-command %s\n", argv[0], cmd_name);
@@ -397,8 +401,10 @@ int main(int argc, char *argv[])
 
     opkg_config->pfm = cmd->pfm;
 
-    if (opkg_conf_load())
-        goto err0;
+    if (!noloadconf) {
+        if (opkg_conf_load())
+            goto err0;
+    }
 
     if (!nocheckfordirorfile) {
         if (!noreadfeedsfile) {
