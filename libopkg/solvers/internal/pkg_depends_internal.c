@@ -501,7 +501,7 @@ static void __pkg_hash_fetch_conflictees(pkg_t *pkg,
     for (i = 0; i < available_pkgs->len; i++) {
         pkg_t *cpkg = available_pkgs->pkgs[i];
         int is_new_conflict = pkg_conflicts(cpkg, pkg)
-                && !is_pkg_a_provides(cpkg, pkg)
+                && strcmp(cpkg->name, pkg->name)
                 && !is_pkg_in_pkg_vec(installed_conflicts, cpkg)
                 && !pkg_replaces(pkg, cpkg);
         if (is_new_conflict)
