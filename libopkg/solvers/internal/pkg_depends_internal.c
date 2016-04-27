@@ -409,7 +409,7 @@ static int is_pkg_a_replaces(pkg_t *pkg_scout, pkg_t *pkg)
     return 0;
 }
 
-static int is_pkg_a_provides(const pkg_t *pkg_scout, const pkg_t *pkg)
+int is_pkg_a_provides(const pkg_t *pkg_scout, const pkg_t *pkg)
 {
     int i;
 

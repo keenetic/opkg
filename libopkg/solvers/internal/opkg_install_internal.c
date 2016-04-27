@@ -195,12 +195,9 @@ int opkg_install_by_name(const char *pkg_name)
     orphans = pkg_vec_alloc();
 
     r = internal_solver_solv(SOLVER_TRANSACTION_INSTALL, pkg, pkgs_to_install, replacees, orphans);
-    if (r < 0)
-        goto cleanup;
+    if (r == 0)
+        r = opkg_execute_install(pkg, pkgs_to_install, replacees, orphans, 0);
 
-    r = opkg_execute_install(pkg, pkgs_to_install, replacees, orphans, 0);
-
-cleanup:
     pkg_vec_free(pkgs_to_install);
     pkg_vec_free(replacees);
     pkg_vec_free(orphans);
@@ -242,6 +239,9 @@ int opkg_install_multiple_by_name(str_list_t *pkg_names)
         if (r < 0) {
             errors++;
             goto cleanup;
+        } else if (r > 0) {
+            /* Provides already installed, skip */
+            continue;
         }
 
         r = opkg_execute_install(pkg, deps_to_install, replacees, orphans, 0);
