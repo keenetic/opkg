@@ -478,7 +478,6 @@ static void __pkg_hash_fetch_conflicts(pkg_t *pkg,
                             && version_constraints_satisfied(possible_satisfier,
                                                              pkg_scout)
                             && !is_pkg_a_replaces(pkg_scout, pkg)
-                            && !is_pkg_a_provides(pkg_scout, pkg)
                             && !is_pkg_in_pkg_vec(installed_conflicts,
                                                   pkg_scout);
                     if (is_new_conflict) {
