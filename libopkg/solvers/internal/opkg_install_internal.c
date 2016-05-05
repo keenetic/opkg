@@ -157,7 +157,7 @@ int opkg_execute_install(pkg_t *pkg, pkg_vec_t *pkgs_to_install, pkg_vec_t *repl
                  dependency->name, dependency->version, dependency->dest->name);
 
         /* Set all pkgs to auto_installed except the top level */
-        if (i < (pkgs_to_install->len - 1))
+        if (dependency != pkg)
             dependency->auto_installed = 1;
         r = opkg_install_pkg(dependency, from_upgrade);
         if (r < 0)
