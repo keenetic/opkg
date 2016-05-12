@@ -27,6 +27,7 @@ unsigned long get_available_kbytes(char *filesystem);
 char *trim_xstrdup(const char *line);
 int line_is_blank(const char *line);
 int str_starts_with(const char *str, const char *prefix);
+void strip_pkg_name_and_version(const char *pkg_name, char **name, char **version);
 
 #ifdef __cplusplus
 }

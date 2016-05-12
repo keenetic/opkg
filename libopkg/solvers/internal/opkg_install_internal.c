@@ -16,13 +16,17 @@
 
 #include "opkg_install_internal.h"
 #include "opkg_solver_internal.h"
+#include "pkg_depends.h"
 #include "opkg_install.h"
 #include "opkg_remove.h"
 #include "opkg_message.h"
+#include "opkg_utils.h"
 #include "pkg_hash.h"
 #include "pkg.h"
 
 #include <stdlib.h>
+
+#include "xfuncs.h"
 
 static int pkg_remove_installed(pkg_vec_t *pkgs_to_remove)
 {
@@ -60,14 +64,38 @@ static int opkg_prepare_install_by_name(const char *pkg_name, pkg_t **pkg)
 {
     int cmp;
     pkg_t *old, *new;
-    char *old_version, *new_version;
+    char *old_version, *new_version, *version, *name;
 
-    old = pkg_hash_fetch_installed_by_name(pkg_name);
+    strip_pkg_name_and_version(pkg_name, &name, &version);
+    abstract_pkg_t *ab_pkg = abstract_pkg_fetch_by_name(name);
+
+    old = pkg_hash_fetch_installed_by_name(name);
     if (old)
         opkg_msg(DEBUG2, "Old versions from pkg_hash_fetch %s.\n",
                  old->version);
 
-    new = pkg_hash_fetch_best_installation_candidate_by_name(pkg_name);
+    /* A specific version of a package was requested. The syntax to request a particular
+     * version is "opkg install  <PKG_NAME>=<VERSION> */
+    if (version) {
+        depend_t *dependence_to_satisfy = xmalloc(sizeof(depend_t));
+        dependence_to_satisfy->constraint = EQUAL;
+        dependence_to_satisfy->version = version;
+        dependence_to_satisfy->pkg = ab_pkg;
+
+        new = pkg_hash_fetch_best_installation_candidate(
+                ab_pkg,
+                pkg_constraint_satisfied,
+                dependence_to_satisfy,
+                1);
+
+        free(dependence_to_satisfy);
+    } else {
+        new = pkg_hash_fetch_best_installation_candidate_by_name(name);
+    }
+
+    free(name);
+    free(version);
+
     if (new == NULL) {
         opkg_msg(NOTICE, "Unknown package '%s'.\n", pkg_name);
         return -1;

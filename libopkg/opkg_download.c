@@ -28,6 +28,7 @@
 #include "opkg_message.h"
 #include "opkg_verify.h"
 #include "opkg_utils.h"
+#include "pkg_depends.h"
 
 #include "md5.h"
 #include "sprintf_alloc.h"
@@ -414,7 +415,8 @@ static int opkg_prepare_file_for_install(const char *path, char **namep)
  */
 int opkg_prepare_url_for_install(const char *url, char **namep)
 {
-    int r;
+    int r = 0;
+    char *pkg_name, *pkg_version;
 
     /* First heuristic: Maybe it's a remote URL. */
     if (url_has_remote_protocol(url)) {
@@ -434,35 +436,62 @@ int opkg_prepare_url_for_install(const char *url, char **namep)
      * We check this before files incase an existing file incidentally shares a
      * name with an available package.
      */
-    if (abstract_pkg_fetch_by_name(url)) {
+    strip_pkg_name_and_version(url, &pkg_name, &pkg_version);
+    abstract_pkg_t *ab_pkg = abstract_pkg_fetch_by_name(pkg_name);
+    if (ab_pkg) {
         if (opkg_config->force_reinstall) {
             /* Reload the given package from its package file into a new package
              * object. This new object can then be marked as force_reinstall and
              * the reinstall should go ahead like an upgrade.
              */
             pkg_t *pkg;
-            pkg = pkg_hash_fetch_best_installation_candidate_by_name(url);
+            if (pkg_version) {
+                depend_t *dependence_to_satisfy = xmalloc(sizeof(depend_t));
+                dependence_to_satisfy->constraint = EQUAL;
+                dependence_to_satisfy->version = pkg_version;
+                dependence_to_satisfy->pkg = ab_pkg;
+
+                pkg = pkg_hash_fetch_best_installation_candidate(
+                        ab_pkg,
+                        pkg_constraint_satisfied,
+                        dependence_to_satisfy,
+                        1);
+
+                free(dependence_to_satisfy);
+            } else {
+                pkg = pkg_hash_fetch_best_installation_candidate_by_name(pkg_name);
+            }
+
             if (!pkg) {
                 opkg_msg(ERROR, "Unknown package %s, cannot force reinstall.\n",
                          url);
-                return -1;
+                r = -1;
+                goto CLEANUP;
             }
             r = opkg_download_pkg(pkg);
             if (r)
-                return r;
+                goto CLEANUP;
 
-            return opkg_prepare_file_for_install(pkg->local_filename, namep);
+            r = opkg_prepare_file_for_install(pkg->local_filename, namep);
+            goto CLEANUP;
         }
 
         /* Nothing special to do. */
-        return 0;
+        goto CLEANUP;
     }
 
     /* Third heuristic: Maybe it's a file. */
-    if (file_exists(url))
-        return opkg_prepare_file_for_install(url, namep);
+    if (file_exists(url)) {
+        r = opkg_prepare_file_for_install(url, namep);
+        goto CLEANUP;
+    }
 
     /* Can't find anything matching the requested URL. */
     opkg_msg(ERROR, "Couldn't find anything to satisfy '%s'.\n", url);
-    return -1;
+    r = -1;
+
+CLEANUP:
+    free(pkg_name);
+    free(pkg_version);
+    return r;
 }

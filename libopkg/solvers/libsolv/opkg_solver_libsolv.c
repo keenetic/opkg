@@ -28,6 +28,7 @@
 #include "opkg_download.h"
 #include "opkg_remove.h"
 #include "opkg_message.h"
+#include "opkg_utils.h"
 #include "pkg_vec.h"
 #include "pkg_hash.h"
 #include "xfuncs.h"
@@ -605,8 +606,17 @@ static void libsolv_solver_add_job(libsolv_solver_t *libsolv_solver,
 {
     Id what = 0;
     Id how = 0;
+    char *name, *version;
 
-    what = pool_str2id(libsolv_solver->pool, pkg_name, 1);
+    strip_pkg_name_and_version(pkg_name, &name, &version);
+    if (version) {
+        what = pool_rel2id(libsolv_solver->pool,
+                           pool_str2id(libsolv_solver->pool, name, 1),
+                           pool_str2id(libsolv_solver->pool, version, 1),
+                           REL_EQ, 1);
+    } else {
+        what = pool_str2id(libsolv_solver->pool, name, 1);
+    }
 
     switch (action) {
     case JOB_INSTALL:
@@ -640,6 +650,9 @@ static void libsolv_solver_add_job(libsolv_solver_t *libsolv_solver,
         how |= SOLVER_CLEANDEPS;
 
     queue_push2(&libsolv_solver->solver_jobs, how, what);
+
+    free(name);
+    free(version);
 }
 
 static int libsolv_solver_solve(libsolv_solver_t *libsolv_solver)

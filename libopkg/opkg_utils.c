@@ -83,3 +83,26 @@ int str_starts_with(const char *str, const char *prefix)
 {
     return (strncmp(str, prefix, strlen(prefix)) == 0);
 }
+
+void strip_pkg_name_and_version(const char *pkg_name, char **name, char **version)
+{
+    char *tmp;
+
+    if (!pkg_name) {
+        *version = NULL;
+        *name = NULL;
+        return;
+    }
+
+    tmp = strrchr(pkg_name, '=');
+
+    if (tmp) {
+        /* Remove '=' character */
+        tmp++;
+        *version = xstrdup(tmp);
+        *name = xstrndup(pkg_name, strlen(pkg_name) - (strlen(*version) + 1));
+    } else {
+        *version = NULL;
+        *name = xstrdup(pkg_name);
+    }
+}
