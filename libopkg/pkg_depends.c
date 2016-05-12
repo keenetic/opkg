@@ -64,6 +64,12 @@ int version_constraints_satisfied(depend_t * depends, pkg_t * pkg)
     return 0;
 }
 
+int pkg_constraint_satisfied(pkg_t *pkg, void *cdata)
+{
+    depend_t *depend = (depend_t *) cdata;
+    return version_constraints_satisfied(depend, pkg);
+}
+
 int pkg_dependence_satisfiable(depend_t * depend)
 {
     abstract_pkg_t *apkg = depend->pkg;

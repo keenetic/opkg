@@ -88,6 +88,7 @@ int pkg_breaks_reverse_dep(pkg_t * pkg);
 char *pkg_depend_str(pkg_t * pkg, int index);
 void buildDependedUponBy(pkg_t * pkg, abstract_pkg_t * ab_pkg);
 int version_constraints_satisfied(depend_t * depends, pkg_t * pkg);
+int pkg_constraint_satisfied(pkg_t *pkg, void *cdata);
 int pkg_dependence_satisfiable(depend_t * depend);
 const char *constraint_to_str(enum version_constraint c);
 enum version_constraint str_to_constraint(const char **str);

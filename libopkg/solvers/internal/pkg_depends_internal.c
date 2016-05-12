@@ -17,6 +17,7 @@
 #include "xfuncs.h"
 #include "pkg.h"
 #include "opkg_message.h"
+#include "pkg_depends.h"
 
 #include <malloc.h>
 
@@ -70,12 +71,6 @@ static int pkg_installed_and_constraint_satisfied(pkg_t *pkg, void *cdata)
     depend_t *depend = (depend_t *) cdata;
     return ((pkg->state_status == SS_INSTALLED || pkg->state_status == SS_UNPACKED)
         && version_constraints_satisfied(depend, pkg));
-}
-
-static int pkg_constraint_satisfied(pkg_t *pkg, void *cdata)
-{
-    depend_t *depend = (depend_t *) cdata;
-    return version_constraints_satisfied(depend, pkg);
 }
 
 /* returns ndependencies or negative error value */
