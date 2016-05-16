@@ -75,6 +75,10 @@ static int pkg_hash_add_from_file(const char *file_name, pkg_src_t * src,
         return -1;
     }
 
+    /* Remove UTF-8 BOM if present */
+    if (!(getc(fp) == 0xEF && getc(fp) == 0xBB && getc(fp) == 0xBF))
+        rewind(fp);
+
     buf = xmalloc(len);
 
     do {
