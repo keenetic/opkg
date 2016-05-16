@@ -89,7 +89,7 @@ int parse_version(pkg_t * pkg, const char *vstr)
         pkg->epoch = 0;
     }
 
-    pkg->version = xstrdup(vstr);
+    pkg->version = trim_xstrdup(vstr);
     pkg->revision = strrchr(pkg->version, '-');
 
     if (pkg->revision)
