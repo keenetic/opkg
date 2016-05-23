@@ -52,12 +52,12 @@ o.write_opk()
 o.write_list()
 
 opkgcl.update()
-status = opkgcl.upgrade("--autoremove")
+status = opkgcl.upgrade("a", "--autoremove")
 
 if not opkgcl.is_installed("a", "2.0"):
-    opk.xfail("New version of package 'a' available during upgrade but was not installed")
+    opk.xfail("[internalsolv] New version of package 'a' available during upgrade but was not installed")
 if status != 0:
-    opk.xfail("Return value was different than 0")
+    opk.fail("Return value was different than 0")
 
 opkgcl.remove("a")
 opkgcl.remove("b")
