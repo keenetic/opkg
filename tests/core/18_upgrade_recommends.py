@@ -34,7 +34,7 @@ o.write_opk()
 o.write_list()
 
 opkgcl.update()
-opkgcl.upgrade("--autoremove")
+opkgcl.upgrade("b", "--autoremove")
 
 if opkgcl.is_installed("a"):
-	opk.xfail("[libsolv] Package a should have been auto-removed")
+	opk.fail("Package a should have been auto-removed")
