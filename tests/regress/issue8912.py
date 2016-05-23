@@ -53,6 +53,6 @@ opkgcl.remove("a","--autoremove")
 if opkgcl.is_installed("a"):
         opk.fail("Package 'a' removed but reports as installed.")
 if opkgcl.is_installed("b"):
-        opk.xfail("Package 'b' not removed from --autoremove.")
+        opk.xfail("[internalsolv] Package 'b' not removed from --autoremove.")
 if opkgcl.is_installed("c"):
         opk.fail("Package 'c' not removed from --autoremove.")

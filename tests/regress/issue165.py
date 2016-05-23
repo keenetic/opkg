@@ -49,4 +49,4 @@ if not opkgcl.is_installed("x"):
 if opkgcl.is_installed("b"):
     opk.fail("Package 'b' installed but conflicts with x.")
 if not opkgcl.is_installed("a"):
-    opk.xfail("Package 'a' not installed even though 'b' is not an absolute dependency of 'a'.")
+    opk.xfail("[internalsolv] Package 'a' not installed even though 'b' is not an absolute dependency of 'a'.")

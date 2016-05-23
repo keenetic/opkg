@@ -47,5 +47,5 @@ opkgcl.remove("b","--force-removal-of-dependent-packages")
 if opkgcl.is_installed("b"):
         opk.fail("Package 'b' removed but reports as installed.")
 if opkgcl.is_installed("a"):
-        opk.xfail("Package 'b' removed with --force-removal-of-dependent-packages "
+        opk.xfail("[internalsolv] Package 'b' removed with --force-removal-of-dependent-packages "
                   "but 'a' which depends on 'b' still installed.")
