@@ -1,0 +1,264 @@
+.TH "@PACKAGE_NAME@" 5 "@CLEAN_DATE@" "@PACKAGE_STRING@" "@PACKAGE_NAME@.conf"
+.SH NAME
+opkg.conf \- opkg configuration file
+.
+.SH DESCRIPTION
+This file contains default options for opkg. Each line contains a
+single option which is exactly the same as a normal command line
+option for opkg except for the leading dashes which are not used
+here. Comments are allowed by starting a line with a hash sign
+("\fB#\fR").
+.P
+There can be multiple configuration files.  Repositories can be
+placed in separate *.conf files.  A repository configuration
+file needs only a \fBsrc\fb line.
+.P
+A opkg.conf file is not needed if repositories are not being used to
+obtain packages and if the packages are expected to install in "/".
+.P
+.
+.SH FILES
+.B @prefix@/etc/*.conf
+.
+.SH USAGE
+.
+Outlined is an example of how to set specific options
+
+.RS
+.fi
+option autoremove 1
+.fi
+option check_signature 1
+.fi
+option signature_type gpg
+.fi
+dest root /
+.fi
+arch i386 1
+.fi
+src/gz base http://my.package.server/path/to/my/base/repo
+.fi
+src/gz nightly http://my.package.server/path/to/my/snapshot/repo
+.RE
+.SH REPOSITORY CONFIGURATION
+The opkg repository configuration consists of three parts.
+
+The repository type, the repository name, and the repository location.
+The repository type is used to indicate what format the repository will take.
+\fBsrc\fP will take the form of an uncompress repository list, while \fBsrc/gz\fP will take the form of a gzip compress repository list.
+
+The repository name is a descriptive name used to identify a particular repository.
+For instance \fBbase\fP may refer to a basic repository containing packages used for generic maintanace.
+A repository named \fBnightly\fP may contain packages from some daily build system.
+
+The third part consists of the repository location.
+This must point to the top directory containing the \fBPackages\fP index file.
+The repository location may refer to a local directory on the system with the prefix \fBfile://\fP, or to a webserver with \fBhttp://\fP\fBhttps://\fP, or to an FTP server with \fBftp://\fP.
+.SH OPTIONS
+.TP
+\fBarch\fP
+Registers a given architecture with a given priorty. The number specifies a priority index which is used by opkg to determine which package to prefer in case it is available in multiple architectures.
+.TP
+\fBautoremove\fP
+Removes packages that where installed automatically in order to satisfy dependencies (default is 0).
+.TP
+\fBcache_dir\fP
+Specifies the cache directory.
+.TP
+\fBcache_local_files\fP
+For local repositories (\fBfile://\fP), a symlink of the file is created in the cache directory rather than copying the file directly (default is 0)
+.TP
+\fBcheck_pkg_signature\fP
+Performs a signature check against a package. The signature file should be next to the package (default is 0).
+.TP
+\fBcheck_signature\fP
+Performs a signature check against the package index. The signature file should be next to the package index (default is 0)
+.TP
+\fBcheck_x509_path\fP
+Validates the x509 certificate all the way back to the Certificate Authority (default is 0)
+.TP
+\fBcombine\fP
+Combines upgrade and install operations, this may be needed to resolve dependency issues. Only available for the internal solver backend (default is 0).
+.TP
+\fBconnect_timeout_ms\fP (CURL)
+The maximum amount of time allowed for a connection initalization to take (default is 300 seconds).
+.TP
+\fBdest\fP
+Registers a given destination with a given path.
+If no dest is specified \fBroot\fP is specified automatically to \fB/\fP.
+.TP
+\fBdownload_only\fP
+No action -- download only (default is 0).
+.TP
+\fBfollow_location\fP (CURL)
+Follows any "Location:" header that the server sends as part of the HTTP header (default is 0).
+.TP
+\fBforce_depends\fP
+Install/remove despite failed dependencies (default is 0).
+.TP
+\fBforce_downgrade\fP
+Allow opkg to downgrade a package (default is 0).
+.TP
+\fBforce_maintainer\fP
+Overwrite existing \fBconffile\fP's (default is 0).
+.TP
+\fBforce_overwrite\fP
+Overwrites files from other packages (default is 0).
+.TP
+\fBforce_postinstall\fP
+Run postinstall scripts even in offline mode (default is 0).
+.TP
+\fBforce_reinstall\fP
+Reinstalls the package(s) (default is 0).
+.TP
+\fBforce_space\fP
+Disables free space checks (default is 0).
+.TP
+\fBftp_explicit_ssl\fP (CURL)
+Forces CURL to establish a FTP connection over SSL (default is 0).
+.TP
+\fBftp_proxy\fP (CURL/WGET)
+Specifies the FTP Proxy.
+.TP
+\fBgpg_dir\fP
+Specifies the GPG directory containing the GPG keyring.
+.TP
+\fBgpg_trust_level\fP
+Specifies the GPG trusted level.
+The Default is \fBTrustOnly\fP.
+.fi
+\fBTrustOnly\fP - Trust only package signatures with a trust level of Full or Ultimate.
+.fi
+\fBTrustAny\fP - Trust any package with a valid signature.
+.fi
+\fBNote:\fP Any file signed with a GPG that is specified as trust level NEVER will \fBNOT\fP be trusted.
+.TP
+\fBhttp_auth\fP (CURL)
+Specifies the HTTP username/password in the format \fB"[username]:[password]"\fP.
+.TP
+\fBhttp_proxy\fP (CURL/WGET)
+Specifies the HTTP proxy address in the format \fB"<url:port>"\fP.
+.TP
+\fBhttps_proxy\fP (CURL)
+Specifies the HTTPS proxy address in the format \fB"<url:port>"\fP.
+.TP
+\fBignore_maintainer\fP
+Ignores changes to files listed as \fBconffile\fP's during a package upgrade (default is 0).
+.TP
+\fBinfo_dir\fP
+Specifies the directory used to store packages information.
+.TP
+\fBlists_dir\fP
+Specifies the directory used to store local copies of repository information.
+.TP
+\fBlock_file\fP
+Specifies the lock file path.
+.TP
+\fBnoaction\fP
+No action -- test only (default is 0).
+.TP
+\fBnodeps\fP
+Do not follow dependencies (default is 0).
+.TP
+\fBno_install_recommends\fP
+Do \fBNOT\fP install any recommended packages (default is 0).
+.TP
+\fBno_proxy\fP
+Comma-separated list of domain extensions proxy should not be used for.
+.TP
+\fBoffline_root\fP
+Specifies directory for offline root installation of packages.
+.TP
+\fBoverlay_root\fP
+Specifices the root overlay.
+.TP
+\fBoverwrite_no_owner\fP
+Allow overwrite of files not owned by a package (default is 0).
+.TP
+\fBproxy_passwd\fP
+Password to use with proxy authentication.
+.TP
+\fBproxy_user\fP
+User name to use for proxy authentication.
+.TP
+\fBquery-all\fP
+Executes a query against all packages from all repositories, not just install packages (default is 0).
+.TP
+\fBsignature_ca_file\fP
+Path to the CA certificate file.
+.TP
+\fBsignature_ca_path\fP
+Path to certificates directory.
+.TP
+\fBsignature_type\fP
+Specifies the signature type.
+The default is \fBgpg\fP.
+.fi
+\fBgpg\fP - GPG signature (binary)
+.fi
+\fBgpg-asc\fP - GPG Signature using ASCII ARMOR
+.fi
+\fBopenssl\fP - Openssl configuration
+.TP
+\fBssl_ca_file\fP (CURL)
+CURL's SSL Certificate Authority file.
+.TP
+\fBssl_ca_path\fP (CURL)
+CURL's SSL Certificate directory.
+.TP
+\fBssl_cert\fP (CURL)
+Filename of client certificate.
+.TP
+\fBssl_cert_type\fP (CURL)
+CURL's SSL Certificate Type.
+.fi
+\fBPEM\fP - PEM Format (default)
+.fi
+\fBDER\fP - DER Format
+.TP
+\fBssl_dont_verify_peer\fP (CURL)
+Dont verify SSL certificates (default is 0).
+.TP
+\fBssl_engine\fP (CURL)
+Selects the SSL crypto engine to use for cipher operations.
+.fi
+See \fBcurl(1)\fP for more details.
+.TP
+\fBssl_key\fP (CURL)
+Filename of private SSL key.
+.TP
+\fBssl_key_passwd\fP (CURL)
+Passphrase to ssl key specified by ssl_key.
+.TP
+\fBssl_key_type\fP (CURL)
+CURL's SSL Key Type.
+.fi
+\fBPEM\fP - PEM Format (default)
+.fi
+\fBDER\fP - DER Format
+.TP
+\fBstatus_file\fP
+Location of the status file.
+This file contains all the status of all current/previously installed packages.
+.TP
+\fBtmp_dir\fP
+Temp directory for unpacking a package before loading into the filesystem.
+.TP
+\fBtransfer_timeout_ms\fP (CURL)
+Amount of time in ms allowed for a connection to be maintained. Default is 0 (never time out).
+.TP
+\fBverbosity\fP
+Verbosity of output from \fBopkg(1)\fP command. Verbosity levels:
+.fi
+\fB0\fP - errors only
+.fi
+\fB1\fP - normal messages (default)
+.fi
+\fB2\fP - informative messages
+.f1
+\fB3\fP - debug
+.fi
+\fB4\fP - debug level 2
+.TP
+\fBvolatile_cache\fP
+Enables volatile cache (default is 0). Volatile cache is located at the directory specified by \fBcache_dir\fP in the subdirectory volatile.

@@ -16,7 +16,7 @@ if [ \( $# -eq 1 \) -a \( "$1" = "--clean" \) ]; then
     rm -f libtool
     rm -f aclocal.m4
     rm -f libopkg.pc
-    rm -f man/opkg.1 man/opkg-key.1
+    rm -f man/opkg.1 man/opkg.conf.5 man/opkg-key.1
     rm -f Makefile Makefile.in
     rm -f libopkg/Makefile libopkg/Makefile.in
     rm -f man/Makefile man/Makefile.in

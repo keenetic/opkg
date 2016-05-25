@@ -64,6 +64,7 @@ tests/libopkg_test
 
 # Man pages
 man/*.1
+man/*.5
 
 # Python
 *.pyc

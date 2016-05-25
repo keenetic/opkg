@@ -257,6 +257,7 @@ AC_OUTPUT(
     man/Makefile
     man/opkg.1
     man/opkg-key.1
+    man/opkg.conf.5
     )
 
 # Issue this warning at the end so the user is likely to see it
