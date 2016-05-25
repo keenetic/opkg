@@ -783,7 +783,7 @@ static int resolve_conffiles(pkg_t * pkg)
                     sprintf_alloc(&new_conffile, "%s-opkg", root_filename);
                     opkg_msg(NOTICE,
                              "Existing conffile %s "
-                             "is different from the conffile in the new package."
+                             "is different from the conffile in the new package.\n"
                              " The new conffile will be placed at %s.\n",
                              root_filename, new_conffile);
                     rename(root_filename, new_conffile);
