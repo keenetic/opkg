@@ -192,8 +192,11 @@ void pkg_deinit(pkg_t * pkg)
 
     active_list_clear(&pkg->list);
 
-    free(pkg->replaces);
-    pkg->replaces = NULL;
+    if (pkg->replaces) {
+        for (i = 0; i < pkg->replaces_count; i++)
+            compound_depend_deinit(&pkg->replaces[i]);
+        free(pkg->replaces);
+    }
 
     if (pkg->depends) {
         unsigned int count = pkg->pre_depends_count + pkg->depends_count
@@ -703,11 +706,17 @@ static void pkg_formatted_field(FILE * fp, pkg_t * pkg, const char *field)
     case 'r':
     case 'R':
         if (strcasecmp(field, "Replaces") == 0) {
+            struct depend *rdep;
             if (pkg->replaces_count) {
                 fprintf(fp, "Replaces:");
                 for (i = 0; i < pkg->replaces_count; i++) {
-                    fprintf(fp, "%s %s", i == 0 ? "" : ",",
-                            pkg->replaces[i]->name);
+                    rdep = pkg->replaces[i].possibilities[0];
+                    fprintf(fp, "%s %s", i == 0 ? "" : ",", rdep->pkg->name);
+                    if (rdep->version) {
+                        fprintf(fp, " (%s%s)",
+                                constraint_to_str(rdep->constraint),
+                                rdep->version);
+                    }
                 }
                 fprintf(fp, "\n");
             }

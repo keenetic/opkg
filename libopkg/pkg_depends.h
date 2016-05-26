@@ -32,7 +32,8 @@ enum depend_type {
     CONFLICTS,
     GREEDY_DEPEND,
     RECOMMEND,
-    SUGGEST
+    SUGGEST,
+    REPLACES
 };
 typedef enum depend_type depend_type_t;
 

@@ -118,12 +118,13 @@ int is_pkg_in_pkg_vec(pkg_vec_t * vec, pkg_t * pkg)
  */
 int pkg_replaces(pkg_t * pkg, pkg_t * replacee)
 {
-    abstract_pkg_t **replaces = pkg->replaces;
+    compound_depend_t *replaces = pkg->replaces;
     int replaces_count = pkg->replaces_count;
     int replacee_provides_count = replacee->provides_count;
     int i, j;
     for (i = 0; i < replaces_count; i++) {
-        abstract_pkg_t *abstract_replacee = replaces[i];
+        /* Replaces field doesn't support or'ed conditions */
+        abstract_pkg_t *abstract_replacee = replaces[i].possibilities[0]->pkg;
         for (j = 0; j < replacee_provides_count; j++) {
             if (replacee->provides[j] == abstract_replacee)
                 return 1;
@@ -288,17 +289,21 @@ void buildConflicts(pkg_t * pkg)
 void buildReplaces(abstract_pkg_t * ab_pkg, pkg_t * pkg)
 {
     unsigned int i;
+    compound_depend_t *replaces;
 
     if (!pkg->replaces_count)
         return;
 
-    pkg->replaces = xcalloc(pkg->replaces_count, sizeof(abstract_pkg_t *));
+    replaces = pkg->replaces = xcalloc(pkg->replaces_count,
+            sizeof(compound_depend_t));
 
     for (i = 0; i < pkg->replaces_count; i++) {
-        abstract_pkg_t *old_abpkg = ensure_abstract_pkg_by_name(pkg->replaces_str[i]);
-
-        pkg->replaces[i] = old_abpkg;
+        parseDepends(replaces, pkg->replaces_str[i]);
+        replaces->type = REPLACES;
         free(pkg->replaces_str[i]);
+
+        /* Replaces field doesn't support or'ed conditions */
+        abstract_pkg_t *old_abpkg = replaces->possibilities[0]->pkg;
 
         if (!old_abpkg->replaced_by)
             old_abpkg->replaced_by = abstract_pkg_vec_alloc();
@@ -309,8 +314,8 @@ void buildReplaces(abstract_pkg_t * ab_pkg, pkg_t * pkg)
             if (!abstract_pkg_vec_contains(old_abpkg->replaced_by, ab_pkg))
                 abstract_pkg_vec_insert(old_abpkg->replaced_by, ab_pkg);
         }
+        replaces++;
     }
-
     free(pkg->replaces_str);
 }
 

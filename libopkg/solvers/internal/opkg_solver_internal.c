@@ -306,12 +306,14 @@ static int check_conflicts_for(pkg_t *pkg)
 static int pkg_get_installed_replacees(pkg_t *pkg,
                                        pkg_vec_t *installed_replacees)
 {
-    abstract_pkg_t **replaces = pkg->replaces;
+    struct compound_depend *replaces = pkg->replaces;
     int replaces_count = pkg->replaces_count;
     int i;
     unsigned int j;
     for (i = 0; i < replaces_count; i++) {
-        abstract_pkg_t *ab_pkg = replaces[i];
+        /* Replaces field doesn't support or'ed conditionals */
+        abstract_pkg_t *ab_pkg = replaces[i].possibilities[0]->pkg;
+
         /* If any package listed in the replacement field is a virtual (provided)
          * package, check to see if it conflicts with any abstract package that pkg
          * provides
@@ -325,7 +327,8 @@ static int pkg_get_installed_replacees(pkg_t *pkg,
                 pkg_t *replacee = pkg_vec->pkgs[j];
                 if (!pkg_conflicts(pkg, replacee))
                     continue;
-                if (replacee->state_status == SS_INSTALLED) {
+                if (replacee->state_status == SS_INSTALLED &&
+                    version_constraints_satisfied(replaces[i].possibilities[0], pkg)) {
                     pkg_vec_insert(installed_replacees, replacee);
                 }
             }

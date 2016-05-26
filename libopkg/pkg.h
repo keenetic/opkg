@@ -146,7 +146,7 @@ struct pkg {
 
     char **replaces_str;
     unsigned int replaces_count;
-    abstract_pkg_t **replaces;
+    compound_depend_t *replaces;
 
     char **provides_str;
     unsigned int provides_count;

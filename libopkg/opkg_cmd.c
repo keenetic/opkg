@@ -829,17 +829,8 @@ static int pkg_mark_provides(pkg_t * pkg)
     return 0;
 }
 
-enum what_field_type {
-    WHATDEPENDS,
-    WHATCONFLICTS,
-    WHATPROVIDES,
-    WHATREPLACES,
-    WHATRECOMMENDS,
-    WHATSUGGESTS
-};
-
-static int opkg_what_depends_conflicts_cmd(enum depend_type what_field_type,
-                                           int recursive, int argc, char **argv)
+static int opkg_what_depends_conflicts_replaces_cmd(enum depend_type what_field_type,
+                                                    int recursive, int argc, char **argv)
 {
     depend_t *possibility;
     compound_depend_t *cdep;
@@ -863,6 +854,9 @@ static int opkg_what_depends_conflicts_cmd(enum depend_type what_field_type,
         break;
     case RECOMMEND:
         rel_str = "recommends";
+        break;
+    case REPLACES:
+        rel_str = "replaces";
         break;
     default:
         return -1;
@@ -897,14 +891,16 @@ static int opkg_what_depends_conflicts_cmd(enum depend_type what_field_type,
         for (j = 0; j < available_pkgs->len; j++) {
             pkg = available_pkgs->pkgs[j];
             count = (what_field_type == CONFLICTS) ? pkg->conflicts_count :
-                    (pkg->pre_depends_count + pkg->depends_count + pkg->recommends_count + pkg->suggests_count);
+                    ((what_field_type == REPLACES) ? pkg->replaces_count :
+                    (pkg->pre_depends_count + pkg->depends_count + pkg->recommends_count + pkg->suggests_count));
 
             /* skip this package if it is already marked */
             if (pkg->parent->state_flag & SF_MARKED)
                 continue;
 
             for (k = 0; k < count; k++) {
-                cdep = (what_field_type == CONFLICTS) ? &pkg->conflicts[k] : &pkg->depends[k];
+                cdep = (what_field_type == CONFLICTS) ? &pkg->conflicts[k] :
+                       ((what_field_type == REPLACES) ? &pkg->replaces[k] : &pkg->depends[k]);
 
                 if (what_field_type != cdep->type)
                     continue;
@@ -948,35 +944,33 @@ static int opkg_what_depends_conflicts_cmd(enum depend_type what_field_type,
 
 static int opkg_whatdepends_recursively_cmd(int argc, char **argv)
 {
-    return opkg_what_depends_conflicts_cmd(DEPEND, 1, argc, argv);
+    return opkg_what_depends_conflicts_replaces_cmd(DEPEND, 1, argc, argv);
 }
 
 static int opkg_whatdepends_cmd(int argc, char **argv)
 {
-    return opkg_what_depends_conflicts_cmd(DEPEND, 0, argc, argv);
+    return opkg_what_depends_conflicts_replaces_cmd(DEPEND, 0, argc, argv);
 }
 
 static int opkg_whatsuggests_cmd(int argc, char **argv)
 {
-    return opkg_what_depends_conflicts_cmd(SUGGEST, 0, argc, argv);
+    return opkg_what_depends_conflicts_replaces_cmd(SUGGEST, 0, argc, argv);
 }
 
 static int opkg_whatrecommends_cmd(int argc, char **argv)
 {
-    return opkg_what_depends_conflicts_cmd(RECOMMEND, 0, argc, argv);
+    return opkg_what_depends_conflicts_replaces_cmd(RECOMMEND, 0, argc, argv);
 }
 
 static int opkg_whatconflicts_cmd(int argc, char **argv)
 {
-    return opkg_what_depends_conflicts_cmd(CONFLICTS, 0, argc, argv);
+    return opkg_what_depends_conflicts_replaces_cmd(CONFLICTS, 0, argc, argv);
 }
 
-static int opkg_what_provides_replaces_cmd(enum what_field_type what_field_type,
-                                           int argc, char **argv)
+static int opkg_whatprovides_cmd(int argc, char **argv)
 {
     if (argc > 0) {
         pkg_vec_t *available_pkgs = pkg_vec_alloc();
-        const char *rel_str = (what_field_type == WHATPROVIDES ? "provides" : "replaces");
         int i;
 
         pkg_info_preinstall_check();
@@ -989,17 +983,17 @@ static int opkg_what_provides_replaces_cmd(enum what_field_type what_field_type,
             const char *target = argv[i];
             unsigned int j;
 
-            opkg_msg(NOTICE, "What %s %s\n", rel_str, target);
+            opkg_msg(NOTICE, "What provides %s\n", target);
             for (j = 0; j < available_pkgs->len; j++) {
                 pkg_t *pkg = available_pkgs->pkgs[j];
                 int k;
-                int count = (what_field_type == WHATPROVIDES) ? pkg->provides_count : pkg->replaces_count;
+                int count = pkg->provides_count;
                 for (k = 0; k < count; k++) {
-                    abstract_pkg_t *apkg = ((what_field_type == WHATPROVIDES) ? pkg->provides[k] : pkg->replaces[k]);
+                    abstract_pkg_t *apkg = pkg->provides[k];
                     if (fnmatch(target, apkg->name, 0) == 0) {
                         opkg_msg(NOTICE, "    %s", pkg->name);
                         if (strcmp(target, apkg->name) != 0)
-                            opkg_msg(NOTICE, "\t%s %s\n", rel_str, apkg->name);
+                            opkg_msg(NOTICE, "\tprovides %s\n", apkg->name);
                         opkg_message(NOTICE, "\n");
                     }
                 }
@@ -1010,14 +1004,9 @@ static int opkg_what_provides_replaces_cmd(enum what_field_type what_field_type,
     return 0;
 }
 
-static int opkg_whatprovides_cmd(int argc, char **argv)
-{
-    return opkg_what_provides_replaces_cmd(WHATPROVIDES, argc, argv);
-}
-
 static int opkg_whatreplaces_cmd(int argc, char **argv)
 {
-    return opkg_what_provides_replaces_cmd(WHATREPLACES, argc, argv);
+    return opkg_what_depends_conflicts_replaces_cmd(REPLACES, 0, argc, argv);
 }
 
 static int opkg_search_cmd(int argc, char **argv)

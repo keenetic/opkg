@@ -343,7 +343,7 @@ pkg_t *pkg_hash_fetch_best_installation_candidate(abstract_pkg_t * apkg,
             if (abstract_pkg_vec_contains(providers, replacement_apkg))
                 continue;
             else
-                provider_apkg = replacement_apkg;
+                abstract_pkg_vec_insert(providers, replacement_apkg);
         }
 
         vec = provider_apkg->pkgs;

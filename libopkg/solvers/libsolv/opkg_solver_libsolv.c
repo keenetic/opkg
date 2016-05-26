@@ -409,10 +409,11 @@ static void pkg2solvable(pkg_t *pkg, Solvable *solvable_out)
     /* set solvable obsoletes. Obsoletes is libsolv's equivalent of Replaces*/
     if (pkg->replaces_count) {
         for (i = 0; i < pkg->replaces_count; i++) {
-            abstract_pkg_t *replaces = pkg->replaces[i];
+            compound_depend_t dep = pkg->replaces[i];
 
-            opkg_msg(DEBUG2, "%s replaces %s\n", pkg->name, replaces->name);
-            Id replacesId = pool_str2id(pool, replaces->name, 1);
+            Id replacesId = dep2id(pool, &dep);
+            opkg_msg(DEBUG2, "%s replaces %s\n", pkg->name,
+                     pool_dep2str(pool, replacesId));
             solvable_out->obsoletes = repo_addid_dep(repo,
                 solvable_out->obsoletes, replacesId, 0);
         }

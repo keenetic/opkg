@@ -387,7 +387,7 @@ static int is_pkg_a_replaces(pkg_t *pkg_scout, pkg_t *pkg)
 {
     int i;
     int replaces_count = pkg->replaces_count;
-    abstract_pkg_t **replaces;
+    struct compound_depend *replaces;
 
     if (pkg->replaces_count == 0)       /* No replaces, it's surely a conflict */
         return 0;
@@ -395,9 +395,10 @@ static int is_pkg_a_replaces(pkg_t *pkg_scout, pkg_t *pkg)
     replaces = pkg->replaces;
 
     for (i = 0; i < replaces_count; i++) {
-        if (strcmp(pkg_scout->name, replaces[i]->name) == 0) {  /* Found */
+        /* Replaces field doesn't support or'ed conditions */
+        if (version_constraints_satisfied(replaces->possibilities[0], pkg_scout)) {  /* Found */
             opkg_msg(DEBUG2, "Seems I've found a replace %s %s\n",
-                     pkg_scout->name, replaces[i]->name);
+                     pkg_scout->name, replaces[i].possibilities[0]->pkg->name);
             return 1;
         }
     }
