@@ -51,7 +51,7 @@ o.write_list()
 os.unlink("foo")
 
 opkgcl.update()
-status = opkgcl.upgrade()
+status = opkgcl.upgrade("a")
 
 if status != 0:
         opk.fail("Upgrade operation failed (Return value was different than 0)")

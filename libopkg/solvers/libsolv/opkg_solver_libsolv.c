@@ -628,7 +628,7 @@ static void libsolv_solver_add_job(libsolv_solver_t *libsolv_solver,
         break;
     case JOB_UPGRADE:
         if (pkg_name && strcmp(pkg_name, "") != 0) {
-            how = SOLVER_UPDATE | SOLVER_SOLVABLE_NAME;
+            how = SOLVER_UPDATE | SOLVER_SOLVABLE_NAME | SOLVER_TARGETED;
         } else {
             how = SOLVER_UPDATE | SOLVER_SOLVABLE_REPO;
             what = libsolv_solver->pool->installed->repoid;
