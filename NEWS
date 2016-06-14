@@ -1,3 +1,48 @@
+opkg-0.3.2
+==========
+
+- Remove configure script --enable-solver. To enable libsolv, add config option
+  --with-libsolv.
+
+- Add version constrain support for Replaces (issue 8931)
+
+- Add targeted install support, enabling installation of a specific version of
+  a package when multiple available (issue 76).
+
+- Remove functions no longer used.
+
+- Fix compare-version functionality (issue 166).
+
+- Add disable_intercepts option (issue 8837)
+
+- Add support for UTF-8 Package files (issue 9557)
+
+Libsolv:
+
+- Add pkg-config support
+
+- Add --download-first option
+
+- Fix crash when using more than 4 arch config options.
+
+Internal Solver:
+
+- Split internal solver from install/upgrade/remove transactions. Solving now
+  happens first, instead of at the same time as installation/removal. New
+  architecture fix issues 156 and 162.
+
+- Abort installation if pkg A B is installed, and pkg A (Provides B, 
+  Conflicts B) is set to be installed (issue 9533)
+
+- Skip dependency if a Provider is already installed (issue 9059)
+
+- Fix status file corruption (issue 8601)
+
+- Mark top level package as not AutoInstalled, when circular dependencies are
+  present (issue 167)
+
+- Fix upgrade error when package A replaces provider B, and B is provided by A.
+
 opkg-0.3.1
 ==========
 
