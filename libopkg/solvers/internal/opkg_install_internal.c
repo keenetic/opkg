@@ -182,8 +182,10 @@ int opkg_execute_install(pkg_t *pkg, pkg_vec_t *pkgs_to_install, pkg_vec_t *repl
                         dependency->state_status == SS_UNPACKED)
             continue;
 
-        opkg_msg(NOTICE, "%s %s (%s) on %s.\n", from_upgrade ? "Upgrading" : "Installing",
-                 dependency->name, dependency->version, dependency->dest->name);
+        if (!opkg_config->download_only) {
+            opkg_msg(NOTICE, "%s %s (%s) on %s.\n", from_upgrade ? "Upgrading" : "Installing",
+                     dependency->name, dependency->version, dependency->dest->name);
+        }
 
         /* Set all pkgs to auto_installed except the top level */
         if (dependency != pkg)
