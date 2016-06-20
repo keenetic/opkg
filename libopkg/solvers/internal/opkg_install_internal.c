@@ -86,6 +86,7 @@ static int opkg_prepare_install_by_name(const char *pkg_name, pkg_t **pkg)
                 ab_pkg,
                 pkg_constraint_satisfied,
                 dependence_to_satisfy,
+                0,
                 1);
 
         free(dependence_to_satisfy);

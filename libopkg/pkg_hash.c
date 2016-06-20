@@ -276,7 +276,7 @@ abstract_pkg_t *abstract_pkg_fetch_by_name(const char *pkg_name)
 
 pkg_t *pkg_hash_fetch_best_installation_candidate(abstract_pkg_t * apkg,
                                                   int (*constraint_fcn) (pkg_t * pkg, void *cdata),
-                                                  void *cdata, int quiet)
+                                                  void *cdata, int prefer_installed, int quiet)
 {
     unsigned int i, j;
     unsigned int nprovides = 0;
@@ -443,6 +443,11 @@ pkg_t *pkg_hash_fetch_best_installation_candidate(abstract_pkg_t * apkg,
                 } else
                     opkg_msg(DEBUG, "%s %s wins by priority.\n",
                              good_pkg_by_name->name, good_pkg_by_name->version);
+            } else if (good_pkg_by_name && prefer_installed) {
+                int is_installed = good_pkg_by_name->state_status == SS_INSTALLED
+                                   || good_pkg_by_name->state_status == SS_UNPACKED;
+                if (!is_installed)
+                    good_pkg_by_name = matching;
             } else
                 good_pkg_by_name = matching;
         }
@@ -574,7 +579,7 @@ pkg_t *pkg_hash_fetch_best_installation_candidate_by_name(const char *name)
     if (!apkg)
         return NULL;
 
-    return pkg_hash_fetch_best_installation_candidate(apkg, NULL, NULL, 0);
+    return pkg_hash_fetch_best_installation_candidate(apkg, NULL, NULL, 0, 0);
 }
 
 pkg_t *pkg_hash_fetch_by_name_version(const char *pkg_name, const char *version)

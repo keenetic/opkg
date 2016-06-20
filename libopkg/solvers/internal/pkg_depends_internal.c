@@ -198,6 +198,7 @@ int pkg_hash_fetch_unsatisfied_dependencies(pkg_t *pkg,
                     satisfying_apkg,
                     pkg_installed_and_constraint_satisfied,
                     dependence_to_satisfy,
+                    0,
                     1);
             opkg_msg(DEBUG, "satisfying_pkg=%p\n", satisfying_pkg);
             if (satisfying_pkg != NULL) {
@@ -216,6 +217,7 @@ int pkg_hash_fetch_unsatisfied_dependencies(pkg_t *pkg,
                         satisfying_apkg,
                         pkg_constraint_satisfied,
                         dependence_to_satisfy,
+                        0,
                         1);
                 opkg_msg(DEBUG, "satisfying_pkg=%p\n", satisfying_pkg);
                 if (!satisfying_pkg)
@@ -366,6 +368,7 @@ pkg_vec_t *pkg_hash_fetch_satisfied_dependencies(pkg_t *pkg)
             pkg_t *satisfying_pkg = pkg_hash_fetch_best_installation_candidate(satisfying_apkg,
                                                            pkg_constraint_satisfied,
                                                            dependence_to_satisfy,
+                                                           1,
                                                            0);
             int need_to_insert = satisfying_pkg != NULL
                     && satisfying_pkg != pkg

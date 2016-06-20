@@ -455,6 +455,7 @@ int opkg_prepare_url_for_install(const char *url, char **namep)
                         ab_pkg,
                         pkg_constraint_satisfied,
                         dependence_to_satisfy,
+                        0,
                         1);
 
                 free(dependence_to_satisfy);
