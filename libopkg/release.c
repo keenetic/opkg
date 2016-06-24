@@ -109,6 +109,20 @@ static const char *release_get_md5(release_t * release, const char *pathname)
     return '\0';
 }
 
+#ifdef HAVE_SHA256
+static const char *release_get_sha256(release_t * release, const char *pathname)
+{
+    const cksum_t *cksum;
+
+    if (release->sha256sums) {
+        cksum = cksum_list_find(release->sha256sums, pathname);
+        return cksum->value;
+    }
+
+    return '\0';
+}
+#endif
+
 int release_verify_file(release_t * release, const char *file_name,
                         const char *pathname)
 {
@@ -319,17 +333,3 @@ int release_download(release_t * release, pkg_src_t * dist, char *lists_dir,
 
     return ret;
 }
-
-#ifdef HAVE_SHA256
-const char *release_get_sha256(release_t * release, const char *pathname)
-{
-    const cksum_t *cksum;
-
-    if (release->sha256sums) {
-        cksum = cksum_list_find(release->sha256sums, pathname);
-        return cksum->value;
-    }
-
-    return '\0';
-}
-#endif
