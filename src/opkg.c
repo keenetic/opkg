@@ -96,7 +96,7 @@ static struct option long_options[] = {
     {"force-remove", 0, 0, ARGS_OPT_FORCE_REMOVE},
     {"force_remove", 0, 0, ARGS_OPT_FORCE_REMOVE},
     {"prefer-arch-to-version", 0, 0, ARGS_OPT_PREFER_ARCH_TO_VERSION},
-    {"prefer-arch-to-version", 0, 0, ARGS_OPT_PREFER_ARCH_TO_VERSION},
+    {"prefer_arch_to_version", 0, 0, ARGS_OPT_PREFER_ARCH_TO_VERSION},
     {"noaction", 0, 0, ARGS_OPT_NOACTION},
     {"download-only", 0, 0, ARGS_OPT_DOWNLOAD_ONLY},
     {"nodeps", 0, 0, ARGS_OPT_NODEPS},
