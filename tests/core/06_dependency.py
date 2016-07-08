@@ -29,3 +29,11 @@ if opkgcl.is_autoinstalled("a"):
 	opk.fail("Package 'a' explicitly installed by reports as auto installed.")
 if not opkgcl.is_autoinstalled("b"):
 	opk.fail("Package 'b' installed as a dependency but does not report as auto installed.")
+
+# Check that trying to remove 'b' fails and doesn't change the system (issue 9862)
+if not opkgcl.remove("b"):
+        opk.fail("Package 'b' should not be allowed to be uninstalled")
+if not opkgcl.is_installed("a"):
+        opk.fail("Package 'a' was incorrectly uninstalled")
+if not opkgcl.is_installed("b"):
+        opk.fail("Package 'b' was incorrectly uninstalled")

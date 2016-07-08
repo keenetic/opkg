@@ -85,8 +85,6 @@ int opkg_solver_remove(int num_pkgs, char **pkg_names)
                 && pkg->state_status == SS_NOT_INSTALLED)
                 done = 1;
 
-            pkg_vec_insert(pkgs_to_remove, pkg);
-
             /* only attempt to remove dependent installed packages if
              * force_depends is not specified or the package is being
              * replaced.
@@ -118,6 +116,7 @@ int opkg_solver_remove(int num_pkgs, char **pkg_names)
                 }
                 free(dependents);
             }
+            pkg_vec_insert(pkgs_to_remove, pkg);
 
             /* get autoinstalled packages that are orphaned by the removal of
              * this one */
