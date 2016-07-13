@@ -1,3 +1,18 @@
+opkg-0.3.3
+==========
+
+- Fix build breakage when using configure option --enable-sha256.
+  Regression from 0.3.1
+
+Internal Solver:
+
+- Do not upgrade installed dependencies if version constrains are meet
+  (issue 9802).
+
+- Do not remove packages if removal operation is not valid due to installed
+  dependendents (issue 9862). Regression from 0.3.1.
+
+
 opkg-0.3.2
 ==========
 
