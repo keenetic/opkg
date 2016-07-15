@@ -49,6 +49,25 @@ def is_installed(pkg_name, version=None, flags=""):
 		return False
 	return True
 
+def is_upgradable(pkg_name, version=None):
+	out = opkgcl("list_upgradable")[1]
+
+	if len(out) == 0:
+		return False
+
+	for line in out.splitlines():
+		pkg, *_, new_v = line.split()
+
+		if pkg != pkg_name:
+			continue
+
+		if version and new_v != version:
+			return False
+
+		return True
+
+	return False
+
 def is_autoinstalled(pkg_name):
 	status_path = "{}/var/lib/opkg/status".format(cfg.offline_root)
 	if not os.path.exists(status_path):
