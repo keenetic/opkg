@@ -572,13 +572,14 @@ static int opkg_list_upgradable_cmd(int argc, char **argv)
     opkg_msg(ERROR,"list-upgradable command not available with external solver enabled\n");
     return -1;
 #else
-    struct active_list *head = prepare_upgrade_list();
-    struct active_list *node = NULL;
     pkg_t *_old_pkg, *_new_pkg;
-    char *old_v, *new_v;
-    for (node = active_list_next(head, head); node;
-            node = active_list_next(head, node)) {
-        _old_pkg = list_entry(node, pkg_t, list);
+    LIST_HEAD(head);
+
+    prepare_upgrade_list(&head);
+
+    list_for_each_entry(_old_pkg, &head, list) {
+        char *old_v, *new_v;
+
         _new_pkg = pkg_hash_fetch_best_installation_candidate_by_name(_old_pkg->name);
         if (_new_pkg == NULL)
             continue;
@@ -588,7 +589,6 @@ static int opkg_list_upgradable_cmd(int argc, char **argv)
         free(old_v);
         free(new_v);
     }
-    active_list_head_delete(head);
     return 0;
 #endif
 }

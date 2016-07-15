@@ -102,8 +102,6 @@ static void pkg_init(pkg_t * pkg)
     pkg->suggests_count = 0;
     pkg->recommends_count = 0;
 
-    active_list_init(&pkg->list);
-
     pkg->conflicts = NULL;
     pkg->conflicts_count = 0;
 
@@ -189,8 +187,6 @@ void pkg_deinit(pkg_t * pkg)
     pkg_vec_free(pkg->wanted_by);
     pkg->state_flag = SF_OK;
     pkg->state_status = SS_NOT_INSTALLED;
-
-    active_list_clear(&pkg->list);
 
     if (pkg->replaces) {
         for (i = 0; i < pkg->replaces_count; i++)

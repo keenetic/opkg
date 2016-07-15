@@ -5,7 +5,7 @@ AM_CFLAGS=-Wall -DHOST_CPU_STR=\"@host_cpu@\" -DDATADIR=\"@datadir@\" \
 
 libopkg_includedir=$(includedir)/libopkg
 
-opkg_headers = active_list.h cksum_list.h conffile.h conffile_list.h \
+opkg_headers = cksum_list.h conffile.h conffile_list.h \
 	file_util.h hash_table.h list.h md5.h nv_pair.h nv_pair_list.h \
 	opkg_archive.h opkg_cmd.h opkg_conf.h opkg_configure.h \
 	opkg_download.h opkg_install.h opkg_message.h \
@@ -21,7 +21,7 @@ opkg_sources = opkg_cmd.c opkg_configure.c opkg_download.c \
 	release_parse.c opkg_utils.c pkg.c pkg_depends.c pkg_extract.c \
 	hash_table.c pkg_hash.c pkg_parse.c pkg_vec.c conffile.c \
 	conffile_list.c nv_pair.c nv_pair_list.c pkg_dest.c pkg_dest_list.c \
-	pkg_src.c pkg_src_list.c str_list.c void_list.c active_list.c \
+	pkg_src.c pkg_src_list.c str_list.c void_list.c \
 	file_util.c opkg_message.c md5.c parse_util.c cksum_list.c \
 	sprintf_alloc.c xregex.c xsystem.c xfuncs.c opkg_archive.c \
 	opkg_verify.c string_util.c

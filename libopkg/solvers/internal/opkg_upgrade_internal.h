@@ -16,7 +16,6 @@
 #ifndef OPKG_UPGRADE_INTERNAL_H
 #define OPKG_UPGRADE_INTERNAL_H
 
-#include "active_list.h"
 #include "pkg.h"
 #include "pkg_vec.h"
 
@@ -26,7 +25,7 @@ extern "C" {
 
 int opkg_upgrade_pkg(pkg_t * old);
 int opkg_upgrade_multiple_pkgs(pkg_vec_t * pkgs_to_upgrade);
-struct active_list *prepare_upgrade_list(void);
+void prepare_upgrade_list(struct list_head *head);
 
 #ifdef __cplusplus
 }

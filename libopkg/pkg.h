@@ -23,7 +23,6 @@
 
 #include "pkg_vec.h"
 #include "str_list.h"
-#include "active_list.h"
 #include "pkg_src.h"
 #include "pkg_dest.h"
 #include "opkg_conf.h"
@@ -137,7 +136,7 @@ struct pkg {
     unsigned int recommends_count;
     char **suggests_str;
     unsigned int suggests_count;
-    struct active_list list;        /* Used for installing|upgrading */
+    struct list_head list;        /* Used for installing|upgrading */
     compound_depend_t *depends;
 
     char **conflicts_str;
