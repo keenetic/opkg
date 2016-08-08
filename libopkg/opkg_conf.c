@@ -630,13 +630,14 @@ int opkg_conf_load(void)
         if (r != 0)
             goto err1;
     } else {
-        if (opkg_config->offline_root)
-            sprintf_alloc(&etc_opkg_conf_pattern, "%s/etc/opkg/*.conf",
-                          opkg_config->offline_root);
-        else {
-            const char *conf_file_dir = getenv("OPKG_CONF_DIR");
-            if (conf_file_dir == NULL)
-                conf_file_dir = OPKG_CONF_DEFAULT_CONF_FILE_DIR;
+        const char *conf_file_dir = getenv("OPKG_CONF_DIR");
+        if (conf_file_dir == NULL)
+            conf_file_dir=OPKG_CONF_DEFAULT_CONF_FILE_DIR;
+        if (opkg_config->offline_root) {
+            sprintf_alloc(&etc_opkg_conf_pattern, "%s/%s/*.conf",
+                        opkg_config->offline_root,
+                        conf_file_dir);
+        } else {
             sprintf_alloc(&etc_opkg_conf_pattern, "%s/*.conf", conf_file_dir);
         }
 
