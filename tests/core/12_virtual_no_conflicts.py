@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # Install a package 'x' which PROVIDES 'v' and ensure that we can install
 # another package 'y' which also PROVIDES 'v'.

@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # Install a package B, which recommends package A. Verify that A installs
 # automatically and gets flagged as auto-installed. Make a newer version

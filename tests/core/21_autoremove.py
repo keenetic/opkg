@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # Create package 'a' which depends on 'b' and 'c'.
 # Explicitly install 'b' then install 'a'.

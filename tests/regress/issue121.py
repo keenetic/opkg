@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # Reported by KirGeNe, Feb 6, 2014
 # Test case modified by Paul Barker

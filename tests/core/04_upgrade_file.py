@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # Install a package and then make available a new version of the same package.
 # This is similar to test 3 but we put a file "test1" in version 1.0 of the

@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # Create essential packages 'a(1.0)' and 'a(2.0)'.
 # Install 'a(1.0)'.

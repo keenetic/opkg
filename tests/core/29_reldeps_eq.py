@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # Create 'a' which depends on 'b(2.0)'.
 # create 'b' in versions 1.0, 2.0, and 3.0.

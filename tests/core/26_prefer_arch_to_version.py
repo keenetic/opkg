@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # Create package 'x(1.0)' with architecture a and 'x(2.0)' with architecture b.
 # Install 'x' with --add-arch a:2 and --add-arch b:1.

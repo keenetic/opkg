@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # Create package 'a' with a nonexistent dependency.
 # Install 'a' with --force-depends and check that 'a' is installed.

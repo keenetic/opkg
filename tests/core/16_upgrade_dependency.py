@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # Install a package 'a' at version 1.0. Make available 'a' at version 2.0 with
 # dependency on 'b', and make available 'b'. Do upgrade and ensure that 'b' in

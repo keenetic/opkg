@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#! /usr/bin/env python3
 #
 # Report and fix from "paradox.kahn" in a google code comment to r543.
 #

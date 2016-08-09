@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # Create package 'a' which depends on 'b'
 # Install 'a' with --nodeps and check that 'b' is not installed

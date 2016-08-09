@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # Verifies intercept scripts can be disabled by an opkg conf token.
 #

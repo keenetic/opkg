@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # Mark an installed package a-1.0 as on hold, make available a-2.0 depended on
 # by z. Check that z refuses to install due to a-1.0 being held.

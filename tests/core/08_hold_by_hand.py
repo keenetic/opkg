@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # Within the function `pkg_hash_fetch_best_installation_candidate`, we wish to
 # test the condition where `(held_pkg && good_pkg_by_name) == true`. So install

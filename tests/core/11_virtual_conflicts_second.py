@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # Install a package 'x' which PROVIDES 'v'. Then try to install 'y' which
 # PROVIDES and CONFLICTS 'v', indicating that no other provider of the virtual

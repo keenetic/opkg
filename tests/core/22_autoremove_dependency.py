@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # Create packages 'a' and 'b' which both depend on 'c'.
 # Install 'a' and 'b' and check that 'c' is autoinstalled.

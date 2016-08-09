@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # Install a package and check that it is listed as installed. Then remove the
 # package and check that it is no longer listed as installed.

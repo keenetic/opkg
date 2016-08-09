@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # Create packages 'a', 'b' which recommends 'a' and 'c' which depends on 'a'.
 # Install 'b' with '--add-exclude a' and ensure 'b' is installed but 'a' is not.

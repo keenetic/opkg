@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # Test opkg when specifying the version to install via:
 #       opkg install <pkg_name>=<pkg_version>

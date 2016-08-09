@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # Make available two versions of the same package and install it. Check that the
 # latest version is chosen out of the two available. Then explicitly install the

@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # Install a package and then make available a new version of the same package.
 # Install this second version of the package by URI to the package file rather

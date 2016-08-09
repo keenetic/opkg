@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # Install a package and then make available a new version of the same package.
 # Upgrade and check that the new version is installed and the old version
