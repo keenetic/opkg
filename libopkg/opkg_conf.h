@@ -49,6 +49,10 @@ extern "C" {
 #define OPKG_CONF_DEFAULT_HASH_LEN 1024
 
 #define OPKG_CONF_DEFAULT_SIGNATURE_TYPE "gpg"
+#define OPKG_CONF_GPG_DEFAULT_DIR OPKG_CONF_DEFAULT_CONF_FILE_DIR
+#define OPKG_CONF_GPG_TRUST_ONLY "TrustOnly"
+#define OPKG_CONF_GPG_TRUST_ANY "TrustAny"
+#define OPKG_CONF_DEFAULT_GPG_TRUST_LEVEL OPKG_CONF_GPG_TRUST_ONLY
 
 typedef struct opkg_conf {
     pkg_src_list_t pkg_src_list;
@@ -95,6 +99,8 @@ typedef struct opkg_conf {
     int prefer_arch_to_version;
     int check_signature;
     int check_pkg_signature;
+    char *gpg_dir;
+    char *gpg_trust_level;
     char *signature_type;
     int nodeps;             /* do not follow dependencies */
     int no_install_recommends;

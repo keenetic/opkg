@@ -32,6 +32,8 @@ else
   ROOT=""
 fi
 
+CFGROOT="$ROOT/etc/opkg"
+
 command="$1"
 if [ -z "$command" ]; then
     usage
@@ -39,25 +41,40 @@ if [ -z "$command" ]; then
 fi
 shift
 
-if [ "$command" != "help" ] && ! which gpg >/dev/null 2>&1; then
-    echo >&2 "Warning: gnupg does not seem to be installed."
-    echo >&2 "Warning: opkg-key requires gnupg for most operations."
-    echo >&2
+# For the particular use case we have in importing/trusting keys the
+# differences between gpg and gpg2 are moot.
+if [ -f "$(which gpg)" ]; then
+    GPGCMD="gpg"
+elif [ -f "$(which gpg2)" ]; then
+    GPGCMD="gpg2"
+else
+    echo >&2 "Error: gnupg does not appear to be installed."
+    exit 1
 fi
 
 # We don't use a secret keyring, of course, but gpg panics and
 # implodes if there isn't one available
 
-GPG="gpg --no-options --no-default-keyring --keyring $ROOT/etc/opkg/trusted.gpg --secret-keyring $ROOT/etc/opkg/secring.gpg --trustdb-name $ROOT/etc/opkg/trustdb.gpg"
+GPG="$GPGCMD --no-options --no-default-keyring --keyring $CFGROOT/trusted.gpg --secret-keyring $CFGROOT/secring.gpg --trustdb-name $CFGROOT/trustdb.gpg"
 
 case "$command" in
     add)
         $GPG --quiet --batch --import "$1"
-        echo "OK"
+        ret=$?
+        if [ $ret -eq 0 ]; then
+            echo "OK"
+        else
+            echo "Failed"
+        fi
         ;;
     del|rm|remove)
         $GPG --quiet --batch --delete-key --yes "$1"
-        echo "OK"
+        ret=$?
+        if [ $ret -eq 0 ]; then
+            echo "OK"
+        else
+            echo "Failed"
+        fi
         ;;
     list)
         $GPG --batch --list-keys
@@ -70,9 +87,9 @@ case "$command" in
         $GPG $*
         ;;
     reset)
-        rm -f $ROOT/etc/opkg/trusted.gpg $ROOT/etc/opkg/trusted.gpg~
-        rm -f $ROOT/etc/opkg/secring.gpg $ROOT/etc/opkg/secring.gpg~
-        rm -f $ROOT/etc/opkg/trustdb.gpg $ROOT/etc/opkg/trustdb.gpg~
+        rm -f $CFGROOT/trusted.gpg $CFGROOT/trusted.gpg~
+        rm -f $CFGROOT/secring.gpg $CFGROOT/secring.gpg~
+        rm -f $CFGROOT/trustdb.gpg $CFGROOT/trustdb.gpg~
         echo "OK"
         ;;
     populate)

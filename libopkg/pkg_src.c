@@ -112,6 +112,7 @@ static int pkg_src_download_signature(pkg_src_t * src)
 
     sprintf_alloc(&sigfile, "%s/%s.%s", opkg_config->lists_dir, src->name,
                   sigext);
+    opkg_msg(DEBUG, "sigfile: %s\n", sigfile);
 
     /* get the url for the sig file */
     if (src->extra_data)        /* debian style? */
@@ -119,6 +120,7 @@ static int pkg_src_download_signature(pkg_src_t * src)
                       sigext);
     else
         sprintf_alloc(&url, "%s/Packages.%s", src->value, sigext);
+    opkg_msg(DEBUG, "url: %s\n", url);
 
     err = opkg_download(url, sigfile, NULL, NULL);
     if (err) {
@@ -148,6 +150,9 @@ int pkg_src_verify(pkg_src_t * src)
 
     sprintf_alloc(&feed, "%s/%s", opkg_config->lists_dir, src->name);
     sprintf_alloc(&sigfile, "%s.%s", feed, sigext);
+
+    opkg_msg(DEBUG, "feed: %s\n", feed);
+    opkg_msg(DEBUG, "sigfile: %s\n", sigfile);
 
     if (!file_exists(sigfile)) {
         opkg_msg(ERROR,

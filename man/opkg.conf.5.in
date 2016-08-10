@@ -120,6 +120,19 @@ Forces CURL to establish a FTP connection over SSL (default is 0).
 \fBftp_proxy\fP (CURL/WGET)
 Specifies the FTP Proxy.
 .TP
+\fBgpg_dir\fP
+Specifies the GPG directory containing the GPG keyring.
+.TP
+\fBgpg_trust_level\fP
+Specifies the GPG trusted level.
+The Default is \fBTrustOnly\fP.
+.fi
+\fBTrustOnly\fP - Trust only package signatures with a trust level of Full or Ultimate
+.fi
+\fBTrustAny\fP - Trust any package with a valid signature
+.fi
+\fBNote:\fP Any file signed with a GPG that is specified as trust level NEVER will \fBNOT\fP be trusted
+.TP
 \fBhttp_auth\fP (CURL)
 Specifies the HTTP username/password in the format \fB"[username]:[password]"\fP.
 .TP
@@ -178,14 +191,13 @@ Path to the CA certificate file.
 Path to certificates directory.
 .TP
 \fBsignature_type\fP
-Specifies the signature type.
-The default is \fBgpg\fP.
+The type of signatures to check against.
 .fi
 \fBgpg\fP - GPG signature (binary)
 .fi
 \fBgpg-asc\fP - GPG Signature using ASCII ARMOR
 .fi
-\fBopenssl\fP - Openssl configuration
+\fBopenssl\fP - OpenSSL Signature Verification
 .TP
 \fBssl_ca_file\fP (CURL)
 CURL's SSL Certificate Authority file.

@@ -87,6 +87,10 @@ static opkg_option_t options[] = {
     {"overwrite_no_owner", OPKG_OPT_TYPE_BOOL, &_conf.overwrite_no_owner},
     {"combine", OPKG_OPT_TYPE_BOOL, &_conf.combine},
     {"cache_local_files", OPKG_OPT_TYPE_BOOL, &_conf.cache_local_files},
+#if defined(HAVE_GPGME)
+    {"gpg_dir", OPKG_OPT_TYPE_STRING, &_conf.gpg_dir},
+    {"gpg_trust_level", OPKG_OPT_TYPE_STRING, &_conf.gpg_trust_level},
+#endif
 #if defined(HAVE_OPENSSL)
     {"signature_ca_file", OPKG_OPT_TYPE_STRING, &_conf.signature_ca_file},
     {"signature_ca_path", OPKG_OPT_TYPE_STRING, &_conf.signature_ca_path},
@@ -747,6 +751,35 @@ int opkg_conf_load(void)
 
     if (opkg_config->signature_type == NULL)
         opkg_config->signature_type = xstrdup(OPKG_CONF_DEFAULT_SIGNATURE_TYPE);
+
+#if defined(HAVE_GPGME)
+    if (opkg_config->gpg_dir == NULL){
+        opkg_config->gpg_dir = xstrdup(OPKG_CONF_GPG_DEFAULT_DIR);
+    }
+
+    if (opkg_config->offline_root) {
+        sprintf_alloc(&tmp, "%s/%s", opkg_config->offline_root,
+                      opkg_config->gpg_dir);
+        free(opkg_config->gpg_dir);
+        opkg_config->gpg_dir = tmp;
+    }
+
+    if (opkg_config->gpg_trust_level == NULL){
+        opkg_config->gpg_trust_level = xstrdup(OPKG_CONF_DEFAULT_GPG_TRUST_LEVEL);
+    }else{
+        /* Verify that the gpg_trust_level is set approriately */
+        if(strncmp(opkg_config->gpg_trust_level,
+                    OPKG_CONF_GPG_TRUST_ONLY,
+                    sizeof(OPKG_CONF_GPG_TRUST_ONLY)) != 0 &&
+           strncmp(opkg_config->gpg_trust_level,
+                    OPKG_CONF_GPG_TRUST_ANY,
+                    sizeof(OPKG_CONF_GPG_TRUST_ANY)) !=0)
+        {
+            opkg_perror(ERROR, "Unrecognized gpg_trust_level %s\n", opkg_config->gpg_trust_level);
+            goto err3;
+        }
+    }
+#endif
 
     /* if no architectures were defined, then default all, noarch, and host architecture */
     if (nv_pair_list_empty(&opkg_config->arch_list)) {
