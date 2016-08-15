@@ -233,13 +233,12 @@ int opkg_verify_gpg_signature(const char *file, const char *sigfile)
     while (s) {
         if (s->status != GPG_ERR_NO_ERROR) {
             opkg_msg(ERROR, "Signature status returned error: %s\n", gpg_strerror(s->status));
-        goto out_err;
-    }
-
-    if(find_trusted_gpg_fingerprints(s->fpr) == 0) {
-        trust=1;
-        break;
-    }
+            goto out_err;
+        }
+        if(find_trusted_gpg_fingerprints(s->fpr) == 0) {
+            trust=1;
+            break;
+        }
         s = s->next;
     }
 
