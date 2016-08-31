@@ -257,11 +257,11 @@ static void libsolv_solver_set_arch_policy(libsolv_solver_t *libsolv_solver)
    into an id usable by libsolv. */
 static Id dep2id(Pool *pool, compound_depend_t *dep)
 {
-    Id nameId = NULL;
-    Id versionId = NULL;
+    Id nameId = 0;
+    Id versionId = 0;
     Id flagId = 0;
-    Id previousId = NULL;
-    Id dependId = NULL;
+    Id previousId = 0;
+    Id dependId = 0;
 
     int i;
 
