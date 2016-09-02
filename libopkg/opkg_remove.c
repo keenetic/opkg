@@ -160,6 +160,8 @@ int opkg_remove_pkg(pkg_t * pkg)
     int err;
     int r;
 
+    if (opkg_config->download_only)
+	return 0;
     /*
      * If called from an upgrade and not from a normal remove,
      * ignore the essential flag.
