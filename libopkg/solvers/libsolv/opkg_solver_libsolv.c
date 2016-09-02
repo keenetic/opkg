@@ -72,7 +72,7 @@ typedef enum job_action job_action_t;
 static libsolv_solver_t *libsolv_solver_new(void);
 static void libsolv_solver_free(libsolv_solver_t *libsolv_solver);
 static void libsolv_solver_add_job(libsolv_solver_t *libsolv_solver,
-                                   job_action_t action, char *pkg_name);
+                                   job_action_t action, const char *pkg_name);
 static int libsolv_solver_solve(libsolv_solver_t *libsolv_solver);
 static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver);
 
@@ -603,7 +603,7 @@ static libsolv_solver_t *libsolv_solver_new(void)
 }
 
 static void libsolv_solver_add_job(libsolv_solver_t *libsolv_solver,
-                                   job_action_t action, char *pkg_name)
+                                   job_action_t action, const char *pkg_name)
 {
     Id what = 0;
     Id how = 0;
