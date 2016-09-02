@@ -105,6 +105,7 @@ CLEANUP:
 int opkg_solver_remove(int num_pkgs, char **pkg_names)
 {
     int i, err;
+    Dataiterator di;
 
     libsolv_solver_t *solver = libsolv_solver_new();
 
@@ -114,8 +115,14 @@ int opkg_solver_remove(int num_pkgs, char **pkg_names)
         goto CLEANUP;
     }
 
-    for (i = 0; i < num_pkgs; i++)
-        libsolv_solver_add_job(solver, JOB_REMOVE, pkg_names[i]);
+    for (i = 0; i < num_pkgs; i++){
+        dataiterator_init(&di, solver->pool, solver->repo_installed, 0, 0, pkg_names[i], SEARCH_GLOB);
+        while (dataiterator_step(&di)) {
+            libsolv_solver_add_job(solver, JOB_REMOVE, di.kv.str);
+            dataiterator_skip_solvable(&di);
+        }
+        dataiterator_free(&di);
+    }
 
     err = libsolv_solver_solve(solver);
     if (err)
