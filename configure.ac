@@ -62,6 +62,28 @@ if test "x$want_pathfinder" = "xyes"; then
 fi
 AM_CONDITIONAL(HAVE_PATHFINDER, test "x$want_pathfinder" = "xyes")
 
+# check for xz
+AC_ARG_ENABLE(xz,
+              AC_HELP_STRING([--enable-xz], [Enable xz compressor support
+      [default=yes] ]),
+    [want_xz="$enableval"], [want_xz="yes"])
+
+if test "$want_xz" = "yes"; then
+  AC_DEFINE(HAVE_XZ, 1, [Define if you want xz support])
+fi
+AM_CONDITIONAL(HAVE_XZ, test "$want_xz" = "yes")
+
+# check for bzip2
+AC_ARG_ENABLE(bzip2,
+              AC_HELP_STRING([--enable-bzip2], [Enable bzip2 compressor support
+      [default=no] ]),
+    [want_bzip2="$enableval"], [want_bzip2="no"])
+
+if test "$want_bzip2" = "yes"; then
+  AC_DEFINE(HAVE_BZIP2, 1, [Define if you want bzip2 support])
+fi
+AM_CONDITIONAL(HAVE_BZIP2, test "$want_bzip2" = "yes")
+
 # check for libcurl
 AC_ARG_ENABLE(curl,
               AC_HELP_STRING([--enable-curl], [Enable downloading with curl
