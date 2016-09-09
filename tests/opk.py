@@ -32,8 +32,18 @@ class Opk:
 			control["Version"] = "1.0"
 		self.control = control
 
-	def write(self, tar_not_ar=False, data_files=None):
-		TEMP_FILES = ['control', 'control.tar.gz', 'data.tar.gz',
+	def write(self, tar_not_ar=False, data_files=None, compression='gz'):
+		COMPRESSORS = ['gz', 'bz2', 'xz']
+		if compression not in COMPRESSORS:
+			raise Exception("Invalid compression type: "
+				"{}. Supported compressors: {}"\
+				.format(compression, ", ".join(COMPRESSORS)))
+
+		control_file = 'control.tar.' + compression
+		data_file = 'data.tar.' + compression
+		tar_mode = "w:" + compression
+
+		TEMP_FILES = ['control', control_file, data_file,
 			'preinst', 'postinst', 'prerm', 'postrm']
 
 		filename = "{Package}_{Version}_{Architecture}.opk"\
@@ -67,25 +77,26 @@ class Opk:
 				os.fchmod(f.fileno(), 0o755)
 				f.write(self.postrm)
 
-		with tarfile.open("control.tar.gz", "w:gz") as tar:
+		with tarfile.open(control_file, tar_mode) as tar:
 			tar.add("control")
 			if self.preinst: tar.add("preinst")
 			if self.postinst: tar.add("postinst")
 			if self.prerm: tar.add("prerm")
 			if self.postrm: tar.add("postrm")
 
-		with tarfile.open("data.tar.gz", "w:gz") as tar:
+		with tarfile.open(data_file, tar_mode) as tar:
 			if data_files:
 				for df in data_files:
 					tar.add(df)
 
 		if tar_not_ar:
-			with tarfile.open(filename, "w:gz") as tar:
-				tar.add("control.tar.gz")
-				tar.add("data.tar.gz")
+			with tarfile.open(filename, tar_mode) as tar:
+				tar.add(control_file)
+				tar.add(data_file)
 		else:
-			os.system("ar q {} control.tar.gz data.tar.gz \
-					2>/dev/null".format(filename))
+			os.system("ar q {0} {1} {2} \
+					2>/dev/null".format(filename,
+						control_file, data_file))
 
 		for f in TEMP_FILES:
 			if os.path.exists(f):
@@ -110,9 +121,9 @@ class OpkGroup:
 	def addOpk(self, opk):
 		self.opk_list.append(opk)
 
-	def write_opk(self, tar_not_ar=False):
+	def write_opk(self, tar_not_ar=False, compression='gz'):
 		for o in self.opk_list:
-			o.write(tar_not_ar)
+			o.write(tar_not_ar=tar_not_ar, compression=compression)
 
 	def write_list(self, filename="Packages"):
 		f = open(filename, "w")
