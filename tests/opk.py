@@ -44,7 +44,8 @@ class Opk:
 		tar_mode = "w:" + compression
 
 		TEMP_FILES = ['control', control_file, data_file,
-			'preinst', 'postinst', 'prerm', 'postrm']
+			'preinst', 'postinst', 'prerm', 'postrm',
+			'debian-binary']
 
 		filename = "{Package}_{Version}_{Architecture}.opk"\
 						.format(**self.control)
@@ -52,6 +53,9 @@ class Opk:
 		for f in TEMP_FILES + [filename]:
 			if os.path.exists(f):
 				os.unlink(f)
+
+		with open("debian-binary", "w") as f:
+			f.write("2.0\n")
 
 		with open("control", "w") as f:
 			for k in self.control.keys():
@@ -94,8 +98,9 @@ class Opk:
 				tar.add(control_file)
 				tar.add(data_file)
 		else:
-			os.system("ar q {0} {1} {2} \
+			os.system("ar q {0} {1} {2} {3}\
 					2>/dev/null".format(filename,
+						'debian-binary',
 						control_file, data_file))
 
 		for f in TEMP_FILES:
