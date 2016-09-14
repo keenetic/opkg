@@ -419,7 +419,7 @@ pkg_t *pkg_hash_fetch_best_installation_candidate(abstract_pkg_t * apkg,
     if (matching_pkgs->len > 1)
         pkg_vec_sort(matching_pkgs, pkg_name_version_and_architecture_compare);
     if (matching_apkgs->len > 1)
-        abstract_pkg_vec_sort(matching_pkgs, abstract_pkg_name_compare);
+        abstract_pkg_vec_sort(matching_apkgs, abstract_pkg_name_compare);
 
     for (i = 0; i < matching_pkgs->len; i++) {
         pkg_t *matching = matching_pkgs->pkgs[i];

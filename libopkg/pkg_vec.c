@@ -195,7 +195,7 @@ int abstract_pkg_vec_contains(abstract_pkg_vec_t * vec, abstract_pkg_t * apkg)
     return 0;
 }
 
-void abstract_pkg_vec_sort(pkg_vec_t * vec, compare_fcn_t compar)
+void abstract_pkg_vec_sort(abstract_pkg_vec_t * vec, compare_fcn_t compar)
 {
     qsort(vec->pkgs, vec->len, sizeof(pkg_t *), compar);
 }
