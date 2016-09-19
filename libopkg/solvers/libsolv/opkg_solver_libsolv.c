@@ -767,7 +767,6 @@ static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
 
             switch (typeId) {
             case SOLVER_TRANSACTION_ERASE:
-                opkg_message(NOTICE, "Removing pkg %s - %s\n", pkg->name, pkg->version);
                 ret = opkg_remove_pkg(pkg);
                 break;
             case SOLVER_TRANSACTION_DOWNGRADE:
@@ -783,7 +782,13 @@ static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
                                     != SOLVER_RULE_JOB)
                     pkg->auto_installed = 1;
 
-                opkg_message(NOTICE, "Installing pkg %s - %s\n", pkg->name, pkg->version);
+                if (pkg->dest == NULL)
+                    pkg->dest = opkg_config->default_dest;
+
+                if (!opkg_config->download_only) {
+                    opkg_message(NOTICE, "Installing %s (%s) on %s\n",
+                                 pkg->name, pkg->version, pkg->dest->name);
+                }
                 ret = opkg_install_pkg(pkg, 0);
                 break;
             case SOLVER_TRANSACTION_UPGRADE:
@@ -792,16 +797,26 @@ static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
                 /* if an old version was found set the new package's
                    autoinstalled status to that of the old package. */
                 if (old) {
-                    char *old_version = pkg_version_str_alloc(old);
-
                     pkg->auto_installed = old->auto_installed;
-                    opkg_message(NOTICE, "Upgrading pkg %s from %s to %s\n",
-                                 pkg->name, old_version, pkg->version);
+                    pkg->dest = old->dest;
+                    if (pkg->dest == NULL)
+                        pkg->dest = opkg_config->default_dest;
 
-                    free(old_version);
+                    if (!opkg_config->download_only) {
+                        char *old_version = pkg_version_str_alloc(old);
+
+                        opkg_message(NOTICE, "Upgrading %s from %s to %s on %s\n",
+                                     pkg->name, old_version, pkg->version, pkg->dest->name);
+
+                        free(old_version);
+                    }
                 } else {
-                    opkg_message(NOTICE, "Upgrading pkg %s to %s\n",
-                                 pkg->name, pkg->version);
+                    if (pkg->dest == NULL)
+                        pkg->dest = opkg_config->default_dest;
+                    if (!opkg_config->download_only) {
+                        opkg_message(NOTICE, "Upgrading %s to %s on %s\n",
+                                     pkg->name, pkg->version, pkg->dest->name);
+                    }
                 }
 
                 ret = opkg_install_pkg(pkg, 1);

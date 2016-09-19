@@ -186,8 +186,8 @@ int opkg_remove_pkg(pkg_t * pkg)
     if (pkg->parent == NULL)
         return 0;
 
-    opkg_msg(NOTICE, "Removing package %s from %s...\n", pkg->name,
-             pkg->dest->name);
+    opkg_msg(NOTICE, "Removing %s (%s) from %s...\n", pkg->name,
+             pkg->version, pkg->dest->name);
     pkg->state_flag |= SF_FILELIST_CHANGED;
 
     pkg->state_want = SW_DEINSTALL;
