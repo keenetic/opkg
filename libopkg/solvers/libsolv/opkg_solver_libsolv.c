@@ -81,6 +81,8 @@ int opkg_solver_install(int num_pkgs, char **pkg_names)
     int i, err;
 
     libsolv_solver_t *solver = libsolv_solver_new();
+    if (solver == NULL)
+        return -1;
 
     if (num_pkgs == 0) {
         opkg_msg(ERROR, "No packages specified for install!\n");
@@ -108,6 +110,8 @@ int opkg_solver_remove(int num_pkgs, char **pkg_names)
     Dataiterator di;
 
     libsolv_solver_t *solver = libsolv_solver_new();
+    if (solver == NULL)
+        return -1;
 
     if (num_pkgs == 0) {
         opkg_msg(ERROR, "No packages specified for removal!\n");
@@ -140,6 +144,8 @@ int opkg_solver_upgrade(int num_pkgs, char **pkg_names)
     int i, err;
 
     libsolv_solver_t *solver = libsolv_solver_new();
+    if (solver == NULL)
+        return -1;
 
     if (num_pkgs == 0) {
         libsolv_solver_add_job(solver, JOB_UPGRADE, 0);
@@ -165,6 +171,8 @@ int opkg_solver_distupgrade(int num_pkgs, char **pkg_names)
     int i, err;
 
     libsolv_solver_t *solver = libsolv_solver_new();
+    if (solver == NULL)
+        return -1;
 
     if (num_pkgs == 0) {
         libsolv_solver_add_job(solver, JOB_DISTUPGRADE, 0);
@@ -537,7 +545,7 @@ static void populate_available_repos(libsolv_solver_t *libsolv_solver)
     pkg_vec_free(available_pkgs);
 }
 
-static void libsolv_solver_init(libsolv_solver_t *libsolv_solver)
+static int libsolv_solver_init(libsolv_solver_t *libsolv_solver)
 {
     /* initialize the solver job queue */
     queue_init(&libsolv_solver->solver_jobs);
@@ -565,6 +573,12 @@ static void libsolv_solver_init(libsolv_solver_t *libsolv_solver)
     pool_set_flag(libsolv_solver->pool, POOL_FLAG_OBSOLETEUSESPROVIDES, 1);
     pool_set_flag(libsolv_solver->pool,
                   POOL_FLAG_IMPLICITOBSOLETEUSESPROVIDES, 1);
+
+    /* Use version matching that most closely matches debian */
+    if (pool_setdisttype(libsolv_solver->pool, DISTTYPE_DEB) == -1) {
+        opkg_message(ERROR, "libsolv not built with Debian or Multi semantics\n");
+        return -1;
+    }
 
     /* read in repo of installed packages */
     populate_installed_repo(libsolv_solver);
@@ -597,14 +611,22 @@ static void libsolv_solver_init(libsolv_solver_t *libsolv_solver)
         solver_set_flag(libsolv_solver->solver,
                         SOLVER_FLAG_NO_INFARCHCHECK, 1);
     }
+
+    return 0;
 }
 
 static libsolv_solver_t *libsolv_solver_new(void)
 {
     libsolv_solver_t *libsolv_solver;
+    int err;
 
     libsolv_solver = xcalloc(1, sizeof(libsolv_solver_t));
-    libsolv_solver_init(libsolv_solver);
+    err = libsolv_solver_init(libsolv_solver);
+    if (err) {
+        opkg_message(ERROR, "Could not initialize libsolv solver\n");
+        libsolv_solver_free(libsolv_solver);
+        return NULL;
+    }
 
     return libsolv_solver;
 }
@@ -698,7 +720,8 @@ static int libsolv_solver_solve(libsolv_solver_t *libsolv_solver)
 
 static void libsolv_solver_free(libsolv_solver_t *libsolv_solver)
 {
-    solver_free(libsolv_solver->solver);
+    if (libsolv_solver->solver)
+        solver_free(libsolv_solver->solver);
     queue_free(&libsolv_solver->solver_jobs);
     pool_free(libsolv_solver->pool);
     free(libsolv_solver);
