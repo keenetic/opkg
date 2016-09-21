@@ -650,14 +650,15 @@ static void libsolv_solver_add_job(libsolv_solver_t *libsolv_solver,
 
     switch (action) {
     case JOB_INSTALL:
-        how = SOLVER_INSTALL | SOLVER_SOLVABLE_NAME;
+        how = SOLVER_INSTALL | SOLVER_SOLVABLE_PROVIDES;
         break;
     case JOB_REMOVE:
+        /* Only remove packages by real package name -- matches internalsolv */
         how = SOLVER_ERASE | SOLVER_SOLVABLE_NAME;
         break;
     case JOB_UPGRADE:
         if (pkg_name && strcmp(pkg_name, "") != 0) {
-            how = SOLVER_UPDATE | SOLVER_SOLVABLE_NAME | SOLVER_TARGETED;
+            how = SOLVER_UPDATE | SOLVER_SOLVABLE_PROVIDES | SOLVER_TARGETED;
         } else {
             how = SOLVER_UPDATE | SOLVER_SOLVABLE_REPO;
             what = libsolv_solver->pool->installed->repoid;
@@ -665,7 +666,7 @@ static void libsolv_solver_add_job(libsolv_solver_t *libsolv_solver,
         break;
     case JOB_DISTUPGRADE:
         if (pkg_name && strcmp(pkg_name, "") != 0) {
-            how = SOLVER_DISTUPGRADE | SOLVER_SOLVABLE_NAME;
+            how = SOLVER_DISTUPGRADE | SOLVER_SOLVABLE_PROVIDES;
         } else {
             how = SOLVER_DISTUPGRADE | SOLVER_SOLVABLE_ALL;
             queue_push2(&libsolv_solver->solver_jobs, SOLVER_DROP_ORPHANED | SOLVER_SOLVABLE_ALL, 0);
@@ -680,6 +681,13 @@ static void libsolv_solver_add_job(libsolv_solver_t *libsolv_solver,
         how |= SOLVER_CLEANDEPS;
 
     queue_push2(&libsolv_solver->solver_jobs, how, what);
+
+    /* Given two packages, one which provides 'name' and one which is
+       actually named 'name', prefer the latter. Regression for issue9533 */
+    if ((how & SOLVER_SELECTMASK) == SOLVER_SOLVABLE_PROVIDES) {
+        queue_push2(&libsolv_solver->solver_jobs,
+                    SOLVER_FAVOR | SOLVER_SOLVABLE_NAME, what);
+    }
 
     free(name);
     free(version);
