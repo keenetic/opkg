@@ -999,6 +999,9 @@ int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
     pkg->state_flag = SF_REINSTREQ;
     pkg->state_status = SS_HALF_INSTALLED;
 
+    if (old_pkg)
+        old_pkg->state_status = SS_NOT_INSTALLED;
+
     /* Print some advice for the user. */
     opkg_msg(NOTICE, "To remove package debris, try `opkg remove %s`.\n",
              pkg->name);
