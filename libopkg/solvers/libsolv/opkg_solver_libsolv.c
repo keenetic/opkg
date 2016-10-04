@@ -441,7 +441,7 @@ static void populate_installed_repo(libsolv_solver_t *libsolv_solver)
 
     pkg_vec_t *installed_pkgs = pkg_vec_alloc();
 
-    pkg_hash_fetch_all_installed(installed_pkgs);
+    pkg_hash_fetch_all_installed(installed_pkgs, 1);
 
     for (i = 0; i < installed_pkgs->len; i++) {
         pkg_t *pkg = installed_pkgs->pkgs[i];
@@ -499,7 +499,8 @@ static void populate_available_repos(libsolv_solver_t *libsolv_solver)
 
         /* if the package is installed or unpacked, skip it */
         if (pkg->state_status == SS_INSTALLED ||
-            pkg->state_status == SS_UNPACKED)
+            pkg->state_status == SS_UNPACKED ||
+            pkg->state_status == SS_HALF_INSTALLED)
             continue;
 
         /* if the package is marked as held, skip it */

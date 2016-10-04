@@ -1308,7 +1308,7 @@ void pkg_info_preinstall_check(void)
 
     /* update the file owner data structure */
     opkg_msg(INFO, "Updating file owner list.\n");
-    pkg_hash_fetch_all_installed(installed_pkgs);
+    pkg_hash_fetch_all_installed(installed_pkgs, 0);
     for (i = 0; i < installed_pkgs->len; i++) {
         pkg_t *pkg = installed_pkgs->pkgs[i];
         str_list_t *installed_files = pkg_get_installed_files(pkg);     /* this causes installed_files to be cached */
@@ -1384,7 +1384,7 @@ int pkg_write_changed_filelists(void)
 
     opkg_msg(INFO, "Saving changed filelists.\n");
 
-    pkg_hash_fetch_all_installed(installed_pkgs);
+    pkg_hash_fetch_all_installed(installed_pkgs, 0);
     for (i = 0; i < installed_pkgs->len; i++) {
         pkg_t *pkg = installed_pkgs->pkgs[i];
         if (pkg->state_flag & SF_FILELIST_CHANGED) {

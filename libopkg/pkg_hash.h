@@ -39,7 +39,7 @@ int pkg_hash_load_status_files(void);
 void hash_insert_pkg(pkg_t * pkg, int set_status);
 
 abstract_pkg_t *ensure_abstract_pkg_by_name(const char *pkg_name);
-void pkg_hash_fetch_all_installed(pkg_vec_t * installed);
+void pkg_hash_fetch_all_installed(pkg_vec_t * installed, int include_half_installed);
 pkg_t *pkg_hash_fetch_by_name_version(const char *pkg_name,
                                       const char *version);
 abstract_pkg_t *abstract_pkg_fetch_by_name(const char *pkg_name);

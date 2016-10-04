@@ -624,7 +624,8 @@ pkg_t *pkg_hash_fetch_installed_by_name_dest(const char *pkg_name,
 
     for (i = 0; i < vec->len; i++) {
         int is_installed = (vec->pkgs[i]->state_status == SS_INSTALLED
-                    || vec->pkgs[i]->state_status == SS_UNPACKED)
+                    || vec->pkgs[i]->state_status == SS_UNPACKED
+                    || vec->pkgs[i]->state_status == SS_HALF_INSTALLED)
                 && vec->pkgs[i]->dest == dest;
         if (is_installed)
             return vec->pkgs[i];
@@ -645,7 +646,8 @@ pkg_t *pkg_hash_fetch_installed_by_name(const char *pkg_name)
 
     for (i = 0; i < vec->len; i++) {
         int is_installed = vec->pkgs[i]->state_status == SS_INSTALLED
-            || vec->pkgs[i]->state_status == SS_UNPACKED;
+            || vec->pkgs[i]->state_status == SS_UNPACKED
+            || vec->pkgs[i]->state_status == SS_HALF_INSTALLED;
         if (is_installed)
             return vec->pkgs[i];
     }
@@ -696,10 +698,33 @@ static void pkg_hash_fetch_all_installed_helper(const char *pkg_name,
     }
 }
 
-void pkg_hash_fetch_all_installed(pkg_vec_t * all)
+static void pkg_hash_fetch_all_half_or_installed_helper(const char *pkg_name,
+                                                        void *entry, void *data)
+{
+    abstract_pkg_t *ab_pkg = (abstract_pkg_t *) entry;
+    pkg_vec_t *all = (pkg_vec_t *) data;
+    pkg_vec_t *pkg_vec = ab_pkg->pkgs;
+    unsigned int j;
+
+    if (!pkg_vec)
+        return;
+
+    for (j = 0; j < pkg_vec->len; j++) {
+        pkg_t *pkg = pkg_vec->pkgs[j];
+        int is_installed = pkg->state_status == SS_INSTALLED
+                           || pkg->state_status == SS_UNPACKED
+                           || pkg->state_status == SS_HALF_INSTALLED;
+        if (is_installed)
+            pkg_vec_insert(all, pkg);
+    }
+}
+
+void pkg_hash_fetch_all_installed(pkg_vec_t * all, int include_half_installed)
 {
     hash_table_foreach(&opkg_config->pkg_hash,
-                       pkg_hash_fetch_all_installed_helper, all);
+            include_half_installed ? pkg_hash_fetch_all_half_or_installed_helper
+                                   : pkg_hash_fetch_all_installed_helper,
+            all);
 }
 
 /*
