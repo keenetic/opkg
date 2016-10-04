@@ -607,3 +607,8 @@ int internal_solver_solv(typeId  transactionType, pkg_t *pkg, pkg_vec_t *pkgs_to
 
     return 0;
 }
+
+char *opkg_solver_version_alloc(void)
+{
+    return NULL;
+}

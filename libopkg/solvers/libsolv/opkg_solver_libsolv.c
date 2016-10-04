@@ -32,6 +32,7 @@
 #include "pkg_vec.h"
 #include "pkg_hash.h"
 #include "xfuncs.h"
+#include "sprintf_alloc.h"
 
 #define INITIAL_ARCH_LIST_SIZE 4
 
@@ -867,4 +868,12 @@ CLEANUP:
     pkg_vec_free(pkgs);
     transaction_free(transaction);
     return err;
+}
+
+char *opkg_solver_version_alloc(void)
+{
+    char *version;
+
+    sprintf_alloc(&version, "libsolv %s", solv_version);
+    return version;
 }

@@ -123,6 +123,7 @@ static int args_parse(int argc, char *argv[])
     int option_index = 0;
     int parse_err = 0;
     char *tuple, *targ;
+    char *solver_version = NULL;
 
     while (1) {
         c = getopt_long_only(argc, argv, "Ad:f:no:p:t:vV::", long_options,
@@ -147,7 +148,13 @@ static int args_parse(int argc, char *argv[])
             opkg_config->tmp_dir = xstrdup(optarg);
             break;
         case 'v':
-            printf("opkg version %s\n", VERSION);
+            solver_version = opkg_solver_version_alloc();
+            if (solver_version) {
+                printf("opkg version " VERSION " (%s)\n", solver_version);
+                free(solver_version);
+            } else {
+                printf("opkg version " VERSION "\n");
+            }
             exit(0);
         case 'V':
             opkg_config->verbosity = INFO;
