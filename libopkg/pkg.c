@@ -1431,6 +1431,8 @@ int pkg_verify(pkg_t * pkg)
         err = opkg_verify_signature(pkg->local_filename, local_sig_filename);
         if (err)
             goto fail;
+
+	opkg_msg(DEBUG, "Signature verification passed for %s.\n", pkg->local_filename);
     }
 
     free(local_sig_filename);
