@@ -158,9 +158,6 @@ int opkg_verify_gpg_signature(const char *file, const char *sigfile)
     gpgme_signature_t s;
     char *trusted_path = NULL;
 
-    if (opkg_config->check_signature == 0)
-        return 0;
-
     if (gpgme_init()) {
         opkg_msg(ERROR, "GPGME Failed to initalize.\n");
         goto out_err;
