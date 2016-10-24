@@ -658,7 +658,8 @@ static void pkg_formatted_field(FILE * fp, pkg_t * pkg, const char *field)
         break;
     case 'i':
     case 'I':
-        if (strcasecmp(field, "Installed-Size") == 0) {
+        if (strcasecmp(field, "Installed-Size") == 0
+		   && pkg->installed_size) {
             fprintf(fp, "Installed-Size: %ld\n", pkg->installed_size);
         } else if (strcasecmp(field, "Installed-Time") == 0
                    && pkg->installed_time) {
@@ -839,6 +840,7 @@ void pkg_formatted_info(FILE * fp, pkg_t * pkg)
     pkg_formatted_field(fp, pkg, "Conffiles");
     pkg_formatted_field(fp, pkg, "Source");
     pkg_formatted_field(fp, pkg, "Description");
+    pkg_formatted_field(fp, pkg, "Installed-Size");
     pkg_formatted_field(fp, pkg, "Installed-Time");
     pkg_formatted_field(fp, pkg, "Tags");
     fputs("\n", fp);
@@ -862,6 +864,7 @@ void pkg_print_status(pkg_t * pkg, FILE * file)
     pkg_formatted_field(file, pkg, "Essential");
     pkg_formatted_field(file, pkg, "Architecture");
     pkg_formatted_field(file, pkg, "Conffiles");
+    pkg_formatted_field(file, pkg, "Installed-Size");
     pkg_formatted_field(file, pkg, "Installed-Time");
     pkg_formatted_field(file, pkg, "Auto-Installed");
     fputs("\n", file);

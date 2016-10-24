@@ -441,7 +441,7 @@ static int extract_entry(struct archive *a, struct archive_entry *entry,
 /* Extract all files in an archive to the filesystem under the path given by
  * dest. Returns 0 on success or <0 on error.
  */
-static int extract_all(struct archive *a, const char *dest, int flags)
+static int extract_all(struct archive *a, const char *dest, int flags, long unsigned int *size)
 {
     struct archive *disk;
     struct archive_entry *entry;
@@ -474,6 +474,8 @@ static int extract_all(struct archive *a, const char *dest, int flags)
         r = extract_entry(a, entry, disk);
         if (r < 0)
             goto err_cleanup;
+	else if (size)
+            *size += archive_entry_size(entry);
     }
 
     r = ARCHIVE_OK;
@@ -828,9 +830,9 @@ int ar_extract_paths_to_stream(struct opkg_ar *ar, FILE * stream)
     return extract_paths_to_stream(ar->ar, stream);
 }
 
-int ar_extract_all(struct opkg_ar *ar, const char *prefix)
+int ar_extract_all(struct opkg_ar *ar, const char *prefix, long unsigned int *size)
 {
-    return extract_all(ar->ar, prefix, ar->extract_flags);
+    return extract_all(ar->ar, prefix, ar->extract_flags, size);
 }
 
 void ar_close(struct opkg_ar *ar)

@@ -33,7 +33,7 @@ int ar_copy_to_stream(struct opkg_ar *ar, FILE * stream);
 int ar_extract_file_to_stream(struct opkg_ar *ar, const char *filename,
                               FILE * stream);
 int ar_extract_paths_to_stream(struct opkg_ar *ar, FILE * stream);
-int ar_extract_all(struct opkg_ar *ar, const char *prefix);
+int ar_extract_all(struct opkg_ar *ar, const char *prefix, long unsigned int *size);
 void ar_close(struct opkg_ar *ar);
 
 #ifdef __cplusplus

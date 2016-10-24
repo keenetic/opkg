@@ -63,7 +63,7 @@ int pkg_extract_control_files_to_dir_with_prefix(pkg_t * pkg, const char *dir,
         goto cleanup;
     }
 
-    r = ar_extract_all(ar, dir_with_prefix);
+    r = ar_extract_all(ar, dir_with_prefix, NULL);
     if (r < 0)
         opkg_msg(ERROR,
                  "Failed to extract all control files from package '%s'.\n",
@@ -93,7 +93,7 @@ int pkg_extract_data_files_to_dir(pkg_t * pkg, const char *dir)
         return -1;
     }
 
-    r = ar_extract_all(ar, dir);
+    r = ar_extract_all(ar, dir, &pkg->installed_size);
     if (r < 0)
         opkg_msg(ERROR, "Failed to extract data files from package '%s'.\n",
                  pkg->local_filename);
