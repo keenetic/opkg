@@ -466,6 +466,11 @@ static int opkg_download_cmd(int argc, char **argv)
             continue;
         }
 
+        if (opkg_config->noaction) {
+            opkg_msg(NOTICE, "Not downloading %s (--noaction specified).\n", pkg->name);
+            continue;
+        }
+
         r = opkg_download_pkg_to_dir(pkg, ".");
         if (r != 0) {
             err = -1;
