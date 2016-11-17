@@ -151,9 +151,6 @@ static int opkg_update_cmd(int argc, char **argv)
             iter = void_list_next(&opkg_config->pkg_src_list, iter)) {
         src = (pkg_src_t *) iter->data;
 
-        if (src->extra_data && !strcmp(src->extra_data, "__dummy__ "))
-            continue;
-
         err = pkg_src_update(src);
         if (err)
             failures++;

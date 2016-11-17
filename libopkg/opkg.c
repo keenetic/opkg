@@ -513,9 +513,6 @@ int opkg_update_package_lists(opkg_progress_callback_t progress_callback,
     list_for_each_entry(iter, &opkg_config->pkg_src_list.head, node) {
         src = (pkg_src_t *) iter->data;
 
-        if (src->extra_data && !strcmp(src->extra_data, "__dummy__ "))
-            continue;
-
         err = pkg_src_update(src);
         if (err)
             result = -1;

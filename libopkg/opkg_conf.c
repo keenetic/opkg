@@ -386,7 +386,7 @@ static int opkg_conf_parse_file(const char *filename,
                 }
             } else if (strcmp(type, "src") == 0) {
                 if (!nv_pair_list_find((nv_pair_list_t *) pkg_src_list, name)) {
-                    pkg_src_list_append(pkg_src_list, name, value, extra, 0);
+                    pkg_src_list_append(pkg_src_list, name, value, NULL, 0);
                 } else {
                     opkg_msg(ERROR,
                              "Duplicate src declaration (%s %s). "
@@ -394,7 +394,7 @@ static int opkg_conf_parse_file(const char *filename,
                 }
             } else if (strcmp(type, "src/gz") == 0) {
                 if (!nv_pair_list_find((nv_pair_list_t *) pkg_src_list, name)) {
-                    pkg_src_list_append(pkg_src_list, name, value, extra, 1);
+                    pkg_src_list_append(pkg_src_list, name, value, NULL, 1);
                 } else {
                     opkg_msg(ERROR,
                              "Duplicate src declaration (%s %s). "
