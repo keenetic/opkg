@@ -32,11 +32,17 @@
 #include "xfuncs.h"
 
 int pkg_src_init(pkg_src_t * src, const char *name, const char *base_url,
-                 const char *extra_data, int gzip)
+                 pkg_src_options_t *options, const char *extra_data, int gzip)
 {
     src->gzip = gzip;
     src->name = xstrdup(name);
     src->value = xstrdup(base_url);
+    src->options = xmalloc(sizeof(pkg_src_options_t));
+    if (options)
+       src->options->disable_sig_check = options->disable_sig_check;
+    else
+       src->options->disable_sig_check = 0;
+
     if (extra_data)
         src->extra_data = xstrdup(extra_data);
     else
@@ -48,6 +54,7 @@ void pkg_src_deinit(pkg_src_t * src)
 {
     free(src->name);
     free(src->value);
+    free(src->options);
     if (src->extra_data)
         free(src->extra_data);
 }
@@ -189,7 +196,7 @@ int pkg_src_update(pkg_src_t * src)
     if (err)
         return err;
 
-    if (opkg_config->check_signature) {
+    if (opkg_config->check_signature && !(src->options->disable_sig_check)) {
         err = pkg_src_download_signature(src);
         if (err)
             return err;

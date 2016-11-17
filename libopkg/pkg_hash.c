@@ -152,7 +152,7 @@ static int dist_hash_add_from_file(pkg_src_t * dist)
                 return -1;
             }
             pkg_src_list_append(&opkg_config->pkg_src_list, subname,
-                                dist->value, "__dummy__", 0);
+                                dist->value, NULL, "__dummy__", 0);
         }
 
         free(list_file);

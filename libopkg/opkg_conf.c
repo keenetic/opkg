@@ -171,6 +171,33 @@ static opkg_option_t *opkg_conf_find_option(const char *name)
     return NULL;
 }
 
+static void parse_pkg_src_options_str(pkg_src_options_t *src_options,
+                                      char *options_str)
+{
+    char *token, *value, *src_option;
+
+    /* default value */
+    src_options->disable_sig_check = 0;
+
+    token = strtok(options_str, " ");
+    while (token) {
+        value = strrchr(token, '=');
+        if (value) {
+            /* Remove '=' character */
+            value++;
+            src_option = xstrndup(token, strlen(token) - (strlen(value) + 1));
+            if (strcasecmp(src_option, "trusted") == 0) {
+                if (strcasecmp(value, "yes") == 0)
+                    src_options->disable_sig_check = 1;
+                else
+                    src_options->disable_sig_check = 0;
+            }
+            free(src_option);
+        }
+        token = strtok(NULL, " ");
+    }
+}
+
 int opkg_conf_get_option(char *name, void *value)
 {
     opkg_option_t *o;
@@ -273,7 +300,7 @@ static int opkg_conf_parse_file(const char *filename,
     int r;
     FILE *file;
     regex_t valid_line_re, comment_re;
-#define regmatch_size 14
+#define regmatch_size 16
     regmatch_t regmatch[regmatch_size];
 
     file = fopen(filename, "r");
@@ -294,6 +321,7 @@ static int opkg_conf_parse_file(const char *filename,
                  "^[[:space:]]*(\"([^\"]*)\"|([^[:space:]]*))"
                  "[[:space:]]*(\"([^\"]*)\"|([^[:space:]]*))"
                  "[[:space:]]*(\"([^\"]*)\"|([^[:space:]]*))"
+                 "([[:space:]]+([[]([^]])+[]]))?"
                  "([[:space:]]+([^[:space:]]+))?([[:space:]]+(.*))?[[:space:]]*$",
                  REG_EXTENDED);
     if (err)
@@ -302,6 +330,7 @@ static int opkg_conf_parse_file(const char *filename,
     while (1) {
         char *line;
         char *type, *name, *value, *extra;
+        pkg_src_options_t *src_options = NULL;
 
         line_num++;
 
@@ -347,15 +376,22 @@ static int opkg_conf_parse_file(const char *filename,
 
         extra = NULL;
         if (regmatch[11].rm_so > 0) {
-            if (regmatch[13].rm_so > 0 && regmatch[13].rm_so != regmatch[13].rm_eo)
-                extra = xstrndup(line + regmatch[11].rm_so,
-                             regmatch[13].rm_eo - regmatch[11].rm_so);
+            char *options_str = xstrndup(1 + line + regmatch[11].rm_so,
+                                    (regmatch[11].rm_eo - regmatch[11].rm_so) - 2);
+            src_options = xmalloc(sizeof(pkg_src_options_t));
+            parse_pkg_src_options_str(src_options, options_str);
+            free(options_str);
+        }
+        if (regmatch[13].rm_so > 0) {
+            if (regmatch[15].rm_so > 0 && regmatch[15].rm_so != regmatch[15].rm_eo)
+                extra = xstrndup(line + regmatch[13].rm_so,
+                             regmatch[15].rm_eo - regmatch[13].rm_so);
             else
-                extra = xstrndup(line + regmatch[11].rm_so,
-                             regmatch[11].rm_eo - regmatch[11].rm_so);
+                extra = xstrndup(line + regmatch[13].rm_so,
+                             regmatch[13].rm_eo - regmatch[13].rm_so);
         }
 
-        if (regmatch[13].rm_so != regmatch[13].rm_eo && strncmp(type, "dist", 4) != 0) {
+        if (regmatch[15].rm_so != regmatch[15].rm_eo && strncmp(type, "dist", 4) != 0) {
             opkg_msg(ERROR,
                      "%s:%d: Ignoring config line with trailing garbage: `%s'\n",
                      filename, line_num, line);
@@ -370,7 +406,7 @@ static int opkg_conf_parse_file(const char *filename,
                 opkg_conf_set_option(name, value, 0);
             } else if (strcmp(type, "dist") == 0) {
                 if (!nv_pair_list_find((nv_pair_list_t *) dist_src_list, name)) {
-                    pkg_src_list_append(dist_src_list, name, value, extra, 0);
+                    pkg_src_list_append(dist_src_list, name, value, src_options, extra, 0);
                 } else {
                     opkg_msg(ERROR,
                              "Duplicate dist declaration (%s %s). "
@@ -378,7 +414,7 @@ static int opkg_conf_parse_file(const char *filename,
                 }
             } else if (strcmp(type, "dist/gz") == 0) {
                 if (!nv_pair_list_find((nv_pair_list_t *) dist_src_list, name)) {
-                    pkg_src_list_append(dist_src_list, name, value, extra, 1);
+                    pkg_src_list_append(dist_src_list, name, value, src_options, extra, 1);
                 } else {
                     opkg_msg(ERROR,
                              "Duplicate dist declaration (%s %s). "
@@ -386,7 +422,7 @@ static int opkg_conf_parse_file(const char *filename,
                 }
             } else if (strcmp(type, "src") == 0) {
                 if (!nv_pair_list_find((nv_pair_list_t *) pkg_src_list, name)) {
-                    pkg_src_list_append(pkg_src_list, name, value, NULL, 0);
+                    pkg_src_list_append(pkg_src_list, name, value, src_options, NULL, 0);
                 } else {
                     opkg_msg(ERROR,
                              "Duplicate src declaration (%s %s). "
@@ -394,7 +430,7 @@ static int opkg_conf_parse_file(const char *filename,
                 }
             } else if (strcmp(type, "src/gz") == 0) {
                 if (!nv_pair_list_find((nv_pair_list_t *) pkg_src_list, name)) {
-                    pkg_src_list_append(pkg_src_list, name, value, NULL, 1);
+                    pkg_src_list_append(pkg_src_list, name, value, src_options, NULL, 1);
                 } else {
                     opkg_msg(ERROR,
                              "Duplicate src declaration (%s %s). "
@@ -422,6 +458,7 @@ static int opkg_conf_parse_file(const char *filename,
         free(type);
         free(name);
         free(value);
+        free(src_options);
         free(extra);
 
  NEXT_LINE:

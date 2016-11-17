@@ -46,12 +46,12 @@ void pkg_src_list_deinit(pkg_src_list_t * list)
 }
 
 pkg_src_t *pkg_src_list_append(pkg_src_list_t * list, const char *name,
-                               const char *base_url, const char *extra_data,
+                               const char *base_url, pkg_src_options_t *options, const char *extra_data,
                                int gzip)
 {
     /* freed in pkg_src_list_deinit */
     pkg_src_t *pkg_src = xcalloc(1, sizeof(pkg_src_t));
-    pkg_src_init(pkg_src, name, base_url, extra_data, gzip);
+    pkg_src_init(pkg_src, name, base_url, options, extra_data, gzip);
 
     void_list_append((void_list_t *) list, pkg_src);
 
