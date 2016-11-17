@@ -55,8 +55,7 @@ void pkg_src_deinit(pkg_src_t * src)
     free(src->name);
     free(src->value);
     free(src->options);
-    if (src->extra_data)
-        free(src->extra_data);
+    free(src->extra_data);
 }
 
 static int pkg_src_download(pkg_src_t * src)
