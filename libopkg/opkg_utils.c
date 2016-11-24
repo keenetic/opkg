@@ -106,3 +106,11 @@ void strip_pkg_name_and_version(const char *pkg_name, char **name, char **versio
         *name = xstrdup(pkg_name);
     }
 }
+
+int is_str_glob(const char *str)
+{
+    /* Following POSIX, a string is a wildcard pattern if it contains '*', '?'
+     *  or '['
+     */
+    return strchr(str, '*') || strchr(str, '?') || strchr(str, '[');
+}
