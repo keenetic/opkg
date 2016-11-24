@@ -73,13 +73,15 @@ typedef enum job_action job_action_t;
 static libsolv_solver_t *libsolv_solver_new(void);
 static void libsolv_solver_free(libsolv_solver_t *libsolv_solver);
 static void libsolv_solver_add_job(libsolv_solver_t *libsolv_solver,
-                                   job_action_t action, const char *pkg_name);
+                                   job_action_t action, const char *pkg_name,
+                                   const char *pkg_version);
 static int libsolv_solver_solve(libsolv_solver_t *libsolv_solver);
 static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver);
 
 int opkg_solver_install(int num_pkgs, char **pkg_names)
 {
     int i, err;
+    char *name, *version;
 
     libsolv_solver_t *solver = libsolv_solver_new();
     if (solver == NULL)
@@ -91,8 +93,12 @@ int opkg_solver_install(int num_pkgs, char **pkg_names)
         goto CLEANUP;
     }
 
-    for (i = 0; i < num_pkgs; i++)
-        libsolv_solver_add_job(solver, JOB_INSTALL, pkg_names[i]);
+    for (i = 0; i < num_pkgs; i++) {
+        strip_pkg_name_and_version(pkg_names[i], &name, &version);
+        libsolv_solver_add_job(solver, JOB_INSTALL, name, version);
+        free(name);
+        free(version);
+    }
 
     err = libsolv_solver_solve(solver);
     if (err)
@@ -123,7 +129,7 @@ int opkg_solver_remove(int num_pkgs, char **pkg_names)
     for (i = 0; i < num_pkgs; i++){
         dataiterator_init(&di, solver->pool, solver->repo_installed, 0, 0, pkg_names[i], SEARCH_GLOB);
         while (dataiterator_step(&di)) {
-            libsolv_solver_add_job(solver, JOB_REMOVE, di.kv.str);
+            libsolv_solver_add_job(solver, JOB_REMOVE, di.kv.str, NULL);
             dataiterator_skip_solvable(&di);
         }
         dataiterator_free(&di);
@@ -149,10 +155,10 @@ int opkg_solver_upgrade(int num_pkgs, char **pkg_names)
         return -1;
 
     if (num_pkgs == 0) {
-        libsolv_solver_add_job(solver, JOB_UPGRADE, 0);
+        libsolv_solver_add_job(solver, JOB_UPGRADE, 0, NULL);
     } else {
         for (i = 0; i < num_pkgs; i++)
-            libsolv_solver_add_job(solver, JOB_UPGRADE, pkg_names[i]);
+            libsolv_solver_add_job(solver, JOB_UPGRADE, pkg_names[i], NULL);
     }
 
     err = libsolv_solver_solve(solver);
@@ -176,10 +182,10 @@ int opkg_solver_distupgrade(int num_pkgs, char **pkg_names)
         return -1;
 
     if (num_pkgs == 0) {
-        libsolv_solver_add_job(solver, JOB_DISTUPGRADE, 0);
+        libsolv_solver_add_job(solver, JOB_DISTUPGRADE, 0, NULL);
     } else {
         for (i = 0; i < num_pkgs; i++)
-            libsolv_solver_add_job(solver, JOB_DISTUPGRADE, pkg_names[i]);
+            libsolv_solver_add_job(solver, JOB_DISTUPGRADE, pkg_names[i], NULL);
     }
 
     err = libsolv_solver_solve(solver);
@@ -634,20 +640,19 @@ static libsolv_solver_t *libsolv_solver_new(void)
 }
 
 static void libsolv_solver_add_job(libsolv_solver_t *libsolv_solver,
-                                   job_action_t action, const char *pkg_name)
+                                   job_action_t action, const char *pkg_name,
+                                   const char *pkg_version)
 {
     Id what = 0;
     Id how = 0;
-    char *name, *version;
 
-    strip_pkg_name_and_version(pkg_name, &name, &version);
-    if (version) {
+    if (pkg_version) {
         what = pool_rel2id(libsolv_solver->pool,
-                           pool_str2id(libsolv_solver->pool, name, 1),
-                           pool_str2id(libsolv_solver->pool, version, 1),
+                           pool_str2id(libsolv_solver->pool, pkg_name, 1),
+                           pool_str2id(libsolv_solver->pool, pkg_version, 1),
                            REL_EQ, 1);
     } else {
-        what = pool_str2id(libsolv_solver->pool, name, 1);
+        what = pool_str2id(libsolv_solver->pool, pkg_name, 1);
     }
 
     switch (action) {
@@ -690,9 +695,6 @@ static void libsolv_solver_add_job(libsolv_solver_t *libsolv_solver,
         queue_push2(&libsolv_solver->solver_jobs,
                     SOLVER_FAVOR | SOLVER_SOLVABLE_NAME, what);
     }
-
-    free(name);
-    free(version);
 }
 
 static int libsolv_solver_solve(libsolv_solver_t *libsolv_solver)
