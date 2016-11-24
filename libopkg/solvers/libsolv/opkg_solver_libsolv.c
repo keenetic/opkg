@@ -158,6 +158,7 @@ CLEANUP:
 int opkg_solver_upgrade(int num_pkgs, char **pkg_names)
 {
     int i, err;
+    Dataiterator di;
 
     libsolv_solver_t *solver = libsolv_solver_new();
     if (solver == NULL)
@@ -166,8 +167,14 @@ int opkg_solver_upgrade(int num_pkgs, char **pkg_names)
     if (num_pkgs == 0) {
         libsolv_solver_add_job(solver, JOB_UPGRADE, 0, NULL);
     } else {
-        for (i = 0; i < num_pkgs; i++)
-            libsolv_solver_add_job(solver, JOB_UPGRADE, pkg_names[i], NULL);
+        for (i = 0; i < num_pkgs; i++) {
+            dataiterator_init(&di, solver->pool, solver->repo_installed, 0, 0, pkg_names[i], SEARCH_GLOB);
+            while (dataiterator_step(&di)) {
+                libsolv_solver_add_job(solver, JOB_UPGRADE, di.kv.str, NULL);
+                dataiterator_skip_solvable(&di);
+            }
+            dataiterator_free(&di);
+        }
     }
 
     err = libsolv_solver_solve(solver);
