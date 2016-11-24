@@ -43,6 +43,7 @@ void pkg_hash_fetch_all_installed(pkg_vec_t * installed, int include_half_instal
 pkg_t *pkg_hash_fetch_by_name_version(const char *pkg_name,
                                       const char *version);
 abstract_pkg_t *abstract_pkg_fetch_by_name(const char *pkg_name);
+void abstract_pkgs_fetch_by_glob(const char *pkg_glob, abstract_pkg_vec_t *apkgs);
 pkg_t *pkg_hash_fetch_best_installation_candidate(abstract_pkg_t * apkg,
                                                   int (*constraint_fcn)(pkg_t * pkg, void *data),
                                                   void *cdata, int prefer_installed, int quiet);

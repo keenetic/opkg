@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <malloc.h>
+#include <fnmatch.h>
 
 #include "hash_table.h"
 #include "release.h"
@@ -272,6 +273,26 @@ int pkg_hash_load_status_files(void)
 abstract_pkg_t *abstract_pkg_fetch_by_name(const char *pkg_name)
 {
     return (abstract_pkg_t *) hash_table_get(&opkg_config->pkg_hash, pkg_name);
+}
+
+void abstract_pkgs_fetch_by_glob(const char *pkg_glob, abstract_pkg_vec_t *apkgs)
+{
+    unsigned int i;
+    hash_table_t *hash = &opkg_config->pkg_hash;
+
+    if (!hash)
+        return;
+
+    for (i = 0; i < hash->n_buckets; i++) {
+        hash_entry_t *hash_entry = (hash->entries + i);
+
+        do {
+            if (hash_entry->key) {
+                if (!fnmatch(pkg_glob, hash_entry->key, 0))
+                    abstract_pkg_vec_insert(apkgs, hash_entry->data);
+            }
+        } while ((hash_entry = hash_entry->next));
+     }
 }
 
 pkg_t *pkg_hash_fetch_best_installation_candidate(abstract_pkg_t * apkg,
