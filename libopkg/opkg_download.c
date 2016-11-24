@@ -415,8 +415,10 @@ static int opkg_prepare_file_for_install(const char *path, char **namep)
  */
 int opkg_prepare_url_for_install(const char *url, char **namep)
 {
-    int r = 0;
+    int r = 0, j;
     char *pkg_name, *pkg_version;
+    abstract_pkg_vec_t *apkgs = NULL;
+    abstract_pkg_t *ab_pkg = NULL;
 
     /* First heuristic: Maybe it's a remote URL. */
     if (url_has_remote_protocol(url)) {
@@ -437,44 +439,58 @@ int opkg_prepare_url_for_install(const char *url, char **namep)
      * name with an available package.
      */
     strip_pkg_name_and_version(url, &pkg_name, &pkg_version);
-    abstract_pkg_t *ab_pkg = abstract_pkg_fetch_by_name(pkg_name);
-    if (ab_pkg) {
+
+    apkgs = abstract_pkg_vec_alloc();
+
+    if (is_str_glob(pkg_name)) {
+        abstract_pkgs_fetch_by_glob(pkg_name, apkgs);
+    } else {
+        ab_pkg = abstract_pkg_fetch_by_name(pkg_name);
+        if (ab_pkg)
+            abstract_pkg_vec_insert(apkgs, ab_pkg);
+    }
+
+    if (apkgs->len) {
         if (opkg_config->force_reinstall) {
-            /* Reload the given package from its package file into a new package
-             * object. This new object can then be marked as force_reinstall and
-             * the reinstall should go ahead like an upgrade.
-             */
-            pkg_t *pkg;
-            if (pkg_version) {
-                depend_t *dependence_to_satisfy = xmalloc(sizeof(depend_t));
-                dependence_to_satisfy->constraint = EQUAL;
-                dependence_to_satisfy->version = pkg_version;
-                dependence_to_satisfy->pkg = ab_pkg;
+            for (j = 0; j < apkgs->len; j++) {
+                /* Reload the given package from its package file into a new package
+                 * object. This new object can then be marked as force_reinstall and
+                 * the reinstall should go ahead like an upgrade.
+                 */
+                pkg_t *pkg;
 
-                pkg = pkg_hash_fetch_best_installation_candidate(
-                        ab_pkg,
-                        pkg_constraint_satisfied,
-                        dependence_to_satisfy,
-                        0,
-                        1);
+                ab_pkg = apkgs->pkgs[j];
+                if (pkg_version) {
+                    depend_t *dependence_to_satisfy = xmalloc(sizeof(depend_t));
+                    dependence_to_satisfy->constraint = EQUAL;
+                    dependence_to_satisfy->version = pkg_version;
+                    dependence_to_satisfy->pkg = ab_pkg;
 
-                free(dependence_to_satisfy);
-            } else {
-                pkg = pkg_hash_fetch_best_installation_candidate_by_name(pkg_name);
+                    pkg = pkg_hash_fetch_best_installation_candidate(
+                            ab_pkg,
+                            pkg_constraint_satisfied,
+                            dependence_to_satisfy,
+                            0,
+                            1);
+
+                    free(dependence_to_satisfy);
+                } else {
+                    pkg = pkg_hash_fetch_best_installation_candidate_by_name(ab_pkg->name);
+                }
+
+                if (!pkg) {
+                    opkg_msg(ERROR, "Unknown package %s, cannot force reinstall.\n",
+                             ab_pkg->name);
+                    r = -1;
+                    continue;
+                }
+                r = opkg_download_pkg(pkg);
+                if (r)
+                    continue;
+
+                r = opkg_prepare_file_for_install(pkg->local_filename, namep);
+                continue;
             }
-
-            if (!pkg) {
-                opkg_msg(ERROR, "Unknown package %s, cannot force reinstall.\n",
-                         url);
-                r = -1;
-                goto CLEANUP;
-            }
-            r = opkg_download_pkg(pkg);
-            if (r)
-                goto CLEANUP;
-
-            r = opkg_prepare_file_for_install(pkg->local_filename, namep);
-            goto CLEANUP;
         }
 
         /* Nothing special to do. */
@@ -494,5 +510,7 @@ int opkg_prepare_url_for_install(const char *url, char **namep)
 CLEANUP:
     free(pkg_name);
     free(pkg_version);
+    abstract_pkg_vec_free(apkgs);
+
     return r;
 }

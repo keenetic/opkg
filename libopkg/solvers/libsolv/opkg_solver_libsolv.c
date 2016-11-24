@@ -82,6 +82,7 @@ int opkg_solver_install(int num_pkgs, char **pkg_names)
 {
     int i, err;
     char *name, *version;
+    Dataiterator di;
 
     libsolv_solver_t *solver = libsolv_solver_new();
     if (solver == NULL)
@@ -95,7 +96,15 @@ int opkg_solver_install(int num_pkgs, char **pkg_names)
 
     for (i = 0; i < num_pkgs; i++) {
         strip_pkg_name_and_version(pkg_names[i], &name, &version);
-        libsolv_solver_add_job(solver, JOB_INSTALL, name, version);
+
+        dataiterator_init(&di, solver->pool, solver->repo_available, 0,
+                          SOLVABLE_NAME | SOLVABLE_PROVIDES, name, SEARCH_GLOB);
+        while (dataiterator_step(&di)) {
+            libsolv_solver_add_job(solver, JOB_INSTALL, di.kv.str, version);
+            dataiterator_skip_solvable(&di);
+        }
+
+        dataiterator_free(&di);
         free(name);
         free(version);
     }
