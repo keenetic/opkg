@@ -694,11 +694,47 @@ static int opkg_remove_cmd(int argc, char **argv)
     return err;
 }
 
+/** \brief opkg_is_state_flag: tells whether the flag is state flag
+ *
+ * \param flag
+ * \return 1 is success, 0 otherwise
+ */
+static int opkg_is_state_flag(const char* flag)
+{
+    return (
+        (strcmp(flag, "hold") == 0) ||
+        (strcmp(flag, "noprune") == 0) ||
+        (strcmp(flag, "ok") == 0) ||
+        (strcmp(flag, "user") == 0)
+    );
+}
+
+/** \brief opkg_is_state_status_flag: tells whether the flag is status flag
+ *
+ * \param flag
+ * \return 1 is success, 0 otherwise
+ */
+static int opkg_is_state_status_flag(const char* flag)
+{
+    return (
+        (strcmp(flag, "installed") == 0) ||
+        (strcmp(flag, "unpacked") == 0)
+    );
+}
+
 static int opkg_flag_cmd(int argc, char **argv)
 {
     int i;
     pkg_t *pkg;
     const char *flags = argv[0];
+
+    int is_state_flag = opkg_is_state_flag(flags);
+    int is_state_status_flag = opkg_is_state_status_flag(flags);
+
+    if ((!is_state_flag) && (!is_state_status_flag)) {
+        opkg_msg(ERROR, "Invalid flag: %s.\n", flags);
+        return -1;
+    }
 
     signal(SIGINT, sigint_handler);
 
@@ -714,8 +750,7 @@ static int opkg_flag_cmd(int argc, char **argv)
             opkg_msg(ERROR, "Package %s is not installed.\n", argv[i]);
             continue;
         }
-        int is_state_flag = ((strcmp(flags, "hold") == 0) || (strcmp(flags, "noprune") == 0)
-                || (strcmp(flags, "user") == 0) || (strcmp(flags, "ok") == 0));
+
         if (is_state_flag) {
             pkg->state_flag = pkg_state_flag_from_str(flags);
         }
@@ -724,9 +759,7 @@ static int opkg_flag_cmd(int argc, char **argv)
          * Useful if a package is installed in an offline_root, and
          * should be configured by opkg configure at a later date.
          */
-        int is_state_status = ((strcmp(flags, "installed") == 0)
-                || (strcmp(flags, "unpacked") == 0));
-        if (is_state_status) {
+        if (is_state_status_flag) {
             pkg->state_status = pkg_state_status_from_str(flags);
         }
 
