@@ -488,6 +488,9 @@ static void populate_installed_repo(libsolv_solver_t *libsolv_solver)
         if (!pkg->auto_installed)
             queue_push2(&libsolv_solver->solver_jobs, SOLVER_SOLVABLE
                         | SOLVER_USERINSTALLED, solvable_id);
+        else
+            queue_push2(&libsolv_solver->solver_jobs, SOLVER_SOLVABLE
+                        | SOLVER_ALLOWUNINSTALL, solvable_id);
 
         /* if the package is held, mark it as locked */
         if (pkg->state_flag & SF_HOLD)
