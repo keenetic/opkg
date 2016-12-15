@@ -178,13 +178,20 @@ static int unpack_pkg_control_files(pkg_t * pkg)
     while (1) {
         char *cf_name;
         char *cf_name_in_dest;
+        int i;
 
         cf_name = file_read_line_alloc(conffiles_file);
         if (cf_name == NULL)
             break;
         if (cf_name[0] == '\0')
             continue;
-
+	for (i = strlen(cf_name) - 1;
+	     (i >=0) && (cf_name[i] == ' ' || cf_name[i] == '\t');
+	     i--)
+	  {
+	     cf_name[i] = '\0';
+	  }
+	
         /* Prepend dest->root_dir to conffile name.
          * Take pains to avoid multiple slashes. */
         root_dir = pkg->dest->root_dir;
