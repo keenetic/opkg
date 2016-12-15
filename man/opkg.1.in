@@ -175,6 +175,9 @@ Don't fail on checksum mismatches
 \fB\--noaction\fR
 No action \- test only
 .TP
+\fB\--size\fR
+Print package size when listing available packages
+.TP
 \fB\--download-only\fR
 No action \- download only
 .TP

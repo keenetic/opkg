@@ -110,6 +110,7 @@ typedef struct opkg_conf {
     int query_all;
     int verbosity;
     int noaction;
+    int size;
     int download_only;
     int download_first;
     int overwrite_no_owner;

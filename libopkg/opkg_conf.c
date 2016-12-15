@@ -82,6 +82,7 @@ static opkg_option_t options[] = {
     {"proxy_passwd", OPKG_OPT_TYPE_STRING, &_conf.proxy_passwd},
     {"proxy_user", OPKG_OPT_TYPE_STRING, &_conf.proxy_user},
     {"query-all", OPKG_OPT_TYPE_BOOL, &_conf.query_all},
+    {"size", OPKG_OPT_TYPE_BOOL, &_conf.size},
     {"tmp_dir", OPKG_OPT_TYPE_STRING, &_conf.tmp_dir},
     {"volatile_cache", OPKG_OPT_TYPE_BOOL, &_conf.volatile_cache},
     {"verbosity", OPKG_OPT_TYPE_INT, &_conf.verbosity},

@@ -50,6 +50,7 @@ enum {
     ARGS_OPT_PREFER_ARCH_TO_VERSION,
     ARGS_OPT_ADD_ARCH,
     ARGS_OPT_ADD_DEST,
+    ARGS_OPT_SIZE,
     ARGS_OPT_ADD_EXCLUDE,
     ARGS_OPT_NOACTION,
     ARGS_OPT_DOWNLOAD_ONLY,
@@ -108,6 +109,7 @@ static struct option long_options[] = {
     {"offline-root", 1, 0, 'o'},
     {"add-arch", 1, 0, ARGS_OPT_ADD_ARCH},
     {"add-dest", 1, 0, ARGS_OPT_ADD_DEST},
+    {"size", 0, 0, ARGS_OPT_SIZE},
     {"add-exclude", 1, 0, ARGS_OPT_ADD_EXCLUDE},
     {"test", 0, 0, ARGS_OPT_NOACTION},
     {"tmp-dir", 1, 0, 't'},
@@ -229,6 +231,9 @@ static int args_parse(int argc, char *argv[])
         case ARGS_OPT_ADD_EXCLUDE:
             str_list_append(&opkg_config->exclude_list, optarg);
             break;
+        case ARGS_OPT_SIZE:
+            opkg_config->size = 1;
+            break;
         case ARGS_OPT_NOACTION:
             opkg_config->noaction = 1;
             break;
@@ -344,6 +349,7 @@ static void usage()
     printf("\t--force-remove                  Remove package even if prerm script fails\n");
     printf("\t--force-checksum                Don't fail on checksum mismatches\n");
     printf("\t--noaction                      No action -- test only\n");
+    printf("\t--size                          Print package size when listing available packages\n");
     printf("\t--download-only                 No action -- download only\n");
     printf("\t--nodeps                        Do not follow dependencies\n");
     printf("\t--no-install-recommends         Do not install any recommended packages\n");
