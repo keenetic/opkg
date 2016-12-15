@@ -503,14 +503,30 @@ static struct archive *open_outer(const char *filename)
                  archive_error_string(outer));
         goto err_cleanup;
     }
-
-    r = archive_read_open_filename(outer, filename, EXTRACT_BUFFER_LEN);
+    r = archive_read_support_filter_gzip(outer);
+    if (r == ARCHIVE_WARN) {
+        /* libarchive returns ARCHIVE_WARN if the filter is provided by
+         * an external program.
+         */
+        opkg_msg(INFO, "Gzip support provided by external program.\n");
+    } else if (r != ARCHIVE_OK) {
+        opkg_msg(ERROR, "Gzip format not supported.\n");
+        goto err_cleanup;
+    }
+    r = archive_read_support_format_tar(outer);
     if (r != ARCHIVE_OK) {
-        opkg_msg(ERROR, "Failed to open package '%s': %s\n", filename,
-                 archive_error_string(outer));
+        opkg_msg(ERROR, "Tar format not supported: %s\n",
+             archive_error_string(outer));
         goto err_cleanup;
     }
 
+    r = archive_read_open_filename(outer, filename, EXTRACT_BUFFER_LEN);
+    if (r != ARCHIVE_OK)
+    {
+        opkg_msg(ERROR, "Failed to open package '%s': %s\n", filename,
+                    archive_error_string(outer));
+        goto err_cleanup;
+    }
     return outer;
 
  err_cleanup:
