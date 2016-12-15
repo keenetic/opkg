@@ -189,6 +189,9 @@ Remove packages that were installed automatically to satisfy dependencies
 .TP
 \fB\-t <\fIdirectory\fP>, \--tmp-dir <\fIdirectory\fP>\fR
 Specify \fIdirectory\fP as temporary directory
+.TP
+\fB\-l <\fIdirectory\fP>, \--lists-dir <\fIdirectory\fP>\fR
+Specify \fIdirectory\fP as package lists directory
 .
 .SH "REPORTING BUGS"
 Report bugs to http://code.google.com/p/opkg/issues/list

@@ -112,6 +112,8 @@ static struct option long_options[] = {
     {"test", 0, 0, ARGS_OPT_NOACTION},
     {"tmp-dir", 1, 0, 't'},
     {"tmp_dir", 1, 0, 't'},
+    {"lists-dir", 1, 0, 'l'},
+    {"lists_dir", 1, 0, 'l'},
     {"cache-dir", 1, 0, ARGS_OPT_CACHE_DIR},
     {"host-cache-dir", 0, 0, ARGS_OPT_HOST_CACHE_DIR},
     {"volatile-cache", 0, 0, ARGS_OPT_VOLATILE_CACHE},
@@ -129,7 +131,7 @@ static int args_parse(int argc, char *argv[])
     char *solver_version = NULL;
 
     while (1) {
-        c = getopt_long_only(argc, argv, "Ad:f:no:p:t:vV::", long_options,
+        c = getopt_long_only(argc, argv, "Ad:f:no:p:l:t:vV::", long_options,
                              &option_index);
         if (c == -1)
             break;
@@ -149,6 +151,9 @@ static int args_parse(int argc, char *argv[])
             break;
         case 't':
             opkg_config->tmp_dir = xstrdup(optarg);
+            break;
+        case 'l':
+            opkg_config->lists_dir = xstrdup(optarg);
             break;
         case 'v':
             solver_version = opkg_solver_version_alloc();
@@ -346,8 +351,8 @@ static void usage()
     printf("\t                                Remove package and all dependencies\n");
     printf("\t--autoremove                    Remove packages that were installed\n");
     printf("\t                                automatically to satisfy dependencies\n");
-    printf("\t-t                              Specify tmp-dir.\n");
-    printf("\t--tmp-dir                       Specify tmp-dir.\n");
+    printf("\t-t, --tmp-dir <directory>       Specify tmp-dir.\n");
+    printf("\t-l, --lists-dir <directory>     Specify lists-dir.\n");
     printf("\t--cache-dir <path>              Specify cache directory.\n");
     printf("\t--host-cache-dir                Don't place cache in offline root dir.\n");
     printf("\t--volatile-cache                Use volatile cache.\n");
