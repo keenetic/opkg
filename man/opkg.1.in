@@ -62,6 +62,9 @@ List files belonging to \fIpackage\fP
 \fBsearch <\fIfile\fP|\fIglob\fP>\fR
 List package providing \fIfile\fP
 .TP
+\fBfind <\fIregexp\fP>\fR
+List packages with names or description matching \fIregexp\fP
+.TP
 \fBinfo [\fIpackage\fP|\fIglob\fP]\fR
 Display all info for selected packages
 .TP

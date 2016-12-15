@@ -481,7 +481,7 @@ static int opkg_download_cmd(int argc, char **argv)
     return err;
 }
 
-static int opkg_list_cmd(int argc, char **argv)
+static int opkg_list_find_cmd(int argc, char **argv, int use_desc)
 {
     unsigned int i;
     pkg_vec_t *available;
@@ -497,13 +497,24 @@ static int opkg_list_cmd(int argc, char **argv)
     for (i = 0; i < available->len; i++) {
         pkg = available->pkgs[i];
         /* if we have package name or pattern and pkg does not match, then skip it */
-        if (pkg_name && fnmatch(pkg_name, pkg->name, 0))
+        if (pkg_name && fnmatch(pkg_name, pkg->name, 0) &&
+           (!use_desc || !pkg->description || fnmatch(pkg_name, pkg->description, 0)))
             continue;
         print_pkg(pkg);
     }
     pkg_vec_free(available);
 
     return 0;
+}
+
+static int opkg_list_cmd(int argc, char **argv)
+{
+    return opkg_list_find_cmd(argc, argv, 0);
+}
+
+static int opkg_find_cmd(int argc, char **argv)
+{
+    return opkg_list_find_cmd(argc, argv, 1);
 }
 
 static int opkg_list_installed_cmd(int argc, char **argv)
@@ -1141,6 +1152,8 @@ static opkg_cmd_t cmds[] = {
         PFM_DESCRIPTION | PFM_SOURCE},
     {"files", 1, (opkg_cmd_fun_t) opkg_files_cmd, PFM_DESCRIPTION | PFM_SOURCE},
     {"search", 1, (opkg_cmd_fun_t) opkg_search_cmd,
+        PFM_DESCRIPTION | PFM_SOURCE},
+    {"find", 1, (opkg_cmd_fun_t) opkg_find_cmd,
         PFM_DESCRIPTION | PFM_SOURCE},
     {"download", 1, (opkg_cmd_fun_t) opkg_download_cmd,
         PFM_DESCRIPTION | PFM_SOURCE},

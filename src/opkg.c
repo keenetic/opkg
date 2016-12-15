@@ -278,6 +278,7 @@ static void usage()
     printf("\tlist-changed-conffiles          List user modified configuration files\n");
     printf("\tfiles <pkg>                     List files belonging to <pkg>\n");
     printf("\tsearch <file|glob>              List package providing <file>\n");
+    printf("\tfind <regexp>                   List packages with names or description matching <regexp>\n");
     printf("\tinfo [pkg|glob]                 Display all info for <pkg>\n");
     printf("\tstatus [pkg|glob]               Display all status for <pkg>\n");
     printf("\tdownload <pkg>                  Download <pkg> to current directory\n");
