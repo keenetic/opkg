@@ -62,6 +62,7 @@ static opkg_option_t options[] = {
     {"force_reinstall", OPKG_OPT_TYPE_BOOL, &_conf.force_reinstall},
     {"force_space", OPKG_OPT_TYPE_BOOL, &_conf.force_space},
     {"force_postinstall", OPKG_OPT_TYPE_BOOL, &_conf.force_postinstall},
+    {"force_checksum", OPKG_OPT_TYPE_BOOL, &_conf.force_checksum},
     {"autoremove", OPKG_OPT_TYPE_BOOL, &_conf.autoremove},
     {"check_signature", OPKG_OPT_TYPE_BOOL, &_conf.check_signature},
     {"check_pkg_signature", OPKG_OPT_TYPE_BOOL, &_conf.check_pkg_signature},

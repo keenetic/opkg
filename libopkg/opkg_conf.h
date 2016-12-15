@@ -96,6 +96,7 @@ typedef struct opkg_conf {
     int force_removal_of_essential_packages;
     int force_postinstall;
     int force_remove;
+    int force_checksum;
     int prefer_arch_to_version;
     int check_signature;
     int check_pkg_signature;

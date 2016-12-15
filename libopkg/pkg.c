@@ -1444,8 +1444,17 @@ int pkg_verify(pkg_t * pkg)
 
  fail:
     free(local_sig_filename);
-    opkg_msg(NOTICE, "Removing corrupt package file %s.\n",
+    if (!opkg_config->force_checksum)
+    {
+	opkg_msg(NOTICE, "Removing corrupt package file %s.\n",
              pkg->local_filename);
-    unlink(pkg->local_filename);
-    return err;
+	unlink(pkg->local_filename);
+	return err;
+    }
+    else
+    {
+	opkg_msg(NOTICE, "Ignored %s checksum mismatch.\n",
+             pkg->local_filename);
+        return 0;
+    }
 }

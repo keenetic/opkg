@@ -166,6 +166,12 @@ Disable free space checks
 \fB\--force-postinstall \fR
 Execute package postinstall scripts in offline installation mode
 .TP
+\fB\--force-remove \fR
+Remove package even if prerm script fails
+.TP
+\fB\--force-checksum \fR
+Don't fail on checksum mismatches
+.TP
 \fB\--noaction\fR
 No action \- test only
 .TP

@@ -108,6 +108,9 @@ Overwrites files from other packages (default is 0).
 \fBforce_postinstall\fP
 Run postinstall scripts even in offline mode (default is 0).
 .TP
+\fBforce-checksum\fP
+Don't fail on checksum mismatches (default is 0).
+.TP
 \fBforce_reinstall\fP
 Reinstalls the package(s) (default is 0).
 .TP
