@@ -35,12 +35,12 @@ extern "C" {
 #define OPKG_CONF_TMP_DIR_SUFFIX "opkg-XXXXXX"
 #define OPKG_BACKUP_SUFFIX "-opkg.backup"
 
-#define OPKG_CONF_DEFAULT_LISTS_DIR     "/var/lib/opkg/lists"
-#define OPKG_CONF_DEFAULT_INFO_DIR      "/var/lib/opkg/info"
-#define OPKG_CONF_DEFAULT_STATUS_FILE   "/var/lib/opkg/status"
-#define OPKG_CONF_DEFAULT_CACHE_DIR     "/var/cache/opkg"
-#define OPKG_CONF_DEFAULT_CONF_FILE_DIR "/etc/opkg"
-#define OPKG_CONF_DEFAULT_LOCK_FILE     "/var/run/opkg.lock"
+#define OPKG_CONF_DEFAULT_LISTS_DIR     VARDIR "/lib/opkg/lists"
+#define OPKG_CONF_DEFAULT_INFO_DIR      VARDIR "/lib/opkg/info"
+#define OPKG_CONF_DEFAULT_STATUS_FILE   VARDIR "/lib/opkg/status"
+#define OPKG_CONF_DEFAULT_CACHE_DIR     VARDIR "/cache/opkg"
+#define OPKG_CONF_DEFAULT_CONF_FILE_DIR SYSCONFDIR "/opkg"
+#define OPKG_CONF_DEFAULT_LOCK_FILE     VARDIR "/run/opkg.lock"
 
 /* In case the config file defines no dest */
 #define OPKG_CONF_DEFAULT_DEST_NAME "root"

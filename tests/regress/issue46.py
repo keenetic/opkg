@@ -15,6 +15,7 @@
 
 import os
 import opk, cfg, opkgcl
+vardir=os.environ['VARDIR']
 
 opk.regress_init()
 
@@ -25,8 +26,8 @@ o.write_opk()
 o.write_list()
 
 # prime the status file so 'b' is not installed as a recommendation
-os.makedirs("{}/var/lib/opkg".format(cfg.offline_root))
-status_filename = "{}/var/lib/opkg/status".format(cfg.offline_root)
+os.makedirs(("{}"+vardir+"/lib/opkg").format(cfg.offline_root))
+status_filename = ("{}"+vardir+"/lib/opkg/status").format(cfg.offline_root)
 f = open(status_filename, "w")
 f.write("Package: b\n")
 f.write("Version: 1.0\n")

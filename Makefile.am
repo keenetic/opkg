@@ -15,6 +15,6 @@ EXTRA_DIST = $(intercept_DATA) CONTRIBUTING ChangeLog.ipkg \
 	     developer-doc tests scripts
 
 run-tests:
-	$(MAKE) -C tests
+	$(MAKE) -C tests DATADIR=@datadir@ SYSCONFDIR=@sysconfdir@ VARDIR=@localstatedir@
 
 check: run-tests

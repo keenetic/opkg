@@ -3,11 +3,12 @@
 import os
 import opk, cfg, opkgcl
 import re
+vardir=os.environ['VARDIR']
 
 re_half_installed = re.compile('Status: \w+ \w+ half-installed')
 
 def is_half_installed(pkg_name):
-    status_path = "{}/var/lib/opkg/status".format(cfg.offline_root)
+    status_path = ("{}"+vardir+"/lib/opkg/status").format(cfg.offline_root)
     if not os.path.exists(status_path):
         return False
     with open(status_path, "r") as status_file:

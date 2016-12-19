@@ -42,9 +42,10 @@ def prepare_sysroot():
     '''
     Creates intercept script and test package.
     '''
+    testprefix=cfg.offline_root+os.environ['DATADIR']
     # Add a intercept script for ls to the sysroot
-    touch_dir('%s/usr/local/share/opkg/intercept' % cfg.offline_root)
-    with open('%s/usr/local/share/opkg/intercept/ls' % cfg.offline_root, 'w') as f:
+    touch_dir('%s/opkg/intercept' % testprefix)
+    with open('%s/opkg/intercept/ls' % testprefix, 'w') as f:
         os.fchmod(f.fileno(), 0o755)
         f.write('\n'.join([
             '#!/bin/sh',
@@ -80,8 +81,10 @@ if opkgcl.remove('a', '--force-postinstall') != 0:
 if readFile(TEST_LOG) != 'intercept from a.postinst:':
     opk.fail('Unexpected intercept log')
 
+sysconfdir=os.environ['SYSCONFDIR']
+testconfdir=cfg.offline_root+sysconfdir
 # Reconfigure opkg to disable intercepts
-appendFile('%s/etc/opkg/opkg.conf' % cfg.offline_root, 'option intercepts_dir /dev/null\n')
+appendFile('%s/opkg/opkg.conf' % testconfdir, 'option intercepts_dir /dev/null\n')
 
 # Re-run the test
 truncFile(TEST_LOG)

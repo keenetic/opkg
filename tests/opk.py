@@ -171,8 +171,9 @@ def regress_init():
 
 	os.system("rm -fr {}".format(cfg.offline_root))
 
-	os.makedirs("{}/etc/opkg".format(cfg.offline_root))
-	f = open("{}/etc/opkg/opkg.conf".format(cfg.offline_root), "w")
+	confdir=os.environ['SYSCONFDIR']+"/opkg";
+	os.makedirs(("{}"+confdir).format(cfg.offline_root))
+	f = open(("{}"+confdir+"/opkg.conf").format(cfg.offline_root), "w")
 	f.write("arch all 1\n")
 	f.write("src test file:{}\n".format(cfg.opkdir))
 	f.close()

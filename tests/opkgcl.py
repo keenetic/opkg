@@ -2,6 +2,7 @@
 
 import os, subprocess
 import cfg
+vardir=os.environ['VARDIR']
 
 def opkgcl(opkg_args):
 	cmd = "{} -o {} {}".format(cfg.opkgcl, cfg.offline_root, opkg_args)
@@ -44,7 +45,7 @@ def is_installed(pkg_name, version=None, flags=""):
 		return False
 	if version and out.split()[2] != version:
 		return False
-	if not os.path.exists("{}/var/lib/opkg/info/{}.control"\
+	if not os.path.exists(("{}"+vardir+"/lib/opkg/info/{}.control")\
 				.format(cfg.offline_root, pkg_name)):
 		return False
 	return True
@@ -69,7 +70,7 @@ def is_upgradable(pkg_name, version=None):
 	return False
 
 def is_autoinstalled(pkg_name):
-	status_path = "{}/var/lib/opkg/status".format(cfg.offline_root)
+	status_path = ("{}"+vardir+"/lib/opkg/status").format(cfg.offline_root)
 	if not os.path.exists(status_path):
 		return False
 	status_file = open(status_path, "r")

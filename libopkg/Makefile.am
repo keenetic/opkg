@@ -1,5 +1,6 @@
 
 AM_CFLAGS=-Wall -DHOST_CPU_STR=\"@host_cpu@\" -DDATADIR=\"@datadir@\" \
+	-DSYSCONFDIR=\"@sysconfdir@\" -DVARDIR=\"@localstatedir@\" \
 	-I$(top_srcdir)	$(LIBARCHIVE_CFLAGS) $(BIGENDIAN_CFLAGS) $(CURL_CFLAGS) \
 	$(GPGME_CFLAGS) $(GPGERR_CFLAGS) $(PATHFINDER_CFLAGS) $(SOLVER_CFLAGS)
 
