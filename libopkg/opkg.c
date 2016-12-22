@@ -573,8 +573,8 @@ int opkg_list_packages(opkg_package_callback_t callback, void *user_data)
 int opkg_list_upgradable_packages(opkg_package_callback_t callback,
                                   void *user_data)
 {
-    struct active_list *head;
-    struct active_list *node;
+    LIST_HEAD(head);
+
     pkg_t *old = NULL, *new = NULL;
 
     opkg_assert(callback);
@@ -582,16 +582,13 @@ int opkg_list_upgradable_packages(opkg_package_callback_t callback,
     /* ensure all data is valid */
     pkg_info_preinstall_check();
 
-    head = prepare_upgrade_list();
-    for (node = active_list_next(head, head); node;
-            node = active_list_next(head, node)) {
-        old = list_entry(node, pkg_t, list);
+    prepare_upgrade_list(&head);
+    list_for_each_entry(old, &head, list) {
         new = pkg_hash_fetch_best_installation_candidate_by_name(old->name);
         if (new == NULL)
             continue;
         callback(new, user_data);
     }
-    active_list_head_delete(head);
     return 0;
 }
 
