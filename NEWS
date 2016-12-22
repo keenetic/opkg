@@ -1,3 +1,59 @@
+opkg-0.3.4
+==========
+
+- Improve GPG signature check by making sure the signature is not only correct,
+  but has an approved level of trust on the trusted database.
+
+- Add support for xz and bzip2 compressed payloads.
+
+- Handle 'opkg remove' and 'opkg install' (libsolv) correctly for packages in
+  SS_HALF_INSTALLED state due to a previously failed installation (issues 10358
+  & 9901).
+
+- Remove redundant requirement to have check_signature enabled when
+  check_pkg_signature is enabled (issue 10361)
+
+- Add Installed-Size field to status file (issue 9906)
+
+- Do not overwrite existing directory permissions on install (issue 9987)
+
+- Add per-feed signature verification toggle (issue 10150)
+
+- Add validation to opkg flag call (issue 8356)
+
+- Add "find" command which searches package names and descriptions (e.g. opkg
+  -i find "*autoconfig*")
+
+- Add --force-checksum cmdline flag to be able to ignore mismatching md5sums
+  (issue 8357)
+
+- Expose lists_dir option as command line argument
+
+- Extend 'opkg list' command to optionally display package size
+
+- Add gzip support for tar.gzipped ipk packages.
+
+- Make the /var and /etc directories configurable at compile time.
+
+- Replace active_list structure with basic list type.
+
+Internal Solver:
+
+- Fix incorrect removal of packages during download only operations (issue
+  10182)
+
+Libsolv:
+
+- Enable globs for install, remove and upgrade operaionts (issue 9792)
+
+- Set libsolv version comparision to be Debian-compatible, instead of
+  RPM-compatible.
+
+- Allow package names to be matched against provides
+
+- Display libsolv version in --version output, if enabled
+
+
 opkg-0.3.3
 ==========
 
