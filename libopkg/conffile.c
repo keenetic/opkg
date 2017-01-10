@@ -51,6 +51,11 @@ int conffile_has_been_modified(conffile_t * conffile)
     }
 
     root_filename = root_filename_alloc(filename);
+    if (!file_exists(root_filename)) {
+        opkg_msg(INFO, "Conffile %s deleted\n", conffile->name);
+        free(root_filename);
+        return 1;
+    }
 
     md5sum = file_md5sum_alloc(root_filename);
 
