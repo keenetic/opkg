@@ -485,6 +485,10 @@ static int calculate_dependencies_for(pkg_t *pkg, pkg_vec_t *pkgs_to_install, pk
                 pkg_vec_insert(dep->wanted_by, pkg);
                 calculate_dependencies_for(dep, pkgs_to_install, replacees, orphans);
                 pkg_vec_insert(pkgs_to_install, dep);
+
+                if (opkg_config->download_only)
+                    continue;
+
                 old_pkg = pkg_hash_fetch_installed_by_name(dep->name);
 
                 pkg_get_installed_replacees(dep, replacees);
@@ -530,6 +534,10 @@ static int calculate_dependencies_for(pkg_t *pkg, pkg_vec_t *pkgs_to_install, pk
             }
             calculate_dependencies_for(dep, pkgs_to_install, replacees, orphans);
             pkg_vec_insert(pkgs_to_install, dep);
+
+            if (opkg_config->download_only)
+                continue;
+
             old_pkg = pkg_hash_fetch_installed_by_name(dep->name);
 
             pkg_get_installed_replacees(dep, replacees);
@@ -597,6 +605,9 @@ int internal_solver_solv(typeId  transactionType, pkg_t *pkg, pkg_vec_t *pkgs_to
         if (err)
             return -1;
     }
+
+    if (opkg_config->download_only)
+        return 0;
 
     /* add orphans for top level pkg */
     if (old_pkg)
