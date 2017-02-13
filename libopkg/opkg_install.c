@@ -47,25 +47,25 @@
 
 static int update_file_ownership(pkg_t * new_pkg, pkg_t * old_pkg)
 {
-    str_list_t *new_list, *old_list;
-    str_list_elt_t *iter, *niter;
+    file_list_t *new_list, *old_list;
+    file_list_elt_t *iter, *niter;
 
     new_list = pkg_get_installed_files(new_pkg);
     if (new_list == NULL)
         return -1;
 
-    for (iter = str_list_first(new_list), niter = str_list_next(new_list, iter);
-            iter; iter = niter, niter = str_list_next(new_list, niter)) {
-        char *new_file = (char *)iter->data;
-        pkg_t *owner = file_hash_get_file_owner(new_file);
-        pkg_t *obs = hash_table_get(&opkg_config->obs_file_hash, new_file);
+    for (iter = file_list_first(new_list), niter = file_list_next(new_list, iter);
+            iter; iter = niter, niter = file_list_next(new_list, niter)) {
+        file_info_t *new_file = (file_info_t *)iter->data;
+        pkg_t *owner = file_hash_get_file_owner(new_file->path);
+        pkg_t *obs = hash_table_get(&opkg_config->obs_file_hash, new_file->path);
 
         opkg_msg(DEBUG2, "%s: new_pkg=%s wants file %s, from owner=%s\n",
-                 __func__, new_pkg->name, new_file,
+                 __func__, new_pkg->name, new_file->path,
                  owner ? owner->name : "<NULL>");
 
         if (!owner || (owner == old_pkg) || obs)
-            file_hash_set_file_owner(new_file, new_pkg);
+            file_hash_set_file_owner(new_file->path, new_pkg);
     }
 
     if (old_pkg) {
@@ -75,13 +75,13 @@ static int update_file_ownership(pkg_t * new_pkg, pkg_t * old_pkg)
             return -1;
         }
 
-        for (iter = str_list_first(old_list), niter = str_list_next(old_list, iter);
-                iter; iter = niter, niter = str_list_next(old_list, niter)) {
-            char *old_file = (char *)iter->data;
-            pkg_t *owner = file_hash_get_file_owner(old_file);
+        for (iter = file_list_first(old_list), niter = file_list_next(old_list, iter);
+                iter; iter = niter, niter = file_list_next(old_list, niter)) {
+            file_info_t *old_file = (file_info_t *)iter->data;
+            pkg_t *owner = file_hash_get_file_owner(old_file->path);
             if (!owner || (owner == old_pkg)) {
                 /* obsolete */
-                hash_table_insert(&opkg_config->obs_file_hash, old_file,
+                hash_table_insert(&opkg_config->obs_file_hash, old_file->path,
                                   old_pkg);
             }
         }
@@ -425,8 +425,9 @@ static int check_data_file_clashes(pkg_t * pkg, pkg_t * old_pkg)
      * packages involved in the clash has the potential to break the
      * other package.
      */
-    str_list_t *files_list;
-    str_list_elt_t *iter, *niter;
+    file_list_t *files_list;
+    file_list_elt_t *iter, *niter;
+    file_info_t *file_info;
     char *filename;
     int clashes = 0;
 
@@ -434,9 +435,10 @@ static int check_data_file_clashes(pkg_t * pkg, pkg_t * old_pkg)
     if (files_list == NULL)
         return -1;
 
-    for (iter = str_list_first(files_list), niter = str_list_next(files_list, iter);
-            iter; iter = niter, niter = str_list_next(files_list, iter)) {
-        filename = (char *)iter->data;
+    for (iter = file_list_first(files_list), niter = file_list_next(files_list, iter);
+            iter; iter = niter, niter = file_list_next(files_list, iter)) {
+        file_info = (file_info_t *)iter->data;
+        filename = file_info->path;
         if (file_exists(filename) && (!file_is_dir(filename))) {
             pkg_t *owner;
             pkg_t *obs;
@@ -526,16 +528,19 @@ static int check_data_file_clashes_change(pkg_t * pkg, pkg_t * old_pkg)
      *
      * @@@ To change after 1.0 release.
      */
-    str_list_t *files_list;
-    str_list_elt_t *iter, *niter;
+    file_list_t *files_list;
+    file_list_elt_t *iter, *niter;
+    file_info_t *file_info;
+    char *filename;
 
     files_list = pkg_get_installed_files(pkg);
     if (files_list == NULL)
         return -1;
 
-    for (iter = str_list_first(files_list), niter = str_list_next(files_list, iter);
-            iter; iter = niter, niter = str_list_next(files_list, niter)) {
-        char *filename = (char *)iter->data;
+    for (iter = file_list_first(files_list), niter = file_list_next(files_list, iter);
+            iter; iter = niter, niter = file_list_next(files_list, niter)) {
+        file_info = (file_info_t *)iter->data;
+        filename = file_info->path;
         if (file_exists(filename) && (!file_is_dir(filename))) {
             pkg_t *owner;
 
@@ -614,10 +619,10 @@ static int postrm_upgrade_old_pkg_unwind(pkg_t * pkg, pkg_t * old_pkg)
 static int remove_obsolesced_files(pkg_t * pkg, pkg_t * old_pkg)
 {
     int err = 0;
-    str_list_t *old_files;
-    str_list_elt_t *of;
-    str_list_t *new_files;
-    str_list_elt_t *nf;
+    file_list_t *old_files;
+    file_list_elt_t *of;
+    file_list_t *new_files;
+    file_list_elt_t *nf;
     hash_table_t new_files_table;
 
     old_files = pkg_get_installed_files(old_pkg);
@@ -632,34 +637,35 @@ static int remove_obsolesced_files(pkg_t * pkg, pkg_t * old_pkg)
 
     new_files_table.entries = NULL;
     hash_table_init("new_files", &new_files_table, 20);
-    for (nf = str_list_first(new_files); nf; nf = str_list_next(new_files, nf)) {
-        if (nf && nf->data)
-            hash_table_insert(&new_files_table, nf->data, nf->data);
+    for (nf = file_list_first(new_files); nf; nf = file_list_next(new_files, nf)) {
+        file_info_t *info = (file_info_t *)nf->data;
+        if (info && info->path)
+            hash_table_insert(&new_files_table, info->path, info->path);
     }
 
-    for (of = str_list_first(old_files); of; of = str_list_next(old_files, of)) {
+    for (of = file_list_first(old_files); of; of = file_list_next(old_files, of)) {
         pkg_t *owner;
-        char *old, *new;
-        old = (char *)of->data;
-        new = (char *)hash_table_get(&new_files_table, old);
+        file_info_t *old = (file_info_t *)of->data;
+        char *new;
+        new = (char *)hash_table_get(&new_files_table, old->path);
         if (new)
             continue;
 
-        if (file_is_dir(old)) {
+        if (file_is_dir(old->path)) {
             continue;
         }
-        owner = file_hash_get_file_owner(old);
+        owner = file_hash_get_file_owner(old->path);
         if (owner != old_pkg) {
             /* in case obsolete file no longer belongs to old_pkg */
             continue;
         }
 
         /* old file is obsolete */
-        opkg_msg(NOTICE, "Removing obsolete file %s.\n", old);
+        opkg_msg(NOTICE, "Removing obsolete file %s.\n", old->path);
         if (!opkg_config->noaction) {
-            err = unlink(old);
+            err = unlink(old->path);
             if (err) {
-                opkg_perror(ERROR, "unlinking %s failed", old);
+                opkg_perror(ERROR, "unlinking %s failed", old->path);
             }
         }
     }

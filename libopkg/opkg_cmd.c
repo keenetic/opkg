@@ -792,8 +792,8 @@ static int opkg_flag_cmd(int argc, char **argv)
 static int opkg_files_cmd(int argc, char **argv)
 {
     pkg_t *pkg;
-    str_list_t *files;
-    str_list_elt_t *iter;
+    file_list_t *files;
+    file_list_elt_t *iter;
     char *pkg_version;
 
     if (argc < 1) {
@@ -812,8 +812,10 @@ static int opkg_files_cmd(int argc, char **argv)
     printf("Package %s (%s) is installed on %s and has the following files:\n",
            pkg->name, pkg_version, pkg->dest->name);
 
-    for (iter = str_list_first(files); iter; iter = str_list_next(files, iter))
-        printf("%s\n", (char *)iter->data);
+    for (iter = file_list_first(files); iter; iter = file_list_next(files, iter)) {
+        file_info_t *info = (file_info_t *)iter->data;
+        printf("%s\n", info->path);
+    }
 
     free(pkg_version);
     pkg_free_installed_files(pkg);
@@ -1067,9 +1069,9 @@ static int opkg_search_cmd(int argc, char **argv)
 
     pkg_vec_t *installed;
     pkg_t *pkg;
-    str_list_t *installed_files;
-    str_list_elt_t *iter;
-    char *installed_file;
+    file_list_t *installed_files;
+    file_list_elt_t *iter;
+    file_info_t *installed_file;
 
     if (argc < 1) {
         return -1;
@@ -1084,10 +1086,10 @@ static int opkg_search_cmd(int argc, char **argv)
 
         installed_files = pkg_get_installed_files(pkg);
 
-        for (iter = str_list_first(installed_files); iter;
-                iter = str_list_next(installed_files, iter)) {
-            installed_file = (char *)iter->data;
-            if (fnmatch(argv[0], installed_file, 0) == 0)
+        for (iter = file_list_first(installed_files); iter;
+                iter = file_list_next(installed_files, iter)) {
+            installed_file = (file_info_t *)iter->data;
+            if (fnmatch(argv[0], installed_file->path, 0) == 0)
                 print_pkg(pkg);
         }
 

@@ -33,8 +33,9 @@
 void remove_data_files_and_list(pkg_t * pkg)
 {
     str_list_t installed_dirs;
-    str_list_t *installed_files;
     str_list_elt_t *iter;
+    file_list_t *installed_files;
+    file_list_elt_t *fiter;
     char *file_name;
     conffile_t *conffile;
     int removed_a_dir;
@@ -56,9 +57,10 @@ void remove_data_files_and_list(pkg_t * pkg)
     if (opkg_config->offline_root)
         rootdirlen = strlen(opkg_config->offline_root);
 
-    for (iter = str_list_first(installed_files); iter;
-            iter = str_list_next(installed_files, iter)) {
-        file_name = (char *)iter->data;
+    for (fiter = file_list_first(installed_files); fiter;
+            fiter = file_list_next(installed_files, fiter)) {
+        file_info_t *file_info = (file_info_t *)fiter->data;
+        file_name = file_info->path;
 
         owner = file_hash_get_file_owner(file_name);
         if (owner != pkg)

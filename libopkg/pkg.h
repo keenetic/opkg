@@ -22,7 +22,7 @@
 #include <sys/types.h>
 
 #include "pkg_vec.h"
-#include "str_list.h"
+#include "file_list.h"
 #include "pkg_src.h"
 #include "pkg_dest.h"
 #include "opkg_conf.h"
@@ -165,7 +165,7 @@ struct pkg {
     conffile_list_t conffiles;
     time_t installed_time;
     /* As pointer for lazy evaluation */
-    str_list_t *installed_files;
+    file_list_t *installed_files;
     /* XXX: CLEANUP: I'd like to perhaps come up with a better
      * mechanism to avoid the problem here, (which is that the
      * installed_files list was being freed from an inner loop while
@@ -206,7 +206,7 @@ void pkg_formatted_info(FILE * fp, pkg_t * pkg);
 void set_flags_from_control(pkg_t * pkg);
 
 void pkg_print_status(pkg_t * pkg, FILE * file);
-str_list_t *pkg_get_installed_files(pkg_t * pkg);
+file_list_t *pkg_get_installed_files(pkg_t * pkg);
 void pkg_free_installed_files(pkg_t * pkg);
 void pkg_remove_installed_files_list(pkg_t * pkg);
 conffile_t *pkg_get_conffile(pkg_t * pkg, const char *file_name);

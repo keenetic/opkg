@@ -841,7 +841,7 @@ void file_hash_set_file_owner(const char *file_name, pkg_t * owning_pkg)
 
     if (old_owning_pkg) {
         pkg_get_installed_files(old_owning_pkg);
-        str_list_remove_elt(old_owning_pkg->installed_files, file_name);
+        file_list_remove_elt(old_owning_pkg->installed_files, file_name);
         pkg_free_installed_files(old_owning_pkg);
 
         /* mark this package to have its filelist written */

@@ -25,6 +25,7 @@
 #include <libgen.h>
 #include <malloc.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 
 #include "pkg.h"
 
@@ -1049,7 +1050,7 @@ char *pkg_version_str_alloc(pkg_t * pkg)
 /*
  * XXX: this should be broken into two functions
  */
-str_list_t *pkg_get_installed_files(pkg_t * pkg)
+file_list_t *pkg_get_installed_files(pkg_t * pkg)
 {
     int err, fd;
     char *list_file_name = NULL;
@@ -1064,7 +1065,7 @@ str_list_t *pkg_get_installed_files(pkg_t * pkg)
         return pkg->installed_files;
     }
 
-    pkg->installed_files = str_list_alloc();
+    pkg->installed_files = file_list_alloc();
 
     /*
      * For installed packages, look at the package.list file in the database.
@@ -1107,7 +1108,7 @@ str_list_t *pkg_get_installed_files(pkg_t * pkg)
             fclose(list_file);
             unlink(list_file_name);
             free(list_file_name);
-            str_list_deinit(pkg->installed_files);
+            file_list_deinit(pkg->installed_files);
             pkg->installed_files = NULL;
             return NULL;
         }
@@ -1127,12 +1128,21 @@ str_list_t *pkg_get_installed_files(pkg_t * pkg)
 
     while (1) {
         char *file_name;
+        char *mode_str;
+        mode_t mode = 0;
 
         line = file_read_line_alloc(list_file);
         if (line == NULL) {
             break;
         }
+
+        // <filename>\t<mode> -- all fields except filename are optional
         file_name = line;
+        mode_str = strchr(line, '\t');
+        if (mode_str) {
+            *mode_str++ = 0;
+            mode = (mode_t)strtoul(mode_str, NULL, 0);
+        }
 
         if (list_from_package) {
             if (*file_name == '.') {
@@ -1144,6 +1154,7 @@ str_list_t *pkg_get_installed_files(pkg_t * pkg)
             sprintf_alloc(&installed_file_name, "%s%s", pkg->dest->root_dir,
                           file_name);
         } else {
+            struct stat file_stat;
             int unmatched_offline_root = opkg_config->offline_root
                     && !str_starts_with(file_name, opkg_config->offline_root);
             if (unmatched_offline_root) {
@@ -1153,8 +1164,10 @@ str_list_t *pkg_get_installed_files(pkg_t * pkg)
                 // already contains root_dir as header -> ABSOLUTE
                 sprintf_alloc(&installed_file_name, "%s", file_name);
             }
+            if (lstat(installed_file_name, &file_stat) == 0)
+                mode = file_stat.st_mode;
         }
-        str_list_append(pkg->installed_files, installed_file_name);
+        file_list_append(pkg->installed_files, installed_file_name, mode);
         free(installed_file_name);
         free(line);
     }
@@ -1182,7 +1195,7 @@ void pkg_free_installed_files(pkg_t * pkg)
         return;
 
     if (pkg->installed_files) {
-        str_list_purge(pkg->installed_files);
+        file_list_purge(pkg->installed_files);
     }
 
     pkg->installed_files = NULL;
@@ -1315,19 +1328,19 @@ void pkg_info_preinstall_check(void)
     pkg_hash_fetch_all_installed(installed_pkgs, 0);
     for (i = 0; i < installed_pkgs->len; i++) {
         pkg_t *pkg = installed_pkgs->pkgs[i];
-        str_list_t *installed_files = pkg_get_installed_files(pkg);     /* this causes installed_files to be cached */
-        str_list_elt_t *iter, *niter;
+        file_list_t *installed_files = pkg_get_installed_files(pkg);    /* this causes installed_files to be cached */
+        file_list_elt_t *iter, *niter;
         if (installed_files == NULL) {
             opkg_msg(ERROR,
                      "Failed to determine installed " "files for pkg %s.\n",
                      pkg->name);
             break;
         }
-        for (iter = str_list_first(installed_files), niter = str_list_next(installed_files, iter);
+        for (iter = file_list_first(installed_files), niter = file_list_next(installed_files, iter);
                 iter;
-                iter = niter, niter = str_list_next(installed_files, iter)) {
-            char *installed_file = (char *)iter->data;
-            file_hash_set_file_owner(installed_file, pkg);
+                iter = niter, niter = file_list_next(installed_files, iter)) {
+            file_info_t *installed_file = (file_info_t *)iter->data;
+            file_hash_set_file_owner(installed_file->path, pkg);
         }
         pkg_free_installed_files(pkg);
     }

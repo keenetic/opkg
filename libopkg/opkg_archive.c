@@ -330,6 +330,7 @@ static int extract_paths_to_stream(struct archive *a, FILE * stream)
     struct archive_entry *entry;
     int r;
     const char *path;
+    const struct stat *entry_stat;
     int eof;
 
     while (1) {
@@ -340,7 +341,8 @@ static int extract_paths_to_stream(struct archive *a, FILE * stream)
             return -1;
 
         path = archive_entry_pathname(entry);
-        r = fprintf(stream, "%s\n", path);
+        entry_stat = archive_entry_stat(entry);
+        r = fprintf(stream, "%s\t0%03o\n", path, (unsigned int)entry_stat->st_mode);
         if (r <= 0) {
             opkg_msg(ERROR, "Failed to path to stream: %s\n", strerror(errno));
             return -1;
