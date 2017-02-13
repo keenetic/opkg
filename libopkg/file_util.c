@@ -40,12 +40,30 @@
 #include "sha256.h"
 #endif
 
+/* lstat will fail if a path contains a trailing slash but is a broken symlink */
+int xlstat(const char *file_name, struct stat *st)
+{
+    char *clean_path = NULL;
+    size_t size = strlen(file_name);
+    int r;
+
+    if (size > 0 && file_name[size-1] == '/') {
+        file_name = clean_path = xstrdup(file_name);
+        if (!clean_path)
+            return -1;
+        clean_path[--size] = '\0';
+    }
+    r = lstat(file_name, st);
+    free(clean_path);
+    return r;
+}
+
 int file_exists(const char *file_name)
 {
     struct stat st;
     int r;
 
-    r = stat(file_name, &st);
+    r = xlstat(file_name, &st);
     if (r == -1)
         return 0;
 
@@ -57,7 +75,7 @@ int file_is_dir(const char *file_name)
     struct stat st;
     int r;
 
-    r = stat(file_name, &st);
+    r = xlstat(file_name, &st);
     if (r == -1)
         return 0;
 
@@ -69,7 +87,7 @@ int file_is_symlink(const char *file_name)
     struct stat st;
     int r;
 
-    r = lstat(file_name, &st);
+    r = xlstat(file_name, &st);
     if (r == -1)
         return 0;
 

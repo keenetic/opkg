@@ -23,6 +23,9 @@
 extern "C" {
 #endif
 
+struct stat;
+
+int xlstat(const char *file_name, struct stat *st);
 int file_exists(const char *file_name);
 int file_is_dir(const char *file_name);
 int file_is_symlink(const char *file_name);

@@ -439,9 +439,27 @@ static int check_data_file_clashes(pkg_t * pkg, pkg_t * old_pkg)
             iter; iter = niter, niter = file_list_next(files_list, iter)) {
         file_info = (file_info_t *)iter->data;
         filename = file_info->path;
-        if (file_exists(filename) && (!file_is_dir(filename))) {
+        if (file_exists(filename)) {
             pkg_t *owner;
             pkg_t *obs;
+            int existing_is_dir = file_is_dir(filename);
+
+            /* OK if both the existing file and new file are directories. */
+            if (existing_is_dir && S_ISDIR(file_info->mode)) {
+                continue;
+            } else if (existing_is_dir || S_ISDIR(file_info->mode)) {
+                /* Can't mix directory and non-directory.  For normal files,
+                 * it would be OK if the package being replaced owns the
+                 * directory, but directories may be owned by multiple packages.
+                 */
+                opkg_msg(ERROR,
+                         "Package %s wants to install %s %s\n"
+                         "\tBut that path is currently a %s\n",
+                         pkg->name, existing_is_dir ? "file" : "directory",
+                         filename, existing_is_dir ? "directory" : "file");
+                clashes++;
+                continue;
+            }
 
             if (backup_exists_for(filename)) {
                 continue;

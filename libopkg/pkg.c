@@ -1164,7 +1164,7 @@ file_list_t *pkg_get_installed_files(pkg_t * pkg)
                 // already contains root_dir as header -> ABSOLUTE
                 sprintf_alloc(&installed_file_name, "%s", file_name);
             }
-            if (lstat(installed_file_name, &file_stat) == 0)
+            if (xlstat(installed_file_name, &file_stat) == 0)
                 mode = file_stat.st_mode;
         }
         file_list_append(pkg->installed_files, installed_file_name, mode);
