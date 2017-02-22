@@ -118,8 +118,12 @@ int pkg_parse_line(void *ptr, const char *line, uint mask)
     static int reading_conffiles = 0, reading_description = 0;
     int ret = 0;
 
-    /* Exclude globally masked fields. */
-    mask |= opkg_config->pfm;
+    if (opkg_config->verbose_status_file) {
+        mask = 0;
+    } else {
+        /* Exclude globally masked fields. */
+        mask |= opkg_config->pfm;
+    }
 
     /* Flip the semantics of the mask. */
     mask ^= PFM_ALL;

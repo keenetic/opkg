@@ -850,9 +850,22 @@ void pkg_print_status(pkg_t * pkg, FILE * file)
     pkg_formatted_field(file, pkg, "Replaces");
     pkg_formatted_field(file, pkg, "Conflicts");
     pkg_formatted_field(file, pkg, "Status");
+    if (opkg_config->verbose_status_file) {
+        pkg_formatted_field(file, pkg, "Section");
+    }
     pkg_formatted_field(file, pkg, "Essential");
     pkg_formatted_field(file, pkg, "Architecture");
+    if (opkg_config->verbose_status_file) {
+        pkg_formatted_field(file, pkg, "Maintainer");
+        pkg_formatted_field(file, pkg, "MD5sum");
+        pkg_formatted_field(file, pkg, "Size");
+        pkg_formatted_field(file, pkg, "Filename");
+    }
     pkg_formatted_field(file, pkg, "Conffiles");
+    if (opkg_config->verbose_status_file) {
+        pkg_formatted_field(file, pkg, "Source");
+        pkg_formatted_field(file, pkg, "Description");
+    }
     pkg_formatted_field(file, pkg, "Installed-Size");
     pkg_formatted_field(file, pkg, "Installed-Time");
     pkg_formatted_field(file, pkg, "Auto-Installed");

@@ -89,6 +89,7 @@ static opkg_option_t options[] = {
     {"overwrite_no_owner", OPKG_OPT_TYPE_BOOL, &_conf.overwrite_no_owner},
     {"combine", OPKG_OPT_TYPE_BOOL, &_conf.combine},
     {"cache_local_files", OPKG_OPT_TYPE_BOOL, &_conf.cache_local_files},
+    {"verbose_status_file", OPKG_OPT_TYPE_BOOL, &_conf.verbose_status_file},
 #if defined(HAVE_GPGME)
     {"gpg_dir", OPKG_OPT_TYPE_STRING, &_conf.gpg_dir},
     {"gpg_trust_level", OPKG_OPT_TYPE_STRING, &_conf.gpg_trust_level},
