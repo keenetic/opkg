@@ -163,6 +163,7 @@ struct pkg {
     char *priority;
     char *source;
     conffile_list_t conffiles;
+    nv_pair_list_t userfields;
     time_t installed_time;
     /* As pointer for lazy evaluation */
     file_list_t *installed_files;

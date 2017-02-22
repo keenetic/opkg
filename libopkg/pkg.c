@@ -127,6 +127,10 @@ static void pkg_init(pkg_t * pkg)
     pkg->installed_files_ref_cnt = 0;
     pkg->essential = 0;
     pkg->provided_by_hand = 0;
+
+    if (opkg_config->verbose_status_file) {
+        nv_pair_list_init(&pkg->userfields);
+    }
 }
 
 pkg_t *pkg_new(void)
@@ -240,6 +244,9 @@ void pkg_deinit(pkg_t * pkg)
     pkg->source = NULL;
 
     conffile_list_deinit(&pkg->conffiles);
+
+    if (opkg_config->verbose_status_file)
+        nv_pair_list_deinit(&pkg->userfields);
 
     /* XXX: QUESTION: Is forcing this to 1 correct? I suppose so,
      * since if they are calling deinit, they should know. Maybe do an
@@ -393,6 +400,13 @@ int pkg_merge(pkg_t * oldpkg, pkg_t * newpkg)
         oldpkg->installed_size = newpkg->installed_size;
     if (!oldpkg->priority)
         oldpkg->priority = xstrdup(newpkg->priority);
+
+    if (opkg_config->verbose_status_file) {
+        if (nv_pair_list_empty(&oldpkg->userfields)) {
+            list_splice_init(&newpkg->userfields.head, &oldpkg->userfields.head);
+        }
+    }
+
     if (!oldpkg->source)
         oldpkg->source = xstrdup(newpkg->source);
 
@@ -794,6 +808,24 @@ static void pkg_formatted_field(FILE * fp, pkg_t * pkg, const char *field)
     opkg_msg(ERROR, "Internal error: field=%s\n", field);
 }
 
+static void pkg_formatted_userfields(FILE *fp, pkg_t *pkg)
+{
+    nv_pair_list_elt_t *iter;
+
+    if (nv_pair_list_empty(&pkg->userfields))
+        return;
+
+    for (iter = nv_pair_list_first(&pkg->userfields); iter;
+                iter = nv_pair_list_next(&pkg->userfields, iter)) {
+        nv_pair_t *uf = (nv_pair_t *)iter->data;
+
+        if (uf->name && uf->value) {
+            fprintf(fp, "%s: %s\n", ((nv_pair_t *)iter->data)->name,
+                    ((nv_pair_t *)iter->data)->value);
+        }
+    }
+}
+
 pkg_state_status_t pkg_state_status_from_str(const char *str)
 {
     unsigned int i;
@@ -832,6 +864,9 @@ void pkg_formatted_info(FILE * fp, pkg_t * pkg)
     pkg_formatted_field(fp, pkg, "Installed-Size");
     pkg_formatted_field(fp, pkg, "Installed-Time");
     pkg_formatted_field(fp, pkg, "Tags");
+    if (opkg_config->verbose_status_file) {
+        pkg_formatted_userfields(fp, pkg);
+    }
     fputs("\n", fp);
 }
 
@@ -869,6 +904,9 @@ void pkg_print_status(pkg_t * pkg, FILE * file)
     pkg_formatted_field(file, pkg, "Installed-Size");
     pkg_formatted_field(file, pkg, "Installed-Time");
     pkg_formatted_field(file, pkg, "Auto-Installed");
+    if (opkg_config->verbose_status_file) {
+        pkg_formatted_userfields(file, pkg);
+    }
     fputs("\n", file);
 }
 

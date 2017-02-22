@@ -63,6 +63,21 @@ static void parse_conffiles(pkg_t * pkg, const char *cstr)
     conffile_list_append(&pkg->conffiles, file_name, md5sum);
 }
 
+static void parse_userfields(pkg_t *pkg, const char *cstr)
+{
+    char name[1024], value[1024];
+    int r;
+
+    r = sscanf(cstr, "%1023s %1023s", name, value);
+    if (r != 2) {
+        opkg_msg(ERROR, "Failed to parse User Field line for %s\n", pkg->name);
+        return;
+    }
+
+    name[strlen(name) - 1] = '\0';
+    nv_pair_list_append(&pkg->userfields, name, value);
+}
+
 int parse_version(pkg_t * pkg, const char *vstr)
 {
     size_t offset;
@@ -116,7 +131,7 @@ int pkg_parse_line(void *ptr, const char *line, uint mask)
 
     /* these flags are a bit hackish... */
     static int reading_conffiles = 0, reading_description = 0;
-    int ret = 0;
+    int ret = 0, userfield = 0;
 
     if (opkg_config->verbose_status_file) {
         mask = 0;
@@ -138,7 +153,8 @@ int pkg_parse_line(void *ptr, const char *line, uint mask)
             if (strcmp(tmp, "yes") == 0)
                 pkg->auto_installed = 1;
             free(tmp);
-        }
+        } else if (opkg_config->verbose_status_file)
+            userfield = 1;
         break;
 
     case 'C':
@@ -149,6 +165,8 @@ int pkg_parse_line(void *ptr, const char *line, uint mask)
         } else if ((mask & PFM_CONFLICTS) && is_field("Conflicts", line))
             pkg->conflicts_str =
                 parse_list(line, &pkg->conflicts_count, ',', 0);
+        else if (opkg_config->verbose_status_file)
+            userfield = 1;
         break;
 
     case 'D':
@@ -159,6 +177,8 @@ int pkg_parse_line(void *ptr, const char *line, uint mask)
             goto dont_reset_flags;
         } else if ((mask & PFM_DEPENDS) && is_field("Depends", line))
             pkg->depends_str = parse_list(line, &pkg->depends_count, ',', 0);
+        else if (opkg_config->verbose_status_file)
+            userfield = 1;
         break;
 
     case 'E':
@@ -167,12 +187,15 @@ int pkg_parse_line(void *ptr, const char *line, uint mask)
             if (strcmp(tmp, "yes") == 0)
                 pkg->essential = 1;
             free(tmp);
-        }
+        } else if (opkg_config->verbose_status_file)
+            userfield = 1;
         break;
 
     case 'F':
         if ((mask & PFM_FILENAME) && is_field("Filename", line))
             pkg->filename = parse_simple("Filename", line);
+        else if (opkg_config->verbose_status_file)
+            userfield = 1;
         break;
 
     case 'I':
@@ -184,7 +207,8 @@ int pkg_parse_line(void *ptr, const char *line, uint mask)
             char *tmp = parse_simple("Installed-Time", line);
             pkg->installed_time = strtoul(tmp, NULL, 0);
             free(tmp);
-        }
+        } else if (opkg_config->verbose_status_file)
+            userfield = 1;
         break;
 
     case 'M':
@@ -196,6 +220,8 @@ int pkg_parse_line(void *ptr, const char *line, uint mask)
             pkg->md5sum = parse_simple("MD5Sum", line);
         else if ((mask & PFM_MAINTAINER) && is_field("Maintainer", line))
             pkg->maintainer = parse_simple("Maintainer", line);
+        else if (opkg_config->verbose_status_file)
+            userfield = 1;
         break;
 
     case 'P':
@@ -208,6 +234,8 @@ int pkg_parse_line(void *ptr, const char *line, uint mask)
         else if ((mask & PFM_PRE_DEPENDS) && is_field("Pre-Depends", line))
             pkg->pre_depends_str =
                 parse_list(line, &pkg->pre_depends_count, ',', 0);
+        else if (opkg_config->verbose_status_file)
+            userfield = 1;
         break;
 
     case 'R':
@@ -216,7 +244,8 @@ int pkg_parse_line(void *ptr, const char *line, uint mask)
                 parse_list(line, &pkg->recommends_count, ',', 0);
         else if ((mask & PFM_REPLACES) && is_field("Replaces", line))
             pkg->replaces_str = parse_list(line, &pkg->replaces_count, ',', 0);
-
+        else if (opkg_config->verbose_status_file)
+            userfield = 1;
         break;
 
     case 'S':
@@ -236,16 +265,22 @@ int pkg_parse_line(void *ptr, const char *line, uint mask)
             parse_status(pkg, line);
         else if ((mask & PFM_SUGGESTS) && is_field("Suggests", line))
             pkg->suggests_str = parse_list(line, &pkg->suggests_count, ',', 0);
+        else if (opkg_config->verbose_status_file)
+            userfield = 1;
         break;
 
     case 'T':
         if ((mask & PFM_TAGS) && is_field("Tags", line))
             pkg->tags = parse_simple("Tags", line);
+        else if (opkg_config->verbose_status_file)
+            userfield = 1;
         break;
 
     case 'V':
         if ((mask & PFM_VERSION) && is_field("Version", line))
             parse_version(pkg, line);
+        else if (opkg_config->verbose_status_file)
+            userfield = 1;
         break;
 
     case ' ':
@@ -267,8 +302,12 @@ int pkg_parse_line(void *ptr, const char *line, uint mask)
         if (line_is_blank(line)) {
             ret = 1;
             break;
-        }
+        } else if (opkg_config->verbose_status_file)
+            userfield = 1;
     }
+
+    if (userfield)
+        parse_userfields(pkg, line);
 
     reading_description = 0;
     reading_conffiles = 0;
