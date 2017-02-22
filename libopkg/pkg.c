@@ -619,24 +619,36 @@ static void pkg_formatted_field(FILE * fp, pkg_t * pkg, const char *field)
         break;
     case 'e':
     case 'E':
-        if (pkg->essential) {
-            fprintf(fp, "Essential: yes\n");
+        if (strcasecmp(field, "Essential") == 0) {
+            if (pkg->essential) {
+                fprintf(fp, "Essential: yes\n");
+            }
+        } else {
+            goto UNKNOWN_FMT_FIELD;
         }
         break;
     case 'f':
     case 'F':
-        if (pkg->filename) {
-            fprintf(fp, "Filename: %s\n", pkg->filename);
+        if (strcasecmp(field, "Filename") == 0) {
+            if (pkg->filename) {
+                fprintf(fp, "Filename: %s\n", pkg->filename);
+            }
+        } else {
+            goto UNKNOWN_FMT_FIELD;
         }
         break;
     case 'i':
     case 'I':
-        if (strcasecmp(field, "Installed-Size") == 0
-		   && pkg->installed_size) {
-            fprintf(fp, "Installed-Size: %ld\n", pkg->installed_size);
-        } else if (strcasecmp(field, "Installed-Time") == 0
-                   && pkg->installed_time) {
-            fprintf(fp, "Installed-Time: %lu\n", pkg->installed_time);
+        if (strcasecmp(field, "Installed-Size") == 0) {
+            if (pkg->installed_size) {
+                fprintf(fp, "Installed-Size: %ld\n", pkg->installed_size);
+            }
+        } else if (strcasecmp(field, "Installed-Time") == 0) {
+            if (pkg->installed_time) {
+                fprintf(fp, "Installed-Time: %lu\n", pkg->installed_time);
+            }
+        } else {
+            goto UNKNOWN_FMT_FIELD;
         }
         break;
     case 'm':
@@ -756,16 +768,20 @@ static void pkg_formatted_field(FILE * fp, pkg_t * pkg, const char *field)
             if (pkg->tags) {
                 fprintf(fp, "Tags: %s\n", pkg->tags);
             }
+        } else {
+            goto UNKNOWN_FMT_FIELD;
         }
         break;
     case 'v':
     case 'V':
-        {
+        if (strcasecmp(field, "Version") == 0) {
             char *version = pkg_version_str_alloc(pkg);
             if (version == NULL)
                 return;
             fprintf(fp, "Version: %s\n", version);
             free(version);
+        } else {
+            goto UNKNOWN_FMT_FIELD;
         }
         break;
     default:
