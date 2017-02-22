@@ -430,34 +430,6 @@ abstract_pkg_t *abstract_pkg_new(void)
     return ab_pkg;
 }
 
-void set_flags_from_control(pkg_t * pkg)
-{
-    char *file_name;
-    FILE *fp;
-    int r;
-
-    sprintf_alloc(&file_name, "%s/%s.control", pkg->dest->info_dir, pkg->name);
-
-    fp = fopen(file_name, "r");
-    if (fp == NULL) {
-        opkg_perror(ERROR, "Failed to open %s", file_name);
-        free(file_name);
-        return;
-    }
-
-    free(file_name);
-
-    r = pkg_parse_from_stream(pkg, fp, PFM_ALL ^ PFM_ESSENTIAL);
-    if (r != 0) {
-        opkg_msg(DEBUG, "Unable to read control file for %s. May be empty.\n",
-                 pkg->name);
-    }
-
-    fclose(fp);
-
-    return;
-}
-
 static const char *pkg_state_want_to_str(pkg_state_want_t sw)
 {
     unsigned int i;

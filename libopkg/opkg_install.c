@@ -768,13 +768,6 @@ static int install_data_files(pkg_t * pkg)
         return err;
     }
 
-    /* The "Essential" control field may only be present in the control
-     * file and not in the Packages list. Ensure we capture it regardless.
-     *
-     * XXX: This should be fixed outside of opkg, in the Package list.
-     */
-    set_flags_from_control(pkg);
-
     opkg_msg(DEBUG, "Calling pkg_write_filelist.\n");
     err = pkg_write_filelist(pkg);
     if (err)
