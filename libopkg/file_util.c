@@ -94,6 +94,28 @@ int file_is_symlink(const char *file_name)
     return S_ISLNK(st.st_mode);
 }
 
+char *file_readlink_alloc(const char *file_name)
+{
+    struct stat st;
+    char *target;
+    ssize_t link_len;
+    int r;
+
+    r = xlstat(file_name, &st);
+    if (r == -1)
+        return NULL;
+
+    target = malloc(st.st_size + 1);
+    link_len = readlink(file_name, target, st.st_size);
+    if (link_len == -1) {
+        free(target);
+        return NULL;
+    }
+    target[link_len] = 0;
+
+    return target;
+}
+
 /* read a single line from a file, stopping at a newline or EOF.
    If a newline is read, it will appear in the resulting string.
    Return value is a malloc'ed char * which should be freed at

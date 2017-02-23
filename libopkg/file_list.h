@@ -27,6 +27,7 @@ extern "C" {
 typedef struct {
     char *path;
     mode_t mode;
+    char *link_target;
 } file_info_t;
 
 typedef struct void_list_elt file_list_elt_t;
@@ -42,7 +43,7 @@ file_list_t *file_list_alloc(void);
 void file_list_init(file_list_t *list);
 void file_list_deinit(file_list_t *list);
 
-file_info_t *file_list_append(file_list_t *list, char *name, mode_t mode);
+file_info_t *file_list_append(file_list_t *list, char *name, mode_t mode, char *link_target);
 void file_list_remove_elt(file_list_t * list, const char *path);
 
 file_list_elt_t *file_list_first(file_list_t *list);

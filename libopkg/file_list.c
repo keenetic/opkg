@@ -24,10 +24,11 @@
 #include "file_list.h"
 #include "xfuncs.h"
 
-static int file_info_init(file_info_t *info, char *path, mode_t mode)
+static int file_info_init(file_info_t *info, char *path, mode_t mode, char *link_target)
 {
     info->path = xstrdup(path);
     info->mode = mode;
+    info->link_target = xstrdup(link_target);
 
     return 0;
 }
@@ -36,6 +37,9 @@ static void file_info_deinit(file_info_t *info)
 {
     free(info->path);
     info->path = NULL;
+
+    free(info->link_target);
+    info->link_target = NULL;
 }
 
 file_list_t *file_list_alloc()
@@ -66,11 +70,11 @@ void file_list_deinit(file_list_t *list)
     void_list_deinit((void_list_t *)list);
 }
 
-file_info_t *file_list_append(file_list_t *list, char *name, mode_t mode)
+file_info_t *file_list_append(file_list_t *list, char *name, mode_t mode, char *link_target)
 {
     /* freed in file_list_deinit */
     file_info_t *info = xcalloc(1, sizeof(file_info_t));
-    file_info_init(info, name, mode);
+    file_info_init(info, name, mode, link_target);
 
     void_list_append((void_list_t *)list, info);
 

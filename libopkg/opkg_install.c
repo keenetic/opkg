@@ -461,6 +461,20 @@ static int check_data_file_clashes(pkg_t * pkg, pkg_t * old_pkg)
                 continue;
             }
 
+            /* OK if both the existing and new are a symlink and point to
+             * the same location */
+            if (S_ISLNK(file_info->mode) && file_is_symlink(filename)) {
+                char *link_target;
+                int r;
+
+                link_target = file_readlink_alloc(filename);
+                r = strcmp(link_target, file_info->link_target);
+                free(link_target);
+
+                if (r == 0)
+                    continue;
+            }
+
             if (backup_exists_for(filename)) {
                 continue;
             }

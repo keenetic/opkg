@@ -1130,17 +1130,22 @@ file_list_t *pkg_get_installed_files(pkg_t * pkg)
         char *file_name;
         char *mode_str;
         mode_t mode = 0;
+        char *link_target = NULL;
+        char *readlink_buf = NULL;
 
         line = file_read_line_alloc(list_file);
         if (line == NULL) {
             break;
         }
 
-        // <filename>\t<mode> -- all fields except filename are optional
+        // <filename>\t<mode>\t<link_target> -- all fields except filename are optional
         file_name = line;
         mode_str = strchr(line, '\t');
         if (mode_str) {
             *mode_str++ = 0;
+            link_target = strchr(mode_str, '\t');
+            if (link_target)
+                *link_target++ = 0;
             mode = (mode_t)strtoul(mode_str, NULL, 0);
         }
 
@@ -1164,11 +1169,15 @@ file_list_t *pkg_get_installed_files(pkg_t * pkg)
                 // already contains root_dir as header -> ABSOLUTE
                 sprintf_alloc(&installed_file_name, "%s", file_name);
             }
-            if (xlstat(installed_file_name, &file_stat) == 0)
+            if (xlstat(installed_file_name, &file_stat) == 0) {
                 mode = file_stat.st_mode;
+                if (S_ISLNK(mode))
+                    link_target = readlink_buf = file_readlink_alloc(installed_file_name);
+            }
         }
-        file_list_append(pkg->installed_files, installed_file_name, mode);
+        file_list_append(pkg->installed_files, installed_file_name, mode, link_target);
         free(installed_file_name);
+        free(readlink_buf);
         free(line);
     }
 
