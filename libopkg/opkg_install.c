@@ -462,16 +462,28 @@ static int check_data_file_clashes(pkg_t * pkg, pkg_t * old_pkg)
             }
 
             /* OK if both the existing and new are a symlink and point to
-             * the same location */
+             * the same directory */
             if (S_ISLNK(file_info->mode) && file_is_symlink(filename)) {
                 char *link_target;
-                int r;
+                int r, target_is_same_directory = 0;
+                struct stat target_stat;
 
                 link_target = file_readlink_alloc(filename);
                 r = strcmp(link_target, file_info->link_target);
                 free(link_target);
 
-                if (r == 0)
+                if (r == 0) {
+                    /* Ensure the target is a directory, not a file.
+                     * NOTE: This requires the directory to exist -- if this
+                     * is a broken symlink, it will be treated as a file and
+                     * be reported as a conflict. */
+                    link_target = realpath(filename, NULL);
+                    if (link_target && xlstat(link_target, &target_stat) == 0)
+                        target_is_same_directory = S_ISDIR(target_stat.st_mode);
+                    free(link_target);
+                }
+
+                if (target_is_same_directory)
                     continue;
             }
 
