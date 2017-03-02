@@ -177,12 +177,14 @@ typedef struct opkg_intercept *opkg_intercept_t;
 static opkg_intercept_t opkg_prep_intercepts(void)
 {
     opkg_intercept_t ctx;
+    const char *oldpath;
     char *newpath;
     char *dtemp;
 
     ctx = xcalloc(1, sizeof(*ctx));
     ctx->oldpath = xstrdup(getenv("PATH"));
-    sprintf_alloc(&newpath, "%s:%s", opkg_config->intercepts_dir, ctx->oldpath);
+    oldpath = ctx->oldpath ? ctx->oldpath : "/usr/sbin:/usr/bin:/sbin:/bin";
+    sprintf_alloc(&newpath, "%s:%s", opkg_config->intercepts_dir, oldpath);
     sprintf_alloc(&ctx->statedir, "%s/opkg-intercept-XXXXXX",
                   opkg_config->tmp_dir);
 
@@ -209,7 +211,11 @@ static int opkg_finalize_intercepts(opkg_intercept_t ctx)
     DIR *dir;
     int err = 0;
 
-    setenv("PATH", ctx->oldpath, 1);
+    if (ctx->oldpath)
+        setenv("PATH", ctx->oldpath, 1);
+    else
+        unsetenv("PATH");
+
     opkg_msg(DEBUG, "Removed intercepts dir from PATH; old PATH=%s\n", ctx->oldpath);
     free(ctx->oldpath);
 
