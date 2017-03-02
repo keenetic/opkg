@@ -224,7 +224,7 @@ static int opkg_finalize_intercepts(opkg_intercept_t ctx)
 
             sprintf_alloc(&path, "%s/%s", ctx->statedir, de->d_name);
             if (access(path, X_OK) == 0) {
-                const char *argv[] = { "sh", "-c", path, NULL };
+                const char *argv[] = { "/bin/sh", "-c", path, NULL };
                 opkg_msg(DEBUG, "Run intercepted script %s\n", path);
                 xsystem(argv);
             }

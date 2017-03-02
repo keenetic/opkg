@@ -1330,7 +1330,7 @@ int pkg_run_script(pkg_t * pkg, const char *script, const char *args)
     sprintf_alloc(&cmd, "%s %s", path, args);
     free(path);
     {
-        const char *argv[] = { "sh", "-c", cmd, NULL };
+        const char *argv[] = { "/bin/sh", "-c", cmd, NULL };
         err = xsystem(argv);
     }
     free(cmd);
