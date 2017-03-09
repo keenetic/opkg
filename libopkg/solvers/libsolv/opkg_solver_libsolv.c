@@ -629,9 +629,15 @@ static int libsolv_solver_init(libsolv_solver_t *libsolv_solver)
     if (opkg_config->force_downgrade)
         solver_set_flag(libsolv_solver->solver,
                         SOLVER_FLAG_ALLOW_DOWNGRADE, 1);
-    if (opkg_config->no_install_recommends)
+    if (opkg_config->no_install_recommends) {
         solver_set_flag(libsolv_solver->solver,
                         SOLVER_FLAG_IGNORE_RECOMMENDED, 1);
+    } else {
+         solver_set_flag(libsolv_solver->solver,
+                        SOLVER_FLAG_STRONG_RECOMMENDS, 1);
+         solver_set_flag(libsolv_solver->solver,
+                        SOLVER_FLAG_INSTALL_ALSO_UPDATES, 1);
+    }
     if (!opkg_config->prefer_arch_to_version) {
         solver_set_flag(libsolv_solver->solver,
                         SOLVER_FLAG_ALLOW_ARCHCHANGE, 1);
