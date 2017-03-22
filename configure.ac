@@ -167,7 +167,7 @@ if test "x$with_libsolv" != "xno"; then
 
     AC_MSG_CHECKING([for solver])
     AC_MSG_RESULT(libsolv)
-    PKG_CHECK_MODULES(SOLVER, libsolv)
+    PKG_CHECK_MODULES(SOLVER, [libsolv >= 0.6.25])
     AC_DEFINE(HAVE_SOLVER_LIBSOLV,1,[Define if you want to use libsolv])
     AC_SUBST(SOLVER_CFLAGS)
     AC_SUBST(SOLVER_LIBS)
