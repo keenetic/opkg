@@ -56,6 +56,6 @@ if opkgcl.is_installed("a"):
 
 x2fullpath = "{}/x2".format(cfg.offline_root)
 if not x2fullpath in opkgcl.files("b"):
-        opk.xfail("[libsolv] Package 'b' does not own file 'x2'.")
+        opk.fail("Package 'b' does not own file 'x2'.")
 
 opkgcl.remove("b")
