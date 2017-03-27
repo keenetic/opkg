@@ -329,7 +329,8 @@ static int pkg_get_installed_replacees(pkg_t *pkg,
                     continue;
                 if (replacee->state_status == SS_INSTALLED &&
                     version_constraints_satisfied(replaces[i].possibilities[0], pkg)) {
-                    pkg_vec_insert(installed_replacees, replacee);
+                    if (!pkg_vec_contains(installed_replacees, replacee))
+                        pkg_vec_insert(installed_replacees, replacee);
                 }
             }
         }
