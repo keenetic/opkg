@@ -28,7 +28,7 @@ o.write_list()
 
 opkgcl.update()
 
-opkgcl.install("a", "--force-postinstall")
+opkgcl.install("a")
 
 o = opk.OpkGroup()
 o.add(Package="a", Version="2.0", Provides="b, c", Replaces="b", Conflicts="b")
@@ -36,7 +36,7 @@ o.write_opk()
 o.write_list()
 
 opkgcl.update()
-status = opkgcl.upgrade("--force-postinstall")
+status = opkgcl.upgrade()
 
 if not opkgcl.is_installed("a", "2.0"):
 	opk.fail("New version of package 'a' available during upgrade but was not installed")

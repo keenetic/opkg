@@ -51,7 +51,7 @@ opkgcl.update()
 
 os.unlink('test_file')
 
-if opkgcl.install('a', '--force-postinstall') != 0:
+if opkgcl.install('a') != 0:
     opk.fail("Installation of Pacakge 'a' failed (Return value was different than 0)")
 if not opkgcl.is_installed("a"):
     opk.fail("Package 'a' installed but reports as not installed.")

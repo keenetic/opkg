@@ -13,19 +13,19 @@ def opkgcl(opkg_args):
 	return (status, stdout_data.decode("utf-8"))
 
 def install(pkg_name, flags=""):
-	return opkgcl("{} install {}".format(flags, pkg_name))[0]
+	return opkgcl("{} --force-postinstall install {}".format(flags, pkg_name))[0]
 
 def remove(pkg_name, flags=""):
-	return opkgcl("{} remove {}".format(flags, pkg_name))[0]
+	return opkgcl("{} --force-postinstall remove {}".format(flags, pkg_name))[0]
 
 def update():
 	return opkgcl("update")[0]
 
 def upgrade(params=None, flags=""):
 	if params:
-		return opkgcl("{} upgrade {}".format(flags, params))[0]
+		return opkgcl("{} --force-postinstall upgrade {}".format(flags, params))[0]
 	else:
-		return opkgcl("upgrade")[0]
+		return opkgcl("--force-postinstall upgrade")[0]
 
 def files(pkg_name):
 	output = opkgcl("files {}".format(pkg_name))[1]

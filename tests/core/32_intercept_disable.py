@@ -74,9 +74,9 @@ opkgcl.update()
 
 # First install with intercepts enabled
 truncFile(TEST_LOG)
-if opkgcl.install('a', '--force-postinstall') != 0:
+if opkgcl.install('a') != 0:
     opk.fail('Failed to install test package')
-if opkgcl.remove('a', '--force-postinstall') != 0:
+if opkgcl.remove('a') != 0:
     opk.fail('Failed to remove test package')
 if readFile(TEST_LOG) != 'intercept from a.postinst:':
     opk.fail('Unexpected intercept log')
@@ -88,9 +88,9 @@ appendFile('%s/opkg/opkg.conf' % testconfdir, 'option intercepts_dir /dev/null\n
 
 # Re-run the test
 truncFile(TEST_LOG)
-if opkgcl.install('a', '--force-postinstall') != 0:
+if opkgcl.install('a') != 0:
     opk.fail('Failed to install test package')
-if opkgcl.remove('a', '--force-postinstall') != 0:
+if opkgcl.remove('a') != 0:
     opk.fail('Failed to remove test package')
 if readFile(TEST_LOG) != '':
     opk.fail('Unexpected intercept log')
