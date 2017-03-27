@@ -252,7 +252,8 @@ void buildProvides(abstract_pkg_t * ab_pkg, pkg_t * pkg)
 
     /* every pkg provides itself */
     pkg->provides_count++;
-    abstract_pkg_vec_insert(ab_pkg->provided_by, ab_pkg);
+    if (!abstract_pkg_vec_contains(ab_pkg->provided_by, ab_pkg))
+        abstract_pkg_vec_insert(ab_pkg->provided_by, ab_pkg);
     pkg->provides = xcalloc(pkg->provides_count, sizeof(abstract_pkg_t *));
     pkg->provides[0] = ab_pkg;
 
