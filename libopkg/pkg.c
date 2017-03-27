@@ -1300,7 +1300,8 @@ int pkg_run_script(pkg_t * pkg, const char *script, const char *args)
 
     /* Installed packages have scripts in pkg->dest->info_dir, uninstalled packages
      * have scripts in pkg->tmp_unpack_dir. */
-    if (pkg->state_status == SS_INSTALLED || pkg->state_status == SS_UNPACKED) {
+    if (pkg->state_status == SS_INSTALLED || pkg->state_status == SS_UNPACKED ||
+        pkg->state_status == SS_HALF_INSTALLED) {
         if (pkg->dest == NULL) {
             opkg_msg(ERROR, "Internal error: %s has a NULL dest.\n", pkg->name);
             return -1;
