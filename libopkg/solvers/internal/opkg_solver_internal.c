@@ -40,8 +40,10 @@ static void pkg_get_provider_replacees(pkg_t *pkg,
             if (old != replacee) {
                 int installed = (replacee->state_status == SS_INSTALLED)
                         || (replacee->state_status == SS_UNPACKED);
-                if (installed)
-                    pkg_vec_insert(replacees, replacee);
+                if (installed) {
+                    if (!pkg_vec_contains(replacees, replacee))
+                        pkg_vec_insert(replacees, replacee);
+                }
             }
         }
     }
