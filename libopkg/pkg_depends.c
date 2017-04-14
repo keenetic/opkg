@@ -258,8 +258,10 @@ void buildProvides(abstract_pkg_t * ab_pkg, pkg_t * pkg)
     pkg->provides[0] = ab_pkg;
 
     for (i = 1; i < pkg->provides_count; i++) {
-        abstract_pkg_t *provided_abpkg = ensure_abstract_pkg_by_name(pkg->provides_str[i - 1]);
+        char* provides = trim_xstrdup(pkg->provides_str[i-1]);
+        abstract_pkg_t *provided_abpkg = ensure_abstract_pkg_by_name(provides);
         free(pkg->provides_str[i - 1]);
+        free(provides);
 
         pkg->provides[i] = provided_abpkg;
 
