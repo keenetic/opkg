@@ -365,7 +365,7 @@ void buildDepends(pkg_t * pkg)
     free(pkg->suggests_str);
 }
 
-const char *constraint_to_str(enum version_constraint c)
+const char *constraint_to_str(version_constraint_t c)
 {
     switch (c) {
     case NONE:
@@ -385,7 +385,7 @@ const char *constraint_to_str(enum version_constraint c)
     return "";
 }
 
-enum version_constraint str_to_constraint(const char **str)
+version_constraint_t str_to_constraint(const char **str)
 {
     if (strncmp(*str, "<<", 2) == 0) {
         *str += 2;
@@ -418,6 +418,32 @@ enum version_constraint str_to_constraint(const char **str)
         return LATER_EQUAL;
     } else {
         return NONE;
+    }
+}
+
+void strip_pkg_name_and_version(const char *pkg_name, char **name, char **version,
+                                version_constraint_t *constraint)
+{
+    const char *tmp;
+
+    if (!pkg_name) {
+        *version = NULL;
+        *name = NULL;
+        return;
+    }
+
+    tmp = strpbrk(pkg_name, "><=");
+
+    if (tmp) {
+        /* Capture and move past the constraint characters */
+        const char *ver_tmp = tmp;
+        *constraint = str_to_constraint(&ver_tmp);
+        *version = xstrdup(ver_tmp);
+        *name = xstrndup(pkg_name, tmp - pkg_name);
+    } else {
+        *version = NULL;
+        *constraint = NONE;
+        *name = xstrdup(pkg_name);
     }
 }
 

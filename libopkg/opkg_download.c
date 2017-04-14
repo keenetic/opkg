@@ -417,6 +417,7 @@ int opkg_prepare_url_for_install(const char *url, char **namep)
 {
     int r = 0, j;
     char *pkg_name, *pkg_version;
+    version_constraint_t constraint;
     abstract_pkg_vec_t *apkgs = NULL;
     abstract_pkg_t *ab_pkg = NULL;
 
@@ -438,7 +439,7 @@ int opkg_prepare_url_for_install(const char *url, char **namep)
      * We check this before files incase an existing file incidentally shares a
      * name with an available package.
      */
-    strip_pkg_name_and_version(url, &pkg_name, &pkg_version);
+    strip_pkg_name_and_version(url, &pkg_name, &pkg_version, &constraint);
 
     apkgs = abstract_pkg_vec_alloc();
 
@@ -462,7 +463,7 @@ int opkg_prepare_url_for_install(const char *url, char **namep)
                 ab_pkg = apkgs->pkgs[j];
                 if (pkg_version) {
                     depend_t *dependence_to_satisfy = xmalloc(sizeof(depend_t));
-                    dependence_to_satisfy->constraint = EQUAL;
+                    dependence_to_satisfy->constraint = constraint;
                     dependence_to_satisfy->version = pkg_version;
                     dependence_to_satisfy->pkg = ab_pkg;
 

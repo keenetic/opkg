@@ -74,7 +74,8 @@ static libsolv_solver_t *libsolv_solver_new(void);
 static void libsolv_solver_free(libsolv_solver_t *libsolv_solver);
 static void libsolv_solver_add_job(libsolv_solver_t *libsolv_solver,
                                    job_action_t action, const char *pkg_name,
-                                   const char *pkg_version);
+                                   const char *pkg_version,
+                                   version_constraint_t constraint);
 static int libsolv_solver_solve(libsolv_solver_t *libsolv_solver);
 static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver);
 
@@ -82,6 +83,7 @@ int opkg_solver_install(int num_pkgs, char **pkg_names)
 {
     int i, err;
     char *name, *version;
+    version_constraint_t constraint;
     Dataiterator di;
 
     libsolv_solver_t *solver = libsolv_solver_new();
@@ -95,12 +97,12 @@ int opkg_solver_install(int num_pkgs, char **pkg_names)
     }
 
     for (i = 0; i < num_pkgs; i++) {
-        strip_pkg_name_and_version(pkg_names[i], &name, &version);
+        strip_pkg_name_and_version(pkg_names[i], &name, &version, &constraint);
 
         dataiterator_init(&di, solver->pool, solver->repo_available, 0,
                           SOLVABLE_NAME | SOLVABLE_PROVIDES, name, SEARCH_GLOB);
         while (dataiterator_step(&di)) {
-            libsolv_solver_add_job(solver, JOB_INSTALL, di.kv.str, version);
+            libsolv_solver_add_job(solver, JOB_INSTALL, di.kv.str, version, constraint);
             dataiterator_skip_solvable(&di);
         }
 
@@ -138,7 +140,7 @@ int opkg_solver_remove(int num_pkgs, char **pkg_names)
     for (i = 0; i < num_pkgs; i++){
         dataiterator_init(&di, solver->pool, solver->repo_installed, 0, 0, pkg_names[i], SEARCH_GLOB);
         while (dataiterator_step(&di)) {
-            libsolv_solver_add_job(solver, JOB_REMOVE, di.kv.str, NULL);
+            libsolv_solver_add_job(solver, JOB_REMOVE, di.kv.str, NULL, NONE);
             dataiterator_skip_solvable(&di);
         }
         dataiterator_free(&di);
@@ -165,12 +167,12 @@ int opkg_solver_upgrade(int num_pkgs, char **pkg_names)
         return -1;
 
     if (num_pkgs == 0) {
-        libsolv_solver_add_job(solver, JOB_UPGRADE, 0, NULL);
+        libsolv_solver_add_job(solver, JOB_UPGRADE, 0, NULL, NONE);
     } else {
         for (i = 0; i < num_pkgs; i++) {
             dataiterator_init(&di, solver->pool, solver->repo_installed, 0, 0, pkg_names[i], SEARCH_GLOB);
             while (dataiterator_step(&di)) {
-                libsolv_solver_add_job(solver, JOB_UPGRADE, di.kv.str, NULL);
+                libsolv_solver_add_job(solver, JOB_UPGRADE, di.kv.str, NULL, NONE);
                 dataiterator_skip_solvable(&di);
             }
             dataiterator_free(&di);
@@ -198,10 +200,10 @@ int opkg_solver_distupgrade(int num_pkgs, char **pkg_names)
         return -1;
 
     if (num_pkgs == 0) {
-        libsolv_solver_add_job(solver, JOB_DISTUPGRADE, 0, NULL);
+        libsolv_solver_add_job(solver, JOB_DISTUPGRADE, 0, NULL, NONE);
     } else {
         for (i = 0; i < num_pkgs; i++)
-            libsolv_solver_add_job(solver, JOB_DISTUPGRADE, pkg_names[i], NULL);
+            libsolv_solver_add_job(solver, JOB_DISTUPGRADE, pkg_names[i], NULL, NONE);
     }
 
     err = libsolv_solver_solve(solver);
@@ -291,6 +293,34 @@ static void libsolv_solver_set_arch_policy(libsolv_solver_t *libsolv_solver)
     pool_setarchpolicy(libsolv_solver->pool, arch_policy);
 }
 
+/* Convert an opkg constraint to libsolv flags */
+static int constraint_to_solv_flags(version_constraint_t constraint)
+{
+    int flags = 0;
+
+    switch (constraint) {
+    case EARLIER:
+        flags = REL_LT;
+        break;
+    case EARLIER_EQUAL:
+        flags = REL_LT | REL_EQ;
+        break;
+    case EQUAL:
+        flags = REL_EQ;
+        break;
+    case LATER:
+        flags = REL_GT;
+        break;
+    case LATER_EQUAL:
+        flags = REL_GT | REL_EQ;
+        break;
+    default:
+        break;
+    }
+
+    return flags;
+}
+
 /* This transforms a compound depend [e.g. A (=3.0)|C (>=2.0) ]
    into an id usable by libsolv. */
 static Id dep2id(Pool *pool, compound_depend_t *dep)
@@ -309,26 +339,7 @@ static Id dep2id(Pool *pool, compound_depend_t *dep)
         nameId = pool_str2id(pool, depend->pkg->name, 1);
         if (depend->version) {
             versionId = pool_str2id(pool, depend->version, 1);
-
-            switch (depend->constraint) {
-            case EARLIER:
-                flagId = REL_LT;
-                break;
-            case EARLIER_EQUAL:
-                flagId = REL_LT | REL_EQ;
-                break;
-            case EQUAL:
-                flagId = REL_EQ;
-                break;
-            case LATER:
-                flagId = REL_GT;
-                break;
-            case LATER_EQUAL:
-                flagId = REL_GT | REL_EQ;
-                break;
-            default:
-                break;
-            }
+            flagId = constraint_to_solv_flags(depend->constraint);
             dependId = pool_rel2id(pool, nameId, versionId, flagId, 1);
         } else {
             dependId = nameId;
@@ -666,7 +677,8 @@ static libsolv_solver_t *libsolv_solver_new(void)
 
 static void libsolv_solver_add_job(libsolv_solver_t *libsolv_solver,
                                    job_action_t action, const char *pkg_name,
-                                   const char *pkg_version)
+                                   const char *pkg_version,
+                                   version_constraint_t constraint)
 {
     Id what = 0;
     Id how = 0;
@@ -675,7 +687,7 @@ static void libsolv_solver_add_job(libsolv_solver_t *libsolv_solver,
         what = pool_rel2id(libsolv_solver->pool,
                            pool_str2id(libsolv_solver->pool, pkg_name, 1),
                            pool_str2id(libsolv_solver->pool, pkg_version, 1),
-                           REL_EQ, 1);
+                           constraint_to_solv_flags(constraint), 1);
     } else {
         what = pool_str2id(libsolv_solver->pool, pkg_name, 1);
     }

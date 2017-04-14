@@ -36,6 +36,7 @@ REGRESSION_TESTS := core/01_install.py \
 		    core/35_download_only.py \
 		    core/36_install_virtual.py \
 		    core/37_globs.py \
+		    core/38_install_constrained_version.py \
 		    regress/issue26.py \
 		    regress/issue31.py \
 		    regress/issue32.py \

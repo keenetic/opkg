@@ -91,8 +91,11 @@ void buildDependedUponBy(pkg_t * pkg, abstract_pkg_t * ab_pkg);
 int version_constraints_satisfied(depend_t * depends, pkg_t * pkg);
 int pkg_constraint_satisfied(pkg_t *pkg, void *cdata);
 int pkg_dependence_satisfiable(depend_t * depend);
-const char *constraint_to_str(enum version_constraint c);
-enum version_constraint str_to_constraint(const char **str);
+const char *constraint_to_str(version_constraint_t c);
+version_constraint_t str_to_constraint(const char **str);
+void strip_pkg_name_and_version(const char *pkg_name, char **name, char **version,
+                                version_constraint_t *constraint);
+
 int is_pkg_in_pkg_vec(pkg_vec_t * vec, pkg_t * pkg);
 
 #ifdef __cplusplus

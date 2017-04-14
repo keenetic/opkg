@@ -65,8 +65,9 @@ static int opkg_prepare_install_by_name(const char *pkg_name, pkg_t **pkg)
     int cmp;
     pkg_t *old, *new;
     char *old_version, *new_version, *version, *name;
+    version_constraint_t constraint;
 
-    strip_pkg_name_and_version(pkg_name, &name, &version);
+    strip_pkg_name_and_version(pkg_name, &name, &version, &constraint);
     abstract_pkg_t *ab_pkg = abstract_pkg_fetch_by_name(name);
 
     old = pkg_hash_fetch_installed_by_name(name);
@@ -74,11 +75,11 @@ static int opkg_prepare_install_by_name(const char *pkg_name, pkg_t **pkg)
         opkg_msg(DEBUG2, "Old versions from pkg_hash_fetch %s.\n",
                  old->version);
 
-    /* A specific version of a package was requested. The syntax to request a particular
+    /* A constrained version of a package was requested. The syntax to request a particular
      * version is "opkg install  <PKG_NAME>=<VERSION> */
     if (version) {
         depend_t *dependence_to_satisfy = xmalloc(sizeof(depend_t));
-        dependence_to_satisfy->constraint = EQUAL;
+        dependence_to_satisfy->constraint = constraint;
         dependence_to_satisfy->version = version;
         dependence_to_satisfy->pkg = ab_pkg;
 
