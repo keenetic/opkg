@@ -417,6 +417,15 @@ int is_pkg_a_provides(const pkg_t *pkg_scout, const pkg_t *pkg)
             opkg_msg(DEBUG2, "Seems I've found a provide %s %s\n",
                      pkg_scout->name, pkg->provides[i]->name);
             return 1;
+        } else {
+            /* if a pkg_scout only Provides one virtual package, then also check if
+             * the pkg_scout Provides is provided by pkg */
+            if ((pkg_scout->provides_count == 2)
+                && strcmp(pkg_scout->provides[1]->name, pkg->provides[i]->name) == 0) { /* Found */
+                opkg_msg(DEBUG2, "Seems I've found a provide %s %s\n",
+                         pkg_scout->name, pkg->provides[i]->name);
+                return 1;
+            }
         }
     }
 
