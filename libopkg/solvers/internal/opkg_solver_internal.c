@@ -579,12 +579,6 @@ int internal_solver_solv(typeId  transactionType, pkg_t *pkg, pkg_vec_t *pkgs_to
         pkg->dest = opkg_config->default_dest;
     }
 
-    /* Provides already installed */
-    if (is_provides_installed(pkg)) {
-        opkg_msg(NOTICE, "Provider for %s already installed \n", pkg->name);
-        return 1;
-    }
-
     /* pkg already installed case */
     if (pkg->state_status == SS_INSTALLED && opkg_config->nodeps == 0) {
         err = calculate_dependencies_for(pkg, pkgs_to_install, replacees, orphans);
