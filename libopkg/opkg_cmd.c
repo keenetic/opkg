@@ -540,7 +540,7 @@ static int opkg_list_installed_cmd(int argc, char **argv)
         pkg_name = argv[0];
     }
     available = pkg_vec_alloc();
-    pkg_hash_fetch_all_installed(available, 0);
+    pkg_hash_fetch_all_installed(available, INSTALLED);
     pkg_vec_sort(available, pkg_compare_names);
     for (i = 0; i < available->len; i++) {
         pkg = available->pkgs[i];
@@ -568,7 +568,7 @@ static int opkg_list_changed_conffiles_cmd(int argc, char **argv)
         pkg_name = argv[0];
     }
     available = pkg_vec_alloc();
-    pkg_hash_fetch_all_installed(available, 0);
+    pkg_hash_fetch_all_installed(available, INSTALLED);
     pkg_vec_sort(available, pkg_compare_names);
     for (i = 0; i < available->len; i++) {
         pkg = available->pkgs[i];
@@ -632,7 +632,7 @@ static int opkg_info_status_cmd(int argc, char **argv, int installed_only)
 
     available = pkg_vec_alloc();
     if (installed_only)
-        pkg_hash_fetch_all_installed(available, 1);
+        pkg_hash_fetch_all_installed(available, INSTALLED_HALF_INSTALLED);
     else
         pkg_hash_fetch_available(available);
 
@@ -845,7 +845,7 @@ static int opkg_depends_cmd(int argc, char **argv)
     if (opkg_config->query_all)
         pkg_hash_fetch_available(available_pkgs);
     else
-        pkg_hash_fetch_all_installed(available_pkgs, 0);
+        pkg_hash_fetch_all_installed(available_pkgs, INSTALLED);
 
     for (i = 0; i < argc; i++) {
         for (j = 0; j < available_pkgs->len; j++) {
@@ -927,7 +927,7 @@ static int opkg_what_depends_conflicts_replaces_cmd(enum depend_type what_field_
     if (opkg_config->query_all)
         pkg_hash_fetch_available(available_pkgs);
     else
-        pkg_hash_fetch_all_installed(available_pkgs, 0);
+        pkg_hash_fetch_all_installed(available_pkgs, INSTALLED);
 
     /* mark the root set */
     pkg_vec_clear_marks(available_pkgs);
@@ -1038,7 +1038,7 @@ static int opkg_whatprovides_cmd(int argc, char **argv)
         if (opkg_config->query_all)
             pkg_hash_fetch_available(available_pkgs);
         else
-            pkg_hash_fetch_all_installed(available_pkgs, 0);
+            pkg_hash_fetch_all_installed(available_pkgs, INSTALLED);
         for (i = 0; i < argc; i++) {
             const char *target = argv[i];
             unsigned int j;
@@ -1084,7 +1084,7 @@ static int opkg_search_cmd(int argc, char **argv)
     }
 
     installed = pkg_vec_alloc();
-    pkg_hash_fetch_all_installed(installed, 0);
+    pkg_hash_fetch_all_installed(installed, INSTALLED);
     pkg_vec_sort(installed, pkg_compare_names);
 
     for (i = 0; i < installed->len; i++) {

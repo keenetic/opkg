@@ -409,7 +409,7 @@ static int is_provides_installed(pkg_t *pkg)
     int i, ret = 0;
     pkg_vec_t *available_pkgs = pkg_vec_alloc();
 
-    pkg_hash_fetch_all_installed(available_pkgs, 0);
+    pkg_hash_fetch_all_installed(available_pkgs, INSTALLED);
 
     for (i = 0; i < available_pkgs->len; i++) {
         pkg_t *installed_pkg = available_pkgs->pkgs[i];

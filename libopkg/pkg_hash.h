@@ -28,6 +28,13 @@
 extern "C" {
 #endif
 
+enum fetch_type {
+    INSTALLED,
+    INSTALLED_HALF_INSTALLED,
+    INSTALLED_TOBE_INSTALLED
+};
+typedef enum fetch_type fetch_type_t;
+
 void pkg_hash_init(void);
 void pkg_hash_deinit(void);
 
@@ -39,7 +46,7 @@ int pkg_hash_load_status_files(void);
 void hash_insert_pkg(pkg_t * pkg, int set_status);
 
 abstract_pkg_t *ensure_abstract_pkg_by_name(const char *pkg_name);
-void pkg_hash_fetch_all_installed(pkg_vec_t * installed, int include_half_installed);
+void pkg_hash_fetch_all_installed(pkg_vec_t * installed, fetch_type_t constain);
 pkg_t *pkg_hash_fetch_by_name_version(const char *pkg_name,
                                       const char *version);
 abstract_pkg_t *abstract_pkg_fetch_by_name(const char *pkg_name);

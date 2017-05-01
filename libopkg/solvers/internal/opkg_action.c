@@ -55,7 +55,7 @@ int opkg_solver_remove(int num_pkgs, char **pkg_names)
 
     available = pkg_vec_alloc();
     pkgs_to_remove = pkg_vec_alloc();
-    pkg_hash_fetch_all_installed(available, 1);
+    pkg_hash_fetch_all_installed(available, INSTALLED_HALF_INSTALLED);
 
     for (i = 0; i < num_pkgs; i++) {
         for (a = 0; a < available->len; a++) {
@@ -226,7 +226,7 @@ int opkg_solver_upgrade(int num_pkgs, char **pkg_names)
     } else {
         pkg_vec_t *installed = pkg_vec_alloc();
 
-        pkg_hash_fetch_all_installed(installed, 0);
+        pkg_hash_fetch_all_installed(installed, INSTALLED);
 
         if (opkg_config->combine) {
             err = opkg_upgrade_multiple_pkgs(installed);

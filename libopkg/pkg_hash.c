@@ -719,6 +719,27 @@ static void pkg_hash_fetch_all_installed_helper(const char *pkg_name,
     }
 }
 
+static void pkg_hash_fetch_all_installed_and_tobe_installed_helper(const char *pkg_name,
+                                                void *entry, void *data)
+{
+    abstract_pkg_t *ab_pkg = (abstract_pkg_t *) entry;
+    pkg_vec_t *all = (pkg_vec_t *) data;
+    pkg_vec_t *pkg_vec = ab_pkg->pkgs;
+    unsigned int j;
+
+    if (!pkg_vec)
+        return;
+
+    for (j = 0; j < pkg_vec->len; j++) {
+        pkg_t *pkg = pkg_vec->pkgs[j];
+        int is_installed = pkg->state_status == SS_INSTALLED
+                || pkg->state_status == SS_UNPACKED
+                || pkg->state_want == SW_INSTALL;
+        if (is_installed)
+            pkg_vec_insert(all, pkg);
+    }
+}
+
 static void pkg_hash_fetch_all_half_or_installed_helper(const char *pkg_name,
                                                         void *entry, void *data)
 {
@@ -740,12 +761,23 @@ static void pkg_hash_fetch_all_half_or_installed_helper(const char *pkg_name,
     }
 }
 
-void pkg_hash_fetch_all_installed(pkg_vec_t * all, int include_half_installed)
+void pkg_hash_fetch_all_installed(pkg_vec_t * all, fetch_type_t constrain)
 {
-    hash_table_foreach(&opkg_config->pkg_hash,
-            include_half_installed ? pkg_hash_fetch_all_half_or_installed_helper
-                                   : pkg_hash_fetch_all_installed_helper,
-            all);
+    void (*pkg_hash_fetch)(const char *key, void *entry, void *data);
+
+    switch (constrain) {
+    case INSTALLED_HALF_INSTALLED:
+        pkg_hash_fetch = pkg_hash_fetch_all_half_or_installed_helper;
+        break;
+    case INSTALLED_TOBE_INSTALLED:
+        pkg_hash_fetch = pkg_hash_fetch_all_installed_and_tobe_installed_helper;
+        break;
+    default:
+        pkg_hash_fetch = pkg_hash_fetch_all_installed_helper;
+        break;
+    }
+
+    hash_table_foreach(&opkg_config->pkg_hash, pkg_hash_fetch, all);
 }
 
 /*

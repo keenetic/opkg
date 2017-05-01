@@ -439,7 +439,7 @@ int opkg_upgrade_all(opkg_progress_callback_t progress_callback,
     installed = pkg_vec_alloc();
     pkg_info_preinstall_check();
 
-    pkg_hash_fetch_all_installed(installed, 0);
+    pkg_hash_fetch_all_installed(installed, INSTALLED);
     for (i = 0; i < installed->len; i++) {
         pkg = installed->pkgs[i];
 

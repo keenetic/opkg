@@ -475,7 +475,7 @@ static void populate_installed_repo(libsolv_solver_t *libsolv_solver)
 
     pkg_vec_t *installed_pkgs = pkg_vec_alloc();
 
-    pkg_hash_fetch_all_installed(installed_pkgs, 1);
+    pkg_hash_fetch_all_installed(installed_pkgs, INSTALLED_HALF_INSTALLED);
 
     for (i = 0; i < installed_pkgs->len; i++) {
         pkg_t *pkg = installed_pkgs->pkgs[i];

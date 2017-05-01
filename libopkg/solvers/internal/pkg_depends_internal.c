@@ -504,7 +504,7 @@ static void __pkg_hash_fetch_conflictees(pkg_t *pkg,
     int i;
 
     pkg_vec_t *available_pkgs = pkg_vec_alloc();
-    pkg_hash_fetch_all_installed(available_pkgs, 0);
+    pkg_hash_fetch_all_installed(available_pkgs, INSTALLED);
 
     for (i = 0; i < available_pkgs->len; i++) {
         pkg_t *cpkg = available_pkgs->pkgs[i];
