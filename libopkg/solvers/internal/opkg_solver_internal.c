@@ -486,7 +486,10 @@ static int calculate_dependencies_for(pkg_t *pkg, pkg_vec_t *pkgs_to_install, pk
                     goto cleanup;
                 }
                 pkg_vec_insert(dep->wanted_by, pkg);
-                calculate_dependencies_for(dep, pkgs_to_install, replacees, orphans);
+                if (calculate_dependencies_for(dep, pkgs_to_install, replacees, orphans)) {
+                    err = -1;
+                    goto cleanup;
+                }
                 pkg_vec_insert(pkgs_to_install, dep);
 
                 if (opkg_config->download_only)
@@ -535,7 +538,10 @@ static int calculate_dependencies_for(pkg_t *pkg, pkg_vec_t *pkgs_to_install, pk
                 err = -1;
                 goto cleanup;
             }
-            calculate_dependencies_for(dep, pkgs_to_install, replacees, orphans);
+            if (calculate_dependencies_for(dep, pkgs_to_install, replacees, orphans)) {
+                err = -1;
+                goto cleanup;
+            }
             pkg_vec_insert(pkgs_to_install, dep);
 
             if (opkg_config->download_only)
