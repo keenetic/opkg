@@ -583,6 +583,11 @@ static void populate_available_repos(libsolv_solver_t *libsolv_solver)
     pkg_vec_free(available_pkgs);
 }
 
+static void printsolution_callback(struct _Pool *pool, void *data, int type, const char *str)
+{
+    opkg_message(ERROR, "%s\n", str);
+}
+
 static int libsolv_solver_init(libsolv_solver_t *libsolv_solver)
 {
     /* initialize the solver job queue */
@@ -655,6 +660,9 @@ static int libsolv_solver_init(libsolv_solver_t *libsolv_solver)
         solver_set_flag(libsolv_solver->solver,
                         SOLVER_FLAG_NO_INFARCHCHECK, 1);
     }
+
+    /* Set callback to log solutions to error queue during solver_printsolution */
+    pool_setdebugcallback(libsolv_solver->pool, printsolution_callback, NULL);
 
     return 0;
 }
@@ -741,15 +749,15 @@ static int libsolv_solver_solve(libsolv_solver_t *libsolv_solver)
 
     /* print out all problems and recommended solutions */
     if (problem_count) {
-        opkg_message(NOTICE, "Solver encountered %d problem(s):\n", problem_count);
+        opkg_message(ERROR, "Solver encountered %d problem(s):\n", problem_count);
 
         int problem;
         /* problems start at 1, not 0 */
         for (problem = 1; problem <= problem_count; problem++) {
-            opkg_message(NOTICE, "Problem %d/%d:\n", problem, problem_count);
-            opkg_message(NOTICE, "  - %s\n",
+            opkg_message(ERROR, "Problem %d/%d:\n", problem, problem_count);
+            opkg_message(ERROR, "  - %s\n",
                          solver_problem2str(libsolv_solver->solver, problem));
-            opkg_message(NOTICE, "\n");
+            opkg_message(ERROR, "\n");
 
             int solution_count = solver_solution_count(libsolv_solver->solver,
                                                        problem);
@@ -757,7 +765,7 @@ static int libsolv_solver_solve(libsolv_solver_t *libsolv_solver)
 
             /* solutions also start from 1 */
             for (solution = 1; solution <= solution_count; solution++) {
-                opkg_message(NOTICE, "Solution %d:\n", solution);
+                opkg_message(ERROR, "Solution %d:\n", solution);
                 solver_printsolution(libsolv_solver->solver, problem, solution);
                 opkg_message(NOTICE, "\n");
             }
