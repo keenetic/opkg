@@ -438,7 +438,7 @@ static int calculate_dependencies_for(pkg_t *pkg, pkg_vec_t *pkgs_to_install, pk
     ndepends =
         pkg_hash_fetch_unsatisfied_dependencies(pkg, depends, &unresolved);
 
-    if (unresolved) {
+    if (unresolved && !opkg_config->force_depends) {
         opkg_msg(ERROR, "Cannot satisfy the following dependencies for %s:\n",
                  pkg->name);
         tmp = unresolved;
@@ -449,14 +449,12 @@ static int calculate_dependencies_for(pkg_t *pkg, pkg_vec_t *pkgs_to_install, pk
         }
         free(tmp);
         opkg_message(ERROR, "\n");
-        if (!opkg_config->force_depends) {
-            opkg_msg(INFO,
-                "This could mean that your package list is out of date or that the packages\n"
-                "mentioned above do not yet exist (try 'opkg update'). To proceed in spite\n"
-                "of this problem try again with the '-force-depends' option.\n");
-            err = -1;
-            goto cleanup;
-        }
+        opkg_msg(INFO,
+            "This could mean that your package list is out of date or that the packages\n"
+            "mentioned above do not yet exist (try 'opkg update'). To proceed in spite\n"
+            "of this problem try again with the '-force-depends' option.\n");
+        err = -1;
+        goto cleanup;
     }
 
     if (ndepends <= 0) {
