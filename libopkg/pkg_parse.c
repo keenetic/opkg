@@ -65,10 +65,10 @@ static void parse_conffiles(pkg_t * pkg, const char *cstr)
 
 static void parse_userfields(pkg_t *pkg, const char *cstr)
 {
-    char name[1024], value[1024];
+    char name[1024], value[4096];
     int r;
 
-    r = sscanf(cstr, "%1023s %[^\n]", name, value);
+    r = sscanf(cstr, "%1023s %4095[^\n]", name, value);
     if (r != 2) {
         opkg_msg(ERROR, "Failed to parse User Field line for %s\n", pkg->name);
         return;
