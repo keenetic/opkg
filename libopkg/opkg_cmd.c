@@ -458,6 +458,31 @@ static int opkg_upgrade_cmd(int argc, char **argv)
     return err;
 }
 
+static int opkg_distupgrade_cmd(int argc, char **argv)
+{
+    int err = 0;
+
+#ifdef HAVE_SOLVER_INTERNAL
+    opkg_msg(ERROR, "dist-upgrade command not available with the internal solver enabled\n");
+    err = -1;
+#else
+    int r;
+
+    signal(SIGINT, sigint_handler);
+
+    pkg_info_preinstall_check();
+
+    err = opkg_solver_distupgrade(argc, argv);
+
+    r = opkg_configure_packages(NULL);
+    if (r != 0)
+        err = -1;
+
+    write_status_files_if_changed();
+#endif
+    return err;
+}
+
 static int opkg_download_cmd(int argc, char **argv)
 {
     int i, err = 0;
@@ -1141,6 +1166,8 @@ static opkg_cmd_t cmds[] = {
     {"update", 0, (opkg_cmd_fun_t) opkg_update_cmd,
         PFM_DESCRIPTION | PFM_SOURCE},
     {"upgrade", 0, (opkg_cmd_fun_t) opkg_upgrade_cmd,
+        PFM_DESCRIPTION | PFM_SOURCE},
+    {"dist-upgrade", 0, (opkg_cmd_fun_t) opkg_distupgrade_cmd,
         PFM_DESCRIPTION | PFM_SOURCE},
     {"list", 0, (opkg_cmd_fun_t) opkg_list_cmd, PFM_SOURCE},
     {"list_installed", 0, (opkg_cmd_fun_t) opkg_list_installed_cmd, PFM_SOURCE},
