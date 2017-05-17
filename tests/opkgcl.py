@@ -27,6 +27,12 @@ def upgrade(params=None, flags=""):
 	else:
 		return opkgcl("--force-postinstall upgrade")[0]
 
+def distupgrade(params=None, flags=""):
+	if params:
+		return opkgcl("{} --force-postinstall dist-upgrade {}".format(flags, params))[0]
+	else:
+		return opkgcl("--force-postinstall dist-upgrade")[0]
+
 def files(pkg_name):
 	output = opkgcl("files {}".format(pkg_name))[1]
 	return output.split("\n")[1:]
