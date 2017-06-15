@@ -1,3 +1,42 @@
+opkg-0.3.5
+==========
+
+- Handle conffiles that don't exist gracefully (show notice instead of error)
+
+- Correctly handle symlink files collisions (issue 11033)
+
+- Add verbose_status_file option to store all the package metadata in the status file
+
+- Add support for user-defined control file fields
+
+- Enhance PATH handling for intercepts
+
+- Explicitly run scripts and intercepts with /bin/sh instead of sh
+
+- Run maintainer scripts by default in the ATS
+
+- Add support for installing packages with version constrains other than '='
+
+Internal Solver:
+
+- Do not process orphans in download-only case (issue 10243)
+
+- Remove duplicate processing of provides and replacees
+
+- Only install one provider for each virtual package (issue 10781)
+
+- Skip dependency error message if --force-depends (issue 9060)
+
+Libsolv:
+
+- Allow removal of recommended packages, in case of conflict (issue 10777)
+
+- During upgrades, also upgrade Recommends (issue 9939)
+
+- Print solver errors to stderr (issue 10407)
+
+- Add dist-upgrade support
+
 opkg-0.3.4
 ==========
 
