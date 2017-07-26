@@ -404,7 +404,7 @@ static int opkg_install_check_downgrade(pkg_t *pkg, pkg_t *old_pkg,
     return 0;
 }
 
-static int is_provides_installed(pkg_t *pkg)
+static int is_provides_installed(pkg_t *pkg, int strict)
 {
     int i, ret = 0;
     pkg_vec_t *available_pkgs = pkg_vec_alloc();
@@ -415,7 +415,7 @@ static int is_provides_installed(pkg_t *pkg)
         pkg_t *installed_pkg = available_pkgs->pkgs[i];
         /* Return true if the installed_pkg provides pkg, is not pkg, and is
          * not set to be removed (issue 121) */
-        if (is_pkg_a_provides(pkg, installed_pkg)
+        if (is_pkg_a_provides(pkg, installed_pkg, strict)
                 && (strcmp(pkg->name, installed_pkg->name))
                 && (installed_pkg->state_want == SW_INSTALL)) {
             ret = 1;
@@ -475,7 +475,7 @@ static int calculate_dependencies_for(pkg_t *pkg, pkg_vec_t *pkgs_to_install, pk
                     && (dep->state_status != SS_UNPACKED)
                     && !is_pkg_in_pkg_vec(pkgs_to_install, dep);
             if (needs_install) {
-                if (is_provides_installed(dep))
+                if (is_provides_installed(dep, 1))
                     continue;
                 if (dep->dest == NULL)
                     dep->dest = opkg_config->default_dest;
@@ -528,7 +528,7 @@ static int calculate_dependencies_for(pkg_t *pkg, pkg_vec_t *pkgs_to_install, pk
                 && (dep->state_status != SS_UNPACKED)
                 && !is_pkg_in_pkg_vec(pkgs_to_install, dep);
         if (needs_install) {
-            if (is_provides_installed(dep))
+            if (is_provides_installed(dep, 0))
                 continue;
             if (dep->dest == NULL)
                 dep->dest = opkg_config->default_dest;

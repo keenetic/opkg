@@ -408,7 +408,7 @@ static int is_pkg_a_replaces(pkg_t *pkg_scout, pkg_t *pkg)
     return 0;
 }
 
-int is_pkg_a_provides(const pkg_t *pkg_scout, const pkg_t *pkg)
+int is_pkg_a_provides(const pkg_t *pkg_scout, const pkg_t *pkg, int strict)
 {
     int i;
 
@@ -417,9 +417,12 @@ int is_pkg_a_provides(const pkg_t *pkg_scout, const pkg_t *pkg)
             opkg_msg(DEBUG2, "Seems I've found a provide %s %s\n",
                      pkg_scout->name, pkg->provides[i]->name);
             return 1;
-        } else {
+        } else if (strict) {
             /* if a pkg_scout only Provides one virtual package, then also check if
-             * the pkg_scout Provides is provided by pkg */
+             * the pkg_scout Provides is provided by pkg. This check is needed when
+	     * looking to satisy a dependency. For satisfied dependencies, we want to
+	     * stick with a pkg name check
+	     * */
             if ((pkg_scout->provides_count == 2)
                 && strcmp(pkg_scout->provides[1]->name, pkg->provides[i]->name) == 0) { /* Found */
                 opkg_msg(DEBUG2, "Seems I've found a provide %s %s\n",

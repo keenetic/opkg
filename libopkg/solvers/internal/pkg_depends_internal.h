@@ -28,7 +28,8 @@ int pkg_hash_fetch_unsatisfied_dependencies(pkg_t *pkg,
                                             char ***unresolved);
 pkg_vec_t *pkg_hash_fetch_satisfied_dependencies(pkg_t *pkg);
 pkg_vec_t *pkg_hash_fetch_conflicts(pkg_t *pkg);
-int is_pkg_a_provides(const pkg_t *pkg_scout, const pkg_t *pkg);
+int is_pkg_a_provides(const pkg_t *pkg_scout, const pkg_t *pkg,
+                                            int strict);
 
 #ifdef __cplusplus
 }
