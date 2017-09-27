@@ -872,9 +872,9 @@ void file_hash_set_file_owner(const char *file_name, pkg_t * owning_pkg)
     hash_table_insert(&opkg_config->file_hash, file_name, owning_pkg);
 
     if (old_owning_pkg) {
-        pkg_get_installed_files(old_owning_pkg);
+        if (!old_owning_pkg->installed_files)
+            pkg_get_installed_files(old_owning_pkg);
         file_list_remove_elt(old_owning_pkg->installed_files, file_name);
-        pkg_free_installed_files(old_owning_pkg);
 
         /* mark this package to have its filelist written */
         old_owning_pkg->state_flag |= SF_FILELIST_CHANGED;
