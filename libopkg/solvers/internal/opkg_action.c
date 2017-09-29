@@ -244,6 +244,27 @@ int opkg_solver_upgrade(int num_pkgs, char **pkg_names)
     return err;
 }
 
+int opkg_solver_list_upgradable(int num_pkgs, char **pkg_names) {
+    pkg_t *_old_pkg, *_new_pkg;
+    LIST_HEAD(head);
+
+    prepare_upgrade_list(&head);
+
+    list_for_each_entry(_old_pkg, &head, list) {
+        char *old_v, *new_v;
+
+        _new_pkg = pkg_hash_fetch_best_installation_candidate_by_name(_old_pkg->name);
+        if (_new_pkg == NULL)
+            continue;
+        old_v = pkg_version_str_alloc(_old_pkg);
+        new_v = pkg_version_str_alloc(_new_pkg);
+        printf("%s - %s - %s\n", _old_pkg->name, old_v, new_v);
+        free(old_v);
+        free(new_v);
+    }
+    return 0;
+}
+
 int opkg_solver_distupgrade(int num_pkgs, char **pkg_names)
 {
     opkg_msg(ERROR, "Internal solver does not support dist-upgrade!\n");

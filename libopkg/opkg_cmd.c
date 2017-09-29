@@ -46,11 +46,6 @@
 #include "xfuncs.h"
 #include "opkg_solver.h"
 
-/* Needed by opkg_list_upgradable */
-#ifdef HAVE_SOLVER_INTERNAL
-#include "solvers/internal/opkg_upgrade_internal.h"
-#endif
-
 static void print_pkg(pkg_t * pkg)
 {
     char *version = pkg_version_str_alloc(pkg);
@@ -615,32 +610,9 @@ static int opkg_list_changed_conffiles_cmd(int argc, char **argv)
 
 static int opkg_list_upgradable_cmd(int argc, char **argv)
 {
-#ifndef HAVE_SOLVER_INTERNAL
-    // TODO: this requires prepare_upgrade_list in opkg_upgrade.c but opkg_upgrade
-    // is not built when an external solver is enabled. Either let the solver
-    // handle this, include opkg_upgrade, or put prepare_upgrade_list somewhere else.
-    opkg_msg(ERROR,"list-upgradable command not available with external solver enabled\n");
-    return -1;
-#else
-    pkg_t *_old_pkg, *_new_pkg;
-    LIST_HEAD(head);
+    pkg_info_preinstall_check();
 
-    prepare_upgrade_list(&head);
-
-    list_for_each_entry(_old_pkg, &head, list) {
-        char *old_v, *new_v;
-
-        _new_pkg = pkg_hash_fetch_best_installation_candidate_by_name(_old_pkg->name);
-        if (_new_pkg == NULL)
-            continue;
-        old_v = pkg_version_str_alloc(_old_pkg);
-        new_v = pkg_version_str_alloc(_new_pkg);
-        printf("%s - %s - %s\n", _old_pkg->name, old_v, new_v);
-        free(old_v);
-        free(new_v);
-    }
-    return 0;
-#endif
+    return opkg_solver_list_upgradable(argc, argv);
 }
 
 static int opkg_info_status_cmd(int argc, char **argv, int installed_only)

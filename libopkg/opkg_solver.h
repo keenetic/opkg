@@ -27,6 +27,7 @@ int opkg_solver_install(int num_pkgs, char **pkg_names);
 int opkg_solver_remove(int num_pkgs, char **pkg_names);
 int opkg_solver_upgrade(int num_pkgs, char **pkg_names);
 int opkg_solver_distupgrade(int num_pkgs, char **pkg_names);
+int opkg_solver_list_upgradable(int num_pkgs, char **pkg_names);
 
 #ifdef __cplusplus
 }

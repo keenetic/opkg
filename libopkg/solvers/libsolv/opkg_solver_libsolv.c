@@ -77,7 +77,10 @@ static void libsolv_solver_add_job(libsolv_solver_t *libsolv_solver,
                                    const char *pkg_version,
                                    version_constraint_t constraint);
 static int libsolv_solver_solve(libsolv_solver_t *libsolv_solver);
+
+typedef int (*libsolv_solver_action_func_t)(libsolv_solver_t *libsolv_solver);
 static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver);
+static int libsolv_solver_print_transaction(libsolv_solver_t *libsolv_solver);
 
 int opkg_solver_install(int num_pkgs, char **pkg_names)
 {
@@ -157,7 +160,7 @@ CLEANUP:
     return err;
 }
 
-int opkg_solver_upgrade(int num_pkgs, char **pkg_names)
+static int opkg_solver_do_upgrade(int num_pkgs, char **pkg_names, libsolv_solver_action_func_t libsolv_solver_action)
 {
     int i, err;
     Dataiterator di;
@@ -183,13 +186,22 @@ int opkg_solver_upgrade(int num_pkgs, char **pkg_names)
     if (err)
         goto CLEANUP;
 
-    err = libsolv_solver_execute_transaction(solver);
+    err = libsolv_solver_action(solver);
 
 CLEANUP:
     libsolv_solver_free(solver);
     return err;
 }
 
+int opkg_solver_upgrade(int num_pkgs, char **pkg_names)
+{
+    return opkg_solver_do_upgrade(num_pkgs, pkg_names, libsolv_solver_execute_transaction);
+}
+
+int opkg_solver_list_upgradable(int num_pkgs, char **pkg_names)
+{
+    return opkg_solver_do_upgrade(num_pkgs, pkg_names, libsolv_solver_print_transaction);
+}
 
 int opkg_solver_distupgrade(int num_pkgs, char **pkg_names)
 {
@@ -791,6 +803,41 @@ static int requires_download(Id typeId)
                      typeId == SOLVER_TRANSACTION_MULTIINSTALL;
 }
 
+static int libsolv_solver_transaction_preamble(libsolv_solver_t *libsolv_solver, pkg_vec_t *pkgs, Transaction *transaction, int no_action)
+{
+    pkg_t *pkg;
+    int i;
+
+    /* order the transaction so dependencies are handled first */
+    transaction_order(transaction, 0);
+
+    for (i = 0; i < transaction->steps.count; i++) {
+        Id stepId = transaction->steps.elements[i];
+        Solvable *solvable = pool_id2solvable(libsolv_solver->pool, stepId);
+        Id typeId = transaction_type(transaction, stepId,
+                SOLVER_TRANSACTION_SHOW_ACTIVE |
+                SOLVER_TRANSACTION_CHANGE_IS_REINSTALL);
+
+        const char *pkg_name = pool_id2str(libsolv_solver->pool, solvable->name);
+        const char *evr = pool_id2str(libsolv_solver->pool, solvable->evr);
+
+        pkg = pkg_hash_fetch_by_name_version(pkg_name, evr);
+        pkg_vec_insert(pkgs, pkg);
+
+        if (!no_action && pkg->local_filename == NULL &&
+            opkg_config->download_first && requires_download(typeId)) {
+            if (opkg_download_pkg(pkg)) {
+                opkg_msg(ERROR,
+                         "Failed to download %s. "
+                         "Perhaps you need to run 'opkg update'?\n", pkg->name);
+                return -1;
+            }
+        }
+    }
+
+    return 0;
+}
+
 static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
 {
     int i, ret = 0, err = 0;
@@ -805,34 +852,8 @@ static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
     } else {
         pkg_t *pkg;
 
-        /* order the transaction so dependencies are handled first */
-        transaction_order(transaction, 0);
-
-        for (i = 0; i < transaction->steps.count; i++) {
-            Id stepId = transaction->steps.elements[i];
-            Solvable *solvable = pool_id2solvable(libsolv_solver->pool, stepId);
-            Id typeId = transaction_type(transaction, stepId,
-                    SOLVER_TRANSACTION_SHOW_ACTIVE |
-                    SOLVER_TRANSACTION_CHANGE_IS_REINSTALL);
-
-            const char *pkg_name = pool_id2str(libsolv_solver->pool, solvable->name);
-            const char *evr = pool_id2str(libsolv_solver->pool, solvable->evr);
-
-            pkg = pkg_hash_fetch_by_name_version(pkg_name, evr);
-            pkg_vec_insert(pkgs, pkg);
-
-            if (pkg->local_filename == NULL && opkg_config->download_first &&
-                                      requires_download(typeId)) {
-                err = opkg_download_pkg(pkg);
-                if (err) {
-                    opkg_msg(ERROR,
-                             "Failed to download %s. "
-                             "Perhaps you need to run 'opkg update'?\n", pkg->name);
-                    ret = -1;
-                    goto CLEANUP;
-                }
-            }
-        }
+        if (libsolv_solver_transaction_preamble(libsolv_solver, pkgs, transaction, 0))
+            goto CLEANUP;
 
         for (i = 0; i < transaction->steps.count; i++) {
             Id stepId = transaction->steps.elements[i];
@@ -915,6 +936,52 @@ CLEANUP:
     pkg_vec_free(pkgs);
     transaction_free(transaction);
     return err;
+}
+
+static int libsolv_solver_print_transaction(libsolv_solver_t *libsolv_solver)
+{
+    int i;
+    Transaction *transaction;
+    pkg_vec_t *pkgs;
+
+    transaction = solver_create_transaction(libsolv_solver->solver);
+    pkgs = pkg_vec_alloc();
+
+    if (transaction->steps.count) {
+        pkg_t *pkg;
+
+        if (libsolv_solver_transaction_preamble(libsolv_solver, pkgs, transaction, 1))
+            goto CLEANUP;
+
+        for (i = 0; i < transaction->steps.count; i++) {
+            Id stepId = transaction->steps.elements[i];
+            Id typeId = transaction_type(transaction, stepId,
+                    SOLVER_TRANSACTION_SHOW_ACTIVE |
+                    SOLVER_TRANSACTION_CHANGE_IS_REINSTALL);
+
+            pkg = pkgs->pkgs[i];
+            pkg_t *old = 0;
+            char *old_v, *new_v;
+
+            switch (typeId) {
+            case SOLVER_TRANSACTION_UPGRADE:
+                old = pkg_hash_fetch_installed_by_name(pkg->name);
+                new_v = pkg_version_str_alloc(pkg);
+                old_v = pkg_version_str_alloc(old);
+                printf("%s - %s - %s\n", pkg->name, old_v, new_v);
+                free(new_v);
+                free(old_v);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+CLEANUP:
+    pkg_vec_free(pkgs);
+    transaction_free(transaction);
+    return 0;
 }
 
 char *opkg_solver_version_alloc(void)

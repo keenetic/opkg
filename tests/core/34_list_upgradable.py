@@ -24,14 +24,14 @@ if opkgcl.is_upgradable("a", "2.0"):
 	opk.fail("Package 'a', is upgradable to version '2.0', though a better candidate is available.")
 
 if not opkgcl.is_upgradable("a", "3.0"):
-	opk.xfail("[libsolv] Package 'a', is not upgradable to version '3.0'.")
+	opk.fail("Package 'a', is not upgradable to version '3.0'.")
 
 opkgcl.install("a=2.0")
 if not opkgcl.is_installed("a", "2.0"):
 	opk.fail("Package 'a', Version '2.0', failed to install.")
 
 if not opkgcl.is_upgradable("a", "3.0"):
-	opk.xfail("[libsolv] Package 'a', is not upgradable to version '3.0'.")
+	opk.fail("Package 'a', is not upgradable to version '3.0'.")
 
 opkgcl.install("a=3.0")
 if not opkgcl.is_installed("a", "3.0"):
