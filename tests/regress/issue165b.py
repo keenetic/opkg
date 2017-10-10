@@ -48,7 +48,7 @@ opkgcl.install("a");
 if not opkgcl.is_installed("x"):
     opk.fail("Package 'x' removed when 'a' installed, but should not be removed.")
 if not opkgcl.is_installed("b"):
-    opk.xfail("Package 'b' not installed, but should be installed as a recommended pkg of 'a'.")
+    opk.xfail("[internalsolv/libsolv<0.6.28]Package 'b' not installed, but should be installed as a recommended pkg of 'a'.")
 if opkgcl.is_installed("c"):
     opk.fail("Package 'c' installed but conflicts with x.")
 if not opkgcl.is_installed("a"):
