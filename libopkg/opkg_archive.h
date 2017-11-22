@@ -34,6 +34,7 @@ int ar_extract_file_to_stream(struct opkg_ar *ar, const char *filename,
                               FILE * stream);
 int ar_extract_paths_to_stream(struct opkg_ar *ar, FILE * stream);
 int ar_extract_all(struct opkg_ar *ar, const char *prefix, long unsigned int *size);
+int gz_write_archive(const char *filename, const char *gz_filename);
 void ar_close(struct opkg_ar *ar);
 
 #ifdef __cplusplus

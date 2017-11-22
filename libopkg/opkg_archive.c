@@ -731,6 +731,59 @@ static struct archive *open_compressed_file(const char *filename)
     return NULL;
 }
 
+int gz_write_archive(const char *filename, const char *gz_filename)
+{
+    struct archive *a;
+    struct archive_entry *entry;
+    char buff[8192];
+    int len;
+    FILE *fd;
+    int r = 0;
+
+    a = archive_write_new();
+    archive_write_add_filter_gzip(a);
+    archive_write_set_format_raw(a);
+    archive_write_open_filename(a, gz_filename);
+
+    struct archive *disk = archive_read_disk_new();
+
+    r = archive_read_disk_open(disk, filename);
+
+    entry = archive_entry_new();
+
+    r = archive_read_next_header2(disk, entry);
+    if (r != ARCHIVE_OK) {
+        opkg_msg(ERROR, "Failed to read file: '%s' : %s", filename, archive_error_string(disk));
+        goto cleanup;
+    }
+
+    /* Remove path hierarchy, as we are only compressing a single file */
+    archive_entry_set_pathname(entry, basename(filename));
+
+    r = archive_write_header(a, entry);
+    if (r != ARCHIVE_OK) {
+        opkg_msg(ERROR, "Failed to create compressed file: '%s' : %s", gz_filename, archive_error_string(a));
+        goto cleanup;
+    }
+
+    fd = fopen(filename, "r");
+    len = fread(buff, 1, sizeof(buff), fd);
+    while (len > 0) {
+        archive_write_data(a, buff, len);
+        len = fread(buff, 1, sizeof(buff), fd);
+    }
+    fclose(fd);
+    archive_entry_free(entry);
+
+cleanup:
+    archive_read_close(disk);
+    archive_read_free(disk);
+    archive_write_close(a);
+    archive_write_free(a);
+
+    return r;
+}
+
 /*******************************************************************************
  * Glue layer.
  */
