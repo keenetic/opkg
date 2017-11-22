@@ -543,3 +543,19 @@ int file_decompress(const char *in, const char *out)
 
     return r;
 }
+
+int file_gz_compress(const char *in)
+{
+    char *in_gz;
+    int r = 0;
+
+    sprintf_alloc(&in_gz, "%s.gz", in);
+    if (!gz_write_archive(in, in_gz)) {
+        r = unlink(in);
+        if (r != 0)
+            opkg_perror(ERROR, "unable to remove `%s'", in);
+    }
+
+    free(in_gz);
+    return r;
+}

@@ -38,6 +38,7 @@ char *file_md5sum_alloc(const char *file_name);
 char *file_sha256sum_alloc(const char *file_name);
 int rm_r(const char *path);
 int file_decompress(const char *in, const char *out);
+int file_gz_compress(const char *filename);
 
 /* Buffer size used for extracting files from archives. */
 #define EXTRACT_BUFFER_LEN 0x8000
