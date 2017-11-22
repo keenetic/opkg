@@ -25,6 +25,7 @@
 #include "release.h"
 #include "opkg_utils.h"
 #include "xfuncs.h"
+#include "opkg_archive.h"
 
 #include "opkg_download.h"
 #include "sprintf_alloc.h"
@@ -207,12 +208,38 @@ void release_deinit(release_t * release)
 int release_init_from_file(release_t * release, const char *filename)
 {
     int err = 0;
-    FILE *release_file;
+    FILE *release_file = NULL;
+    char *bp = NULL;
 
-    release_file = fopen(filename, "r");
-    if (release_file == NULL) {
-        opkg_perror(ERROR, "Failed to open %s", filename);
-        return -1;
+    if (opkg_config->compress_list_files) {
+        struct opkg_ar *ar;
+        size_t size;
+
+        ar = ar_open_compressed_file(filename);
+        if (!ar)
+            return -1;
+
+        FILE *mfp = open_memstream(&bp, &size);
+
+        if (ar_copy_to_stream(ar, mfp) < 0) {
+            opkg_perror(ERROR, "Failed to open %s", filename);
+            err = -1;
+            goto cleanup;
+        }
+        fclose(mfp);
+
+        release_file = fmemopen(bp, size, "r");
+        if (release_file == NULL) {
+            opkg_perror(ERROR, "Failed to open memory buffer: %s\n", strerror(errno));
+            err = -1;
+            goto cleanup;
+        }
+    } else {
+        release_file = fopen(filename, "r");
+        if (release_file == NULL) {
+            opkg_perror(ERROR, "Failed to open %s", filename);
+            return -1;
+        }
     }
 
     err = release_parse_from_stream(release, release_file);
@@ -223,6 +250,9 @@ int release_init_from_file(release_t * release, const char *filename)
         }
     }
 
+cleanup:
+    fclose(release_file);
+    free(bp);
     return err;
 }
 
@@ -301,9 +331,15 @@ int release_download(release_t * release, pkg_src_t * dist, char *lists_dir,
                     if (err) {
                         unlink(list_file_name);
                     } else {
-                        err = file_decompress(cache_location, list_file_name);
+                        if (opkg_config->compress_list_files) {
+                            strcat(list_file_name, ".gz");
+                            err = file_copy(cache_location, list_file_name);
+                        } else {
+                            err = file_decompress(cache_location, list_file_name);
+                        }
                         if (err) {
-                            opkg_msg(ERROR, "Couldn't decompress %s", url);
+                            opkg_msg(ERROR, "Couldn't %s %s",
+                                    (opkg_config->compress_list_files) ? "copy" : "decompress", url);
                         }
                     }
                 }
@@ -315,6 +351,8 @@ int release_download(release_t * release, pkg_src_t * dist, char *lists_dir,
                 sprintf_alloc(&url, "%s-%s/Packages", prefix, nv->name);
                 err = opkg_download(url, list_file_name, NULL, NULL);
                 if (!err) {
+                    if (opkg_config->compress_list_files)
+                        err = file_gz_compress(list_file_name);
                     err = release_verify_file(release, list_file_name, subpath);
                     if (err)
                         unlink(list_file_name);

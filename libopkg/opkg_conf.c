@@ -90,6 +90,7 @@ static opkg_option_t options[] = {
     {"combine", OPKG_OPT_TYPE_BOOL, &_conf.combine},
     {"cache_local_files", OPKG_OPT_TYPE_BOOL, &_conf.cache_local_files},
     {"verbose_status_file", OPKG_OPT_TYPE_BOOL, &_conf.verbose_status_file},
+    {"compress_list_files", OPKG_OPT_TYPE_BOOL, &_conf.compress_list_files},
 #if defined(HAVE_GPGME)
     {"gpg_dir", OPKG_OPT_TYPE_STRING, &_conf.gpg_dir},
     {"gpg_trust_level", OPKG_OPT_TYPE_STRING, &_conf.gpg_trust_level},

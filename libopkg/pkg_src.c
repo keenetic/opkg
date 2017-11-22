@@ -83,10 +83,16 @@ static int pkg_src_download(pkg_src_t * src)
             goto cleanup;
         }
 
-        err = file_decompress(cache_location, feed);
+        if (opkg_config->compress_list_files) {
+            strcat(feed, ".gz");
+            err = file_copy(cache_location, feed);
+        } else {
+            err = file_decompress(cache_location, feed);
+        }
         free(cache_location);
         if (err) {
-            opkg_msg(ERROR, "Couldn't decompress feed for source %s.",
+            opkg_msg(ERROR, "Couldn't %s feed for source %s.",
+                     (opkg_config->compress_list_files) ? "copy" : "decompress",
                      src->name);
             goto cleanup;
         }
@@ -94,6 +100,8 @@ static int pkg_src_download(pkg_src_t * src)
         err = opkg_download(url, feed, NULL, NULL);
         if (err)
             goto cleanup;
+        if (opkg_config->compress_list_files)
+            file_gz_compress(feed);
     }
 
     opkg_msg(DEBUG, "Downloaded package list for %s.\n", src->name);

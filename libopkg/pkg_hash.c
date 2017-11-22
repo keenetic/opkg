@@ -26,6 +26,7 @@
 #include "release.h"
 #include "pkg.h"
 #include "opkg_message.h"
+#include "opkg_archive.h"
 #include "pkg_vec.h"
 #include "pkg_hash.h"
 #include "parse_util.h"
@@ -65,15 +66,41 @@ static int pkg_hash_add_from_file(const char *file_name, pkg_src_t * src,
                            pkg_dest_t * dest, int is_status_file)
 {
     pkg_t *pkg;
-    FILE *fp;
-    char *buf;
+    FILE *fp = NULL;
+    char *buf = NULL, *bp = NULL;
     const size_t len = 4096;
     int ret = 0;
 
-    fp = fopen(file_name, "r");
-    if (fp == NULL) {
-        opkg_perror(ERROR, "Failed to open %s", file_name);
-        return -1;
+    if (opkg_config->compress_list_files  && !is_status_file) {
+        struct opkg_ar *ar;
+        size_t size;
+
+        ar = ar_open_compressed_file(file_name);
+        if (!ar)
+            return -1;
+
+        FILE *mfp = open_memstream(&bp, &size);
+
+        if (ar_copy_to_stream(ar, mfp) < 0) {
+            opkg_perror(ERROR, "Failed to open %s", file_name);
+            ret = -1;
+            goto cleanup;
+        }
+        fclose(mfp);
+
+        fp = fmemopen(bp, size, "r");
+        if (fp == NULL) {
+            opkg_perror(ERROR, "Failed to open memory buffer: %s\n", strerror(errno));
+            ret = -1;
+            goto cleanup;
+        }
+    } else {
+        fp = fopen(file_name, "r");
+        if (fp == NULL) {
+            opkg_perror(ERROR, "Failed to open %s", file_name);
+            ret = -1;
+            goto cleanup;
+        }
     }
 
     /* Remove UTF-8 BOM if present */
@@ -129,8 +156,11 @@ static int pkg_hash_add_from_file(const char *file_name, pkg_src_t * src,
 
     } while (!feof(fp));
 
+cleanup:
     free(buf);
-    fclose(fp);
+    if (fp)
+        fclose(fp);
+    free(bp);
 
     return ret;
 }
@@ -191,8 +221,8 @@ int pkg_hash_load_feeds(void)
 
         src = (pkg_src_t *) iter->data;
 
-        sprintf_alloc(&list_file, "%s/%s", opkg_config->lists_dir, src->name);
-
+        sprintf_alloc(&list_file, "%s/%s%s", opkg_config->lists_dir, src->name,
+                      opkg_config->compress_list_files ? ".gz" : "");
         if (file_exists(list_file)) {
             unsigned int i;
             release_t *release = release_new();
@@ -229,7 +259,8 @@ int pkg_hash_load_feeds(void)
 
         src = (pkg_src_t *) iter->data;
 
-        sprintf_alloc(&list_file, "%s/%s", opkg_config->lists_dir, src->name);
+        sprintf_alloc(&list_file, "%s/%s%s", opkg_config->lists_dir, src->name,
+                      opkg_config->compress_list_files ? ".gz" : "" );
 
         if (file_exists(list_file)) {
             r = pkg_hash_add_from_file(list_file, src, NULL, 0);
