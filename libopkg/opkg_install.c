@@ -856,7 +856,7 @@ static int resolve_conffiles(pkg_t * pkg)
 /**
  *  @brief Really install a pkg_t
  */
-int opkg_install_pkg(pkg_t * pkg, int from_upgrade)
+int opkg_install_pkg(pkg_t * pkg)
 {
     int err = 0;
     pkg_t *old_pkg = NULL;

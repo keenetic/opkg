@@ -310,7 +310,7 @@ int opkg_install_package(const char *package_url,
     progress(&pdata, 75, progress_callback, user_data);
 
     /* unpack the package */
-    err = opkg_install_pkg(new, 0);
+    err = opkg_install_pkg(new);
 
     if (err) {
         return -1;

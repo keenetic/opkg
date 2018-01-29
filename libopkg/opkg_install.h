@@ -26,7 +26,7 @@
 extern "C" {
 #endif
 
-int opkg_install_pkg(pkg_t * pkg, int from_upgrading);
+int opkg_install_pkg(pkg_t * pkg);
 
 #ifdef __cplusplus
 }

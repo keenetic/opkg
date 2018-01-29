@@ -890,7 +890,7 @@ static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
                     opkg_message(NOTICE, "Installing %s (%s) on %s\n",
                                  pkg->name, pkg->version, pkg->dest->name);
                 }
-                ret = opkg_install_pkg(pkg, 0);
+                ret = opkg_install_pkg(pkg);
                 break;
             case SOLVER_TRANSACTION_UPGRADE:
                 old = pkg_hash_fetch_installed_by_name(pkg->name);
@@ -920,7 +920,7 @@ static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
                     }
                 }
 
-                ret = opkg_install_pkg(pkg, 1);
+                ret = opkg_install_pkg(pkg);
                 break;
             case SOLVER_TRANSACTION_IGNORE:
             default:
