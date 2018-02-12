@@ -128,6 +128,9 @@ class OpkGroup:
 	def addOpk(self, opk):
 		self.opk_list.append(opk)
 
+	def removeOpk(self, opk):
+		self.opk_list.remove(opk)
+
 	def write_opk(self, tar_not_ar=False, compression='gz'):
 		for o in self.opk_list:
 			o.write(tar_not_ar=tar_not_ar, compression=compression)
