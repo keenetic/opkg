@@ -482,6 +482,32 @@ static int opkg_conf_parse_file(const char *filename,
     return err;
 }
 
+static int skip_pkg_if_duplicate_and_installed(pkg_t *pkg)
+{
+    int i;
+    int skip = 0;
+
+    /*  If a pkg is set to be installed, but another version is already installed
+     *  then skip  */
+    if ((pkg->state_status == SS_NOT_INSTALLED) && (pkg->state_want == SW_INSTALL)) {
+        pkg_t *installed_pkg;
+        pkg_vec_t *installed_pkgs = pkg_vec_alloc();
+        pkg_hash_fetch_all_installed(installed_pkgs, INSTALLED_HALF_INSTALLED);
+
+        for (i = 0; i < installed_pkgs->len; i++) {
+            installed_pkg = installed_pkgs->pkgs[i];
+            if (!strcmp(installed_pkg->name, pkg->name)) {
+                skip = 1;
+                break;
+            }
+        }
+
+        pkg_vec_free(installed_pkgs);
+    }
+
+    return skip;
+}
+
 int opkg_conf_write_status_files(void)
 {
     pkg_dest_list_elt_t *iter;
@@ -525,7 +551,7 @@ int opkg_conf_write_status_files(void)
                      pkg->name);
             continue;
         }
-        if (pkg->dest->status_fp)
+        if (pkg->dest->status_fp && !skip_pkg_if_duplicate_and_installed(pkg))
             pkg_print_status(pkg, pkg->dest->status_fp);
     }
 
