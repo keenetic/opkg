@@ -563,9 +563,25 @@ static void populate_available_repos(libsolv_solver_t *libsolv_solver)
         if (pkg->state_want == SW_INSTALL) {
             opkg_message(DEBUG2, "Package marked for install: %s - %s\n",
                          pkg->name, version);
-            solvable_id = repo_add_solvable(libsolv_solver->repo_to_install);
-            queue_push2(&libsolv_solver->solver_jobs, SOLVER_SOLVABLE
-                        | SOLVER_INSTALL | SOLVER_SETEVR, solvable_id);
+            /* If a package has state_want == SW_INSTALL and pkg->auto_installed == 1
+             * it signals that it was meant to be installed as a dependency, but the
+             * installation failed, probably because the Package index was out of date.
+             * Create a non-version constrained solvable, since other package versions
+             * may satisfy the dependency
+             *
+             * Bugzilla #8351
+             */
+            if (pkg->auto_installed == 1) {
+                solvable_id = pool_str2id(libsolv_solver->pool, pkg->name, 1);
+                queue_push2(&libsolv_solver->solver_jobs, SOLVER_SOLVABLE_PROVIDES
+                            | SOLVER_INSTALL, solvable_id);
+                free(version);
+                continue;
+            } else {
+                solvable_id = repo_add_solvable(libsolv_solver->repo_to_install);
+                queue_push2(&libsolv_solver->solver_jobs, SOLVER_SOLVABLE
+                            | SOLVER_INSTALL | SOLVER_SETEVR, solvable_id);
+            }
         }
         /* if the package is preferred, create a solvable in repo_preferred */
         else if (pkg->state_flag & SF_PREFER) {
