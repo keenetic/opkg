@@ -121,7 +121,9 @@ class OpkGroup:
 		self.opk_list = []
 
 	def add(self, **control):
-		self.opk_list.append(Opk(**control))
+		opk = Opk(**control)
+		self.opk_list.append(opk)
+		return opk
 
 	def addOpk(self, opk):
 		self.opk_list.append(opk)
