@@ -259,7 +259,7 @@ AC_FUNC_FORK
 AC_TYPE_SIGNAL
 AC_FUNC_UTIME_NULL
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS([memmove memset mkdir regcomp strchr strcspn strdup strerror strndup strrchr strstr strtol strtoul sysinfo utime])
+AC_CHECK_FUNCS([memmove memset mkdir regcomp strchr strcspn strdup strerror strndup strrchr strstr strtol strtoul sysinfo utime getopt_long_only])
 
 CLEAN_DATE=`date +"%B %Y" | tr -d '\n'`
 

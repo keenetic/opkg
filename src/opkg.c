@@ -132,8 +132,13 @@ static int args_parse(int argc, char *argv[])
     char *solver_version = NULL;
 
     while (1) {
+#if HAVE_GETOPT_LONG_ONLY
         c = getopt_long_only(argc, argv, "Ad:f:no:p:l:t:vV::", long_options,
                              &option_index);
+#else
+        c = getopt_long(argc, argv, "Ad:f:no:p:l:t:vV::", long_options,
+                             &option_index);
+#endif
         if (c == -1)
             break;
 
