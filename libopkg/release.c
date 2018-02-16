@@ -18,7 +18,7 @@
 
 #include <unistd.h>
 #include <ctype.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <sys/stat.h>
 
 #include "opkg_message.h"

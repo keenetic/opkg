@@ -19,7 +19,7 @@
 #include "opkg_message.h"
 #include "pkg_depends.h"
 
-#include <malloc.h>
+#include <stdlib.h>
 
 static char **merge_unresolved(char **oldstuff, char **newstuff)
 {

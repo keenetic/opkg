@@ -25,7 +25,6 @@
 #include <fcntl.h>
 #include <glob.h>
 #include <unistd.h>
-#include <malloc.h>
 #include <stdlib.h>
 
 #include "opkg_conf.h"

@@ -23,7 +23,6 @@
 #include <signal.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include <malloc.h>
 #include <stdlib.h>
 
 #include "pkg.h"
@@ -191,7 +190,7 @@ static int unpack_pkg_control_files(pkg_t * pkg)
 	  {
 	     cf_name[i] = '\0';
 	  }
-	
+
         /* Prepend dest->root_dir to conffile name.
          * Take pains to avoid multiple slashes. */
         root_dir = pkg->dest->root_dir;

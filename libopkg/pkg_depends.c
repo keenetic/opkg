@@ -18,7 +18,7 @@
 
 #include <stdio.h>
 #include <ctype.h>
-#include <malloc.h>
+#include <stdlib.h>
 
 #include "pkg.h"
 #include "opkg_conf.h"

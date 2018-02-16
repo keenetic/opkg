@@ -19,7 +19,7 @@
 #include "config.h"
 
 #include <stdio.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <fnmatch.h>
 
 #include "hash_table.h"

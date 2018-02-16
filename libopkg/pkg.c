@@ -23,7 +23,6 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <libgen.h>
-#include <malloc.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 

@@ -26,7 +26,7 @@
 #include <unistd.h>
 #include <utime.h>
 #include <fcntl.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "opkg_message.h"

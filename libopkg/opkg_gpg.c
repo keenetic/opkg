@@ -19,7 +19,7 @@
 #include "config.h"
 
 #include <gpgme.h>
-#include <malloc.h>
+#include <stdlib.h>
 
 #include "opkg_conf.h"
 #include "opkg_message.h"
@@ -45,7 +45,7 @@ static int gpgme_init()
         opkg_msg(ERROR, "GPGME Failed to set signature directory: %s\n", gpg_strerror(err));
         goto err;
     }
-  
+
     if (opkg_config->verbosity >= DEBUG2 ) {
         err = gpgme_get_engine_info(&info);
         if (err) {

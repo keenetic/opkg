@@ -36,7 +36,7 @@
 
 #ifdef HAVE_PATHFINDER
 #include <libpathfinder.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include "xfuncs.h"
 
 /* This callback is called instead of X509_verify_cert to perform path
