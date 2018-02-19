@@ -1,3 +1,29 @@
+opkg-0.3.6
+==========
+
+- Optimize access to packagename.list file
+
+- Add compress_list_files option to optimize disk space (issue 11912)
+
+- Avoid duplicated entries on status file, due to stale package index (issue
+  8351)
+
+- Miscelaneous fixes to make opkg compatible on more paltforms.
+
+Internal Solver:
+
+- Enable upgrades of installed packages that Provide a virtual package already
+  installed (issue 11926, regression from 0.3.4)
+
+Libsolv:
+
+- Add list-upgradable support (issue 8165)
+
+- Run maintainer scripts in correct order when upgrading virtual packages
+  (issue 11362)
+
+- Make missing packages solvable non-version constrained
+
 opkg-0.3.5
 ==========
 
