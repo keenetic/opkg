@@ -837,8 +837,9 @@ static int libsolv_solver_transaction_preamble(libsolv_solver_t *libsolv_solver,
 
         const char *pkg_name = pool_id2str(libsolv_solver->pool, solvable->name);
         const char *evr = pool_id2str(libsolv_solver->pool, solvable->evr);
+        const char *arch = pool_id2str(libsolv_solver->pool, solvable->arch);
 
-        pkg = pkg_hash_fetch_by_name_version(pkg_name, evr);
+        pkg = pkg_hash_fetch_by_name_version_arch(pkg_name, evr, arch);
         pkg_vec_insert(pkgs, pkg);
 
         if (!no_action && pkg->local_filename == NULL &&

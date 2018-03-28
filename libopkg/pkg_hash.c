@@ -634,7 +634,9 @@ pkg_t *pkg_hash_fetch_best_installation_candidate_by_name(const char *name)
     return pkg_hash_fetch_best_installation_candidate(apkg, NULL, NULL, 0, 0);
 }
 
-pkg_t *pkg_hash_fetch_by_name_version(const char *pkg_name, const char *version)
+pkg_t *pkg_hash_fetch_by_name_version_arch(const char *pkg_name,
+                                           const char *version,
+                                           const char *arch)
 {
     pkg_vec_t *vec;
     long i;
@@ -649,7 +651,9 @@ pkg_t *pkg_hash_fetch_by_name_version(const char *pkg_name, const char *version)
     // This is so that libsolv choses the correct package for reinstall
     for (i = vec->len-1; i >= 0; i--) {
         version_str = pkg_version_str_alloc(vec->pkgs[i]);
-        if (strcmp(version_str, version) == 0) {
+        int is_match = (strcmp(version_str, version) == 0)
+                && (strcmp(vec->pkgs[i]->architecture, arch) == 0);
+        if (is_match) {
             free(version_str);
             break;
         }
