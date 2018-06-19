@@ -524,6 +524,12 @@ static void populate_installed_repo(libsolv_solver_t *libsolv_solver)
         if (opkg_config->force_depends)
             queue_push2(&libsolv_solver->solver_jobs, SOLVER_SOLVABLE
                         | SOLVER_WEAKENDEPS, solvable_id);
+
+        if (pkg->essential && !opkg_config->force_removal_of_essential_packages) {
+            Id essential_pkg_id = pool_str2id(libsolv_solver->pool, pkg->name, 1);
+            queue_push2(&libsolv_solver->solver_jobs, SOLVER_SOLVABLE_NAME
+                        | SOLVER_INSTALL | SOLVER_ESSENTIAL, essential_pkg_id);
+        }
     }
 
     pkg_vec_free(installed_pkgs);

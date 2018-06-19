@@ -24,6 +24,7 @@ REGRESSION_TESTS := core/01_install.py \
 		    core/23_force_depends.py \
 		    core/24_nodeps.py \
 		    core/25_essential.py \
+		    core/25a_essential.py \
 		    core/26_prefer_arch_to_version.py \
 		    core/27_reldeps_lt.py \
 		    core/28_reldeps_lteq.py \
