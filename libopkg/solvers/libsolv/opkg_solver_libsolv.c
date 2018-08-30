@@ -894,14 +894,20 @@ static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
             switch (typeId) {
             case SOLVER_TRANSACTION_ERASE:
                 ret = opkg_remove_pkg(pkg);
+                if (ret) {
+                    err = -1;
+                    goto CLEANUP;
+                }
                 break;
             case SOLVER_TRANSACTION_OBSOLETES:
                 /* Replaces operations are expressed in two steps: the first one is a SOLVER_TRANSACTION_OBSOLETES, with the name of
                  * the replacer package. The second one is a SOLVER_TRANSACTION_IGNORE, with the name of the replacee */
                 obs = pkgs->pkgs[i + 1];
                 ret = opkg_remove_pkg(obs);
-                if (ret)
-                    break;
+                if (ret) {
+                    err = -1;
+                    goto CLEANUP;
+                }
             case SOLVER_TRANSACTION_DOWNGRADE:
             case SOLVER_TRANSACTION_REINSTALL:
             case SOLVER_TRANSACTION_INSTALL:
@@ -923,6 +929,10 @@ static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
                                  pkg->name, pkg->version, pkg->dest->name);
                 }
                 ret = opkg_install_pkg(pkg);
+                if (ret) {
+                    err = -1;
+                    goto CLEANUP;
+                }
                 break;
             case SOLVER_TRANSACTION_UPGRADE:
                 old = pkg_hash_fetch_installed_by_name(pkg->name);
@@ -951,14 +961,15 @@ static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
                 }
 
                 ret = opkg_install_pkg(pkg);
+                if (ret) {
+                    err = -1;
+                    goto CLEANUP;
+                }
                 break;
             case SOLVER_TRANSACTION_IGNORE:
             default:
-                ret = 0;
                 break;
             }
-            if (ret)
-                err = -1;
         }
     }
 
