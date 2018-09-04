@@ -137,7 +137,7 @@ void remove_maintainer_scripts(pkg_t * pkg)
 {
     unsigned int i;
     int err;
-    char *globpattern;
+    char *globpattern, *filename, *lastdot;
     glob_t globbuf;
 
     if (opkg_config->noaction)
@@ -151,8 +151,16 @@ void remove_maintainer_scripts(pkg_t * pkg)
         return;
 
     for (i = 0; i < globbuf.gl_pathc; i++) {
-        opkg_msg(INFO, "Deleting %s.\n", globbuf.gl_pathv[i]);
-        unlink(globbuf.gl_pathv[i]);
+        filename = xstrdup(basename(globbuf.gl_pathv[i]));
+        lastdot = strrchr(filename, '.');
+        *lastdot = '\0';
+        // Only delete files that match the package name (the glob may match files
+        // with similar names)
+        if (!strcmp(filename, pkg->name)) {
+            opkg_msg(INFO, "Deleting %s.\n", globbuf.gl_pathv[i]);
+            unlink(globbuf.gl_pathv[i]);
+        }
+        free(filename);
     }
     globfree(&globbuf);
 }
