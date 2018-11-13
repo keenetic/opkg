@@ -1207,11 +1207,10 @@ file_list_t *pkg_get_installed_files(pkg_t * pkg)
                 // already contains root_dir as header -> ABSOLUTE
                 sprintf_alloc(&installed_file_name, "%s", file_name);
             }
-            if (xlstat(installed_file_name, &file_stat) == 0) {
+            if (!mode && xlstat(installed_file_name, &file_stat) == 0)
                 mode = file_stat.st_mode;
-                if (S_ISLNK(mode))
-                    link_target = readlink_buf = file_readlink_alloc(installed_file_name);
-            }
+            if (!link_target && S_ISLNK(mode))
+                link_target = readlink_buf = file_readlink_alloc(installed_file_name);
         }
         file_list_append(pkg->installed_files, installed_file_name, mode, link_target);
         free(installed_file_name);
@@ -1406,7 +1405,34 @@ static void pkg_write_filelist_helper(const char *key, void *entry_,
     struct pkg_write_filelist_data *data = data_;
     pkg_t *entry = entry_;
     if (entry == data->pkg) {
-        fprintf(data->stream, "%s\n", key);
+        char *installed_file_name;
+        struct stat file_stat;
+        mode_t mode = 0;
+        char *link_target = NULL;
+        int unmatched_offline_root = opkg_config->offline_root
+                && !str_starts_with(key, opkg_config->offline_root);
+        if (unmatched_offline_root) {
+            sprintf_alloc(&installed_file_name, "%s%s",
+                          opkg_config->offline_root, key);
+        } else {
+            // already contains root_dir as header -> ABSOLUTE
+            sprintf_alloc(&installed_file_name, "%s", key);
+        }
+        if (xlstat(installed_file_name, &file_stat) == 0) {
+            mode = file_stat.st_mode;
+            if (S_ISLNK(mode))
+                link_target = file_readlink_alloc(installed_file_name);
+        }
+
+        if (link_target)
+            fprintf(data->stream, "%s\t%03o\t%s\n", key, (unsigned int)mode, link_target);
+        else if (mode)
+            fprintf(data->stream, "%s\t%03o\n", key, (unsigned int)mode);
+        else
+            fprintf(data->stream, "%s\n", key);
+
+        free(link_target);
+        free(installed_file_name);
     }
 }
 
