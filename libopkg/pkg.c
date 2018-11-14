@@ -1425,9 +1425,9 @@ static void pkg_write_filelist_helper(const char *key, void *entry_,
         }
 
         if (link_target)
-            fprintf(data->stream, "%s\t%03o\t%s\n", key, (unsigned int)mode, link_target);
+            fprintf(data->stream, "%s\t%#03o\t%s\n", key, (unsigned int)mode, link_target);
         else if (mode)
-            fprintf(data->stream, "%s\t%03o\n", key, (unsigned int)mode);
+            fprintf(data->stream, "%s\t%#03o\n", key, (unsigned int)mode);
         else
             fprintf(data->stream, "%s\n", key);
 
