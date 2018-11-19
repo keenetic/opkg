@@ -596,6 +596,19 @@ static struct archive *open_inner(struct archive *outer)
     }
 #endif
 
+#if HAVE_LZ4
+    r = archive_read_support_filter_lz4(inner);
+    if (r == ARCHIVE_WARN) {
+        /* libarchive returns ARCHIVE_WARN if the filter is provided by
+         * an external program.
+         */
+        opkg_msg(INFO, "Lz4 support provided by external program.\n");
+    } else if (r != ARCHIVE_OK) {
+        opkg_msg(ERROR, "Lz4 format not supported.\n");
+        goto err_cleanup;
+    }
+#endif
+
     r = archive_read_support_format_tar(inner);
     if (r != ARCHIVE_OK) {
         opkg_msg(ERROR, "Tar format not supported: %s\n",
@@ -805,6 +818,11 @@ struct opkg_ar *ar_open_pkg_control_archive(const char *filename)
         ar->ar = extract_outer(filename, "control.tar.bz2");
     }
 #endif
+#if HAVE_LZ4
+    if (!ar->ar) {
+        ar->ar = extract_outer(filename, "control.tar.lz4");
+    }
+#endif
     if (!ar->ar) {
         free(ar);
         return NULL;
@@ -835,6 +853,11 @@ struct opkg_ar *ar_open_pkg_data_archive(const char *filename)
 #if HAVE_BZIP2
     if (!ar->ar) {
         ar->ar = extract_outer(filename, "data.tar.bz2");
+    }
+#endif
+#if HAVE_LZ4
+    if (!ar->ar) {
+        ar->ar = extract_outer(filename, "data.tar.lz4");
     }
 #endif
     if (!ar->ar) {

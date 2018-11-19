@@ -84,6 +84,17 @@ if test "$want_bzip2" = "yes"; then
 fi
 AM_CONDITIONAL(HAVE_BZIP2, test "$want_bzip2" = "yes")
 
+# check for lz4
+AC_ARG_ENABLE(lz4,
+              AC_HELP_STRING([--enable-lz4], [Enable lz4 compressor support
+      [default=no] ]),
+    [want_lz4="$enableval"], [want_lz4="no"])
+
+if test "$want_lz4" = "yes"; then
+  AC_DEFINE(HAVE_LZ4, 1, [Define if you want lz4 support])
+fi
+AM_CONDITIONAL(HAVE_LZ4, test "$want_lz4" = "yes")
+
 # check for libcurl
 AC_ARG_ENABLE(curl,
               AC_HELP_STRING([--enable-curl], [Enable downloading with curl
