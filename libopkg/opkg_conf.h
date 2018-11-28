@@ -75,6 +75,7 @@ typedef struct opkg_conf {
     char *lock_file;
     char *info_dir;
     char *status_file;
+    char *fields_filter; /* specific fields the user requests */
 
     unsigned int pfm;       /* package field mask */
 

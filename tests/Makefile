@@ -40,6 +40,7 @@ REGRESSION_TESTS := core/01_install.py \
 		    core/38_install_constrained_version.py \
 		    core/39_distupgrade.py \
 		    core/40_arch.py \
+		    core/41_info_fields.py \
 		    regress/issue26.py \
 		    regress/issue31.py \
 		    regress/issue32.py \
@@ -89,6 +90,7 @@ REGRESSION_TESTS := core/01_install.py \
 		    misc/filehash.py \
 		    misc/update_loses_autoinstalled_flag.py \
 		    misc/version_comparisons.py
+
 RUN_TESTS := $(REGRESSION_TESTS:%.py=run-%.py)
 
 regress: $(RUN_TESTS)

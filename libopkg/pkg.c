@@ -546,13 +546,21 @@ static const char *pkg_state_status_to_str(pkg_state_status_t ss)
     return "<STATE_STATUS_UNKNOWN>";
 }
 
-static void pkg_formatted_field(FILE * fp, pkg_t * pkg, const char *field)
+static int should_include_field(const char *field, const char *fields_filter)
+{
+   return field && (!fields_filter || strstr(fields_filter, field));
+}
+
+static void pkg_formatted_field(FILE * fp, pkg_t * pkg, const char *field, const char *fields_filter)
 {
     unsigned int i, j;
     char *str;
     unsigned int depends_count = pkg->pre_depends_count + pkg->depends_count
         + pkg->recommends_count + pkg->suggests_count;
 
+    if (!should_include_field(field, fields_filter)) {
+       return;
+    }
     if (strlen(field) < PKG_MINIMUM_FIELD_NAME_LEN) {
         goto UNKNOWN_FMT_FIELD;
     }
@@ -807,7 +815,7 @@ static void pkg_formatted_field(FILE * fp, pkg_t * pkg, const char *field)
     opkg_msg(ERROR, "Internal error: field=%s\n", field);
 }
 
-static void pkg_formatted_userfields(FILE *fp, pkg_t *pkg)
+static void pkg_formatted_userfields(FILE *fp, pkg_t *pkg, const char *fields_filter)
 {
     nv_pair_list_elt_t *iter;
 
@@ -818,9 +826,8 @@ static void pkg_formatted_userfields(FILE *fp, pkg_t *pkg)
                 iter = nv_pair_list_next(&pkg->userfields, iter)) {
         nv_pair_t *uf = (nv_pair_t *)iter->data;
 
-        if (uf->name && uf->value) {
-            fprintf(fp, "%s: %s\n", ((nv_pair_t *)iter->data)->name,
-                    ((nv_pair_t *)iter->data)->value);
+        if (should_include_field(uf->name, fields_filter) && uf->value) {
+            fprintf(fp, "%s: %s\n", uf->name, uf->value);
         }
     }
 }
@@ -839,32 +846,32 @@ pkg_state_status_t pkg_state_status_from_str(const char *str)
     return SS_NOT_INSTALLED;
 }
 
-void pkg_formatted_info(FILE * fp, pkg_t * pkg)
+void pkg_formatted_info(FILE * fp, pkg_t * pkg, const char *fields_filter)
 {
-    pkg_formatted_field(fp, pkg, "Package");
-    pkg_formatted_field(fp, pkg, "Version");
-    pkg_formatted_field(fp, pkg, "Depends");
-    pkg_formatted_field(fp, pkg, "Recommends");
-    pkg_formatted_field(fp, pkg, "Suggests");
-    pkg_formatted_field(fp, pkg, "Provides");
-    pkg_formatted_field(fp, pkg, "Replaces");
-    pkg_formatted_field(fp, pkg, "Conflicts");
-    pkg_formatted_field(fp, pkg, "Status");
-    pkg_formatted_field(fp, pkg, "Section");
-    pkg_formatted_field(fp, pkg, "Essential");
-    pkg_formatted_field(fp, pkg, "Architecture");
-    pkg_formatted_field(fp, pkg, "Maintainer");
-    pkg_formatted_field(fp, pkg, "MD5sum");
-    pkg_formatted_field(fp, pkg, "Size");
-    pkg_formatted_field(fp, pkg, "Filename");
-    pkg_formatted_field(fp, pkg, "Conffiles");
-    pkg_formatted_field(fp, pkg, "Source");
-    pkg_formatted_field(fp, pkg, "Description");
-    pkg_formatted_field(fp, pkg, "Installed-Size");
-    pkg_formatted_field(fp, pkg, "Installed-Time");
-    pkg_formatted_field(fp, pkg, "Tags");
+    pkg_formatted_field(fp, pkg, "Package", NULL);
+    pkg_formatted_field(fp, pkg, "Version", fields_filter);
+    pkg_formatted_field(fp, pkg, "Depends", fields_filter);
+    pkg_formatted_field(fp, pkg, "Recommends", fields_filter);
+    pkg_formatted_field(fp, pkg, "Suggests", fields_filter);
+    pkg_formatted_field(fp, pkg, "Provides", fields_filter);
+    pkg_formatted_field(fp, pkg, "Replaces", fields_filter);
+    pkg_formatted_field(fp, pkg, "Conflicts", fields_filter);
+    pkg_formatted_field(fp, pkg, "Status", fields_filter);
+    pkg_formatted_field(fp, pkg, "Section", fields_filter);
+    pkg_formatted_field(fp, pkg, "Essential", fields_filter);
+    pkg_formatted_field(fp, pkg, "Architecture", fields_filter);
+    pkg_formatted_field(fp, pkg, "Maintainer", fields_filter);
+    pkg_formatted_field(fp, pkg, "MD5sum", fields_filter);
+    pkg_formatted_field(fp, pkg, "Size", fields_filter);
+    pkg_formatted_field(fp, pkg, "Filename", fields_filter);
+    pkg_formatted_field(fp, pkg, "Conffiles", fields_filter);
+    pkg_formatted_field(fp, pkg, "Source", fields_filter);
+    pkg_formatted_field(fp, pkg, "Description", fields_filter);
+    pkg_formatted_field(fp, pkg, "Installed-Size", fields_filter);
+    pkg_formatted_field(fp, pkg, "Installed-Time", fields_filter);
+    pkg_formatted_field(fp, pkg, "Tags", fields_filter);
     if (opkg_config->verbose_status_file) {
-        pkg_formatted_userfields(fp, pkg);
+        pkg_formatted_userfields(fp, pkg, fields_filter);
     }
     fputs("\n", fp);
 }
@@ -875,36 +882,36 @@ void pkg_print_status(pkg_t * pkg, FILE * file)
         return;
     }
 
-    pkg_formatted_field(file, pkg, "Package");
-    pkg_formatted_field(file, pkg, "Version");
-    pkg_formatted_field(file, pkg, "Depends");
-    pkg_formatted_field(file, pkg, "Recommends");
-    pkg_formatted_field(file, pkg, "Suggests");
-    pkg_formatted_field(file, pkg, "Provides");
-    pkg_formatted_field(file, pkg, "Replaces");
-    pkg_formatted_field(file, pkg, "Conflicts");
-    pkg_formatted_field(file, pkg, "Status");
+    pkg_formatted_field(file, pkg, "Package", NULL);
+    pkg_formatted_field(file, pkg, "Version", NULL);
+    pkg_formatted_field(file, pkg, "Depends", NULL);
+    pkg_formatted_field(file, pkg, "Recommends", NULL);
+    pkg_formatted_field(file, pkg, "Suggests", NULL);
+    pkg_formatted_field(file, pkg, "Provides", NULL);
+    pkg_formatted_field(file, pkg, "Replaces", NULL);
+    pkg_formatted_field(file, pkg, "Conflicts", NULL);
+    pkg_formatted_field(file, pkg, "Status", NULL);
     if (opkg_config->verbose_status_file) {
-        pkg_formatted_field(file, pkg, "Section");
+        pkg_formatted_field(file, pkg, "Section", NULL);
     }
-    pkg_formatted_field(file, pkg, "Essential");
-    pkg_formatted_field(file, pkg, "Architecture");
+    pkg_formatted_field(file, pkg, "Essential", NULL);
+    pkg_formatted_field(file, pkg, "Architecture", NULL);
     if (opkg_config->verbose_status_file) {
-        pkg_formatted_field(file, pkg, "Maintainer");
-        pkg_formatted_field(file, pkg, "MD5sum");
-        pkg_formatted_field(file, pkg, "Size");
-        pkg_formatted_field(file, pkg, "Filename");
+        pkg_formatted_field(file, pkg, "Maintainer", NULL);
+        pkg_formatted_field(file, pkg, "MD5sum", NULL);
+        pkg_formatted_field(file, pkg, "Size", NULL);
+        pkg_formatted_field(file, pkg, "Filename", NULL);
     }
-    pkg_formatted_field(file, pkg, "Conffiles");
+    pkg_formatted_field(file, pkg, "Conffiles", NULL);
     if (opkg_config->verbose_status_file) {
-        pkg_formatted_field(file, pkg, "Source");
-        pkg_formatted_field(file, pkg, "Description");
+        pkg_formatted_field(file, pkg, "Source", NULL);
+        pkg_formatted_field(file, pkg, "Description", NULL);
     }
-    pkg_formatted_field(file, pkg, "Installed-Size");
-    pkg_formatted_field(file, pkg, "Installed-Time");
-    pkg_formatted_field(file, pkg, "Auto-Installed");
+    pkg_formatted_field(file, pkg, "Installed-Size", NULL);
+    pkg_formatted_field(file, pkg, "Installed-Time", NULL);
+    pkg_formatted_field(file, pkg, "Auto-Installed", NULL);
     if (opkg_config->verbose_status_file) {
-        pkg_formatted_userfields(file, pkg);
+        pkg_formatted_userfields(file, pkg, NULL);
     }
     fputs("\n", file);
 }

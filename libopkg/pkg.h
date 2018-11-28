@@ -202,7 +202,7 @@ int pkg_compare_versions_no_reinstall(const pkg_t * pkg, const pkg_t * ref_pkg);
 int pkg_name_version_and_architecture_compare(const void *a, const void *b);
 int abstract_pkg_name_compare(const void *a, const void *b);
 
-void pkg_formatted_info(FILE * fp, pkg_t * pkg);
+void pkg_formatted_info(FILE * fp, pkg_t * pkg, const char *fields_filter);
 
 void set_flags_from_control(pkg_t * pkg);
 

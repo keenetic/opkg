@@ -638,7 +638,7 @@ static int opkg_info_status_cmd(int argc, char **argv, int installed_only)
             continue;
         }
 
-        pkg_formatted_info(stdout, pkg);
+        pkg_formatted_info(stdout, pkg, opkg_config->fields_filter);
 
         if (opkg_config->verbosity >= INFO) {
             conffile_list_elt_t *iter;
@@ -661,7 +661,7 @@ static int opkg_info_status_cmd(int argc, char **argv, int installed_only)
         if (err)
             return err;
         hash_insert_pkg(pkg, 0);
-        pkg_formatted_info(stdout, pkg);
+        pkg_formatted_info(stdout, pkg, opkg_config->fields_filter);
     }
 
     return 0;
