@@ -147,6 +147,9 @@ priority \fIprio\fP. Lower priorities take precedence.
 \fB\--fields <\fIfield1\fP>,<\fIfield2\fP>\fR
 Limit display information to the specified fields plus
 the package name. Valid for \fBinfo\fP and \fBstatus\fP.
+.TP
+\fB\--short-description
+Display only the first line of the description.
 .SS FORCE OPTIONS
 .TP
 \fB\--force-depends \fR

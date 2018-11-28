@@ -632,7 +632,15 @@ static void pkg_formatted_field(FILE * fp, pkg_t * pkg, const char *field, const
             }
         } else if (strcasecmp(field, "Description") == 0) {
             if (pkg->description) {
-                fprintf(fp, "Description: %s\n", pkg->description);
+                const char* first_line_end = strchr(pkg->description, '\n');
+                if (opkg_config->short_description && first_line_end) {
+                    fprintf(fp, "Description: %.*s\n",
+                            (int)(first_line_end - pkg->description),
+                            pkg->description);
+                }
+                else {
+                    fprintf(fp, "Description: %s\n", pkg->description);
+                }
             }
         } else {
             goto UNKNOWN_FMT_FIELD;

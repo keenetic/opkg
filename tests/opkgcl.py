@@ -27,11 +27,11 @@ def upgrade(params=None, flags=""):
 	else:
 		return opkgcl("--force-postinstall upgrade")[0]
 
-def info(pkg_name, params=None):
+def info(pkg_name, params=None, flags=""):
 	if params:
-		return opkgcl("--fields {} info {}".format(params, pkg_name))[1]
+		return opkgcl("{} --fields {} info {}".format(flags, params, pkg_name))[1]
 	else:
-		return opkgcl("info {}".format(pkg_name))[1]
+		return opkgcl("{} info {}".format(flags, pkg_name))[1]
 
 def distupgrade(params=None, flags=""):
 	if params:

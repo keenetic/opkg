@@ -60,6 +60,7 @@ enum {
     ARGS_OPT_NO_INSTALL_RECOMMENDS,
     ARGS_OPT_CACHE_DIR,
     ARGS_OPT_HOST_CACHE_DIR,
+    ARGS_OPT_SHORT_DESCRIPTION,
     ARGS_OPT_FIELDS_FILTER,
 };
 
@@ -119,6 +120,7 @@ static struct option long_options[] = {
     {"cache-dir", 1, 0, ARGS_OPT_CACHE_DIR},
     {"host-cache-dir", 0, 0, ARGS_OPT_HOST_CACHE_DIR},
     {"volatile-cache", 0, 0, ARGS_OPT_VOLATILE_CACHE},
+    {"short-description", 0, 0, ARGS_OPT_SHORT_DESCRIPTION},
     {"fields", 1, 0, ARGS_OPT_FIELDS_FILTER},
     {"verbosity", 2, 0, 'V'},
     {"version", 0, 0, 'v'},
@@ -253,6 +255,9 @@ static int args_parse(int argc, char *argv[])
         case ARGS_OPT_NO_INSTALL_RECOMMENDS:
             opkg_config->no_install_recommends = 1;
             break;
+        case ARGS_OPT_SHORT_DESCRIPTION:
+           opkg_config->short_description = 1;
+           break;
         case ARGS_OPT_FIELDS_FILTER:
             opkg_config->fields_filter = xstrdup(optarg);
             break;
@@ -341,6 +346,7 @@ static void usage()
     printf("\t--combine                       Combine upgrade and install operations, this\n");
     printf("\t                                may be needed to resolve dependency issues.\n");
     printf("\t                                Only available for the internal solver backend.\n");
+    printf("\t--short-description             Display only the first line of the description.\n");
     printf("\t--fields <field1>,<field2>      Limit display information to the specified fields\n");
     printf("\t                                plus the package name. Valid for info and status.\n");
 

@@ -121,6 +121,7 @@ typedef struct opkg_conf {
     int host_cache_dir;
     int verbose_status_file;
     int compress_list_files;
+    int short_description;
 
     /* ssl options: used only when opkg is configured with '--enable-curl',
      * otherwise always NULL or 0.
