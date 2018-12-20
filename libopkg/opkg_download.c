@@ -288,7 +288,7 @@ int opkg_download_pkg(pkg_t * pkg)
 
     /* Check if valid package exists in cache */
     err = pkg_verify(pkg);
-    if (!err)
+    if (err != 1)
         goto cleanup;
 
     err = opkg_download_internal(url, pkg->local_filename, NULL, NULL, 1);

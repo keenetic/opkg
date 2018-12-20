@@ -389,10 +389,8 @@ int pkg_merge(pkg_t * oldpkg, pkg_t * newpkg)
         oldpkg->tmp_unpack_dir = xstrdup(newpkg->tmp_unpack_dir);
     if (!oldpkg->md5sum)
         oldpkg->md5sum = xstrdup(newpkg->md5sum);
-#if defined HAVE_SHA256
     if (!oldpkg->sha256sum)
         oldpkg->sha256sum = xstrdup(newpkg->sha256sum);
-#endif
     if (!oldpkg->size)
         oldpkg->size = newpkg->size;
     if (!oldpkg->installed_size)
@@ -754,12 +752,10 @@ static void pkg_formatted_field(FILE * fp, pkg_t * pkg, const char *field, const
             if (pkg->section) {
                 fprintf(fp, "Section: %s\n", pkg->section);
             }
-#if defined HAVE_SHA256
         } else if (strcasecmp(field, "SHA256sum") == 0) {
             if (pkg->sha256sum) {
                 fprintf(fp, "SHA256sum: %s\n", pkg->sha256sum);
             }
-#endif
         } else if (strcasecmp(field, "Size") == 0) {
             if (pkg->size) {
                 fprintf(fp, "Size: %ld\n", pkg->size);
@@ -1510,21 +1506,27 @@ int pkg_verify(pkg_t * pkg)
     int err;
     char *local_sig_filename = NULL;
 
-    /* Silently fail verification if the package doesn't exist locally as the
-     * caller may be about to download it. */
+    /* Exit if the package doesn't exist locally as the caller may be about to
+     * download it. */
     if (!file_exists(pkg->local_filename))
-        return -1;
+        return 1;
 
-    if (pkg->md5sum) {
-        err = opkg_verify_md5sum(pkg->local_filename, pkg->md5sum);
-        if (err)
-            goto fail;
-    }
-
+#ifdef HAVE_SHA256
     if (pkg->sha256sum) {
         err = opkg_verify_sha256sum(pkg->local_filename, pkg->sha256sum);
         if (err)
             goto fail;
+    }
+    else
+#endif
+    if (pkg->md5sum) {
+        err = opkg_verify_md5sum(pkg->local_filename, pkg->md5sum);
+        if (err)
+            goto fail;
+    } else if (!opkg_config->force_checksum) {
+         opkg_msg(ERROR, "Checksum is either missing or unsupported on opkg. To bypass verification "
+                  "use --force-checksum. Aborting \n");
+         return -1;
     }
 
     if (opkg_config->check_pkg_signature) {

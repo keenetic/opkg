@@ -250,10 +250,8 @@ int pkg_parse_line(void *ptr, const char *line, uint mask)
     case 'S':
         if ((mask & PFM_SECTION) && is_field("Section", line))
             pkg->section = parse_simple("Section", line);
-#ifdef HAVE_SHA256
         else if ((mask & PFM_SHA256SUM) && is_field("SHA256sum", line))
             pkg->sha256sum = parse_simple("SHA256sum", line);
-#endif
         else if ((mask & PFM_SIZE) && is_field("Size", line)) {
             char *tmp = parse_simple("Size", line);
             pkg->size = strtoul(tmp, NULL, 0);
