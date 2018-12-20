@@ -30,6 +30,9 @@ Configure unpacked \fIpackage(s)\fP
 Remove \fIpackage(s)\fP. \fIglob\fP works like a shell globbing pattern and
 could be something like 'pkgname*' '*file*' or similar
 .TP
+\fBclean \fR
+Clean internal cache
+.TP
 \fBflag <\fIflag\fP> <\fIpackages\fP>\fR
 Flag \fIpackage(s)\fP. Available flags (one per invocation):
 .TS
@@ -91,9 +94,15 @@ c l.
 \fBprint-architecture\fR
 List installable package architectures
 .TP
+\fBdepends [\fI\-A\fP] <\fIpackage(s)\fP|\fIglob\fP>\fR
+.TP
 \fBwhatdepends [\fI\-A\fP] <\fIpackage(s)\fP|\fIglob\fP>\fR
 .TP
 \fBwhatdependsrec [\fI\-A\fP] <\fIpackage(s)\fP|\fIglob\fP>\fR
+.TP
+\fBwhatrecommends [\fI\-A\fP] <\fIpackage(s)\fP|\fIglob\fP>\fR
+.TP
+\fBwhatsuggests [\fI\-A\fP] <\fIpackage(s)\fP|\fIglob\fP>\fR
 .TP
 \fBwhatprovides [\fI\-A\fP] <\fIpackage(s)\fP|\fIglob\fP>\fR
 .TP
@@ -123,8 +132,14 @@ l l.
 \fB\-f <\fIconf_file\fP>, \fB\--conf <\fIconf_file\fP>\fR
 Use \fIconf_file\fP as the opkg configuration file
 .TP
-\fB\--cache <\fIdirectory\fP>\fR
+\fB\--cache-dir <\fIdirectory\fP>\fR
 Use a package cache
+.TP
+\fB\-t <\fIdirectory\fP>, \--tmp-dir <\fIdirectory\fP>\fR
+Specify \fIdirectory\fP as temporary directory
+.TP
+\fB\-l <\fIdirectory\fP>, \--lists-dir <\fIdirectory\fP>\fR
+Specify \fIdirectory\fP as package lists directory
 .TP
 \fB\-d <\fIdest_name\fP>, \fB\--dest <\fIdest_name\fP>\fR
 Use \fIdest_name\fP as the the root directory for
@@ -144,12 +159,26 @@ conjunction with \fB\--dest\fP
 Register the package architecture \fIarch\fP with the numeric
 priority \fIprio\fP. Lower priorities take precedence.
 .TP
+\fB\--add-exclude <\fIname\fP>\fR
+Register package to be excluded from install
+.TP
+\fB\--prefer-arch-to-version\fR
+Use the architecture priority package rather than the higher version
+one if more than one candidate is found.
+.TP
+\fB\--combine\fR
+Combine upgrade and install operations, this may be needed to resolve
+dependency issues. Only available for the internal solver backend.
+.TP
 \fB\--fields <\fIfield1\fP>,<\fIfield2\fP>\fR
 Limit display information to the specified fields plus
 the package name. Valid for \fBinfo\fP and \fBstatus\fP.
 .TP
 \fB\--short-description
 Display only the first line of the description.
+.TP
+\fB\--size\fR
+Print package size when listing available packages
 .SS FORCE OPTIONS
 .TP
 \fB\--force-depends \fR
@@ -182,14 +211,14 @@ Don't fail on checksum mismatches
 \fB\--noaction\fR
 No action \- test only
 .TP
-\fB\--size\fR
-Print package size when listing available packages
-.TP
 \fB\--download-only\fR
 No action \- download only
 .TP
 \fB\--nodeps\fR
 Do not follow dependencies
+.TP
+\fB\--no-install-recommends\fR
+Do not install any recommended packages
 .TP
 \fB\--force-removal-of-dependent-packages\fR
 Remove package and all dependencies
@@ -197,14 +226,14 @@ Remove package and all dependencies
 \fB\--autoremove\fR
 Remove packages that were installed automatically to satisfy dependencies
 .TP
-\fB\-t <\fIdirectory\fP>, \--tmp-dir <\fIdirectory\fP>\fR
-Specify \fIdirectory\fP as temporary directory
+\fB\--host-cache-dir\fR
+Don't place cache in offline root dir
 .TP
-\fB\-l <\fIdirectory\fP>, \--lists-dir <\fIdirectory\fP>\fR
-Specify \fIdirectory\fP as package lists directory
+\fB\--volatile-cache\fR
+Use volatile cache. Volatile cache will be cleared on exit
 .
 .SH "REPORTING BUGS"
-Report bugs to http://code.google.com/p/opkg/issues/list
+Report bugs to https://bugzilla.yoctoproject.org/buglist.cgi?product=opkg
 .
 .P
 Copyright \(co Opkg development team.

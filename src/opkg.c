@@ -330,6 +330,9 @@ static void usage()
     printf("\t                                  4 debug level 2\n");
     printf("\t-f <conf_file>                  Use <conf_file> as the opkg configuration file\n");
     printf("\t--conf <conf_file>\n");
+    printf("\t--cache-dir <path>              Specify cache directory.\n");
+    printf("\t-t, --tmp-dir <directory>       Specify tmp-dir.\n");
+    printf("\t-l, --lists-dir <directory>     Specify lists-dir.\n");
     printf("\t-d <dest_name>                  Use <dest_name> as the the root directory for\n");
     printf("\t--dest <dest_name>              package installation, removal, upgrading.\n");
     printf("\t                                <dest_name> should be a defined dest name from\n");
@@ -337,8 +340,8 @@ static void usage()
     printf("\t                                directory name in a pinch).\n");
     printf("\t-o <dir>                        Use <dir> as the root directory for\n");
     printf("\t--offline-root <dir>            offline installation of packages.\n");
-    printf("\t--add-arch <arch>:<prio>        Register architecture with given priority\n");
     printf("\t--add-dest <name>:<path>        Register destination with given path\n");
+    printf("\t--add-arch <arch>:<prio>        Register architecture with given priority\n");
     printf("\t--add-exclude <name>            Register package to be excluded from install\n");
     printf("\t--prefer-arch-to-version        Use the architecture priority package rather\n");
     printf("\t                                than the higher version one if more\n");
@@ -346,9 +349,10 @@ static void usage()
     printf("\t--combine                       Combine upgrade and install operations, this\n");
     printf("\t                                may be needed to resolve dependency issues.\n");
     printf("\t                                Only available for the internal solver backend.\n");
-    printf("\t--short-description             Display only the first line of the description.\n");
     printf("\t--fields <field1>,<field2>      Limit display information to the specified fields\n");
     printf("\t                                plus the package name. Valid for info and status.\n");
+    printf("\t--short-description             Display only the first line of the description.\n");
+    printf("\t--size                          Print package size when listing available packages\n");
 
     printf("\nForce Options:\n");
     printf("\t--force-depends                 Install/remove despite failed dependencies\n");
@@ -361,7 +365,6 @@ static void usage()
     printf("\t--force-remove                  Remove package even if prerm script fails\n");
     printf("\t--force-checksum                Don't fail on checksum mismatches\n");
     printf("\t--noaction                      No action -- test only\n");
-    printf("\t--size                          Print package size when listing available packages\n");
     printf("\t--download-only                 No action -- download only\n");
     printf("\t--nodeps                        Do not follow dependencies\n");
     printf("\t--no-install-recommends         Do not install any recommended packages\n");
@@ -369,13 +372,9 @@ static void usage()
     printf("\t                                Remove package and all dependencies\n");
     printf("\t--autoremove                    Remove packages that were installed\n");
     printf("\t                                automatically to satisfy dependencies\n");
-    printf("\t-t, --tmp-dir <directory>       Specify tmp-dir.\n");
-    printf("\t-l, --lists-dir <directory>     Specify lists-dir.\n");
-    printf("\t--cache-dir <path>              Specify cache directory.\n");
     printf("\t--host-cache-dir                Don't place cache in offline root dir.\n");
     printf("\t--volatile-cache                Use volatile cache.\n");
     printf("\t                                Volatile cache will be cleared on exit\n");
-
     printf("\n");
 
     printf(" glob could be something like 'pkgname*' '*file*' or similar\n");
