@@ -1,3 +1,34 @@
+opkg-0.4.0
+==========
+
+- Remove support for long options with only one leading dash.
+
+- Use strict matching, instead of globs, when removing maintaner scripts (issue
+  12905).
+
+- Speed up opkg installed files algorithm (issue 12648). This was a regression
+  from 0.3.4.
+
+- Add support for lz4 compression.
+
+- Add --fields command line argument, to customize 'info' and 'status' output.
+
+- Add --short-description, to limit the output of 'info' and 'status'.
+
+- Error out if feeds only have sha256 sums, but --enable-sha256=false.
+
+- Clean up command line help and man page.
+
+Libsolv:
+
+- Use arch when finding a package match. Before it was only using name and
+  version, which lead to incorrect results if a feed had two packages with the
+  name and version, but different arch.
+
+- Make sure Essential package dependencies are not removed.
+
+- Abort installation on first failure.
+
 opkg-0.3.6
 ==========
 
