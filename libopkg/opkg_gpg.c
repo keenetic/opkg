@@ -20,11 +20,13 @@
 
 #include <gpgme.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 
 #include "opkg_conf.h"
 #include "opkg_message.h"
 #include "opkg_gpg.h"
 #include "sprintf_alloc.h"
+#include "file_util.h"
 
 static int gpgme_init()
 {
@@ -38,6 +40,13 @@ static int gpgme_init()
     if (err) {
         opkg_msg(ERROR, "GPGME Engine Check Failed: %s\n", gpg_strerror(err));
         goto err;
+    }
+
+    if (!file_exists(opkg_config->gpg_dir)) {
+        if (file_mkdir_hier(opkg_config->gpg_dir, 0700) != 0) {
+            opkg_perror(ERROR, "Failed to create gpg home dir: %s", opkg_config->gpg_dir);
+            goto err;
+        }
     }
 
     err = gpgme_set_engine_info(GPGME_PROTOCOL_OpenPGP, NULL, opkg_config->gpg_dir);
