@@ -145,18 +145,94 @@ out_err:
     return ret;
 }
 
+static const char* get_keyid(const gpgme_key_t key)
+{
+    if (key && key->subkeys && key->subkeys->keyid) {
+        return key->subkeys->keyid;
+    }
+    else {
+        return "";
+    }
+}
+
+/* Load all available keys into specified ctx */
+static int load_all_keys(gpgme_ctx_t ctx)
+{
+    int ret = -1;
+    int import_attempts = 0;
+    int import_failures = 0;
+    int has_lsctx = 0;
+    gpgme_key_t key[2] = {0, 0}; /* gpgme_op_import_keys() only takes NULL-terminated list */
+    gpgme_ctx_t lsctx;
+    gpgme_error_t err;
+
+    /* Gpgme can't iterate and add on the same context handle, so this
+     * function lists keys on `lsctx` add keys to `ctx`.
+     */
+    err = gpgme_new(&lsctx);
+    if (err) {
+        opkg_msg(ERROR, "Unable to create gpgme context: %s\n",
+            gpg_strerror(err));
+        goto out_err;
+    }
+    has_lsctx = 1;
+
+    err = gpgme_op_keylist_start(lsctx, "*", 0);
+    if (err) {
+        opkg_msg(ERROR, "gpgme_op_keylist_start() failed: %s\n",
+                 gpg_strerror(err));
+        goto out_err;
+    }
+
+    /* XXX/BUG Doesn't return GPG_ERR_EOF as documentation indicates
+     * Using loop-until-error based on <gpgme.git>/lang/cpp/src/data.cpp
+     */
+    while(!gpgme_op_keylist_next(lsctx, &key[0])) {
+        ++import_attempts;
+
+        err = gpgme_op_import_keys(ctx, key);
+        if (err) {
+            opkg_msg(DEBUG, "gpgme_op_import_keys() failed on keyid=\"%s\" (%d): %s\n",
+                     get_keyid(key[0]),
+                     import_attempts,
+                     gpg_strerror(err));
+            ++import_failures;
+        }
+
+        gpgme_key_release(key[0]);
+    }
+
+    err = gpgme_op_keylist_end(lsctx);
+    if (err) {
+        opkg_msg(ERROR, "gpgme_op_keylist_end() failed: %s\n",
+                 gpg_strerror(err));
+        goto out_err;
+    }
+
+    ret = 0;
+
+ out_err:
+    opkg_msg((import_failures == 0 ? INFO : ERROR),
+             "Found %d keys, %d failed import\n",
+             import_attempts, import_failures);
+
+    if (has_lsctx)
+        gpgme_release(lsctx);
+
+    return ret;
+}
+
 int opkg_verify_gpg_signature(const char *file, const char *sigfile)
 {
     int ret = -1;
     int trust = 0;
     gpgme_ctx_t ctx;
     int have_ctx = 0;
-    gpgme_data_t sig, text, key;
-    int have_sig = 0, have_text = 0, have_key = 0;
+    gpgme_data_t sig, text;
+    int have_sig = 0, have_text = 0;
     gpgme_error_t err;
     gpgme_verify_result_t result;
     gpgme_signature_t s;
-    char *trusted_path = NULL;
 
     if (gpgme_init()) {
         opkg_msg(ERROR, "GPGME Failed to initalize.\n");
@@ -175,24 +251,10 @@ int opkg_verify_gpg_signature(const char *file, const char *sigfile)
     gpgme_get_engine_info(&info);
     gpgme_ctx_set_engine_info(ctx, info->protocol, info->file_name, info->home_dir);
 
-    sprintf_alloc(&trusted_path, "%s/%s", opkg_config->gpg_dir, "trusted.gpg");
-    if (!trusted_path) {
-        opkg_msg(ERROR, "Out of memory!\n");
-        goto out_err;
-    }
-
-    err = gpgme_data_new_from_file(&key, trusted_path, 1);
-    if (err) {
-        opkg_msg(ERROR, "Unable to get data from file %s: %s\n", trusted_path,
-                 gpg_strerror(err));
-        goto out_err;
-    }
-    have_key = 1;
-
-    err = gpgme_op_import(ctx, key);
-    if (err) {
-        opkg_msg(ERROR, "Unable to import key from file %s: %s\n", trusted_path,
-                 gpg_strerror(err));
+    /* First verify signature against all available pubkeys.
+     * We verify the selected signing key is trusted at end.
+     */
+    if (load_all_keys(ctx) != 0) {
         goto out_err;
     }
 
@@ -250,10 +312,6 @@ int opkg_verify_gpg_signature(const char *file, const char *sigfile)
         gpgme_data_release(sig);
     if (have_text)
         gpgme_data_release(text);
-    if (have_key)
-        gpgme_data_release(key);
-    if (trusted_path)
-        free(trusted_path);
     if (have_ctx)
         gpgme_release(ctx);
 
