@@ -337,6 +337,11 @@ int file_mkdir_hier(const char *path, long mode)
     struct stat st;
     int r;
 
+    /* Default mode only permits user access */
+    if (mode == -1) {
+        mode = 0700;
+    }
+
     r = stat(path, &st);
     if (r < 0 && errno == ENOENT) {
         int status;
@@ -349,19 +354,22 @@ int file_mkdir_hier(const char *path, long mode)
         if (status < 0)
             return -1;
 
-        r = mkdir(path, 0777);
+        /* mode will be further constrained by the process umask */
+        r = mkdir(path, mode);
         if (r < 0) {
             opkg_perror(ERROR, "Cannot create directory `%s'", path);
             return -1;
         }
 
-        if (mode != -1) {
-            r = chmod(path, mode);
-            if (r < 0) {
-                opkg_perror(ERROR, "Cannot set permissions of directory `%s'",
-                            path);
-                return -1;
-            }
+        /* Set mode again with chmod() to realize the mode specified by
+         * callers, regardless of the process umask. Unlike the previous
+         * mkdir() operation, chmod() ignores umask.
+         */
+        r = chmod(path, mode);
+        if (r < 0) {
+            opkg_perror(ERROR, "Cannot set permissions of directory `%s'",
+                        path);
+            return -1;
         }
     }
 
