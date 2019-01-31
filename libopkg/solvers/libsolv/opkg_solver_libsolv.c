@@ -672,6 +672,10 @@ static int libsolv_solver_init(libsolv_solver_t *libsolv_solver)
     /* create the solver with the solver pool */
     libsolv_solver->solver = solver_create(libsolv_solver->pool);
 
+    /* allow upgrades of installed packages during install */
+    solver_set_flag(libsolv_solver->solver,
+                    SOLVER_FLAG_INSTALL_ALSO_UPDATES, 1);
+
     /* set libsolv solver flags to match behavoir of opkg options */
     if (opkg_config->force_removal_of_dependent_packages)
         solver_set_flag(libsolv_solver->solver,
@@ -685,8 +689,6 @@ static int libsolv_solver_init(libsolv_solver_t *libsolv_solver)
     } else {
          solver_set_flag(libsolv_solver->solver,
                         SOLVER_FLAG_STRONG_RECOMMENDS, 1);
-         solver_set_flag(libsolv_solver->solver,
-                        SOLVER_FLAG_INSTALL_ALSO_UPDATES, 1);
     }
     if (!opkg_config->prefer_arch_to_version) {
         solver_set_flag(libsolv_solver->solver,
