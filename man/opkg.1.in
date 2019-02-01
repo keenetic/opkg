@@ -162,6 +162,9 @@ priority \fIprio\fP. Lower priorities take precedence.
 \fB\--add-exclude <\fIname\fP>\fR
 Register package to be excluded from install
 .TP
+\fB\--add-ignore-recommends <\fIname\fP>\fR
+Register package to be ignored as a recomendee
+.TP
 \fB\--prefer-arch-to-version\fR
 Use the architecture priority package rather than the higher version
 one if more than one candidate is found.

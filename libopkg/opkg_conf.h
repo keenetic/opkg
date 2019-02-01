@@ -61,6 +61,7 @@ typedef struct opkg_conf {
     pkg_dest_list_t tmp_dest_list;
     nv_pair_list_t arch_list;
     str_list_t exclude_list;
+    str_list_t ignore_recommends_list;
 
     int restrict_to_default_dest;
     pkg_dest_t *default_dest;

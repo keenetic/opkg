@@ -484,6 +484,7 @@ static void pkg2solvable(pkg_t *pkg, Solvable *solvable_out)
 static void populate_installed_repo(libsolv_solver_t *libsolv_solver)
 {
     int i;
+    Id what;
 
     pkg_vec_t *installed_pkgs = pkg_vec_alloc();
 
@@ -506,6 +507,15 @@ static void populate_installed_repo(libsolv_solver_t *libsolv_solver)
 
         /* set solvable attributes */
         pkg2solvable(pkg, solvable);
+
+        /* if the package is in ignore-recommends-list, disfavor installation */
+        if (str_list_contains(&opkg_config->ignore_recommends_list, pkg->name)) {
+            opkg_message(NOTICE, "Disfavor package: %s\n",
+                         pkg->name);
+            what = pool_str2id(libsolv_solver->pool, pkg->name, 1);
+            queue_push2(&libsolv_solver->solver_jobs, SOLVER_SOLVABLE_NAME
+                        | SOLVER_DISFAVOR, what);
+        }
 
         /* if the package is not autoinstalled, mark it as user installed */
         if (!pkg->auto_installed)
@@ -539,7 +549,7 @@ static void populate_available_repos(libsolv_solver_t *libsolv_solver)
 {
     int i;
     Solvable *solvable;
-    Id solvable_id;
+    Id solvable_id, what;
 
     pkg_vec_t *available_pkgs = pkg_vec_alloc();
 
@@ -607,6 +617,15 @@ static void populate_available_repos(libsolv_solver_t *libsolv_solver)
         /* set solvable attributes using the package */
         solvable = pool_id2solvable(libsolv_solver->pool, solvable_id);
         pkg2solvable(pkg, solvable);
+
+        /* if the package is in ignore-recommends-list, disfavor installation */
+        if (str_list_contains(&opkg_config->ignore_recommends_list, pkg->name)) {
+            opkg_message(NOTICE, "Disfavor package: %s\n",
+                         pkg->name);
+            what = pool_str2id(libsolv_solver->pool, pkg->name, 1);
+            queue_push2(&libsolv_solver->solver_jobs, SOLVER_SOLVABLE_NAME
+                        | SOLVER_DISFAVOR, what);
+        }
 
         /* if the --force-depends option is specified make dependencies weak */
         if (opkg_config->force_depends)

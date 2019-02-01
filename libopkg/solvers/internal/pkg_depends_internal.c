@@ -228,7 +228,8 @@ int pkg_hash_fetch_unsatisfied_dependencies(pkg_t *pkg,
                             || compound_depend->type == SUGGEST)
                         && (satisfying_pkg->state_want == SW_DEINSTALL
                             || satisfying_pkg->state_want == SW_PURGE
-                            || opkg_config->no_install_recommends);
+                            || opkg_config->no_install_recommends
+                            || str_list_contains(&opkg_config->ignore_recommends_list, satisfying_pkg->name));
                 if (ignore) {
                     opkg_msg(NOTICE,
                              "%s: ignoring recommendation for "

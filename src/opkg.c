@@ -51,6 +51,7 @@ enum {
     ARGS_OPT_ADD_DEST,
     ARGS_OPT_SIZE,
     ARGS_OPT_ADD_EXCLUDE,
+    ARGS_OPT_ADD_IGNORE_RECOMMENDS,
     ARGS_OPT_NOACTION,
     ARGS_OPT_DOWNLOAD_ONLY,
     ARGS_OPT_NODEPS,
@@ -112,6 +113,7 @@ static struct option long_options[] = {
     {"add-dest", 1, 0, ARGS_OPT_ADD_DEST},
     {"size", 0, 0, ARGS_OPT_SIZE},
     {"add-exclude", 1, 0, ARGS_OPT_ADD_EXCLUDE},
+    {"add-ignore-recommends", 1, 0, ARGS_OPT_ADD_IGNORE_RECOMMENDS},
     {"test", 0, 0, ARGS_OPT_NOACTION},
     {"tmp-dir", 1, 0, 't'},
     {"tmp_dir", 1, 0, 't'},
@@ -234,6 +236,9 @@ static int args_parse(int argc, char *argv[])
         case ARGS_OPT_ADD_EXCLUDE:
             str_list_append(&opkg_config->exclude_list, optarg);
             break;
+        case ARGS_OPT_ADD_IGNORE_RECOMMENDS:
+            str_list_append(&opkg_config->ignore_recommends_list, optarg);
+            break;
         case ARGS_OPT_SIZE:
             opkg_config->size = 1;
             break;
@@ -343,6 +348,7 @@ static void usage()
     printf("\t--add-dest <name>:<path>        Register destination with given path\n");
     printf("\t--add-arch <arch>:<prio>        Register architecture with given priority\n");
     printf("\t--add-exclude <name>            Register package to be excluded from install\n");
+    printf("\t--add-ignore-recommends <name>  Register package to be ignored as a recomendee\n");
     printf("\t--prefer-arch-to-version        Use the architecture priority package rather\n");
     printf("\t                                than the higher version one if more\n");
     printf("\t                                than one candidate is found.\n");
