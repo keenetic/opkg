@@ -3,12 +3,18 @@
 import os, subprocess
 import cfg
 vardir=os.environ['VARDIR']
+debug_opkg_cmds=bool(os.environ.get("DEBUG_OPKG_CMDS") or False)
 
 def opkgcl(opkg_args):
 	cmd = "{} -o {} {}".format(cfg.opkgcl, cfg.offline_root, opkg_args)
+	if debug_opkg_cmds:
+		print("DEBUG cmd: {}".format(cmd))
 	p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
 			stderr=subprocess.STDOUT)
 	(stdout_data, stderr_data) = p.communicate()
+	if debug_opkg_cmds:
+		print("DEBUG stdout: {}".format(stdout_data.decode("utf-8") if stdout_data else None))
+		print("DEBUG stderr: {}".format(stderr_data.decode("utf-8") if stderr_data else None))
 	status = p.returncode
 	return (status, stdout_data.decode("utf-8"))
 
