@@ -142,8 +142,10 @@ class OpkGroup:
 				f.write("{}: {}\n".format(k, opk.control[k]))
 			fpattern = "{Package}_{Version}_{Architecture}.opk"
 			fname = fpattern.format(**opk.control)
+			fsize = os.stat(fname).st_size
 			md5sum = md5sum_file(fname)
 			f.write("Filename: {}\n".format(fname))
+			f.write("Size: {}\n".format(fsize))
 			f.write("MD5Sum: {}\n".format(md5sum))
 			f.write("\n")
 		f.close()

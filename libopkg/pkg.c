@@ -1504,12 +1504,32 @@ int pkg_write_changed_filelists(void)
 int pkg_verify(pkg_t * pkg)
 {
     int err;
+    struct stat pkg_stat;
     char *local_sig_filename = NULL;
 
-    /* Exit if the package doesn't exist locally as the caller may be about to
-     * download it. */
-    if (!file_exists(pkg->local_filename))
-        return 1;
+    err = stat(pkg->local_filename, &pkg_stat);
+    if (err) {
+        if (errno == ENOENT) {
+            /* Exit with soft error 1 if the package doesn't exist.
+             * This allows the caller to download it without nasty
+             * messages in the error log.
+             */
+            return 1;
+        }
+        else {
+            opkg_msg(ERROR, "Failed to stat %s: %s\n",
+                pkg->local_filename, strerror(errno));
+            goto fail;
+        }
+    }
+
+    /* Check size to mitigate hash collisions. */
+    if (pkg_stat.st_size < 1 || pkg_stat.st_size != pkg->size) {
+        err = -1;
+        opkg_msg(ERROR, "File size mismatch: %s is %lld bytes, expecting %lu bytes\n",
+            pkg->local_filename, (long long int)pkg_stat.st_size, pkg->size);
+        goto fail;
+    }
 
 #ifdef HAVE_SHA256
     if (pkg->sha256sum) {
