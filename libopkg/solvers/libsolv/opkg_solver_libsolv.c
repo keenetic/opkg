@@ -897,8 +897,10 @@ static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
     } else {
         pkg_t *pkg;
 
-        if (libsolv_solver_transaction_preamble(libsolv_solver, pkgs, transaction, 0))
+        if (libsolv_solver_transaction_preamble(libsolv_solver, pkgs, transaction, 0)) {
+            err = -1;
             goto CLEANUP;
+        }
 
         for (i = 0; i < transaction->steps.count; i++) {
             Id stepId = transaction->steps.elements[i];
