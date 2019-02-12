@@ -217,6 +217,8 @@ int opkg_download(const char *src, const char *dest_file_name,
         if (cache_location) {
             err = file_copy(cache_location, dest_file_name);
             free(cache_location);
+        } else {
+            err = -1;
         }
     } else {
         err = opkg_download_direct(src, dest_file_name, NULL, NULL);
