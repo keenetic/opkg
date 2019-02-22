@@ -90,7 +90,7 @@ case "$command" in
         $GPG $*
         ;;
     reset)
-        rm -Rf "$GPGHOMEDIR"
+        find "$GPGHOMEDIR" ! -path "$GPGHOMEDIR/gpg.conf" ! -path "$GPGHOMEDIR" -prune -exec rm -r {} \;
         echo "OK"
         ;;
     populate)
