@@ -56,7 +56,7 @@ if not os.path.lexists("{}/{}".format(cfg.offline_root, long_filename2)):
 				"not created.")
 
 linky = os.path.realpath("{}/{}".format(cfg.offline_root, long_filename2))
-linky_dst = "{}/{}".format(cfg.offline_root, long_filename)
+linky_dst = os.path.realpath("{}/{}".format(cfg.offline_root, long_filename))
 if linky != linky_dst:
 	opk.fail("symlink path truncated.")
 
