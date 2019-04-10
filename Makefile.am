@@ -18,3 +18,8 @@ run-tests:
 	$(MAKE) -C tests DATADIR=@datadir@ SYSCONFDIR=@sysconfdir@ VARDIR=@localstatedir@
 
 check: run-tests
+
+install-ptest:
+	cp -r $(srcdir)/tests $(DESTDIR)
+	cp Makefile $(DESTDIR)
+	sed -e 's/^Makefile/_Makefile/' < Makefile > $(DESTDIR)/Makefile
