@@ -61,7 +61,7 @@ static int release_parse_line(void *ptr, const char *line, uint mask)
         break;
 
     case 'M':
-        if (is_field("MD5sum", line)) {
+        if (is_field("MD5Sum", line)) {
             reading_md5sums = 1;
             if (release->md5sums == NULL) {
                 release->md5sums = xcalloc(1, sizeof(cksum_list_t));
@@ -100,7 +100,7 @@ static int release_parse_line(void *ptr, const char *line, uint mask)
         break;
 
     default:
-        ret = 1;
+        ret = 0;
     }
 
     reading_md5sums = 0;
