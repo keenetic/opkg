@@ -282,9 +282,13 @@ int pkg_parse_line(void *ptr, const char *line, uint mask)
 
     case ' ':
         if ((mask & PFM_DESCRIPTION) && reading_description) {
-            pkg->description =
-                xrealloc(pkg->description, strlen(pkg->description)
-                         + 1 + strlen(line) + 1);
+            if (!pkg->description) {
+                pkg->description = xmalloc(strlen(line) + 1);
+            } else {
+                pkg->description =
+                    xrealloc(pkg->description, strlen(pkg->description)
+                             + 1 + strlen(line) + 1);
+            }
             strcat(pkg->description, "\n");
             strcat(pkg->description, (line));
             goto dont_reset_flags;
