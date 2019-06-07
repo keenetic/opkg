@@ -182,8 +182,12 @@ static int dist_hash_add_from_file(pkg_src_t * dist)
                 free(list_file);
                 return -1;
             }
+            char *subpath, *distribution, *component;
+            distribution = strtok(dist->name, "-");
+            component = strtok(NULL, "-");
+            sprintf_alloc(&subpath, "dists/%s/%s/binary-%s", distribution, component, nv->name);
             pkg_src_list_append(&opkg_config->pkg_src_list, subname,
-                                dist->value, NULL, "__dummy__", 0);
+                                dist->value, NULL, subpath, 0);
         }
 
         free(list_file);
