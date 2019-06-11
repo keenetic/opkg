@@ -1,3 +1,27 @@
+opkg-0.4.1
+==========
+
+- Improve support for Debian-based repos (issue 13185).
+
+- Add target for testsuite installation.
+
+- Add --add-ignore-recommends option to ignore specific recommendations.
+
+- Check download file size when checking file hash, to insulate verification from hash collisions.
+
+- Abort operations on download error.
+
+- Move gpg homedir to /etc/opkg/gpg to decouple opkg from gpg internals. This
+  is a breaking change if gpg is enabled and opkg is upgraded. You can use the
+  conf option "option gpg dir /etc/opkg" to revert back to the old directory
+  layout.
+
+- Avoid window with overly permissive umask when creating directory hierarchy 
+
+Libsolv:
+
+- Make --no-install-recommends case libsolv flags consistent with the canonical case.
+
 opkg-0.4.0
 ==========
 
