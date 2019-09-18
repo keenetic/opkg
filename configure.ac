@@ -43,8 +43,17 @@ PKG_PROG_PKG_CONFIG([0.20])
 
 # Checks for libraries
 
+AC_ARG_WITH(static-libopkg,
+[  --with-static-libopkg   Statically link libopkg into opkg.],
+[static_libopkg="${withval}"])
+AM_CONDITIONAL(STATIC_LIBOPKG, test "x$static_libopkg" = "xyes")
+
 # Require libarchive
-PKG_CHECK_MODULES([LIBARCHIVE], [libarchive])
+if test "$static_libopkg" = "yes"; then
+  PKG_CHECK_MODULES_STATIC([LIBARCHIVE], [libarchive])
+else
+  PKG_CHECK_MODULES([LIBARCHIVE], [libarchive])
+fi
 
 dnl extra argument: --enable-pathfinder
 AC_ARG_ENABLE(pathfinder,
@@ -273,11 +282,6 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([memmove memset mkdir regcomp strchr strcspn strdup strerror strndup strrchr strstr strtol strtoul sysinfo utime])
 
 CLEAN_DATE=`date +"%B %Y" | tr -d '\n'`
-
-AC_ARG_WITH(static-libopkg,
-[  --with-static-libopkg   Statically link libopkg into opkg.],
-[static_libopkg="${withval}"])
-AM_CONDITIONAL(STATIC_LIBOPKG, test "x$static_libopkg" = "xyes")
 
 AC_SUBST([CLEAN_DATE])
 
