@@ -420,7 +420,8 @@ int main(int argc, char *argv[])
         || !strcmp(cmd_name, "print-installation-architecture")
         || !strcmp(cmd_name, "print_installation_architecture")
         || !strcmp(cmd_name, "compare_versions")
-        || !strcmp(cmd_name, "compare-versions");
+        || !strcmp(cmd_name, "compare-versions")
+        || !strcmp(cmd_name, "clean");
 
     noreadfeedsfile = !strcmp(cmd_name, "flag")
         || !strcmp(cmd_name, "configure")
@@ -431,7 +432,8 @@ int main(int argc, char *argv[])
         || !strcmp(cmd_name, "list-installed")
         || !strcmp(cmd_name, "list_changed_conffiles")
         || !strcmp(cmd_name, "list-changed-conffiles")
-        || !strcmp(cmd_name, "status");
+        || !strcmp(cmd_name, "status")
+        || !strcmp(cmd_name, "clean");
 
     noloadconf = !strcmp(cmd_name, "compare_versions")
         || !strcmp(cmd_name, "compare-versions");
