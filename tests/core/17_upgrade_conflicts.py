@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # Install a package A at version V. Install a package B, which conflicts
 # with a version of A older than V. Make available A at a version newer

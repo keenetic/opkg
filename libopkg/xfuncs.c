@@ -3,6 +3,7 @@
  * Utility routines.
  *
  * Copyright (C) 1999,2000,2001 by Erik Andersen <andersee@debian.org>
+ * SPDX-License-Identifier: GPL-2.0-or-later
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

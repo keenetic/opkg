@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # Install a package B, which recommends package A. Verify that A installs
 # automatically and gets flagged as auto-installed. Make a newer version

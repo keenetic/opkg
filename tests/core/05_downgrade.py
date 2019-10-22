@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # Make available two versions of the same package and install it. Check that the
 # latest version is chosen out of the two available. Then explicitly install the

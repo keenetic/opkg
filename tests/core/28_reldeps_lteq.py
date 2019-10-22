@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # Create 'a' which depends on 'b' earlier than or equal to 2.0.
 # create 'b' in versions 1.0, 2.0, and 3.0.

@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # Report and fix from "paradox.kahn" in a google code comment to r543.
 #

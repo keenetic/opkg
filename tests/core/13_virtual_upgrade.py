@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # Install version 1.0 of a package 'x' which PROVIDES and CONFLICTS 'v', then
 # try to upgrade it.

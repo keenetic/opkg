@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # Install a package 'a' which depends on a second package 'b'. Check that both
 # are installed, that package 'a' does not report as automatically installed but

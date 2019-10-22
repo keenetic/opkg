@@ -1,4 +1,5 @@
 #!/bin/sh
+# SPDX-License-Identifier: GPL-2.0-only
 
 if [ ! -f $OPKG_INTERCEPT_DIR/update-modules ]; then
   echo "update-modules" > $OPKG_INTERCEPT_DIR/update-modules

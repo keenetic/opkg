@@ -3,6 +3,9 @@
    according to the definition of MD5 in RFC 1321 from April 1992.
    Copyright (C) 1995,1996,1997,1999,2000,2001,2005,2006,2008
 	Free Software Foundation, Inc.
+
+   SPDX-License-Identifier: GPL-2.0-or-later
+
    This file is part of the GNU C Library.
 
    This program is free software; you can redistribute it and/or modify it

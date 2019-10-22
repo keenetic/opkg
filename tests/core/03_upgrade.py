@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # Install a package and then make available a new version of the same package.
 # Upgrade and check that the new version is installed and the old version

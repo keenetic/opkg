@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # Install a package and mark it as on hold. Make an updated version available
 # and upgrade. Check that the new version is not installed and the old version

@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # Install a package and check that it is listed as installed. Then remove the
 # package and check that it is no longer listed as installed.

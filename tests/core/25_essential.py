@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # Create essential packages 'a(1.0)' and 'a(2.0)'.
 # Install 'a(1.0)'.

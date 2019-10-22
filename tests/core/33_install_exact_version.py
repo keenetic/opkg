@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # Test opkg when specifying the version to install via:
 #       opkg install <pkg_name>=<pkg_version>

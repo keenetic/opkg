@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # Create package 'x(1.0)' with architecture a and 'x(1.0)' with architecture b.
 # Install 'x' with --add-arch a:2 and --add-arch b:3.

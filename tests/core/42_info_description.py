@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # Create package 'a(1.0)' with short description only.
 # Create package 'b(1.0)' with a complete multiline description.

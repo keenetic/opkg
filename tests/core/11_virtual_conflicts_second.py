@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # Install a package 'x' which PROVIDES 'v'. Then try to install 'y' which
 # PROVIDES and CONFLICTS 'v', indicating that no other provider of the virtual

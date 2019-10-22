@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # Install a package containing a file and check that the file is created. Remove
 # the package and check that the file is removed.

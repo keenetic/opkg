@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # Install package 'a' with a Depends on 'b'. Make available a new version of
 # 'a' that Conflicts with 'b'. Dist-upgrade and make sure 'a' is upgraded to

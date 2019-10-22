@@ -1,4 +1,5 @@
 #!/bin/sh
+# SPDX-License-Identifier: GPL-2.0-only
 
 if [ "x$1" = "x-a" ] || [ "x$1" = "x-A" ]; then
   echo "depmod $@" >> $OPKG_INTERCEPT_DIR/depmod

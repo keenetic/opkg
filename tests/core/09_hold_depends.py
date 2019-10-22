@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
 #
 # Mark an installed package a-1.0 as on hold, make available a-2.0 depended on
 # by z. Check that z refuses to install due to a-1.0 being held.

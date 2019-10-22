@@ -1,4 +1,5 @@
 #!/bin/sh
+# SPDX-License-Identifier: GPL-2.0-only
 
 # Based on apt-key from apt-0.6.25
 # Licensed under GPL Version 2
