@@ -109,6 +109,11 @@ List installable package architectures
 \fBwhatconflicts [\fI\-A\fP] <\fIpackage(s)\fP|\fIglob\fP>\fR
 .TP
 \fBwhatreplaces [\fI\-A\fP] <\fIpackage(s)\fP|\fIglob\fP>\fR
+.TP
+\fBverify  <\fIpackage(s)\fP|\fIglob\fP>\fR
+Verifies the integrity of <pkg>, or all packages if omitted by
+comparing the md5sum of each file with the information stored
+on the opkg metadata database.
 
 .SS OPTIONS
 .TP

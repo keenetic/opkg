@@ -550,6 +550,75 @@ static int opkg_find_cmd(int argc, char **argv)
     return opkg_list_find_cmd(argc, argv, 1);
 }
 
+static int opkg_verify_cmd(int argc, char **argv)
+{
+    unsigned int i;
+    pkg_vec_t *available;
+    pkg_t *pkg;
+    char *pkg_name = NULL;
+
+    if (argc > 0) {
+        pkg_name = argv[0];
+    }
+    available = pkg_vec_alloc();
+    pkg_hash_fetch_all_installed(available, INSTALLED);
+    pkg_vec_sort(available, pkg_compare_names);
+    for (i = 0; i < available->len; i++) {
+        char *md5sums_file;
+
+        pkg = available->pkgs[i];
+        /* if we have package name or pattern and pkg does not match, then skip it */
+        if (pkg_name && fnmatch(pkg_name, pkg->name, 0))
+            continue;
+
+        sprintf_alloc(&md5sums_file, "%s/%s.md5sums", pkg->dest->info_dir,
+                pkg->name);
+        if (file_exists(md5sums_file)) {
+            FILE *file;
+            char *expected_md5sum,  *actual_md5sum;
+            char *line, *file_name, *installed_file_name;
+
+            file  = fopen(md5sums_file, "r");
+            if (file == NULL) {
+                opkg_perror(ERROR, "Failed to open %s", md5sums_file);
+                return -1;
+            }
+
+            while (1) {
+                line = file_read_line_alloc(file);
+                if (line == NULL)
+                    break;
+
+                expected_md5sum = strtok(line, " ");
+                file_name = strtok(NULL, " ");
+                if (file_name == NULL) {
+                     opkg_msg(ERROR, "%s: Ignoring invalid line: %s\n", md5sums_file, line);
+                } else {
+                    sprintf_alloc(&installed_file_name, "%s%s", pkg->dest->root_dir,
+                                  file_name);
+                    actual_md5sum = file_md5sum_alloc(installed_file_name);
+                    if (actual_md5sum != NULL) {
+                        if (strcmp(expected_md5sum, actual_md5sum)) {
+                           opkg_msg(ERROR, "Checksum mismatch on package: \"%s\" \"%s\"\n",
+                                    pkg->name, installed_file_name);
+                        }
+                    }
+                    free(installed_file_name);
+                    free(actual_md5sum);
+                }
+                free(line);
+            }
+            fclose(file);
+        }
+        free(md5sums_file);
+    }
+
+    pkg_vec_free(available);
+
+    return 0;
+
+}
+
 static int opkg_list_installed_cmd(int argc, char **argv)
 {
     unsigned int i;
@@ -1169,6 +1238,8 @@ static opkg_cmd_t cmds[] = {
         PFM_DESCRIPTION | PFM_SOURCE},
     {"find", 1, (opkg_cmd_fun_t) opkg_find_cmd,
         PFM_DESCRIPTION | PFM_SOURCE},
+    {"verify", 0, (opkg_cmd_fun_t) opkg_verify_cmd,
+        0},
     {"download", 1, (opkg_cmd_fun_t) opkg_download_cmd,
         PFM_DESCRIPTION | PFM_SOURCE},
     {"compare_versions", 1, (opkg_cmd_fun_t) opkg_compare_versions_cmd, 0},

@@ -325,7 +325,9 @@ static void usage()
     printf("\twhatprovides [-A] [pkgname|glob]+\n");
     printf("\twhatconflicts [-A] [pkgname|glob]+\n");
     printf("\twhatreplaces [-A] [pkgname|glob]+\n");
-
+    printf("\tverify [pkg|glob]               Verifies the intrgrity of <pkg>, or all packages if omitted by\n");
+    printf("\t                                comparing the md5sum of each file with the information stored\n");
+    printf("\t                                on the opkg metadata database");
     printf("\nOptions:\n");
     printf("\t-A                              Query all packages not just those installed\n");
     printf("\t-V[<level>]                     Set verbosity level to <level>.\n");
