@@ -622,7 +622,7 @@ static struct archive *open_inner(struct archive *outer)
     if (r != ARCHIVE_OK) {
         opkg_msg(ERROR, "Failed to open inner archive: %s\n",
                  archive_error_string(inner));
-        goto err_cleanup;
+        return NULL;
     }
 
     return inner;
@@ -683,7 +683,7 @@ static struct archive *extract_outer(const char *filename, const char *arname)
 
     inner = open_inner(outer);
     if (!inner)
-        goto err_cleanup;
+        return NULL;
 
     return inner;
 
