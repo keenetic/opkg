@@ -618,6 +618,13 @@ static struct archive *open_inner(struct archive *outer)
         goto err_cleanup;
     }
 
+    r = archive_read_support_format_empty(inner);
+    if (r != ARCHIVE_OK) {
+        opkg_msg(ERROR, "Empty format not supported: %s\n",
+                 archive_error_string(inner));
+        goto err_cleanup;
+    }
+
     r = archive_read_open(inner, data, NULL, inner_read, inner_close);
     if (r != ARCHIVE_OK) {
         opkg_msg(ERROR, "Failed to open inner archive: %s\n",
