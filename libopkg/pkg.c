@@ -1423,15 +1423,23 @@ static void pkg_write_filelist_helper(const char *key, void *entry_,
         struct stat file_stat;
         mode_t mode = 0;
         char *link_target = NULL;
+        size_t size;
         int unmatched_offline_root = opkg_config->offline_root
                 && !str_starts_with(key, opkg_config->offline_root);
+        char *entry = xstrdup(key);
+
+        size = strlen(entry);
+        if (size > 0 && entry[size-1] == '/')
+            entry[size-1] = '\0';
+
         if (unmatched_offline_root) {
             sprintf_alloc(&installed_file_name, "%s%s",
-                          opkg_config->offline_root, key);
+                          opkg_config->offline_root, entry);
         } else {
             // already contains root_dir as header -> ABSOLUTE
-            sprintf_alloc(&installed_file_name, "%s", key);
+            sprintf_alloc(&installed_file_name, "%s", entry);
         }
+
         if (xlstat(installed_file_name, &file_stat) == 0) {
             mode = file_stat.st_mode;
             if (S_ISLNK(mode))
@@ -1439,12 +1447,13 @@ static void pkg_write_filelist_helper(const char *key, void *entry_,
         }
 
         if (link_target)
-            fprintf(data->stream, "%s\t%#03o\t%s\n", key, (unsigned int)mode, link_target);
+            fprintf(data->stream, "%s\t%#03o\t%s\n", entry, (unsigned int)mode, link_target);
         else if (mode)
-            fprintf(data->stream, "%s\t%#03o\n", key, (unsigned int)mode);
+            fprintf(data->stream, "%s\t%#03o\n", entry, (unsigned int)mode);
         else
-            fprintf(data->stream, "%s\n", key);
+            fprintf(data->stream, "%s\n", entry);
 
+        free(entry);
         free(link_target);
         free(installed_file_name);
     }
