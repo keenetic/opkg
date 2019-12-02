@@ -449,6 +449,30 @@ static int check_data_file_clashes(pkg_t * pkg, pkg_t * old_pkg)
             if (existing_is_dir && S_ISDIR(file_info->mode)) {
                 continue;
             } else if (existing_is_dir || S_ISDIR(file_info->mode)) {
+                /* OK if existing file is a symlink to a directory and the new
+                 * entity is a directory */
+                if (file_is_symlink(filename) && S_ISDIR(file_info->mode)) {
+                    char *link_target;
+                    struct stat target_stat;
+                    int is_directory = 0;
+
+                    link_target = realpath(filename, NULL);
+                    if (link_target) {
+                       if (xlstat(link_target, &target_stat) == 0) {
+                          is_directory = S_ISDIR(target_stat.st_mode);
+                       }
+                       free(link_target);
+                    }
+
+                    if (!is_directory) {
+                        opkg_msg(ERROR,
+                                 "Package %s want to install %s \n"
+                                 "\tBut that path is a symlink\n",
+                                 pkg->name, filename);
+                        clashes++;
+                    }
+                    continue;
+                }
                 /* Can't mix directory and non-directory.  For normal files,
                  * it would be OK if the package being replaced owns the
                  * directory, but directories may be owned by multiple packages.

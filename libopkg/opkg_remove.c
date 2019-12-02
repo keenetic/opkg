@@ -24,6 +24,7 @@
 #include <glob.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 
 #include "opkg_message.h"
 #include "opkg_remove.h"
@@ -34,13 +35,13 @@
 
 void remove_data_files_and_list(pkg_t * pkg)
 {
-    str_list_t installed_dirs;
+    str_list_t installed_dirs, installed_dirs_symlinks;
     str_list_elt_t *iter;
     file_list_t *installed_files;
     file_list_elt_t *fiter;
     char *file_name;
     conffile_t *conffile;
-    int removed_a_dir;
+    int removed_a_dir, removed_a_dir_symlink;
     pkg_t *owner;
     int rootdirlen = 0;
     int r;
@@ -54,6 +55,7 @@ void remove_data_files_and_list(pkg_t * pkg)
     }
 
     str_list_init(&installed_dirs);
+    str_list_init(&installed_dirs_symlinks);
 
     /* don't include trailing slash */
     if (opkg_config->offline_root)
@@ -69,9 +71,22 @@ void remove_data_files_and_list(pkg_t * pkg)
             /* File may have been claimed by another package. */
             continue;
 
-        if (!file_is_symlink(file_name) && file_is_dir(file_name)) {
+        if (file_is_dir(file_name)) {
             str_list_append(&installed_dirs, file_name);
             continue;
+        } else if (file_is_symlink(file_name)) {
+            char *link_target;
+            struct stat target_stat;
+
+            link_target = realpath(file_name, NULL);
+            if (link_target) {
+                if ((xlstat(link_target, &target_stat) == 0) && S_ISDIR(target_stat.st_mode)) {
+                    str_list_append(&installed_dirs_symlinks, file_name);
+                    free(link_target);
+                    continue;
+                }
+                free(link_target);
+            }
         }
 
         conffile = pkg_get_conffile(pkg, file_name + rootdirlen);
@@ -108,6 +123,20 @@ void remove_data_files_and_list(pkg_t * pkg)
                 }
             }
         } while (removed_a_dir);
+        do {
+            removed_a_dir_symlink = 0;
+            for (iter = str_list_first(&installed_dirs_symlinks); iter;
+                    iter = str_list_next(&installed_dirs_symlinks, iter)) {
+                file_name = (char *)iter->data;
+
+                r = unlink(file_name);
+                if (r == 0) {
+                    opkg_msg(INFO, "Deleting %s.\n", file_name);
+                    removed_a_dir_symlink = 1;
+                    str_list_remove(&installed_dirs_symlinks, &iter);
+                }
+            }
+        } while (removed_a_dir_symlink);
     }
 
     pkg_free_installed_files(pkg);
@@ -132,7 +161,13 @@ void remove_data_files_and_list(pkg_t * pkg)
         free(iter->data);
         free(iter);
     }
+    while (!void_list_empty(&installed_dirs_symlinks)) {
+        iter = str_list_pop(&installed_dirs_symlinks);
+        free(iter->data);
+        free(iter);
+    }
     str_list_deinit(&installed_dirs);
+    str_list_deinit(&installed_dirs_symlinks);
 }
 
 void remove_maintainer_scripts(pkg_t * pkg)
