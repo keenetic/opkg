@@ -1,3 +1,20 @@
+opkg-0.4.2
+==========
+
+- Follow symlinks during install (issue 13574).
+
+- Add support for empty payloads. Before, an empty payload would segfault opkg.
+
+- Add new opkg verify option, to check system status.
+
+- Add SPDX license identifiers to source files.
+
+- Speed up opkg clean by avoiding loading feed/status information.
+
+- Fix static build (issue 8355).
+
+- Add missing pkg->tags initialization (issue 13380).
+
 opkg-0.4.1
 ==========
 
