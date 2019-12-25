@@ -45,11 +45,11 @@ int pkg_dest_init(pkg_dest_t * dest, const char *name, const char *root_dir)
     }
     file_mkdir_hier(dest->root_dir, 0755);
 
-    sprintf_alloc(&dest->info_dir, "%s/%s", dest->root_dir,
+    sprintf_alloc(&dest->info_dir, "%s%s", dest->root_dir,
                   opkg_config->info_dir);
     file_mkdir_hier(dest->info_dir, 0755);
 
-    sprintf_alloc(&dest->status_file_name, "%s/%s", dest->root_dir,
+    sprintf_alloc(&dest->status_file_name, "%s%s", dest->root_dir,
                   opkg_config->status_file);
 
     /* Ensure that the directory in which we will create the status file exists.
