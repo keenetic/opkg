@@ -49,6 +49,7 @@ REGRESSION_TESTS := core/01_install.py \
 		    regress/issue45.py \
 		    regress/issue46.py \
 		    regress/issue50.py \
+		    regress/issue50a.py \
 		    regress/issue51.py \
 		    regress/issue55.py \
 		    regress/issue58.py \

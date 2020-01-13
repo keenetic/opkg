@@ -862,7 +862,8 @@ static int libsolv_solver_transaction_preamble(libsolv_solver_t *libsolv_solver,
         Id typeId = transaction_type(transaction, stepId,
                 SOLVER_TRANSACTION_SHOW_ACTIVE |
                 SOLVER_TRANSACTION_CHANGE_IS_REINSTALL |
-                SOLVER_TRANSACTION_SHOW_OBSOLETES);
+                SOLVER_TRANSACTION_SHOW_OBSOLETES |
+                SOLVER_TRANSACTION_OBSOLETE_IS_UPGRADE);
 
         const char *pkg_name = pool_id2str(libsolv_solver->pool, solvable->name);
         const char *evr = pool_id2str(libsolv_solver->pool, solvable->evr);
@@ -909,10 +910,11 @@ static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
             Id typeId = transaction_type(transaction, stepId,
                     SOLVER_TRANSACTION_SHOW_ACTIVE |
                     SOLVER_TRANSACTION_CHANGE_IS_REINSTALL |
-                    SOLVER_TRANSACTION_SHOW_OBSOLETES);
+                    SOLVER_TRANSACTION_SHOW_OBSOLETES |
+                    SOLVER_TRANSACTION_OBSOLETE_IS_UPGRADE);
 
             pkg = pkgs->pkgs[i];
-            pkg_t *old, *obs = NULL;
+            pkg_t *old = NULL, *obs = NULL;
 
             Id decision_rule;
 
@@ -924,15 +926,6 @@ static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
                     goto CLEANUP;
                 }
                 break;
-            case SOLVER_TRANSACTION_OBSOLETES:
-                /* Replaces operations are expressed in two steps: the first one is a SOLVER_TRANSACTION_OBSOLETES, with the name of
-                 * the replacer package. The second one is a SOLVER_TRANSACTION_IGNORE, with the name of the replacee */
-                obs = pkgs->pkgs[i + 1];
-                ret = opkg_remove_pkg(obs);
-                if (ret) {
-                    err = -1;
-                    goto CLEANUP;
-                }
             case SOLVER_TRANSACTION_DOWNGRADE:
             case SOLVER_TRANSACTION_REINSTALL:
             case SOLVER_TRANSACTION_INSTALL:
@@ -960,7 +953,27 @@ static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
                 }
                 break;
             case SOLVER_TRANSACTION_UPGRADE:
-                old = pkg_hash_fetch_installed_by_name(pkg->name);
+                  /* An upgrade due to a package obsoleting another one (SOLVER_TRANSACTION_OBSOLETE_IS_UPGRADE)
+                   * will show as an upgrade operation (new pkg) AND a ignore operation (old package)   */
+                  if ((i+1) < transaction->steps.count) {
+                    Id nextStepId = transaction->steps.elements[i+1];
+                    Id nextTypeId = transaction_type(transaction, nextStepId,
+                        SOLVER_TRANSACTION_SHOW_ACTIVE |
+                        SOLVER_TRANSACTION_CHANGE_IS_REINSTALL |
+                        SOLVER_TRANSACTION_SHOW_OBSOLETES |
+                        SOLVER_TRANSACTION_OBSOLETE_IS_UPGRADE);
+
+                   if (nextTypeId == SOLVER_TRANSACTION_IGNORE) {
+                        obs = pkgs->pkgs[i+1];
+                        old = pkg_hash_fetch_installed_by_name(obs->name);
+                    }
+                }
+
+                /* If this is not an OBSOLETE operation, check to see if there is an older pkg installed */
+                if (!obs) {
+                    old = pkg_hash_fetch_installed_by_name(pkg->name);
+                }
+
                 /* if an old version was found set the new package's
                    autoinstalled status to that of the old package. */
                 if (old) {
@@ -972,8 +985,8 @@ static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
                     if (!opkg_config->download_only) {
                         char *old_version = pkg_version_str_alloc(old);
 
-                        opkg_message(NOTICE, "Upgrading %s from %s to %s on %s\n",
-                                     pkg->name, old_version, pkg->version, pkg->dest->name);
+                        opkg_message(NOTICE, "Upgrading %s (%s) to %s (%s) on %s\n",
+                                     old->name, old_version, pkg->name, pkg->version, pkg->dest->name);
                         free(old_version);
                     }
                 } else {
@@ -985,7 +998,7 @@ static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
                     }
                 }
 
-                ret = opkg_install_pkg(pkg, NULL);
+                ret = opkg_install_pkg(pkg, old);
                 if (ret) {
                     err = -1;
                     goto CLEANUP;
