@@ -953,7 +953,7 @@ static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
                     opkg_message(NOTICE, "Installing %s (%s) on %s\n",
                                  pkg->name, pkg->version, pkg->dest->name);
                 }
-                ret = opkg_install_pkg(pkg);
+                ret = opkg_install_pkg(pkg, NULL);
                 if (ret) {
                     err = -1;
                     goto CLEANUP;
@@ -985,7 +985,7 @@ static int libsolv_solver_execute_transaction(libsolv_solver_t *libsolv_solver)
                     }
                 }
 
-                ret = opkg_install_pkg(pkg);
+                ret = opkg_install_pkg(pkg, NULL);
                 if (ret) {
                     err = -1;
                     goto CLEANUP;

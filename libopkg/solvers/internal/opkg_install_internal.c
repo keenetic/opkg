@@ -54,7 +54,7 @@ static int pkg_remove_installed_replacees_unwind(pkg_vec_t *replacees)
         pkg_t *replacee = replacees->pkgs[i];
         if (replacee->state_status != SS_INSTALLED) {
             opkg_msg(DEBUG2, "Calling opkg_install_pkg.\n");
-            err = opkg_install_pkg(replacee);
+            err = opkg_install_pkg(replacee, NULL);
             if (err)
                 return err;
         }
@@ -193,7 +193,7 @@ int opkg_execute_install(pkg_t *pkg, pkg_vec_t *pkgs_to_install, pkg_vec_t *repl
         /* Set all pkgs to auto_installed except the top level */
         if (dependency != pkg)
             dependency->auto_installed = 1;
-        r = opkg_install_pkg(dependency);
+        r = opkg_install_pkg(dependency, NULL);
         if (r < 0)
             errors++;
     }

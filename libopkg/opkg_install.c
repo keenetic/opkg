@@ -881,10 +881,9 @@ static int resolve_conffiles(pkg_t * pkg)
 /**
  *  @brief Really install a pkg_t
  */
-int opkg_install_pkg(pkg_t * pkg)
+int opkg_install_pkg(pkg_t * pkg, pkg_t * old_pkg)
 {
     int err = 0;
-    pkg_t *old_pkg = NULL;
     abstract_pkg_t *ab_pkg = NULL;
     int old_state_flag;
     sigset_t newset, oldset;
@@ -902,7 +901,8 @@ int opkg_install_pkg(pkg_t * pkg)
         pkg->dest = opkg_config->default_dest;
     }
 
-    old_pkg = pkg_hash_fetch_installed_by_name(pkg->name);
+    if (!old_pkg)
+        old_pkg = pkg_hash_fetch_installed_by_name(pkg->name);
 
     pkg->state_want = SW_INSTALL;
     if (old_pkg) {
