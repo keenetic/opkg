@@ -799,6 +799,24 @@ static void libsolv_solver_add_job(libsolv_solver_t *libsolv_solver,
     }
 }
 
+static void libsolv_print_all_problem_rules(libsolv_solver_t *libsolv_solver, Id problem)
+{
+    Queue rules;
+    int i;
+
+    queue_init(&rules);
+    solver_findallproblemrules(libsolv_solver->solver, problem, &rules);
+    for (i = 0; i < rules.count; i++) {
+        Id type, source, target, dep;
+        Id r = rules.elements[i];
+        type = solver_ruleinfo(libsolv_solver->solver, r, &source, &target, &dep);
+        opkg_message(ERROR, "  - %s\n",
+                     solver_problemruleinfo2str(libsolv_solver->solver,
+                                                type, source, target, dep));
+    }
+    queue_free(&rules);
+}
+
 static int libsolv_solver_solve(libsolv_solver_t *libsolv_solver)
 {
     int problem_count = solver_solve(libsolv_solver->solver,
@@ -812,8 +830,7 @@ static int libsolv_solver_solve(libsolv_solver_t *libsolv_solver)
         /* problems start at 1, not 0 */
         for (problem = 1; problem <= problem_count; problem++) {
             opkg_message(ERROR, "Problem %d/%d:\n", problem, problem_count);
-            opkg_message(ERROR, "  - %s\n",
-                         solver_problem2str(libsolv_solver->solver, problem));
+            libsolv_print_all_problem_rules(libsolv_solver, problem);
             opkg_message(ERROR, "\n");
 
             int solution_count = solver_solution_count(libsolv_solver->solver,
