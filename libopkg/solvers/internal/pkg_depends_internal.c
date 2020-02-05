@@ -231,7 +231,7 @@ int pkg_hash_fetch_unsatisfied_dependencies(pkg_t *pkg,
                         && (satisfying_pkg->state_want == SW_DEINSTALL
                             || satisfying_pkg->state_want == SW_PURGE
                             || opkg_config->no_install_recommends
-                            || str_list_contains(&opkg_config->ignore_recommends_list, satisfying_pkg->name));
+                            || str_list_contains(&opkg_config->ignore_recommends_list, satisfying_pkg->name, 1));
                 if (ignore) {
                     opkg_msg(NOTICE,
                              "%s: ignoring recommendation for "
@@ -242,7 +242,7 @@ int pkg_hash_fetch_unsatisfied_dependencies(pkg_t *pkg,
 
                 /* Check for excluded packages */
                 int exclude = str_list_contains(&opkg_config->exclude_list,
-                                         satisfying_pkg->name);
+                                         satisfying_pkg->name, 1);
                 if (exclude) {
                     opkg_msg(NOTICE,
                              "%s: exclude required package %s at users request\n",

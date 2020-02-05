@@ -20,6 +20,7 @@
 
 #include "config.h"
 
+#include <fnmatch.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -109,15 +110,20 @@ void str_list_purge(str_list_t * list)
     free(list);
 }
 
-int str_list_contains(str_list_t * list, const char *s)
+int str_list_contains(str_list_t * list, const char *s, int use_glob)
 {
     str_list_elt_t *elt;
     const char *candidate;
 
     for (elt = str_list_first(list); elt; elt = str_list_next(list, elt)) {
         candidate = elt->data;
-        if (strcmp(candidate, s) == 0)
-            return 1;
+        if (use_glob) {
+            if (fnmatch(candidate, s, 0) == 0)
+                return 1;
+        } else {
+            if (strcmp(candidate, s) == 0)
+                return 1;
+        }
     }
 
     return 0;

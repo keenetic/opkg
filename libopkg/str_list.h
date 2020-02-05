@@ -48,7 +48,7 @@ str_list_elt_t *str_list_next(str_list_t * list, str_list_elt_t * node);
 
 void str_list_purge(str_list_t * list);
 
-int str_list_contains(str_list_t * list, const char *s);
+int str_list_contains(str_list_t * list, const char *s, int use_glob);
 
 #ifdef __cplusplus
 }

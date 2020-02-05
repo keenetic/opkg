@@ -511,7 +511,7 @@ static void populate_installed_repo(libsolv_solver_t *libsolv_solver)
         pkg2solvable(pkg, solvable);
 
         /* if the package is in ignore-recommends-list, disfavor installation */
-        if (str_list_contains(&opkg_config->ignore_recommends_list, pkg->name)) {
+        if (str_list_contains(&opkg_config->ignore_recommends_list, pkg->name, 1)) {
             opkg_message(NOTICE, "Disfavor package: %s\n",
                          pkg->name);
             what = pool_str2id(libsolv_solver->pool, pkg->name, 1);
@@ -561,7 +561,7 @@ static void populate_available_repos(libsolv_solver_t *libsolv_solver)
         pkg_t *pkg = available_pkgs->pkgs[i];
 
         /* if the package is marked as excluded, skip it */
-        if (str_list_contains(&opkg_config->exclude_list, pkg->name))
+        if (str_list_contains(&opkg_config->exclude_list, pkg->name, 1))
             continue;
 
         /* if the package is installed or unpacked, skip it */
@@ -621,7 +621,7 @@ static void populate_available_repos(libsolv_solver_t *libsolv_solver)
         pkg2solvable(pkg, solvable);
 
         /* if the package is in ignore-recommends-list, disfavor installation */
-        if (str_list_contains(&opkg_config->ignore_recommends_list, pkg->name)) {
+        if (str_list_contains(&opkg_config->ignore_recommends_list, pkg->name, 1)) {
             opkg_message(NOTICE, "Disfavor package: %s\n",
                          pkg->name);
             what = pool_str2id(libsolv_solver->pool, pkg->name, 1);
