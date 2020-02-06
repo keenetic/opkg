@@ -336,8 +336,9 @@ static int constraint_to_solv_flags(version_constraint_t constraint)
 }
 
 /* This transforms a compound depend [e.g. A (=3.0)|C (>=2.0) ]
-   into an id usable by libsolv. */
-static Id dep2id(Pool *pool, compound_depend_t *dep)
+   into an id usable by libsolv.  Use skip_installed to skip
+   dependencies that are already installed */
+static Id dep2id(Pool *pool, compound_depend_t *dep, int skip_installed)
 {
     Id nameId = 0;
     Id versionId = 0;
@@ -349,6 +350,10 @@ static Id dep2id(Pool *pool, compound_depend_t *dep)
 
     for (i = 0; i < dep->possibility_count; ++i) {
         depend_t *depend = dep->possibilities[i];
+
+        if (skip_installed && !pkg_hash_fetch_installed_by_name(depend->pkg->name)) {
+            continue;
+        }
 
         nameId = pool_str2id(pool, depend->pkg->name, 1);
         if (depend->version) {
@@ -367,7 +372,7 @@ static Id dep2id(Pool *pool, compound_depend_t *dep)
     return dependId;
 }
 
-static void pkg2solvable(pkg_t *pkg, Solvable *solvable_out)
+static void pkg2solvable(pkg_t *pkg, Solvable *solvable_out, int installed)
 {
     if (!solvable_out) {
         opkg_msg(ERROR, "Solvable undefined!\n");
@@ -400,7 +405,7 @@ static void pkg2solvable(pkg_t *pkg, Solvable *solvable_out)
 
         for (i = 0; i < deps_count; ++i) {
             compound_depend_t dep = pkg->depends[i];
-            dependId = dep2id(pool, &dep);
+            dependId = dep2id(pool, &dep, 0);
             switch (dep.type) {
             /* pre-depends is not supported by opkg. However, the
                field is parsed in pkg_parse. This will handle the
@@ -421,8 +426,10 @@ static void pkg2solvable(pkg_t *pkg, Solvable *solvable_out)
             case RECOMMEND:
                 opkg_msg(DEBUG2, "%s recommends %s\n", pkg->name,
                          pool_dep2str(pool, dependId));
+                // If the package is installed, skip not installed recommends dependencies
+                // This is needed to avoid installing missing recommends of installed packages
                 solvable_out->recommends = repo_addid_dep(repo,
-                         solvable_out->recommends, dependId, 0);
+                         solvable_out->recommends, dep2id(pool, &dep, installed), 0);
                 break;
             case SUGGEST:
                 opkg_msg(DEBUG2, "%s suggests %s\n", pkg->name,
@@ -441,7 +448,7 @@ static void pkg2solvable(pkg_t *pkg, Solvable *solvable_out)
         for (i = 0; i < pkg->conflicts_count; i++) {
             compound_depend_t dep = pkg->conflicts[i];
 
-            dependId = dep2id(pool, &dep);
+            dependId = dep2id(pool, &dep, 0);
             opkg_msg(DEBUG2, "%s conflicts %s\n", pkg->name,
                      pool_dep2str(pool, dependId));
             solvable_out->conflicts = repo_addid_dep(repo,
@@ -474,7 +481,7 @@ static void pkg2solvable(pkg_t *pkg, Solvable *solvable_out)
         for (i = 0; i < pkg->replaces_count; i++) {
             compound_depend_t dep = pkg->replaces[i];
 
-            Id replacesId = dep2id(pool, &dep);
+            Id replacesId = dep2id(pool, &dep, 0);
             opkg_msg(DEBUG2, "%s replaces %s\n", pkg->name,
                      pool_dep2str(pool, replacesId));
             solvable_out->obsoletes = repo_addid_dep(repo,
@@ -508,7 +515,7 @@ static void populate_installed_repo(libsolv_solver_t *libsolv_solver)
                                               solvable_id);
 
         /* set solvable attributes */
-        pkg2solvable(pkg, solvable);
+        pkg2solvable(pkg, solvable, 1);
 
         /* if the package is in ignore-recommends-list, disfavor installation */
         if (str_list_contains(&opkg_config->ignore_recommends_list, pkg->name, 1)) {
@@ -618,7 +625,7 @@ static void populate_available_repos(libsolv_solver_t *libsolv_solver)
 
         /* set solvable attributes using the package */
         solvable = pool_id2solvable(libsolv_solver->pool, solvable_id);
-        pkg2solvable(pkg, solvable);
+        pkg2solvable(pkg, solvable, 0);
 
         /* if the package is in ignore-recommends-list, disfavor installation */
         if (str_list_contains(&opkg_config->ignore_recommends_list, pkg->name, 1)) {
