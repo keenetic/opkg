@@ -889,6 +889,10 @@ void pkg_print_status(pkg_t * pkg, FILE * file)
         return;
     }
 
+    int is_installed = (pkg->state_status == SS_INSTALLED
+            || pkg->state_status == SS_UNPACKED
+            || pkg->state_status == SS_HALF_INSTALLED);
+
     pkg_formatted_field(file, pkg, "Package", NULL);
     pkg_formatted_field(file, pkg, "Version", NULL);
     pkg_formatted_field(file, pkg, "Depends", NULL);
@@ -914,9 +918,11 @@ void pkg_print_status(pkg_t * pkg, FILE * file)
         pkg_formatted_field(file, pkg, "Source", NULL);
         pkg_formatted_field(file, pkg, "Description", NULL);
     }
-    pkg_formatted_field(file, pkg, "Installed-Size", NULL);
-    pkg_formatted_field(file, pkg, "Installed-Time", NULL);
-    pkg_formatted_field(file, pkg, "Auto-Installed", NULL);
+    if (is_installed) {
+        pkg_formatted_field(file, pkg, "Installed-Size", NULL);
+        pkg_formatted_field(file, pkg, "Installed-Time", NULL);
+        pkg_formatted_field(file, pkg, "Auto-Installed", NULL);
+    }
     if (opkg_config->verbose_status_file) {
         pkg_formatted_userfields(file, pkg, NULL);
     }
