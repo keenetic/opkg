@@ -127,17 +127,14 @@ char *file_readlink_alloc(const char *file_name)
 */
 char *file_read_line_alloc(FILE * fp)
 {
+    size_t buf_len, line_size;
     char buf[BUFSIZ];
-    unsigned int buf_len;
     char *line = NULL;
-    unsigned int line_size = 0;
     int got_nl = 0;
-
-    buf[0] = '\0';
 
     while (fgets(buf, BUFSIZ, fp)) {
         buf_len = strlen(buf);
-        if (buf[buf_len - 1] == '\n') {
+        if (buf_len > 0 && buf[buf_len - 1] == '\n') {
             buf_len--;
             buf[buf_len] = '\0';
             got_nl = 1;
