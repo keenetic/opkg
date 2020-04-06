@@ -886,8 +886,6 @@ int opkg_conf_load(void)
     return 0;
 
  err4:
-    free(opkg_config->lists_dir);
-
     pkg_hash_deinit();
     hash_table_deinit(&opkg_config->file_hash);
     hash_table_deinit(&opkg_config->obs_file_hash);
