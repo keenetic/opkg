@@ -1,3 +1,24 @@
+opkg-0.4.3
+==========
+
+- Do not populate install status if package is not installed (issue 13760)
+
+- Add glob support for --add-ignore-recommends and --add-exclude (issue 13759)
+
+- Fix possible bad memory access in file_read_line_alloc
+
+- Allow upgrades between packages with different names
+
+- Remove extra slash on dest struct variables
+
+- Prevent double free on opkg_conf_load
+
+Libsolv:
+
+- Show all solver problems and not only an educated guess
+
+- Ignore missing recommends of installed packages (issue 13758)
+
 opkg-0.4.2
 ==========
 
