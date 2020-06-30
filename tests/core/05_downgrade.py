@@ -22,13 +22,13 @@ opkgcl.update()
 
 opkgcl.install("a")
 if not opkgcl.is_installed("a", "2.0"):
-	opk.fail("Package 'a' installed but latest version does not report as installed.")
+    opk.fail("Package 'a' installed but latest version does not report as installed.")
 if opkgcl.is_installed("a", "1.0"):
-	opk.fail("Package 'a' version '1.0' installed as well as version '2.0'.")
+    opk.fail("Package 'a' version '1.0' installed as well as version '2.0'.")
 
 # Explicitly install old version
 opkgcl.install("a_1.0_all.opk", "--force-downgrade")
 if not opkgcl.is_installed("a", "1.0"):
-	opk.fail("Package 'a' explicitly downgraded but old version does not report as installed.")
+    opk.fail("Package 'a' explicitly downgraded but old version does not report as installed.")
 if opkgcl.is_installed("a", "2.0"):
-	opk.fail("Package 'a' explicitly downgraded but latest version still reports as installed.")
+    opk.fail("Package 'a' explicitly downgraded but latest version still reports as installed.")

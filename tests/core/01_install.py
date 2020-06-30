@@ -18,12 +18,12 @@ o.write_list()
 opkgcl.update()
 
 if opkgcl.is_installed("a"):
-	opk.fail("Package 'a' not installed but reports as being installed.")
+    opk.fail("Package 'a' not installed but reports as being installed.")
 
 opkgcl.install("a")
 if not opkgcl.is_installed("a"):
-	opk.fail("Package 'a' installed but reports as not installed.")
+    opk.fail("Package 'a' installed but reports as not installed.")
 
 opkgcl.remove("a")
 if opkgcl.is_installed("a"):
-	opk.fail("Package 'a' removed but still reports as being installed.")
+    opk.fail("Package 'a' removed but still reports as being installed.")

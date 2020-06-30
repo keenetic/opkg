@@ -33,16 +33,16 @@ opkgcl.update()
 
 opkgcl.install("a")
 if not opkgcl.is_installed("a"):
-	opk.fail("Package 'a' failed to install.")
+    opk.fail("Package 'a' failed to install.")
 if not os.path.exists("%s/test_dir" % cfg.offline_root):
-	opk.fail("Package 'a' installed but 'test_dir' not created")
+    opk.fail("Package 'a' installed but 'test_dir' not created")
 if not os.path.lexists("%s/test_link" % cfg.offline_root):
-	opk.fail("Package 'a' installed but 'test_link' not created")
+    opk.fail("Package 'a' installed but 'test_link' not created")
 
 opkgcl.remove("a")
 if opkgcl.is_installed("a"):
-	opk.fail("Package 'a' failed to remove.")
+    opk.fail("Package 'a' failed to remove.")
 if os.path.exists("%s/test_dir" % cfg.offline_root):
-	opk.fail("Package 'a' removed but 'test_dir' not deleted")
+    opk.fail("Package 'a' removed but 'test_dir' not deleted")
 if os.path.lexists("%s/test_link" % cfg.offline_root):
-	opk.fail("Package 'a' removed but 'test_link' not deleted")
+    opk.fail("Package 'a' removed but 'test_link' not deleted")

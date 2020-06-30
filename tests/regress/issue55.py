@@ -7,7 +7,7 @@
 # ======================================
 #
 # 1. Create a package containing a symlink to a file with a long file name
-# 	(longer than 100 characters)
+#     (longer than 100 characters)
 # 2. Install the package
 #
 #
@@ -37,10 +37,10 @@ os.unlink("linky")
 opkgcl.install("a_1.0_all.opk")
 
 if not opkgcl.is_installed("a"):
-	opk.fail("Package 'a' not installed.")
+    opk.fail("Package 'a' not installed.")
 
 if not os.path.lexists("{}/linky".format(cfg.offline_root)):
-	opk.fail("symlink to file with a name longer than 100 "
-					"characters not created.")
+    opk.fail("symlink to file with a name longer than 100 "
+             "characters not created.")
 
 opkgcl.remove("a")

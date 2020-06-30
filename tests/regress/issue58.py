@@ -40,4 +40,4 @@ opkgcl.install("a")
 
 opkgcl.remove("a", "--autoremove")
 if opkgcl.is_installed("b"):
-	opk.fail("Recommended package 'b' not autoremoved.")
+    opk.fail("Recommended package 'b' not autoremoved.")

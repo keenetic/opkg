@@ -42,4 +42,4 @@ if opkgcl.is_installed("a"):
 
 opkgcl.install("a")
 if not opkgcl.is_installed("a"):
-	opk.fail("Package 'a' failed to install.")
+    opk.fail("Package 'a' failed to install.")

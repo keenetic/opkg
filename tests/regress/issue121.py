@@ -36,14 +36,14 @@ opkgcl.update()
 
 opkgcl.install("x")
 if not opkgcl.is_installed("x"):
-	opk.fail("Package 'x' failed to install.")
+    opk.fail("Package 'x' failed to install.")
 
 opkgcl.install("y")
 if not opkgcl.is_installed("y"):
-	opk.fail("Package 'y' failed to install.")
+    opk.fail("Package 'y' failed to install.")
 
 if not opkgcl.is_installed("a"):
-	opk.fail("Package 'a' not installed despite being a dependency of installed packages.")
+    opk.fail("Package 'a' not installed despite being a dependency of installed packages.")
 
 o = opk.OpkGroup()
 o.add(Package="a", Version="2.0", Depends="b")
@@ -57,9 +57,9 @@ opkgcl.update()
 opkgcl.upgrade()
 
 if not opkgcl.is_installed("a", "2.0"):
-	opk.fail("New version of package 'a' available during upgrade but was not installed")
+    opk.fail("New version of package 'a' available during upgrade but was not installed")
 if opkgcl.is_installed("a", "1.0"):
-	opk.fail("Package 'a' upgraded but old version still installed.")
+    opk.fail("Package 'a' upgraded but old version still installed.")
 
 if not opkgcl.is_installed("b"):
-	opk.fail("Package 'b' not installed despite being a dependency of installed packages.")
+    opk.fail("Package 'b' not installed despite being a dependency of installed packages.")

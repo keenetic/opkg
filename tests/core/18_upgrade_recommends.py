@@ -24,9 +24,9 @@ opkgcl.update()
 
 opkgcl.install("b")
 if not opkgcl.is_installed("a"):
-	opk.fail("Package a should have been auto-installed")
+    opk.fail("Package a should have been auto-installed")
 if not opkgcl.is_autoinstalled("a"):
-	opk.fail("Package a should have been marked as auto-installed")
+    opk.fail("Package a should have been marked as auto-installed")
 
 o = opk.OpkGroup()
 o.add(Package="a", Version="2.0")
@@ -38,4 +38,4 @@ opkgcl.update()
 opkgcl.upgrade("b", "--autoremove")
 
 if opkgcl.is_installed("a"):
-	opk.fail("Package a should have been auto-removed")
+    opk.fail("Package a should have been auto-removed")

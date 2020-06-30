@@ -32,12 +32,12 @@ os.unlink("test_file")
 # Test...
 opkgcl.install("a")
 if not opkgcl.is_installed("a"):
-	opk.fail("Package 'a' installed but reports as not installed.")
+    opk.fail("Package 'a' installed but reports as not installed.")
 if not os.path.exists("%s/test_file" % cfg.offline_root):
-	opk.fail("Package 'a' installed but file 'test_file' not created.")
+    opk.fail("Package 'a' installed but file 'test_file' not created.")
 
 opkgcl.remove("a")
 if opkgcl.is_installed("a"):
-	opk.fail("Package 'a' removed but still reports as being installed.")
+    opk.fail("Package 'a' removed but still reports as being installed.")
 if os.path.exists("%s/test_file" % cfg.offline_root):
-	opk.fail("Package 'a' removed but file 'test_file' still present.")
+    opk.fail("Package 'a' removed but file 'test_file' still present.")

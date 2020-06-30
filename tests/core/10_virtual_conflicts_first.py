@@ -21,10 +21,10 @@ opkgcl.update()
 
 opkgcl.install("x")
 if not opkgcl.is_installed("x"):
-	opk.fail("Package 'x' installed but reports as not installed.")
+    opk.fail("Package 'x' installed but reports as not installed.")
 
 # Now try to install "y", which should fail
 
 opkgcl.install("y")
 if opkgcl.is_installed("y"):
-	opk.fail("Package 'y' installed despite conflict with 'v' provided by 'x'.")
+    opk.fail("Package 'y' installed despite conflict with 'v' provided by 'x'.")

@@ -40,6 +40,6 @@ opkgcl.update()
 status = opkgcl.upgrade()
 
 if not opkgcl.is_installed("a", "2.0"):
-	opk.fail("New version of package 'a' available during upgrade but was not installed")
+    opk.fail("New version of package 'a' available during upgrade but was not installed")
 
 opkgcl.remove("a")

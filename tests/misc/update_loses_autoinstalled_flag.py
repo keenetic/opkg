@@ -24,7 +24,7 @@ opkgcl.update()
 opkgcl.install("a")
 
 if not opkgcl.is_autoinstalled("b"):
-	opk.fail("b is not autoinstalled")
+    opk.fail("b is not autoinstalled")
 
 a = opk.Opk(Package="a", Version="2.0", Depends="b")
 a.write()
@@ -40,7 +40,7 @@ opkgcl.update()
 opkgcl.upgrade();
 
 if not opkgcl.is_autoinstalled("b"):
-	opk.fail("b is not autoinstalled anymore")
+    opk.fail("b is not autoinstalled anymore")
 
 # The internalsolver is more agressive removing orphans than libsolv. On libsolv upgrades, no
 # packages are removed (on dist-upgrade, removal is allowed)

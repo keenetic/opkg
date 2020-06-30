@@ -20,7 +20,7 @@ opkgcl.update()
 
 opkgcl.install("a")
 if not opkgcl.is_installed("a"):
-	opk.fail("Package 'a' installed but reports as not installed.")
+    opk.fail("Package 'a' installed but reports as not installed.")
 
 # Make a new version of 'a' available
 o.add(Package="a", Version="2.0")
@@ -31,6 +31,6 @@ opkgcl.update()
 opkgcl.upgrade()
 
 if not opkgcl.is_installed("a", "2.0"):
-	opk.fail("New version of package 'a' available during upgrade but was not installed")
+    opk.fail("New version of package 'a' available during upgrade but was not installed")
 if opkgcl.is_installed("a", "1.0"):
-	opk.fail("Package 'a' upgraded but old version still installed.")
+    opk.fail("Package 'a' upgraded but old version still installed.")

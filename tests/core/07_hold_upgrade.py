@@ -20,7 +20,7 @@ opkgcl.update()
 
 opkgcl.install("a")
 if not opkgcl.is_installed("a"):
-	opk.fail("Package 'a' installed but reports as not installed.")
+    opk.fail("Package 'a' installed but reports as not installed.")
 
 opkgcl.flag_hold("a")
 
@@ -33,6 +33,6 @@ opkgcl.update()
 opkgcl.upgrade()
 
 if opkgcl.is_installed("a", "2.0"):
-	opk.fail("Old version of package 'a' flagged as on hold but was upgraded.")
+    opk.fail("Old version of package 'a' flagged as on hold but was upgraded.")
 if not opkgcl.is_installed("a", "1.0"):
-	opk.fail("Package 'a' not upgraded but old version was removed.")
+    opk.fail("Package 'a' not upgraded but old version was removed.")

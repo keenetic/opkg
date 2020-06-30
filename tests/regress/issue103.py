@@ -41,5 +41,4 @@ opkgcl.install("c")
 
 opkgcl.remove("a", "--autoremove")
 if not opkgcl.is_installed("b"):
-	opk.fail("Pacakge 'b' removed despite remaining "
-			"recommending package 'c'.")
+    opk.fail("Pacakge 'b' removed despite remaining recommending package 'c'.")

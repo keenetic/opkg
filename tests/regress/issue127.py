@@ -26,4 +26,4 @@ opkgcl.update()
 
 opkgcl.upgrade("a")
 if opkgcl.is_installed("a"):
-	opk.fail("Package 'a' installed by upgrade.")
+    opk.fail("Package 'a' installed by upgrade.")

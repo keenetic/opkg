@@ -34,7 +34,7 @@ opkgcl.update()
 
 opkgcl.install("a")
 if not opkgcl.is_installed("a"):
-	opk.fail("Package 'a' installed but reports as not installed.")
+    opk.fail("Package 'a' installed but reports as not installed.")
 
 opkgcl.install("b")
 if not opkgcl.is_installed("b"):

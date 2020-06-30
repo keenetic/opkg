@@ -58,15 +58,15 @@ if status != 0:
         opk.fail("Upgrade operation failed (Return value was different than 0)")
 
 if not opkgcl.is_installed("a", "2.0"):
-	opk.fail("Package 'a_2.0' not installed.")
+    opk.fail("Package 'a_2.0' not installed.")
 
 foo_fullpath = "{}/foo".format(cfg.offline_root)
 
 if not os.path.exists(foo_fullpath):
-	opk.fail("File 'foo' incorrectly orphaned.")
+    opk.fail("File 'foo' incorrectly orphaned.")
 
 if not foo_fullpath in opkgcl.files("b"):
-	opk.fail("Package 'b' does not own file 'foo'.")
+    opk.fail("Package 'b' does not own file 'foo'.")
 
 opkgcl.remove("a")
 opkgcl.remove("b")

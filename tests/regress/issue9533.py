@@ -31,8 +31,8 @@ opkgcl.update()
 opkgcl.install("b")
 
 if not opkgcl.is_installed("b"):
-	opk.fail("Package 'b' failed to install.")
+    opk.fail("Package 'b' failed to install.")
 
 opkgcl.install("a")
 if opkgcl.is_installed("a"):
-	opk.fail("Package 'a' was incorrectly installed, since it conflicts with b.")
+    opk.fail("Package 'a' was incorrectly installed, since it conflicts with b.")

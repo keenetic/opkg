@@ -15,9 +15,9 @@
 import opk, cfg, opkgcl
 
 def cleanup():
-	opkgcl.remove("a")
-	opkgcl.remove("b")
-	opkgcl.remove('c')
+    opkgcl.remove("a")
+    opkgcl.remove("b")
+    opkgcl.remove('c')
 
 opk.regress_init()
 
@@ -34,7 +34,7 @@ opkgcl.update()
 # install ``c'' from repository
 opkgcl.install("c")
 if not opkgcl.is_installed("c"):
-	cleanup()
-	opk.xfail("[internalsolv] package ``c'' not installed.")
+    cleanup()
+    opk.xfail("[internalsolv] package ``c'' not installed.")
 
 cleanup()

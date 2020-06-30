@@ -27,9 +27,9 @@ opkgcl.update()
 
 opkgcl.install("a")
 if not opkgcl.is_installed("a"):
-	opk.fail("Package 'a' installed but reports as not installed.")
+    opk.fail("Package 'a' installed but reports as not installed.")
 if not os.path.exists("%s/test1" % cfg.offline_root):
-	opk.fail("Package 'a' installed but file 'test1' not created.")
+    opk.fail("Package 'a' installed but file 'test1' not created.")
 
 # Create a 2.0 containing file "test2" and upgrade by URI
 f = open("test2", "w")
@@ -44,11 +44,11 @@ os.unlink("test2")
 opkgcl.install("a_2.0_all.opk")
 
 if not opkgcl.is_installed("a", "2.0"):
-	opk.fail("New version of package 'a' failed to install")
+    opk.fail("New version of package 'a' failed to install")
 if opkgcl.is_installed("a", "1.0"):
-	opk.fail("Package 'a' upgraded but old version still installed.")
+    opk.fail("Package 'a' upgraded but old version still installed.")
 
 if not os.path.exists("%s/test2" % cfg.offline_root):
-	opk.fail("Package 'a' upgraded but new file 'test2' not created.")
+    opk.fail("Package 'a' upgraded but new file 'test2' not created.")
 if os.path.exists("%s/test1" % cfg.offline_root):
-	opk.fail("Package 'a' upgraded but old file 'test1' not removed.")
+    opk.fail("Package 'a' upgraded but old file 'test1' not removed.")

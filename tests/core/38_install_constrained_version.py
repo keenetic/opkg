@@ -30,21 +30,21 @@ opkgcl.update()
 # with shell=True (meaning characters like '<' would get handled by the shell)
 opkgcl.install("'a<=2.0'")
 if not opkgcl.is_installed("a", "2.0"):
-	opk.fail("Package 'a', Version '2.0', failed to install.")
+    opk.fail("Package 'a', Version '2.0', failed to install.")
 
 opkgcl.upgrade("a")
 if not opkgcl.is_installed("a", "3.0"):
-	opk.fail("Package 'a' was not upgraded to Version '3.0'.")
+    opk.fail("Package 'a' was not upgraded to Version '3.0'.")
 
 opkgcl.install("'a<<2.0'", "--force-downgrade")
 if not opkgcl.is_installed("a", "1.0"):
-	opk.fail("Package 'a' was not downgraded to Version '1.0'.")
+    opk.fail("Package 'a' was not downgraded to Version '1.0'.")
 
 opkgcl.install("'a>=2.0'")
 if not opkgcl.is_installed("a", "3.0"):
-	opk.fail("Package 'a', Version '3.0', failed to install.")
+    opk.fail("Package 'a', Version '3.0', failed to install.")
 
 opkgcl.remove("a")
 opkgcl.install("'a>=4.0'")
 if opkgcl.is_installed("a"):
-	opk.fail("Package 'a' was installed incorrectly.")
+    opk.fail("Package 'a' was installed incorrectly.")

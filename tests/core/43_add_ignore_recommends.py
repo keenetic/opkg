@@ -31,29 +31,29 @@ opkgcl.update()
 opkgcl.install('a', '--add-ignore-recommends c')
 
 if not opkgcl.is_installed('a'):
-	opk.fail("Package 'a' installed but reports as not installed.")
+    opk.fail("Package 'a' installed but reports as not installed.")
 
 if opkgcl.is_installed('c'):
-	opk.xfail("[libsolv<0.7.3] Package 'c' should not have been installed since it was in --add-ignore-recommends.")
+    opk.xfail("[libsolv<0.7.3] Package 'c' should not have been installed since it was in --add-ignore-recommends.")
 
 if not opkgcl.is_installed('d'):
-	opk.fail("Package 'd' installed but reports as not installed.")
+    opk.fail("Package 'd' installed but reports as not installed.")
 
 opkgcl.remove('a')
 opkgcl.remove('d')
 opkgcl.install('a b', '--add-ignore-recommends c')
 
 if not opkgcl.is_installed('a'):
-	opk.fail("Package 'a' installed but reports as not installed.")
+    opk.fail("Package 'a' installed but reports as not installed.")
 
 if not opkgcl.is_installed('b'):
-	opk.fail("Package 'b' installed but reports as not installed.")
+    opk.fail("Package 'b' installed but reports as not installed.")
 
 if not opkgcl.is_installed('c'):
-	opk.fail("Package 'c' should have been installed since 'b' depends on it.")
+    opk.fail("Package 'c' should have been installed since 'b' depends on it.")
 
 if not opkgcl.is_installed('d'):
-	opk.fail("Package 'd' installed but reports as not installed.")
+    opk.fail("Package 'd' installed but reports as not installed.")
 
 opkgcl.remove('b c d', '--force-depends')
 o.add(Package='a', Recommends='c', Version='2.0')
@@ -65,10 +65,10 @@ opkgcl.update()
 opkgcl.upgrade('a', "--add-ignore-recommends '*'")
 
 if not opkgcl.is_installed('a', '2.0'):
-	opk.fail("Package 'a (2.0)' installed but reports as not installed.")
+    opk.fail("Package 'a (2.0)' installed but reports as not installed.")
 
 if opkgcl.is_installed('c'):
-	opk.fail("Package 'c' should not have been installed since it was in --add-ignore-recommends.")
+    opk.fail("Package 'c' should not have been installed since it was in --add-ignore-recommends.")
 
 if opkgcl.is_installed('d'):
-	opk.fail("Package 'd' should not have been installed since it was in --add-ignore-recommends.")
+    opk.fail("Package 'd' should not have been installed since it was in --add-ignore-recommends.")

@@ -7,9 +7,9 @@
 # ======================================
 #
 # 1. Given three packages A, B, C
-#	A depends on B
-#	A failed postinst and is in unpacked state
-#	C depends on B
+#    A depends on B
+#    A failed postinst and is in unpacked state
+#    C depends on B
 #
 # 2. Upgrade to a new version of C which do not depends on B anymore, and use
 #    --autoremove
@@ -55,4 +55,4 @@ opkgcl.update()
 opkgcl.upgrade("--autoremove")
 
 if not opkgcl.is_installed("b", "1.0"):
-	opk.fail("b has been removed even though a still depends on it")
+    opk.fail("b has been removed even though a still depends on it")

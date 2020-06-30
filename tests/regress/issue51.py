@@ -10,7 +10,7 @@
 # 2. Create an identically named/versioned package containing file /foo and /bar
 # 3. Install the first package.
 # 4. Force reinstall the second package from a repository (passing the package
-#	on the command line will not show the bug).
+#    on the command line will not show the bug).
 #
 #
 # What is the expected output? What do you see instead?
@@ -73,17 +73,16 @@ foo_fullpath = "{}/foo".format(cfg.offline_root)
 bar_fullpath = "{}/bar".format(cfg.offline_root)
 
 if not os.path.exists(foo_fullpath) or not os.path.exists(bar_fullpath):
-	opk.fail("Files foo and/or bar are missing.")
+    opk.fail("Files foo and/or bar are missing.")
 
 a_files = opkgcl.files("a")
 if not foo_fullpath in a_files or not bar_fullpath in a_files:
-	opk.fail("Package 'a' does not own foo and/or bar.")
+    opk.fail("Package 'a' does not own foo and/or bar.")
 
 opkgcl.remove("a")
 
 if os.path.exists(foo_fullpath) or os.path.exists(bar_fullpath):
-	opk.fail("Files foo and/or bar still exist "
-				"after removal of package 'a'.")
+    opk.fail("Files foo and/or bar still exist after removal of package 'a'.")
 
 # ----
 o = opk.OpkGroup()
@@ -98,9 +97,9 @@ opkgcl.update()
 opkgcl.install("a", "--force-reinstall")
 
 if os.path.exists(foo_fullpath):
-	opk.fail("File 'foo' not orphaned as it should be.")
+    opk.fail("File 'foo' not orphaned as it should be.")
 
 if foo_fullpath in opkgcl.files("a"):
-	opk.fail("Package 'a' incorrectly owns file 'foo'.")
+    opk.fail("Package 'a' incorrectly owns file 'foo'.")
 
 opkgcl.remove("a")

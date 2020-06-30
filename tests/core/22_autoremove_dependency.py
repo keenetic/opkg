@@ -30,15 +30,15 @@ if not opkgcl.is_installed("c"):
 
 opkgcl.install("b")
 if not opkgcl.is_installed("b"):
-	opk.fail("Package 'b' installed but does not report as installed.")
+    opk.fail("Package 'b' installed but does not report as installed.")
 
 # Check the packages are marked correctly
 if opkgcl.is_autoinstalled("a"):
-	opk.fail("Package 'a' explicitly installed by user but reports as auto installed.")
+    opk.fail("Package 'a' explicitly installed by user but reports as auto installed.")
 if opkgcl.is_autoinstalled("b"):
         opk.fail("Package 'b' explicitly installed by user but reports as auto installed.")
 if not opkgcl.is_autoinstalled("c"):
-	opk.fail("Package 'c' installed as a dependency but does not report as auto installed.")
+    opk.fail("Package 'c' installed as a dependency but does not report as auto installed.")
 
 # Check that autoinstalled packages are not removed when other packages still depend on them
 opkgcl.remove("a","--autoremove")
