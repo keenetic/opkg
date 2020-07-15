@@ -19,6 +19,9 @@ def opkgcl(opkg_args):
 	status = p.returncode
 	return (status, stdout_data.decode("utf-8"))
 
+def download(pkg_name, flags=""):
+	return opkgcl("{} download {}".format(flags, pkg_name))[0]
+
 def install(pkg_name, flags=""):
 	return opkgcl("{} --force-postinstall install {}".format(flags, pkg_name))[0]
 
