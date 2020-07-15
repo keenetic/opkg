@@ -1,7 +1,9 @@
 # SPDX-License-Identifier: GPL-2.0-only
 import tarfile, os, sys, stat
+import os.path
 import cfg
 import errno
+from pathlib import Path
 
 __appname = sys.argv[0]
 
@@ -19,7 +21,7 @@ class Opk:
 	prerm = None
 	postrm = None
 
-	def __init__(self, **control):
+	def __init__(self, subdirectory=None, **control):
 		for k in control.keys():
 			if k not in self.valid_control_fields:
 				raise Exception("Invalid control field: "
@@ -31,6 +33,12 @@ class Opk:
 			control["Architecture"] = "all"
 		if "Version" not in control.keys():
 			control["Version"] = "1.0"
+		if subdirectory is not None:
+			subdir = Path(subdirectory).resolve()
+			opkdir = Path(cfg.opkdir)
+			self._relative_dir = subdir.relative_to(opkdir)
+		else:
+			self._relative_dir = None
 		self.control = control
 
 	def write(self, tar_not_ar=False, data_files=None, compression='gz'):
@@ -48,8 +56,13 @@ class Opk:
 			'preinst', 'postinst', 'prerm', 'postrm',
 			'debian-binary']
 
-		filename = "{Package}_{Version}_{Architecture}.opk"\
-						.format(**self.control)
+		# process a final filename for the package
+		dirname  = self._relative_dir or ''
+		basename = self.control.get('Filename',
+						'{Package}_{Version}_{Architecture}.opk'\
+							.format(**self.control))
+		filename = os.path.join(dirname, basename)
+		self.control['Filename'] = filename
 
 		for f in TEMP_FILES + [filename]:
 			if os.path.exists(f):
@@ -94,6 +107,8 @@ class Opk:
 				for df in data_files:
 					tar.add(df)
 
+		if self._relative_dir is not None:
+			self._relative_dir.mkdir(parents=True, exist_ok=True)
 		if tar_not_ar:
 			with tarfile.open(filename, tar_mode) as tar:
 				tar.add(control_file)
@@ -141,11 +156,9 @@ class OpkGroup:
 		for opk in self.opk_list:
 			for k in opk.control.keys():
 				f.write("{}: {}\n".format(k, opk.control[k]))
-			fpattern = "{Package}_{Version}_{Architecture}.opk"
-			fname = fpattern.format(**opk.control)
+			fname = opk.control['Filename']
 			fsize = os.stat(fname).st_size
 			md5sum = md5sum_file(fname)
-			f.write("Filename: {}\n".format(fname))
 			f.write("Size: {}\n".format(fsize))
 			f.write("MD5Sum: {}\n".format(md5sum))
 			f.write("\n")
