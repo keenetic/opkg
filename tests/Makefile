@@ -89,6 +89,7 @@ REGRESSION_TESTS := core/01_install.py \
 		    regress/issue10781.py \
 		    regress/issue11033.py \
 		    regress/issue11033b.py \
+		    regress/issue11301.py \
 		    regress/issue11826.py \
 		    regress/issue13574.py \
 		    regress/issue13758.py \

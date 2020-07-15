@@ -316,7 +316,7 @@ int opkg_download_pkg_to_dir(pkg_t * pkg, const char *dir)
     char *url = NULL;
     int err = 0;
 
-    sprintf_alloc(&dest_file_name, "%s/%s", dir, pkg->filename);
+    sprintf_alloc(&dest_file_name, "%s/%s", dir, basename(pkg->filename));
 
     if (opkg_config->volatile_cache) {
         url = get_pkg_url(pkg);
