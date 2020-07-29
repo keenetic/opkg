@@ -285,7 +285,8 @@ int pkg_parse_line(void *ptr, const char *line, uint mask)
     case ' ':
         if ((mask & PFM_DESCRIPTION) && reading_description) {
             if (!pkg->description) {
-                pkg->description = xmalloc(strlen(line) + 1);
+                pkg->description = xmalloc(1 + strlen(line) + 1);
+                *pkg->description = '\0';
             } else {
                 pkg->description =
                     xrealloc(pkg->description, strlen(pkg->description)
