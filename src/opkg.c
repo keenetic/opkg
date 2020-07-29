@@ -478,8 +478,5 @@ int main(int argc, char *argv[])
     opkg_conf_deinit();
 
  err0:
-    print_error_list();
-    free_error_list();
-
     return err;
 }
