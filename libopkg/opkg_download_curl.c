@@ -232,6 +232,7 @@ static int opkg_validate_cached_file(const char *src, const char *cache_location
     long resume_from = 0;
     char *etag = NULL;
     double src_size = -1;
+    int ret = 1;
 
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &dummy_write);
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, &header_write);
@@ -245,7 +246,8 @@ static int opkg_validate_cached_file(const char *src, const char *cache_location
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &error_code);
         opkg_msg(ERROR, "Failed to download %s headers: %s.\n", src,
                  curl_easy_strerror(res));
-        return -1;
+        ret = -1;
+        goto cleanup;
     }
     curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &src_size);
 
@@ -261,18 +263,12 @@ static int opkg_validate_cached_file(const char *src, const char *cache_location
         if (r != 0)
             opkg_msg(ERROR, "Failed to create stamp for %s.\n", cache_location);
     }
-    free(etag);
-
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NULL);
-    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, NULL);
-    curl_easy_setopt(curl, CURLOPT_WRITEHEADER, NULL);
-    curl_easy_setopt(curl, CURLOPT_HEADER, 0);
-    curl_easy_setopt(curl, CURLOPT_NOBODY, 0);
 
     file = fopen(cache_location, "ab");
     if (!file) {
         opkg_msg(ERROR, "Failed to open cache file %s\n", cache_location);
-        return -1;
+        ret = -1;
+        goto cleanup;
     }
     fseek(file, 0, SEEK_END);
     resume_from = ftell(file);
@@ -280,10 +276,20 @@ static int opkg_validate_cached_file(const char *src, const char *cache_location
 
     if (resume_from < src_size)
         curl_easy_setopt(curl, CURLOPT_RESUME_FROM, resume_from);
-    else
-        return 0;
+    else {
+        ret = 0;
+        goto cleanup;
+    }
 
-    return 1;
+cleanup:
+    free(etag);
+
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NULL);
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, NULL);
+    curl_easy_setopt(curl, CURLOPT_WRITEHEADER, NULL);
+    curl_easy_setopt(curl, CURLOPT_HEADER, 0);
+    curl_easy_setopt(curl, CURLOPT_NOBODY, 0);
+    return ret;
 }
 
 /* Download using curl backend. */
