@@ -40,8 +40,8 @@
 #include "xfuncs.h"
 
 #define opkg_assert(expr) if (!(expr)) { \
-    printf ("opkg: file %s: line %d (%s): Assertation '%s' failed",\
-            __FILE__, __LINE__, __PRETTY_FUNCTION__, # expr); abort (); }
+    printf ("opkg: file libopkg/opkg.c: line %d (%s): Assertation '%s' failed",\
+            __LINE__, __PRETTY_FUNCTION__, # expr); abort (); }
 
 /** Private Functions ***/
 
