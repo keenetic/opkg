@@ -668,6 +668,8 @@ int opkg_unlock()
         if (r == -1) {
             opkg_perror(ERROR, "Couldn't unlink %s", opkg_config->lock_file);
             err = -1;
+        } else {
+            lock_fd = -1;
         }
     }
 
