@@ -182,7 +182,7 @@ static void parse_pkg_src_options_str(pkg_src_options_t *src_options,
     char *token, *value, *src_option;
 
     /* default value */
-    src_options->disable_sig_check = 0;
+    src_options->signature_verified = 0;
 
     token = strtok(options_str, " ");
     while (token) {
@@ -193,9 +193,9 @@ static void parse_pkg_src_options_str(pkg_src_options_t *src_options,
             src_option = xstrndup(token, strlen(token) - (strlen(value) + 1));
             if (strcasecmp(src_option, "trusted") == 0) {
                 if (strcasecmp(value, "yes") == 0)
-                    src_options->disable_sig_check = 1;
+                    src_options->signature_verified = 1;
                 else
-                    src_options->disable_sig_check = 0;
+                    src_options->signature_verified = 0;
             }
             free(src_option);
         }

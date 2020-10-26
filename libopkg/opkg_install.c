@@ -915,7 +915,7 @@ int opkg_install_pkg(pkg_t * pkg, pkg_t * old_pkg)
         return -1;
 
     /* check that the repository is valid */
-    if (opkg_config->check_signature && pkg->src && !(pkg->src->options->disable_sig_check)) {
+    if (opkg_config->check_signature && pkg->src && !(pkg->src->options->signature_verified)) {
         /* pkg_src_verify prints an error message so we don't have to. */
         err = pkg_src_verify(pkg->src);
         if (err)

@@ -41,9 +41,9 @@ int pkg_src_init(pkg_src_t * src, const char *name, const char *base_url,
     src->value = xstrdup(base_url);
     src->options = xmalloc(sizeof(pkg_src_options_t));
     if (options)
-       src->options->disable_sig_check = options->disable_sig_check;
+       src->options->signature_verified = options->signature_verified;
     else
-       src->options->disable_sig_check = 0;
+       src->options->signature_verified = 0;
 
     if (extra_data)
         src->extra_data = xstrdup(extra_data);
@@ -186,6 +186,8 @@ int pkg_src_verify(pkg_src_t * src)
 
     opkg_msg(DEBUG, "Signature verification passed for %s.\n", src->name);
 
+    src->options->signature_verified = 1;
+
  cleanup:
     if (err) {
         /* Remove incorrect files. */
@@ -205,7 +207,7 @@ int pkg_src_update(pkg_src_t * src)
     if (err)
         return err;
 
-    if (opkg_config->check_signature && !(src->options->disable_sig_check)) {
+    if (opkg_config->check_signature && !(src->options->signature_verified)) {
         err = pkg_src_download_signature(src);
         if (err)
             return err;

@@ -28,7 +28,7 @@ extern "C" {
 #endif
 
 typedef struct {
-    int disable_sig_check;
+    int signature_verified;
 } pkg_src_options_t;
 
 typedef struct {
