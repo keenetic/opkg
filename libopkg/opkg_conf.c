@@ -604,7 +604,7 @@ int opkg_conf_init(void)
     return 0;
 }
 
-static int opkg_lock()
+int opkg_lock()
 {
     int r;
     char *lock_dir;
@@ -643,7 +643,7 @@ static int opkg_lock()
     return 0;
 }
 
-static int opkg_unlock()
+int opkg_unlock()
 {
     int r;
     int err = 0;
@@ -759,7 +759,6 @@ int opkg_conf_load(void)
         opkg_config->lock_file = tmp;
     }
 
-    r = opkg_lock();
     if (r < 0)
         goto err2;
 
@@ -870,13 +869,6 @@ int opkg_conf_load(void)
         opkg_config->cache_dir = tmp;
     }
 
-    r = file_mkdir_hier(opkg_config->cache_dir, 0755);
-    if (r != 0) {
-        opkg_perror(ERROR, "Creating cache dir %s failed",
-                    opkg_config->cache_dir);
-        goto err4;
-    }
-
     r = resolve_pkg_dest_list();
     if (r != 0)
         goto err4;
@@ -894,8 +886,6 @@ int opkg_conf_load(void)
     if (r == -1)
         opkg_perror(ERROR, "Couldn't remove dir %s", opkg_config->tmp_dir);
  err3:
-    opkg_unlock();
-
  err2:
  err1:
     pkg_src_list_deinit(&opkg_config->pkg_src_list);
@@ -950,8 +940,6 @@ void opkg_conf_deinit(void)
     pkg_hash_deinit();
     hash_table_deinit(&opkg_config->file_hash);
     hash_table_deinit(&opkg_config->obs_file_hash);
-
-    opkg_unlock();
 
     for (i = 0; options[i].name; i++) {
         if (options[i].type == OPKG_OPT_TYPE_STRING) {

@@ -1206,70 +1206,75 @@ static int opkg_print_architecture_cmd(int argc, char **argv)
    array for easier maintenance */
 static opkg_cmd_t cmds[] = {
     {"update", 0, (opkg_cmd_fun_t) opkg_update_cmd,
-        PFM_DESCRIPTION | PFM_SOURCE},
+        PFM_DESCRIPTION | PFM_SOURCE, true},
     {"upgrade", 0, (opkg_cmd_fun_t) opkg_upgrade_cmd,
-        PFM_DESCRIPTION | PFM_SOURCE},
+        PFM_DESCRIPTION | PFM_SOURCE, true},
     {"dist-upgrade", 0, (opkg_cmd_fun_t) opkg_distupgrade_cmd,
-        PFM_DESCRIPTION | PFM_SOURCE},
-    {"list", 0, (opkg_cmd_fun_t) opkg_list_cmd, PFM_SOURCE},
-    {"list_installed", 0, (opkg_cmd_fun_t) opkg_list_installed_cmd, PFM_SOURCE},
-    {"list-installed", 0, (opkg_cmd_fun_t) opkg_list_installed_cmd, PFM_SOURCE},
+        PFM_DESCRIPTION | PFM_SOURCE, true},
+    {"list", 0, (opkg_cmd_fun_t) opkg_list_cmd, PFM_SOURCE, false},
+    {"list_installed", 0, (opkg_cmd_fun_t) opkg_list_installed_cmd, PFM_SOURCE,
+        false},
+    {"list-installed", 0, (opkg_cmd_fun_t) opkg_list_installed_cmd, PFM_SOURCE,
+        false},
     {"list_upgradable", 0, (opkg_cmd_fun_t) opkg_list_upgradable_cmd,
-        PFM_SOURCE},
+        PFM_SOURCE, false},
     {"list-upgradable", 0, (opkg_cmd_fun_t) opkg_list_upgradable_cmd,
-        PFM_SOURCE},
+        PFM_SOURCE, false},
     {"list_changed_conffiles", 0,
-        (opkg_cmd_fun_t) opkg_list_changed_conffiles_cmd, PFM_SOURCE},
+        (opkg_cmd_fun_t) opkg_list_changed_conffiles_cmd, PFM_SOURCE, false},
     {"list-changed-conffiles", 0,
-        (opkg_cmd_fun_t) opkg_list_changed_conffiles_cmd, PFM_SOURCE},
-    {"info", 0, (opkg_cmd_fun_t) opkg_info_cmd, 0},
-    {"flag", 1, (opkg_cmd_fun_t) opkg_flag_cmd, PFM_DESCRIPTION | PFM_SOURCE},
+        (opkg_cmd_fun_t) opkg_list_changed_conffiles_cmd, PFM_SOURCE, false},
+    {"info", 0, (opkg_cmd_fun_t) opkg_info_cmd, 0, false},
+    {"flag", 1, (opkg_cmd_fun_t) opkg_flag_cmd, PFM_DESCRIPTION | PFM_SOURCE,
+        true},
     {"status", 0, (opkg_cmd_fun_t) opkg_status_cmd,
-        PFM_DESCRIPTION | PFM_SOURCE},
+        PFM_DESCRIPTION | PFM_SOURCE, false},
     {"install", 1, (opkg_cmd_fun_t) opkg_install_cmd,
-        PFM_DESCRIPTION | PFM_SOURCE},
+        PFM_DESCRIPTION | PFM_SOURCE, true},
     {"remove", 1, (opkg_cmd_fun_t) opkg_remove_cmd,
-        PFM_DESCRIPTION | PFM_SOURCE},
-    {"clean", 0, (opkg_cmd_fun_t) opkg_clean_cmd, 0},
+        PFM_DESCRIPTION | PFM_SOURCE, true},
+    {"clean", 0, (opkg_cmd_fun_t) opkg_clean_cmd, 0, true},
     {"configure", 0, (opkg_cmd_fun_t) opkg_configure_cmd,
-        PFM_DESCRIPTION | PFM_SOURCE},
-    {"files", 1, (opkg_cmd_fun_t) opkg_files_cmd, PFM_DESCRIPTION | PFM_SOURCE},
+        PFM_DESCRIPTION | PFM_SOURCE, true},
+    {"files", 1, (opkg_cmd_fun_t) opkg_files_cmd, PFM_DESCRIPTION | PFM_SOURCE,
+        false},
     {"search", 1, (opkg_cmd_fun_t) opkg_search_cmd,
-        PFM_DESCRIPTION | PFM_SOURCE},
+        PFM_DESCRIPTION | PFM_SOURCE, false},
     {"find", 1, (opkg_cmd_fun_t) opkg_find_cmd,
-        PFM_DESCRIPTION | PFM_SOURCE},
-    {"verify", 0, (opkg_cmd_fun_t) opkg_verify_cmd,
-        0},
+        PFM_DESCRIPTION | PFM_SOURCE, false},
+    {"verify", 0, (opkg_cmd_fun_t) opkg_verify_cmd, 0, false},
     {"download", 1, (opkg_cmd_fun_t) opkg_download_cmd,
-        PFM_DESCRIPTION | PFM_SOURCE},
-    {"compare_versions", 1, (opkg_cmd_fun_t) opkg_compare_versions_cmd, 0},
-    {"compare-versions", 1, (opkg_cmd_fun_t) opkg_compare_versions_cmd, 0},
+        PFM_DESCRIPTION | PFM_SOURCE, false},
+    {"compare_versions", 1, (opkg_cmd_fun_t) opkg_compare_versions_cmd, 0,
+        false},
+    {"compare-versions", 1, (opkg_cmd_fun_t) opkg_compare_versions_cmd, 0,
+        false},
     {"print-architecture", 0, (opkg_cmd_fun_t) opkg_print_architecture_cmd,
-        PFM_DESCRIPTION | PFM_SOURCE},
+        PFM_DESCRIPTION | PFM_SOURCE, false},
     {"print_architecture", 0, (opkg_cmd_fun_t) opkg_print_architecture_cmd,
-        PFM_DESCRIPTION | PFM_SOURCE},
+        PFM_DESCRIPTION | PFM_SOURCE, false},
     {"print-installation-architecture", 0,
         (opkg_cmd_fun_t) opkg_print_architecture_cmd,
-        PFM_DESCRIPTION | PFM_SOURCE},
+        PFM_DESCRIPTION | PFM_SOURCE, false},
     {"print_installation_architecture", 0,
         (opkg_cmd_fun_t) opkg_print_architecture_cmd,
-        PFM_DESCRIPTION | PFM_SOURCE},
+        PFM_DESCRIPTION | PFM_SOURCE, false},
     {"depends", 1, (opkg_cmd_fun_t) opkg_depends_cmd,
-        PFM_DESCRIPTION | PFM_SOURCE},
+        PFM_DESCRIPTION | PFM_SOURCE, false},
     {"whatdepends", 1, (opkg_cmd_fun_t) opkg_whatdepends_cmd,
-        PFM_DESCRIPTION | PFM_SOURCE},
+        PFM_DESCRIPTION | PFM_SOURCE, false},
     {"whatdependsrec", 1, (opkg_cmd_fun_t) opkg_whatdepends_recursively_cmd,
-        PFM_DESCRIPTION | PFM_SOURCE},
+        PFM_DESCRIPTION | PFM_SOURCE, false},
     {"whatrecommends", 1, (opkg_cmd_fun_t) opkg_whatrecommends_cmd,
-        PFM_DESCRIPTION | PFM_SOURCE},
+        PFM_DESCRIPTION | PFM_SOURCE, false},
     {"whatsuggests", 1, (opkg_cmd_fun_t) opkg_whatsuggests_cmd,
-        PFM_DESCRIPTION | PFM_SOURCE},
+        PFM_DESCRIPTION | PFM_SOURCE, false},
     {"whatprovides", 1, (opkg_cmd_fun_t) opkg_whatprovides_cmd,
-        PFM_DESCRIPTION | PFM_SOURCE},
+        PFM_DESCRIPTION | PFM_SOURCE, false},
     {"whatreplaces", 1, (opkg_cmd_fun_t) opkg_whatreplaces_cmd,
-        PFM_DESCRIPTION | PFM_SOURCE},
+        PFM_DESCRIPTION | PFM_SOURCE, false},
     {"whatconflicts", 1, (opkg_cmd_fun_t) opkg_whatconflicts_cmd,
-        PFM_DESCRIPTION | PFM_SOURCE},
+        PFM_DESCRIPTION | PFM_SOURCE, false},
 };
 
 opkg_cmd_t *opkg_cmd_find(const char *name)
@@ -1289,5 +1294,19 @@ opkg_cmd_t *opkg_cmd_find(const char *name)
 
 int opkg_cmd_exec(opkg_cmd_t * cmd, int argc, const char **argv)
 {
-    return (cmd->fun) (argc, argv);
+    int ret = 0;
+
+    if (cmd->privileged) {
+        ret = opkg_lock();
+        if (ret != 0) {
+            opkg_perror(ERROR, "Command failed to capture privilege lock");
+            return ret;
+        }
+    }
+
+    ret = (cmd->fun) (argc, argv);
+
+    if (cmd->privileged)
+        opkg_unlock();
+    return ret;
 }

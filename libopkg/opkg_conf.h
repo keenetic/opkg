@@ -204,6 +204,9 @@ int opkg_conf_get_option(char *option, void *value);
 int opkg_conf_set_option(const char *name, const char *value,
                          int overwrite);
 
+int opkg_lock(void);
+int opkg_unlock(void);
+
 char *opkg_solver_version_alloc(void);
 
 #ifdef __cplusplus

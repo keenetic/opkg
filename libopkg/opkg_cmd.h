@@ -21,6 +21,8 @@
 #ifndef OPKG_CMD_H
 #define OPKG_CMD_H
 
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -32,6 +34,7 @@ struct opkg_cmd {
     int requires_args;
     opkg_cmd_fun_t fun;
     unsigned int pfm;       /* package field mask */
+    bool privileged;        /* command requires exclusive lock */
 };
 typedef struct opkg_cmd opkg_cmd_t;
 

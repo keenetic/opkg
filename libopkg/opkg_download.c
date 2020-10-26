@@ -121,6 +121,13 @@ static int opkg_download_internal(const char *src, const char *dest,
 {
     int ret;
 
+    if (use_cache) {
+        ret = file_mkdir_hier(opkg_config->cache_dir, 0755);
+        if (ret != 0)
+            opkg_perror(ERROR, "Creating cache dir %s failed",
+                    opkg_config->cache_dir);
+    }
+
     opkg_msg(NOTICE, "Downloading %s.\n", src);
 
     if (str_starts_with(src, "file:")) {
