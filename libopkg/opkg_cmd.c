@@ -492,6 +492,7 @@ static int opkg_download_cmd(int argc, char **argv)
 
         pkg = pkg_hash_fetch_best_installation_candidate_by_name(arg);
         if (pkg == NULL) {
+            err = -1;
             opkg_msg(ERROR, "Cannot find package %s.\n", arg);
             continue;
         }
