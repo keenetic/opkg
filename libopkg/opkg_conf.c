@@ -53,7 +53,6 @@ static opkg_option_t options[] = {
     {"lock_file", OPKG_OPT_TYPE_STRING, &_conf.lock_file},
     {"info_dir", OPKG_OPT_TYPE_STRING, &_conf.info_dir},
     {"status_file", OPKG_OPT_TYPE_STRING, &_conf.status_file},
-    {"force_defaults", OPKG_OPT_TYPE_BOOL, &_conf.force_defaults},
     {"force_maintainer", OPKG_OPT_TYPE_BOOL, &_conf.force_maintainer},
     {"ignore_maintainer", OPKG_OPT_TYPE_BOOL, &_conf.ignore_maintainer},
     {"ignore_uid", OPKG_OPT_TYPE_BOOL, &_conf.ignore_uid},
@@ -72,7 +71,6 @@ static opkg_option_t options[] = {
     {"http_proxy", OPKG_OPT_TYPE_STRING, &_conf.http_proxy},
     {"https_proxy", OPKG_OPT_TYPE_STRING, &_conf.https_proxy},
     {"no_proxy", OPKG_OPT_TYPE_STRING, &_conf.no_proxy},
-    {"test", OPKG_OPT_TYPE_BOOL, &_conf.noaction},
     {"noaction", OPKG_OPT_TYPE_BOOL, &_conf.noaction},
     {"download_only", OPKG_OPT_TYPE_BOOL, &_conf.download_only},
     {"download_first", OPKG_OPT_TYPE_BOOL, &_conf.download_first}, /* Not available on internal solver */

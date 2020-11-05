@@ -80,12 +80,18 @@ Validates the x509 certificate all the way back to the Certificate Authority (de
 \fBcombine\fP
 Combines upgrade and install operations, this may be needed to resolve dependency issues. Only available for the internal solver backend (default is 0).
 .TP
+\fBcompress_list_files\fP
+Compresses the list files in list_dir (gz)
+.TP
 \fBconnect_timeout_ms\fP (CURL)
 The maximum amount of time allowed for a connection initalization to take (default is 300 seconds).
 .TP
 \fBdest\fP
 Registers a given destination with a given path.
 If no dest is specified \fBroot\fP is specified automatically to \fB/\fP.
+.TP
+\fBdownload_first\fP
+Download all the transaction packages first, before any changes to the file system.
 .TP
 \fBdownload_only\fP
 No action -- download only (default is 0).
@@ -148,6 +154,12 @@ Specifies the HTTPS proxy address in the format \fB"<url:port>"\fP.
 \fBignore_maintainer\fP
 Ignores changes to files listed as \fBconffile\fP's during a package upgrade (default is 0).
 .TP
+\fBignore_uid\fP
+Do not restore the user and group IDs when extracting files.
+.TP
+\fBintercepts_dir\fP
+Specifies the directory used to store intercept scripts.
+.TP
 \fBinfo_dir\fP
 Specifies the directory used to store packages information.
 .TP
@@ -201,6 +213,9 @@ The type of signatures to check against.
 \fBgpg-asc\fP - GPG Signature using ASCII ARMOR
 .fi
 \fBopenssl\fP - OpenSSL Signature Verification
+.TP
+\fBsize\fP
+Print package size when listing available packages (default is 0)
 .TP
 \fBssl_ca_file\fP (CURL)
 CURL's SSL Certificate Authority file.
