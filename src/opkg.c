@@ -88,7 +88,6 @@ static struct option long_options[] = {
     {"force_reinstall", 0, 0, ARGS_OPT_FORCE_REINSTALL},
     {"force-space", 0, 0, ARGS_OPT_FORCE_SPACE},
     {"force_space", 0, 0, ARGS_OPT_FORCE_SPACE},
-    {"recursive", 0, 0, ARGS_OPT_FORCE_REMOVAL_OF_DEPENDENT_PACKAGES},
     {"force-removal-of-dependent-packages", 0, 0,
      ARGS_OPT_FORCE_REMOVAL_OF_DEPENDENT_PACKAGES},
     {"force_removal_of_dependent_packages", 0, 0,
@@ -109,14 +108,12 @@ static struct option long_options[] = {
     {"download-only", 0, 0, ARGS_OPT_DOWNLOAD_ONLY},
     {"nodeps", 0, 0, ARGS_OPT_NODEPS},
     {"no-install-recommends", 0, 0, ARGS_OPT_NO_INSTALL_RECOMMENDS},
-    {"offline", 1, 0, 'o'},
     {"offline-root", 1, 0, 'o'},
     {"add-arch", 1, 0, ARGS_OPT_ADD_ARCH},
     {"add-dest", 1, 0, ARGS_OPT_ADD_DEST},
     {"size", 0, 0, ARGS_OPT_SIZE},
     {"add-exclude", 1, 0, ARGS_OPT_ADD_EXCLUDE},
     {"add-ignore-recommends", 1, 0, ARGS_OPT_ADD_IGNORE_RECOMMENDS},
-    {"test", 0, 0, ARGS_OPT_NOACTION},
     {"tmp-dir", 1, 0, 't'},
     {"tmp_dir", 1, 0, 't'},
     {"lists-dir", 1, 0, 'l'},
@@ -296,6 +293,7 @@ static void usage()
     printf("\nPackage Manipulation:\n");
     printf("\tupdate                          Update list of available packages\n");
     printf("\tupgrade                         Upgrade installed packages\n");
+    printf("\tdist-upgrade                    Upgrade operation that allows package removal (libsolv backend)\n");
     printf("\tinstall <pkgs>                  Install package(s)\n");
     printf("\tconfigure <pkgs>                Configure unpacked package(s)\n");
     printf("\tremove <pkgs|glob>              Remove package(s)\n");
@@ -327,7 +325,8 @@ static void usage()
     printf("\twhatreplaces [-A] [pkgname|glob]+\n");
     printf("\tverify [pkg|glob]               Verifies the intrgrity of <pkg>, or all packages if omitted by\n");
     printf("\t                                comparing the md5sum of each file with the information stored\n");
-    printf("\t                                on the opkg metadata database");
+    printf("\t                                on the opkg metadata database\n");
+    printf("\t-v, --version                   Print version\n");
     printf("\nOptions:\n");
     printf("\t-A                              Query all packages not just those installed\n");
     printf("\t-V[<level>]                     Set verbosity level to <level>.\n");

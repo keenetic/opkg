@@ -20,6 +20,9 @@ Update list of available packages
 \fBupgrade\fR
 Upgrade installed packages
 .TP
+\fBdist-upgrade\fR
+Upgrade operation that allows package removal. Only available on the libsolv backend.
+.TP
 \fBinstall <\fIpackage(s)\fP>\fR
 Install \fIpackage(s)\fP
 .TP
@@ -45,6 +48,10 @@ ok
 installed
 unpacked
 .TE
+.
+.TP
+\fBversion \fR
+Print version
 .SS INFORMATIONAL SUB-COMMANDS
 .TP
 \fBlist\fR
@@ -77,7 +84,7 @@ Display all statuses for selected packages
 \fBdownload <\fIpackage\fP>\fR
 Download \fIpackage\fP to current directory
 .TP
-\fBcompare-version <\fIversion1\fP> <\fIoperator\fP> <\fIversion2\fP>\fR
+\fBcompare-versions <\fIversion1\fP> <\fIoperator\fP> <\fIversion2\fP>\fR
 compare versions using following operators :
 .TS
 tab(@);
@@ -121,7 +128,7 @@ on the opkg metadata database.
 Query all packages not just those installed
 .
 .TP
-\fB\-v <\fIlevel\fP>, --verbosity <\fIlevel\fP>\fR
+\fB\-V <\fIlevel\fP>, --verbosity <\fIlevel\fP>\fR
 Set verbosity level to \fIlevel\fP. Verbosity levels :
 .TS
 tab(@);
