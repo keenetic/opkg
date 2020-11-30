@@ -1,3 +1,31 @@
+opkg-0.4.4
+==========
+
+- Drop feed path when manually downloading packages (issue 11301)
+
+- Send error information to stderr/stdout immediately, by disabling buffering (issue 13985)
+
+- Do not require root privileges for read-only operations (issue 9348)
+
+- Fix segfault when parsing packages with long descriptions, but no summary (issue 13575)
+
+- Only check feed signature once
+
+- Make opkg download return -1 (instead of 0) if a package is missing
+
+- Clear curl properties to avoid a failed call pollute next calls
+
+- Testsuite: standardize styline and spacing at 4 (PEP 8)
+
+- Make opkg_assert comply with reproducible builds rules
+
+- Make opkg and opkg.conf man pages and cli help consistent and correct
+
+Libsolv:
+
+- Do not download packages if --noaction is used with download_first=1
+
+
 opkg-0.4.3
 ==========
 
