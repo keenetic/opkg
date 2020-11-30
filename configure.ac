@@ -1,5 +1,5 @@
 # Process this file with autoconf to produce a configure script
-AC_INIT([opkg], [0.4.4-SNAPSHOT])
+AC_INIT([opkg], [0.4.4])
 AC_CONFIG_SRCDIR([libopkg/pkg.c])
 
 AC_CONFIG_AUX_DIR([conf])
