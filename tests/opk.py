@@ -58,9 +58,7 @@ class Opk:
         if 'Version' not in control.keys():
             control['Version'] = '1.0'
         if subdirectory is not None:
-            subdir = Path(subdirectory).resolve()
-            opkdir = Path(cfg.opkdir)
-            self._relative_dir = subdir.relative_to(opkdir)
+            self._relative_dir = Path(subdirectory)
         else:
             self._relative_dir = None
         self.control = control
