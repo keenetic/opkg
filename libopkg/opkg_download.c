@@ -417,7 +417,7 @@ static int opkg_prepare_file_for_install(const char *path, char **namep)
     hash_insert_pkg(pkg, 1);
 
     if (namep)
-        *namep = pkg->name;
+        *namep = strdup(pkg->name);
     return 0;
 }
 
