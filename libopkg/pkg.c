@@ -1355,9 +1355,8 @@ int pkg_run_script(pkg_t * pkg, const char *script, const char *args)
     free(cmd);
 
     if (err) {
-        if (!opkg_config->offline_root)
-            opkg_msg(ERROR, "package \"%s\" %s script returned status %d.\n",
-                     pkg->name, script, err);
+        opkg_msg(ERROR, "package \"%s\" %s script returned status %d.\n",
+                 pkg->name, script, err);
         return err;
     }
 
