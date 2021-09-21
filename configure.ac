@@ -104,6 +104,17 @@ if test "$want_lz4" = "yes"; then
 fi
 AM_CONDITIONAL(HAVE_LZ4, test "$want_lz4" = "yes")
 
+# check for zstd
+AC_ARG_ENABLE(zstd,
+              AC_HELP_STRING([--enable-zstd], [Enable zstd compressor support
+      [default=no] ]),
+    [want_zstd="$enableval"], [want_zstd="no"])
+
+if test "$want_zstd" = "yes"; then
+  AC_DEFINE(HAVE_ZSTD, 1, [Define if you want zstd support])
+fi
+AM_CONDITIONAL(HAVE_ZSTD, test "$want_zstd" = "yes")
+
 # check for libcurl
 AC_ARG_ENABLE(curl,
               AC_HELP_STRING([--enable-curl], [Enable downloading with curl

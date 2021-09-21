@@ -611,6 +611,19 @@ static struct archive *open_inner(struct archive *outer)
     }
 #endif
 
+#if HAVE_ZSTD
+    r = archive_read_support_filter_zstd(inner);
+    if (r == ARCHIVE_WARN) {
+        /* libarchive returns ARCHIVE_WARN if the filter is provided by
+         * an external program.
+         */
+        opkg_msg(INFO, "Zstandard support provided by external program.\n");
+    } else if (r != ARCHIVE_OK) {
+        opkg_msg(ERROR, "Zstandard format not supported.\n");
+        goto err_cleanup;
+    }
+#endif
+
     r = archive_read_support_format_tar(inner);
     if (r != ARCHIVE_OK) {
         opkg_msg(ERROR, "Tar format not supported: %s\n",
@@ -832,6 +845,11 @@ struct opkg_ar *ar_open_pkg_control_archive(const char *filename)
         ar->ar = extract_outer(filename, "control.tar.lz4");
     }
 #endif
+#if HAVE_ZSTD
+    if (!ar->ar) {
+        ar->ar = extract_outer(filename, "control.tar.zst");
+    }
+#endif
     if (!ar->ar) {
         free(ar);
         return NULL;
@@ -869,6 +887,12 @@ struct opkg_ar *ar_open_pkg_data_archive(const char *filename)
         ar->ar = extract_outer(filename, "data.tar.lz4");
     }
 #endif
+#if HAVE_ZSTD
+    if (!ar->ar) {
+        ar->ar = extract_outer(filename, "data.tar.zst");
+    }
+#endif
+
     if (!ar->ar) {
         free(ar);
         return NULL;
